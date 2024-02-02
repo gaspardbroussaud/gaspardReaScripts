@@ -1,5 +1,5 @@
--- @description Create region for clusters of selected items (only item overlap)
--- @author 
+-- @description Create region for clusters of selected media items (only item overlap)
+-- @author gaspard
 -- @version 1.0
 -- @about
 --    This scripts creates a region around each selected media items. If the regions overlap, they are
@@ -10,7 +10,7 @@
 --
 
 
--- CREATE TEXT ITEMS
+-- CREATE TEXT ITEMS --
 function CreateTextItem(track, position, length)
 
   local item = reaper.AddMediaItemToTrack(track)
@@ -23,10 +23,10 @@ function CreateTextItem(track, position, length)
 end
 
 
--- TABLE INIT
+-- TABLE INIT --
 local setSelectedMediaItem = {}
 
--- MAIN
+-- MAIN --
 function createNoteItems()
 
   selected_tracks_count = reaper.CountSelectedTracks(0)
@@ -71,7 +71,20 @@ function createNoteItems()
   end -- if selected track
 end
 
+-- VARIABLE SETUP --
+function setupVariables()
+    
+    selected_items_count = reaper.CountSelectedMediaItems(0)
+    
+    first_item = reaper.GetSelectedMediaItem(0, 0)
+    
+    first_item_start_pos = reaper.GetMediaItemInfo_Value(first_item, "D_POSITION")
+    
+    prev_item_end_pos = first_item_start_pos
+    
+end
 
+-- CREATE CLUSTER REGION --
 function createGroupsRegion()
 
     setupVariables()
@@ -104,18 +117,7 @@ function createGroupsRegion()
     
 end
 
-function setupVariables()
-    
-    selected_items_count = reaper.CountSelectedMediaItems(0)
-    
-    first_item = reaper.GetSelectedMediaItem(0, 0)
-    
-    first_item_start_pos = reaper.GetMediaItemInfo_Value(first_item, "D_POSITION")
-    
-    prev_item_end_pos = first_item_start_pos
-    
-end
-
+-- MAIN EXECUTION --
 function main()
     if reaper.CountSelectedMediaItems(0) > 0 then
         
@@ -136,7 +138,7 @@ function main()
 end
 
 
---START
+-- SCRIPT START --
 reaper.PreventUIRefresh(1)
 
 main()
@@ -144,7 +146,7 @@ main()
 reaper.UpdateArrange()
 
 reaper.PreventUIRefresh(-1)
---END
+-- SCRIPT END --
 
 
 ---------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
--- @description Create region for clusters of selected items
+-- @description Create region for clusters of selected media items
 -- @author gaspard
 -- @version 1.0
 -- @about
@@ -70,6 +70,19 @@ function createNoteItems()
   end -- if selected track
 end
 
+-- SETUP ALL VARIABLES FOR CLUSTERS --
+function setupVariables()
+    
+    selected_items_count = reaper.CountSelectedMediaItems(0)
+    
+    first_item = reaper.GetSelectedMediaItem(0, 0)
+    
+    first_item_start_pos = reaper.GetMediaItemInfo_Value(first_item, "D_POSITION")
+    
+    prev_item_end_pos = first_item_start_pos
+    
+end
+
 -- CREATE REGION FOR CLUSTERS --
 function createGroupsRegion()
 
@@ -100,19 +113,6 @@ function createGroupsRegion()
         prev_item_end_pos = cur_item_start_pos + reaper.GetMediaItemInfo_Value(cur_item, "D_LENGTH")
         
     end
-    
-end
-
--- SETUP ALL VARIABLES FOR CLUSTERS --
-function setupVariables()
-    
-    selected_items_count = reaper.CountSelectedMediaItems(0)
-    
-    first_item = reaper.GetSelectedMediaItem(0, 0)
-    
-    first_item_start_pos = reaper.GetMediaItemInfo_Value(first_item, "D_POSITION")
-    
-    prev_item_end_pos = first_item_start_pos
     
 end
 
