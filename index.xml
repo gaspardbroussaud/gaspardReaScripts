@@ -1,5 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard's ReaScripts" commit="7c1e0519a41e2bc0ed1fa95935535c6483fc98e5">
+<index version="1" name="Gaspard's ReaScripts" commit="8b159bbf2ea8d52a402520e68e500ec2e49ead73">
+  <category name="Region">
+    <reapack name="gaspard_Create region for clusters of selected items.lua" type="script" desc="Create region for clusters of selected items">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 This scripts creates a region around clusters of media items if they overlap or are directly next to each others.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 It does so by creating a track on witch it duplicates and overlaps all selected items and checks if they overlap/next to each others. It merges the overlapping ones, creates a region around items and deletes track.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-02-02T15:28:20Z">
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8b159bbf2ea8d52a402520e68e500ec2e49ead73/Region/gaspard_Create%20region%20for%20clusters%20of%20selected%20items.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Create region for each selected media items.lua" type="script" desc="Create region for each selected media item">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Creates a unique region for each selected media item. Region takes item's active take's name. Overlap possible.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-02-02T15:28:20Z">
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8b159bbf2ea8d52a402520e68e500ec2e49ead73/Region/gaspard_Create%20region%20for%20each%20selected%20media%20items.lua</source>
+      </version>
+    </reapack>
+  </category>
+  <category name="Render region matrix">
+    <reapack name="gaspard_Set parent track of selected media items in region render matrix for respective regions.lua" type="script" desc="Set parent track in region render matrix for selected media items regions">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Sets the parent track of the selected media items track in region render matrix for media items region.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-02-02T15:28:20Z">
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8b159bbf2ea8d52a402520e68e500ec2e49ead73/Render%20region%20matrix/gaspard_Set%20parent%20track%20of%20selected%20media%20items%20in%20region%20render%20matrix%20for%20respective%20regions.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Set track of selected media items in region render matrix for respective regions.lua" type="script" desc="Set track of selected media items in region render matrix for respective regions">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Sets selected media items' track in region render matrix for their respective regions.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-02-02T15:28:20Z">
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8b159bbf2ea8d52a402520e68e500ec2e49ead73/Render%20region%20matrix/gaspard_Set%20track%20of%20selected%20media%20items%20in%20region%20render%20matrix%20for%20respective%20regions.lua</source>
+      </version>
+    </reapack>
+  </category>
   <category name="Testing">
     <reapack name="gaspard_Hello world.lua" type="script" desc="Hello world">
       <metadata>
@@ -13,6 +74,52 @@
       </metadata>
       <version name="1.0" author="gaspard" time="2024-02-02T14:55:08Z">
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7c1e0519a41e2bc0ed1fa95935535c6483fc98e5/Testing/gaspard_Hello%20world.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_ImGui Test Script.lua" type="script" desc="Test ImGui">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 This is a test of ImGui.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-02-02T15:28:20Z">
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8b159bbf2ea8d52a402520e68e500ec2e49ead73/Testing/gaspard_ImGui%20Test%20Script.lua</source>
+      </version>
+    </reapack>
+  </category>
+  <category name="Timeline">
+    <reapack name="gaspard_Duplicate items N times with seconds between (prompt).lua" type="script" desc="Duplicate items N times with seconds between (prompt)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Duplicates selection of items N times with X seconds between copies.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-02-02T15:28:20Z">
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8b159bbf2ea8d52a402520e68e500ec2e49ead73/Timeline/gaspard_Duplicate%20items%20N%20times%20with%20seconds%20between%20(prompt).lua</source>
+      </version>
+    </reapack>
+  </category>
+  <category name="Track">
+    <reapack name="gaspard_Rename track with selected media item name on it.lua" type="script" desc="Rename track with selected media item name on it">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Renames the track of the selected media item with it's name (or last item's name if multiple selected).\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-02-02T15:28:20Z">
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8b159bbf2ea8d52a402520e68e500ec2e49ead73/Track/gaspard_Rename%20track%20with%20selected%20media%20item%20name%20on%20it.lua</source>
       </version>
     </reapack>
   </category>
