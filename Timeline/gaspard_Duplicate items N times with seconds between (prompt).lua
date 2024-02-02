@@ -16,9 +16,43 @@ function inputsWindow()
     end
 end
 
+-- GET ITEM INFOS : Start Position, Length, End Position --
+function getItemInfos(item)
+    item_start = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+    item_length = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
+    item_end = item_start + item_length
+    return item_start, item_length, item_end
+end
+
 -- EXECUTION FUNCTION --
 function duplicateItems()
-    reaper.ShowMessageBox("Duplicate", "Duplicate", 0)
+    first_item = reaper.GetSelectedMediaItem(0, 0)
+    first_item_start, first_item_length, last_item_end = getItemInfos(first_item)
+    
+    for i=0, reaper.CountSelectedMediaItems(0)-1 do
+        cur_item = reaper.GetSelectedMediaItem(0, i)
+        cur_item_start, cur_item_length, cur_item_end = getItemInfos(cur_item)
+        if cur_item_start < first_item_start then
+            first_item_start = cur_item_start
+        elseif cur_item_end > last_item_end then
+            last_item_end = cur_item_end
+        end
+    end
+    
+    cluster_length = last_item_end - first_item_start
+    
+    duplication_start_pos = first_item_start + cluster_length + secondsVal
+end
+
+-- GET LENGTH OF SELECTED ITEMS --
+function getClusterLength()
+    first_item = reaper.GetSelectedMediaItem(0, 0)
+    first_item_start, first_item_length, first_item_end = getItemInfos(first_item)
+
+    
+    for i=0, reaper.GetSelectedMediaItem(0)-1 do
+        
+    end
 end
 
 -- MAIN FUNCTION --
