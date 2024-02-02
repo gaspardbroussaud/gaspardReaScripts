@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard's ReaScripts" commit="ca8f1ce1fbd00bbe9b7fa8ef2d6fe778df0ee248">
+<index version="1" name="Gaspard ReaScripts" commit="ca8f1ce1fbd00bbe9b7fa8ef2d6fe778df0ee248">
   <category name="Region">
     <reapack name="gaspard_Create region for clusters of selected media items (only item overlap).lua" type="script" desc="Create region for clusters of selected media items (only item overlap)">
       <metadata>
