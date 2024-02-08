@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="ca8f1ce1fbd00bbe9b7fa8ef2d6fe778df0ee248">
+<index version="1" name="Gaspard ReaScripts" commit="6e6d9f019a9453a887b96953575c1dbe55951242">
   <category name="Region">
+    <reapack name="gaspard_Create region for clusters of selected items (prompt).lua" type="script" desc="Create region for clusters of selected items (prompt)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Creates a region for each cluster of selected media items (overlapping or touching items in timeline). Prompts the renaming choices.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-02-08T14:14:28Z">
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/6e6d9f019a9453a887b96953575c1dbe55951242/Region/gaspard_Create%20region%20for%20clusters%20of%20selected%20items%20(prompt).lua</source>
+      </version>
+    </reapack>
     <reapack name="gaspard_Create region for clusters of selected media items (only item overlap).lua" type="script" desc="Create region for clusters of selected media items (only item overlap)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
