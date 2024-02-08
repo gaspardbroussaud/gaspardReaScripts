@@ -1,9 +1,12 @@
 --@description Create region for clusters of selected items (prompt)
 --@author gaspard
---@version 1.0
+--@version 1.1
+--@changelog
+--  1.1 Fix crash parent track choice when there is no parent track.
+--  1.0 Initial release
 --@about
---      Creates a region for each cluster of selected media items (overlapping or touching items in timeline).
---      Prompts the renaming choices.
+--  Creates a region for each cluster of selected media items (overlapping or touching items in timeline).
+--  Prompts the renaming choices.
 
 -- INITIALISATION --
 local libPath = reaper.GetExtState("Scythe v3", "libPath")
@@ -236,7 +239,11 @@ function createNoteItems()
         item = setSelectedMediaItem[i] -- Get selected item i
         item_track = reaper.GetMediaItemTrack(item)
         item_parent_track = reaper.GetParentTrack(item_track)
-        _, item_parent_track_name = reaper.GetSetMediaTrackInfo_String(item_parent_track, "P_NAME", "", false)
+        if item_parent_track ~= nil then
+            _, item_parent_track_name = reaper.GetSetMediaTrackInfo_String(item_parent_track, "P_NAME", "", false)
+        else
+            item_parent_track_name = "MasterTrack"
+        end
 
         -- TIMES
         item_start = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
