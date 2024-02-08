@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="6e6d9f019a9453a887b96953575c1dbe55951242">
+<index version="1" name="Gaspard ReaScripts" commit="c9f4f9347e44d8a0cc1d02e1c5c561a378fa7457">
   <category name="Region">
     <reapack name="gaspard_Create region for clusters of selected items (prompt).lua" type="script" desc="Create region for clusters of selected items (prompt)">
       <metadata>
@@ -133,6 +133,20 @@
       </metadata>
       <version name="1.0" author="gaspard" time="2024-02-02T15:28:20Z">
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8b159bbf2ea8d52a402520e68e500ec2e49ead73/Timeline/gaspard_Duplicate%20items%20N%20times%20with%20seconds%20between%20(prompt).lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_ProTools marker go to.lua" type="script" desc="ProTools marker go to">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Adds the marker selection in timeline behavior from ProTools : suppr + marker number with numpad + suppr\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-02-08T14:20:15Z">
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/c9f4f9347e44d8a0cc1d02e1c5c561a378fa7457/Timeline/gaspard_ProTools%20marker%20go%20to.lua</source>
       </version>
     </reapack>
   </category>
