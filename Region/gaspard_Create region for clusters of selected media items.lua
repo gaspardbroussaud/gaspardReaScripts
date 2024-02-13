@@ -1,6 +1,9 @@
 -- @description Create region for clusters of selected media items
 -- @author gaspard
--- @version 1.0
+-- @version 1.1
+-- @changelog
+--    v1.1 Fix incorrect cluster when cur item end position inferior to previous item end position.
+--    v1.0 Initial release.
 -- @about
 --    This scripts creates a region around clusters of media items if they overlap or are directly
 --    next to each others.
@@ -93,24 +96,33 @@ function createGroupsRegion()
         cur_item = reaper.GetSelectedMediaItem(0, i)
         
         cur_item_start_pos = reaper.GetMediaItemInfo_Value(cur_item, "D_POSITION")
+        cur_item_end_pos = cur_item_start_pos + reaper.GetMediaItemInfo_Value(cur_item, "D_LENGTH")
         
         if prev_item_end_pos + 0.0000001 < cur_item_start_pos then
             
             reaper.AddProjectMarker(0, true, first_item_start_pos, prev_item_end_pos, "", -1)
+
             first_item_start_pos = cur_item_start_pos
             --prev_item_end_pos = cur_item_start_pos + reaper.GetMediaItemInfo_Value(cur_item, "D_LENGTH")
-            
         end
             
         if i == selected_items_count - 1 then
-        
-            last_item_end_pos = cur_item_start_pos + reaper.GetMediaItemInfo_Value(cur_item, "D_LENGTH")
+            if prev_item_end_pos > cur_item_end_pos then
+                last_item_end_pos = prev_item_end_pos
+            else
+                last_item_end_pos = cur_item_end_pos
+            end
+            
             --reaper.AddProjectMarker(0, true, first_item_start_pos, prev_item_end_pos, "", -1)
             reaper.AddProjectMarker(0, true, first_item_start_pos, last_item_end_pos, "", -1)
         
         end
         
-        prev_item_end_pos = cur_item_start_pos + reaper.GetMediaItemInfo_Value(cur_item, "D_LENGTH")
+        if prev_item_end_pos > cur_item_end_pos then
+            --nothing
+        else
+            prev_item_end_pos = cur_item_end_pos
+        end
         
     end
     

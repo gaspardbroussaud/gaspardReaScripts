@@ -1,9 +1,10 @@
 --@description Create region for clusters of selected items (prompt)
 --@author gaspard
---@version 1.1
+--@version 1.2
 --@changelog
---  1.1 Fix crash parent track choice when there is no parent track.
---  1.0 Initial release
+--  v1.2 Fix crash parent track choice when there is no parent track.
+--  v1.1 Fix incorrect cluster when cur item end position inferior to previous item end position.
+--  v1.0 Initial release.
 --@about
 --  Creates a region for each cluster of selected media items (overlapping or touching items in timeline).
 --  Prompts the renaming choices.
@@ -285,6 +286,7 @@ function createGroupsRegion()
         cur_item = reaper.GetSelectedMediaItem(0, i)
         
         cur_item_start_pos = reaper.GetMediaItemInfo_Value(cur_item, "D_POSITION")
+        cur_item_end_pos = cur_item_start_pos + reaper.GetMediaItemInfo_Value(cur_item, "D_LENGTH")
         
         if prev_item_end_pos + 0.0000001 < cur_item_start_pos then
             inputsToName()
@@ -294,12 +296,21 @@ function createGroupsRegion()
         end
             
         if i == selected_items_count - 1 then
-            last_item_end_pos = cur_item_start_pos + reaper.GetMediaItemInfo_Value(cur_item, "D_LENGTH")
+            if prev_item_end_pos > cur_item_end_pos then
+                last_item_end_pos = prev_item_end_pos
+            else
+                last_item_end_pos = cur_item_end_pos
+            end
+            
             inputsToName()
             reaper.AddProjectMarker(0, true, first_item_start_pos, last_item_end_pos, rgnName, -1)
         end
         
-        prev_item_end_pos = cur_item_start_pos + reaper.GetMediaItemInfo_Value(cur_item, "D_LENGTH")
+        if prev_item_end_pos > cur_item_end_pos then
+            --nothing
+        else
+            prev_item_end_pos = cur_item_end_pos
+        end
     end
     
 end
