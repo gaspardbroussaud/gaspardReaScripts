@@ -1,10 +1,8 @@
 --@description Create region for clusters of selected items (prompt)
 --@author gaspard
---@version 1.2
+--@version 1.3
 --@changelog
---  v1.2 Fix crash parent track choice when there is no parent track.
---  v1.1 Fix incorrect cluster when cur item end position inferior to previous item end position.
---  v1.0 Initial release.
+--  Added a 0 before region number with AutoNumber ON if region number under 10.
 --@about
 --  Creates a region for each cluster of selected media items (overlapping or touching items in timeline).
 --  Prompts the renaming choices.
@@ -325,7 +323,12 @@ function inputsToName()
     
     if autoNumber then
         rgnNumText = tostring(regionNumber)
-        rgnName = textInput.."_"..rgnNumText
+        if regionNumber < 10 then
+            rgnName = textInput.."_".."0"..rgnNumText
+        else
+            rgnName = textInput.."_"..rgnNumText
+        end
+        
         regionNumber = regionNumber + 1
     else
         rgnName = textInput
