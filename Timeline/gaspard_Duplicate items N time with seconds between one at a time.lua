@@ -2,9 +2,9 @@
 --@author gaspard
 --@version 1.0
 --@changelog
---Initial release
+--      Initial release
 --@about
---    Duplicates selection of items N times with X seconds between copies, one item at a time.
+--      Duplicates selection of items N times with X seconds between copies, one item at a time.
 
 -- GET INPUTS FROM USER --
 function inputDatas()
@@ -70,24 +70,31 @@ function duplicateItems()
     end
 end
 
--- MAIN EXECUTION --
-reaper.Undo_BeginBlock()
-sel_item_count = reaper.CountSelectedMediaItems(0)
-if sel_item_count ~= 0 then
-    reaper.ClearConsole()
-    inputDatas()
-    if isNotCanceled == true then
-        addItemsToTab()
-        setNewItemPos()
-        if Nval ~= 0 then
-            duplicateItems()
+function main()
+    sel_item_count = reaper.CountSelectedMediaItems(0)
+    if sel_item_count ~= 0 then
+        reaper.ClearConsole()
+        inputDatas()
+        if isNotCanceled == true then
+            addItemsToTab()
+            setNewItemPos()
+            if Nval ~= 0 then
+                duplicateItems()
+            end
         end
+        if Nval == 0 and sel_item_count == 1 then
+            reaper.MB("Since only one item is selected and copies number is 0, nothing happens.", "Nothing happens", 0)
+            reaper.SetMediaItemSelected(itemTab[0], true)
+        end
+    else
+        reaper.MB("Please select at least one item", "No item selected", 0)
     end
-    if Nval == 0 and sel_item_count == 1 then
-        reaper.MB("Since only one item is selected and copies number is 0, nothing happens.", "Nothing happens", 0)
-        reaper.SetMediaItemSelected(itemTab[0], true)
-    end
-else
-    reaper.MB("Please select at least one item", "No item selected", 0)
 end
+
+-- MAIN EXECUTION --
+reaper.PreventUIRefresh(1)
+reaper.Undo_BeginBlock()
+main()
 reaper.Undo_EndBlock("Duplicates item N times with X seconds between each at a time", 0)
+reaper.PreventUIRefresh(-1)
+reaper.UpdateArrange()
