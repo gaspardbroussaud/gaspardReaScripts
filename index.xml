@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="eb44eb6052ee71047dc2ad9a18678cff6dd6d9a8">
+<index version="1" name="Gaspard ReaScripts" commit="89e6ef27e0ab4ca51947a59fdf5a91700d25b8cb">
   <category name="Region">
     <reapack name="gaspard_Create region for clusters of selected items (prompt).lua" type="script" desc="Create region for clusters of selected items (prompt)">
       <metadata>
@@ -146,19 +146,19 @@ v1.0 Initial release.]]></changelog>
     </reapack>
   </category>
   <category name="Timeline">
-    <reapack name="gaspard_Crop consolidated items with selected reference items.lua" type="script" desc="Crop consolidated items with selected reference items">
+    <reapack name="gaspard_Cut consolidated items with selected reference items.lua" type="script" desc="Cut consolidated items with selected reference items">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 Crop consolidated items with selected reference items. For Post-production use.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Cuts items with selected reference items. For Post-production use.\par}
 }
 ]]></description>
       </metadata>
-      <version name="1.0" author="gaspard" time="2024-02-14T17:17:22Z">
-        <changelog><![CDATA[Initial release]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/eb44eb6052ee71047dc2ad9a18678cff6dd6d9a8/Timeline/gaspard_Crop%20consolidated%20items%20with%20selected%20reference%20items.lua</source>
+      <version name="1.1" author="gaspard" time="2024-02-15T09:37:00Z">
+        <changelog><![CDATA[Now works with next to items and distant items (cuts only the start if next to and cuts start and end if far)]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/89e6ef27e0ab4ca51947a59fdf5a91700d25b8cb/Timeline/gaspard_Cut%20consolidated%20items%20with%20selected%20reference%20items.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Duplicate items N time with seconds between one at a time.lua" type="script" desc="Duplicate items N times with seconds between one at a time">
