@@ -1,8 +1,8 @@
 --@description Duplicate items N times with X seconds between and apply LKC Variator preset
 --@author gaspard
---@version 1.1
+--@version 1.2
 --@changelog
---    Fix bug if items not at position 0 on timeline.
+--    Added Variator formula check.
 --@about
 --    Duplicates selection of items N times with X seconds between copies and applies selected LKC Variator preset.
 
@@ -100,9 +100,11 @@ function duplicateItems()
             reaper.ApplyNudge(0, 0, 5, 1, nudge_length, 0, 1)
             
             -- Create region for new cluster --
-            region_start = original_start + nudge_length
-            region_end = region_start + original_length
-            region_index = reaper.AddProjectMarker(0, true, region_start, region_end, "Variator_"..tostring(i), -1)
+            if variatorFormula ~= 0 and variatorFormula < 6 then
+                region_start = original_start + nudge_length
+                region_end = region_start + original_length
+                region_index = reaper.AddProjectMarker(0, true, region_start, region_end, "Variator_"..tostring(i), -1)
+            end
             
             regionTab[i] = region_index
         end
@@ -157,14 +159,22 @@ sel_item_count = reaper.CountSelectedMediaItems(0)
 if sel_item_count ~= 0 then
     inputsWindow()
     if isNotCanceled then
-        tableOfItems()
-        originalDatas()
-        duplicateItems()
-        applyVariatorIndex0()
-        lasttime = os.time()
-        timeChoice = 1
-        loopNB = 0
-        runloop()
+        if variatorFormula < 6 then
+            tableOfItems()
+            originalDatas()
+            duplicateItems()
+            if variatorFormula ~= 0 and variatorFormula < 6 then
+                applyVariatorIndex0()
+                lasttime = os.time()
+                timeChoice = 1
+                loopNB = 0
+                runloop()
+            end
+            reaper.Main_OnCommand(40289, 0) -- Unselect all items
+            reaper.Main_OnCommand(40635, 0) -- Clear time selection
+        else
+            reaper.MB("Error selecting Variator Formula.\nPlease select a number between 0 and 5.", "Variator formula error", 0)
+        end
     end
 else
     reaper.MB("Please select at least one item", "No item selected", 0)
