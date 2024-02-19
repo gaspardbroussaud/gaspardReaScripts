@@ -1,8 +1,8 @@
 --@description Duplicate items N times with X seconds between and apply LKC Variator preset
 --@author gaspard
---@version 1.0
+--@version 1.1
 --@changelog
---    Initial release. (WIP for better Undo and speed)
+--    Fix bug if items not at position 0 on timeline.
 --@about
 --    Duplicates selection of items N times with X seconds between copies and applies selected LKC Variator preset.
 
@@ -39,6 +39,9 @@ function runloop()
   if newtime-lasttime >= timeChoice then
     lasttime=newtime
     applyVariator()
+    if stopScriptLoop == true then
+        reaper.ShowConsoleMsg("\nStopped at: "..tostring(loopNB))
+    end
     if loopNB == #regionTab + 1 then
         reaper.Main_OnCommand(40289, 0) -- Unselect all items
         reaper.Main_OnCommand(40635, 0) -- Clear time selection
@@ -46,7 +49,6 @@ function runloop()
         return
     end
   end
-  
   reaper.defer(runloop)
 end
 
@@ -98,9 +100,11 @@ function duplicateItems()
             reaper.ApplyNudge(0, 0, 5, 1, nudge_length, 0, 1)
             
             -- Create region for new cluster --
-            region_index = reaper.AddProjectMarker(0, true, nudge_length, nudge_length + original_length, "Variator_"..tostring(i), -1)
+            region_start = original_start + nudge_length
+            region_end = region_start + original_length
+            region_index = reaper.AddProjectMarker(0, true, region_start, region_end, "Variator_"..tostring(i), -1)
             
-            regionTab[i] = region_index --{nudge_length, nudge_length + original_length}
+            regionTab[i] = region_index
         end
     end
 end
