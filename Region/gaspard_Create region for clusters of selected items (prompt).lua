@@ -1,8 +1,9 @@
 --@description Create region for clusters of selected items (prompt)
 --@author gaspard
---@version 1.3
+--@version 1.4
 --@changelog
---  Added a 0 before region number with AutoNumber ON if region number under 10.
+--  Parent name is now top parent track's name.
+--  Minor fixes in syntax.
 --@about
 --  Creates a region for each cluster of selected media items (overlapping or touching items in timeline).
 --  Prompts the renaming choices.
@@ -139,11 +140,6 @@ function mainWindow()
     GUI.Main()
 end
 
--- MAIN FUNCTION --
-function main()
-    mainWindow()
-end
-
 -- BUTTONS FUNCTIONS --
 function customTextWindow()
     mainLayer:hide()
@@ -185,15 +181,19 @@ function setParent()
     window:close()
 end
 
--- MAIN SCRIPT EXECUTION --
-reaper.PreventUIRefresh(1)
-reaper.ClearConsole()
-main()
-reaper.PreventUIRefresh(-1)
-reaper.UpdateArrange()
-
-
 --------------------------------------------------------------------------------------------------------------------
+
+-- GET TOP PARENT TRACK --
+local function getTopParentTrack(track)
+  while true do
+    local parent = reaper.GetParentTrack(track)
+    if parent then
+      track = parent
+    else
+      return track
+    end
+  end
+end
 
 -- CREATE TEXT ITEMS -- Credit to X-Raym
 function CreateTextItem(track, position, length, parentTrackName)
@@ -207,7 +207,6 @@ function CreateTextItem(track, position, length, parentTrackName)
   return item
 
 end
-
 
 -- TABLE INIT -- Credit to X-Raym
 local setSelectedMediaItem = {}
@@ -239,7 +238,8 @@ function createNoteItems()
         item_track = reaper.GetMediaItemTrack(item)
         item_parent_track = reaper.GetParentTrack(item_track)
         if item_parent_track ~= nil then
-            _, item_parent_track_name = reaper.GetSetMediaTrackInfo_String(item_parent_track, "P_NAME", "", false)
+            track_top_parent = getTopParentTrack(item_parent_track)
+            _, item_parent_track_name = reaper.GetSetMediaTrackInfo_String(track_top_parent, "P_NAME", "", false)
         else
             item_parent_track_name = "MasterTrack"
         end
@@ -272,7 +272,6 @@ function setupVariables()
     prev_item_end_pos = first_item_start_pos
     
     regionNumber = 1
-    
 end
 
 -- CREATE REGION FOR CLUSTERS --
@@ -354,12 +353,23 @@ function createClusterRegion()
 end
 
 function applyChoice(temp_choice)
+    choice = temp_choice
+    createClusterRegion()
+end
+
+-- MAIN FUNCTION --
+function main()
     selected_items_count = reaper.CountSelectedMediaItems(0)
-    
     if selected_items_count ~= 0 then
-        choice = temp_choice
-        createClusterRegion()
+        mainWindow()
     else
-        reaper.ShowMessageBox("Please select items", "Error", 0)
+        reaper.ShowMessageBox("Please select at least one item", "No items selected", 0)
     end
 end
+
+-- MAIN SCRIPT EXECUTION --
+reaper.PreventUIRefresh(1)
+reaper.ClearConsole()
+main()
+reaper.PreventUIRefresh(-1)
+reaper.UpdateArrange()
