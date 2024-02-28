@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="9125bd45e395466b0c0dc7833d4657dd13bba16e">
+<index version="1" name="Gaspard ReaScripts" commit="a22d28f56345b6a67fc631042ef0e6241625cd8e">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -268,6 +268,21 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       </metadata>
       <version name="1.0" author="gaspard" time="2024-02-08T14:20:15Z">
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/c9f4f9347e44d8a0cc1d02e1c5c561a378fa7457/Timeline/gaspard_ProTools%20marker%20go%20to.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Set selected items start with seconds between.lua" type="script" desc="Set selected items start with seconds between">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Set selected items start with seconds between.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-02-28T11:40:54Z">
+        <changelog><![CDATA[Initial release.  ]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a22d28f56345b6a67fc631042ef0e6241625cd8e/Timeline/gaspard_Set%20selected%20items%20start%20with%20seconds%20between.lua</source>
       </version>
     </reapack>
   </category>
