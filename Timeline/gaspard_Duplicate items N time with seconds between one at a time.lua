@@ -1,19 +1,19 @@
 --@description Duplicate items N times with seconds between one at a time
 --@author gaspard
---@version 1.0
+--@version 1.1
 --@changelog
---      Initial release
+--    Fix error when using a decimal number for seconds variable.
+--    Prevent the use of decimal number for number of copies variable.  
 --@about
---      Duplicates selection of items N times with X seconds between copies, one item at a time.
+--    Duplicates selection of items N times with X seconds between copies, one item at a time.
 
 -- GET INPUTS FROM USER --
 function inputDatas()
     defaultDatas = "1,1"
     isNotCanceled, retvals_csv = reaper.GetUserInputs("Duplicate items data", 2, "Number of copies = ,Seconds between copies = ", defaultDatas)
     if isNotCanceled == true then
-        tempNval,tempSecondsVal = retvals_csv:match("(.+),(.+)")
+        tempNval,secondsVal = retvals_csv:match("(.+),(.+)")
         Nval = math.tointeger(tempNval)
-        secondsVal = math.tointeger(tempSecondsVal)
     end
 end
 
