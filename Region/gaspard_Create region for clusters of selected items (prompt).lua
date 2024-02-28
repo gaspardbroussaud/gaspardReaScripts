@@ -1,9 +1,8 @@
 --@description Create region for clusters of selected items (prompt)
 --@author gaspard
---@version 1.4
+--@version 1.5
 --@changelog
---  Parent name is now top parent track's name.
---  Minor fixes in syntax.
+--  Added first parent and top parent options.
 --@about
 --  Creates a region for each cluster of selected media items (overlapping or touching items in timeline).
 --  Prompts the renaming choices.
@@ -19,7 +18,7 @@ loadfile(libPath .. "scythe.lua")()
 
 -- VARIABLES --
 main_win_w = 250
-main_win_h = 250
+main_win_h = 300
 
 bsw = 140
 bpx = (main_win_w - bsw) / 2
@@ -62,13 +61,23 @@ mainLayer:addElements( GUI.createElements(
     w = bsw,
     h = bsh,
     caption = "Use parent's name",
-    func = function () setParent() end
+    func = function () setParent(false) end
+  },
+  {
+    name = "btn_top_parent_name",
+    type = "Button",
+    x = bpx,
+    y = 170,
+    w = bsw,
+    h = bsh,
+    caption = "Use top parent's name",
+    func = function () setParent(true) end
   },
   {
     name = "btn_cancel_main",
     type = "Button",
     x = bpx,
-    y = 180,
+    y = 220,
     w = bsw,
     h = bsh,
     caption = "Cancel",
@@ -168,7 +177,7 @@ function setCustom()
     window:close()
 end
 
-function setParent()
+function setParent(tempBool)
     -- Get value for checkbox Auto Number --
     valCheckBox = GUI.Val("checkbox_auto_number")
     autoNumber = valCheckBox[1]
@@ -177,6 +186,7 @@ function setParent()
     textInput = ""
     
     -- Function script --
+    isTopParentName = tempBool
     applyChoice(1) -- 1 = Parent track name
     window:close()
 end
@@ -238,7 +248,11 @@ function createNoteItems()
         item_track = reaper.GetMediaItemTrack(item)
         item_parent_track = reaper.GetParentTrack(item_track)
         if item_parent_track ~= nil then
-            track_top_parent = getTopParentTrack(item_parent_track)
+            if isTopParentName then
+                track_top_parent = getTopParentTrack(item_parent_track)
+            else
+                track_top_parent = item_parent_track
+            end
             _, item_parent_track_name = reaper.GetSetMediaTrackInfo_String(track_top_parent, "P_NAME", "", false)
         else
             item_parent_track_name = "MasterTrack"
