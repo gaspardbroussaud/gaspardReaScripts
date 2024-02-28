@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="a22d28f56345b6a67fc631042ef0e6241625cd8e">
+<index version="1" name="Gaspard ReaScripts" commit="d3fa52ce54204cc335fe53aa7e8d9a909de296c9">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -75,6 +75,11 @@ v1.0 Initial release.]]></changelog>
       <version name="1.3" author="gaspard" time="2024-02-13T15:48:50Z">
         <changelog><![CDATA[Added a 0 before region number with AutoNumber ON if region number under 10.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/fb8464ee7a287abfdcdf1bbbd6627fe4939529d8/Region/gaspard_Create%20region%20for%20clusters%20of%20selected%20items%20(prompt).lua</source>
+      </version>
+      <version name="1.4" author="gaspard" time="2024-02-28T16:44:13Z">
+        <changelog><![CDATA[Parent name is now top parent track's name.
+Minor fixes in syntax.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d3fa52ce54204cc335fe53aa7e8d9a909de296c9/Region/gaspard_Create%20region%20for%20clusters%20of%20selected%20items%20(prompt).lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Create region for clusters of selected media items (only item overlap).lua" type="script" desc="Create region for clusters of selected media items (only item overlap)">
