@@ -1,8 +1,9 @@
 --@description Duplicate items N times with X seconds between and apply LKC Variator preset
 --@author gaspard
---@version 1.2
+--@version 1.3
 --@changelog
---    Added Variator formula check.
+--    Fix errors when using whole number for inputs.
+--    Added usage of decimal numbers for seconds between copies.
 --@about
 --    Duplicates selection of items N times with X seconds between copies and applies selected LKC Variator preset.
 
@@ -11,10 +12,10 @@ function inputsWindow()
     defaultDatas = "1,1,0"
     isNotCanceled, retvals_csv = reaper.GetUserInputs("Duplicate items data", 3, "Number of copies = ,Seconds between copies = ,Variator formula (0 to 5) = ", defaultDatas)
     if isNotCanceled then
-        tempNval,tempSecondsVal,tempVariatorFormula = retvals_csv:match("(.+),(.+),(.+)")
+        tempNval,secondsVal,tempVariatorFormula = retvals_csv:match("(.+),(.+),(.+)")
         Nval = math.tointeger(tempNval)
-        secondsVal = math.tointeger(tempSecondsVal)
         variatorFormula = math.tointeger(tempVariatorFormula)
+        reaper.ShowConsoleMsg(tostring(variatorFormula))
     end
 end
 
@@ -159,21 +160,29 @@ sel_item_count = reaper.CountSelectedMediaItems(0)
 if sel_item_count ~= 0 then
     inputsWindow()
     if isNotCanceled then
-        if variatorFormula < 6 then
-            tableOfItems()
-            originalDatas()
-            duplicateItems()
-            if variatorFormula ~= 0 and variatorFormula < 6 then
-                applyVariatorIndex0()
-                lasttime = os.time()
-                timeChoice = 1
-                loopNB = 0
-                runloop()
+        if tostring(variatorFormula) ~= "nil" then
+            if variatorFormula < 6 then
+                if tostring(Nval) ~= "nil" then
+                    tableOfItems()
+                    originalDatas()
+                    duplicateItems()
+                    if variatorFormula ~= 0 then
+                        applyVariatorIndex0()
+                        lasttime = os.time()
+                        timeChoice = 1
+                        loopNB = 0
+                        runloop()
+                    end
+                    reaper.Main_OnCommand(40289, 0) -- Unselect all items
+                    reaper.Main_OnCommand(40635, 0) -- Clear time selection
+                else
+                    reaper.MB("Error. Please enter a whole number for copies input", "Error decimal number entered", 0)
+                end
+            else
+                reaper.MB("Error selecting Variator Formula.\nPlease select a whole number between 0 and 5.", "Variator formula error", 0)
             end
-            reaper.Main_OnCommand(40289, 0) -- Unselect all items
-            reaper.Main_OnCommand(40635, 0) -- Clear time selection
         else
-            reaper.MB("Error selecting Variator Formula.\nPlease select a number between 0 and 5.", "Variator formula error", 0)
+            reaper.MB("Error selecting Variator Formula.\nPlease select a whole number between 0 and 5.", "Variator formula error", 0)
         end
     end
 else
