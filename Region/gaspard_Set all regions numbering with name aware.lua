@@ -1,8 +1,8 @@
 --@description Set all regions numbering with name aware
 --@author gaspard
---@version 1.0.1
+--@version 1.1
 --@changelog
---  Clean init tables and setup variables functions.
+--  + Removing of numbering if region is unique.
 --@about
 --  Sets the sufix number for region name withe name awareness. If name1_01 exists, another region name1 would be name1_02.
 --  Regardless of the number of region between them.
@@ -37,6 +37,15 @@ function GetRegionsName()
             colorTab[i] = color
         end
         i = i + 1
+    end
+end
+
+-- CHECK FOR NUMBERING IN REGION --
+function DeleteNumbers()
+    for i in pairs(nameTab) do
+        if nameTab[i]:match("_(.+)") ~= nil and i ~= tabIndex then
+            nameTab[i] = nameTab[i]:gsub("_(.+)", "")
+        end
     end
 end
 
@@ -76,12 +85,11 @@ end
 -- MAIN FUNCTION --
 function main()
     SetupVariables()
-    if num_regions == 0 then
-        -- Script break since there is no region in project
-    else
+    if num_regions ~= 0 then
         GetRegionsName()
+        DeleteNumbers()
         SetRegionsName()
-        InitTabs()
+        InitTabs() -- Called to clean the tabs after use.
     end
 end
 
