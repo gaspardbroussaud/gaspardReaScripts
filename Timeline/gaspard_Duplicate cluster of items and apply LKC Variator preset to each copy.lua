@@ -1,8 +1,8 @@
 --@description Duplicate items N times with X seconds between and apply LKC Variator preset
 --@author gaspard
---@version 1.4
+--@version 1.4.1
 --@changelog
---    Fix potential error of Variator command ID lookup.
+--    Fix typo in script.
 --@about
 --    Duplicates selection of items N times with X seconds between copies and applies selected LKC Variator preset.
 
@@ -54,7 +54,7 @@ end
 function variatorCommandId()
     ActionCommandID = {}
     for i = 1, 5 do
-        ActionCommandID[i] = GetActionCommandIDByFilename("LKC-Variator/GameAudio/LKC - Variator - Mutate using formula "..i..".lua")
+        ActionCommandID[i] = GetActionCommandIDByFilename("LKC-Variator/GameAudio/LKC - Variator - Mutate using formula "..i..".lua", 0)
     end
 end
 

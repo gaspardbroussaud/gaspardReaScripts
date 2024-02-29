@@ -1,14 +1,15 @@
 --@description Set all regions numbering with name aware
 --@author gaspard
---@version 1.1
+--@version 1.2
 --@changelog
---  + Removing of numbering if region is unique.
+--  Fix error if markers in project.
 --@about
 --  Sets the sufix number for region name withe name awareness. If name1_01 exists, another region name1 would be name1_02.
 --  Regardless of the number of region between them.
 
 -- INITIALISATION --
 function InitTabs()
+    isrgnTab = {}
     posTab = {}
     rgnendTab = {}
     nameTab = {}
@@ -19,23 +20,23 @@ end
 
 -- SETS ALL VARIABLES FOR SCRIPT --
 function SetupVariables()
-    _, _, num_regions = reaper.CountProjectMarkers(0)
-    
+    markrgn_count, _, _ = reaper.CountProjectMarkers(0)
     InitTabs()
 end
 
 -- GETS THE REGIONS INFORMATIONS AND ADDS THEM IN CORRESPONDING TABS --
 function GetRegionsName()
     local i = 0
-    while i < num_regions do
+    while i < markrgn_count do
         local retval, isrgn, pos, rgnend, name, markrgnindexnumber, color = reaper.EnumProjectMarkers3(0, i)
-        if isrgn then
-            posTab[i] = pos
-            rgnendTab[i] = rgnend
-            nameTab[i] = name
-            indexTab[i] = markrgnindexnumber
-            colorTab[i] = color
-        end
+        
+        isrgnTab[i] = isrgn
+        posTab[i] = pos
+        rgnendTab[i] = rgnend
+        nameTab[i] = name
+        indexTab[i] = markrgnindexnumber
+        colorTab[i] = color
+
         i = i + 1
     end
 end
@@ -43,8 +44,10 @@ end
 -- CHECK FOR NUMBERING IN REGION --
 function DeleteNumbers()
     for i in pairs(nameTab) do
-        if nameTab[i]:match("_(.+)") ~= nil and i ~= tabIndex then
-            nameTab[i] = nameTab[i]:gsub("_(.+)", "")
+        if isrgnTab[i] then
+            if nameTab[i]:match("_(.+)") ~= nil and i ~= tabIndex then
+                nameTab[i] = nameTab[i]:gsub("_(.+)", "")
+            end
         end
     end
 end
@@ -70,14 +73,17 @@ end
 
 function SetRegionsName()
     local i = 0
-    while i < num_regions do
-        pos = posTab[i]
-        rgnend = rgnendTab[i]
-        name = nameTab[i]
-        new_name = CheckForNameInTab(name, i)
-        indexToSet = indexTab[i]
-        color = colorTab[i]
-        reaper.SetProjectMarkerByIndex(0, i, true, pos, rgnend, indexToSet, new_name, color)
+    while i < markrgn_count do
+        if isrgnTab[i] then
+            pos = posTab[i]
+            rgnend = rgnendTab[i]
+            name = nameTab[i]
+            new_name = CheckForNameInTab(name, i)
+            indexToSet = indexTab[i]
+            color = colorTab[i]
+            reaper.SetProjectMarkerByIndex(0, i, true, pos, rgnend, indexToSet, new_name, color)
+        end
+        
         i = i + 1
     end
 end
