@@ -1,16 +1,14 @@
 --@description Set all regions numbering with name aware
 --@author gaspard
---@version 1.0
+--@version 1.0.1
 --@changelog
---  Initial release.
+--  Clean init tables and setup variables functions.
 --@about
 --  Sets the sufix number for region name withe name awareness. If name1_01 exists, another region name1 would be name1_02.
 --  Regardless of the number of region between them.
 
 -- INITIALISATION --
-function setupVariables()
-    _, _, num_regions = reaper.CountProjectMarkers(0)
-    
+function InitTabs()
     posTab = {}
     rgnendTab = {}
     nameTab = {}
@@ -19,7 +17,15 @@ function setupVariables()
     numNameTab = {}
 end
 
-function getRegionsName()
+-- SETS ALL VARIABLES FOR SCRIPT --
+function SetupVariables()
+    _, _, num_regions = reaper.CountProjectMarkers(0)
+    
+    InitTabs()
+end
+
+-- GETS THE REGIONS INFORMATIONS AND ADDS THEM IN CORRESPONDING TABS --
+function GetRegionsName()
     local i = 0
     while i < num_regions do
         local retval, isrgn, pos, rgnend, name, markrgnindexnumber, color = reaper.EnumProjectMarkers3(0, i)
@@ -34,7 +40,8 @@ function getRegionsName()
     end
 end
 
-function checkForNameInTab(cur_name, tabIndex)
+-- CHECK IF REGION NAME IS UNIQUE AND SETS NUMBERING --
+function CheckForNameInTab(cur_name, tabIndex)
     for i in pairs(nameTab) do
         if i ~= tabIndex and cur_name == nameTab[i] then
             if numNameTab[cur_name] == nil then
@@ -58,7 +65,7 @@ function SetRegionsName()
         pos = posTab[i]
         rgnend = rgnendTab[i]
         name = nameTab[i]
-        new_name = checkForNameInTab(name, i)
+        new_name = CheckForNameInTab(name, i)
         indexToSet = indexTab[i]
         color = colorTab[i]
         reaper.SetProjectMarkerByIndex(0, i, true, pos, rgnend, indexToSet, new_name, color)
@@ -66,21 +73,16 @@ function SetRegionsName()
     end
 end
 
-function clearTabs()
-    posTab = {}
-    rgnendTab = {}
-    nameTab = {}
-    indexTab = {}
-    colorTab = {}
-    numNameTab = {}
-end
-
 -- MAIN FUNCTION --
 function main()
-    setupVariables()
-    getRegionsName()
-    SetRegionsName()
-    clearTabs()
+    SetupVariables()
+    if num_regions == 0 then
+        -- Script break since there is no region in project
+    else
+        GetRegionsName()
+        SetRegionsName()
+        InitTabs()
+    end
 end
 
 -- SCRIPT EXECUTION --

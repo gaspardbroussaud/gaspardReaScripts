@@ -1,8 +1,9 @@
 --@description Create region for clusters of selected items (prompt)
 --@author gaspard
---@version 1.5
+--@version 1.6
 --@changelog
---  Added first parent and top parent options.
+--  New Auto Number feature that is name aware: if region parentA_name is unique and parentB_name has multiple regions,
+--  parentA_name stays the same and parentB_name is parentB_name_01, parentB_name_02, etc.
 --@about
 --  Creates a region for each cluster of selected media items (overlapping or touching items in timeline).
 --  Prompts the renaming choices.
@@ -333,19 +334,7 @@ function inputsToName()
     elseif choice == 1 then
         _, textInput = reaper.GetSetMediaItemInfo_String(first_item, "P_NOTES", "", false)
     end
-    
-    if autoNumber then
-        rgnNumText = tostring(regionNumber)
-        if regionNumber < 10 then
-            rgnName = textInput.."_".."0"..rgnNumText
-        else
-            rgnName = textInput.."_"..rgnNumText
-        end
-        
-        regionNumber = regionNumber + 1
-    else
-        rgnName = textInput
-    end
+    rgnName = textInput
 end
 
 -- MAIN --
@@ -362,6 +351,10 @@ function createClusterRegion()
     
         reaper.Main_OnCommand(40005, 0) -- Delete created track
         
+        if autoNumber then
+            mainSetNumberRegions()
+        end
+        
         reaper.Undo_EndBlock("Create region for selected clusters of items", -1) -- End of undo block
     end
 end
@@ -370,6 +363,93 @@ function applyChoice(temp_choice)
     choice = temp_choice
     createClusterRegion()
 end
+
+------------------------------------------
+--description Set all regions numbering with name aware
+--author gaspard
+--version 1.0
+--changelog
+--  Initial release.
+--about
+--  Sets the sufix number for region name withe name awareness. If name1_01 exists, another region name1 would be name1_02.
+--  Regardless of the number of region between them.
+
+-- INITIALISATION --
+function setupVariablesRegionName()
+    _, _, num_regions = reaper.CountProjectMarkers(0)
+    
+    posTab = {}
+    rgnendTab = {}
+    nameTab = {}
+    indexTab = {}
+    colorTab = {}
+    numNameTab = {}
+end
+
+function getRegionsName()
+    local i = 0
+    while i < num_regions do
+        local retval, isrgn, pos, rgnend, name, markrgnindexnumber, color = reaper.EnumProjectMarkers3(0, i)
+        if isrgn then
+            posTab[i] = pos
+            rgnendTab[i] = rgnend
+            nameTab[i] = name
+            indexTab[i] = markrgnindexnumber
+            colorTab[i] = color
+        end
+        i = i + 1
+    end
+end
+
+function checkForNameInTab(cur_name, tabIndex)
+    for i in pairs(nameTab) do
+        if i ~= tabIndex and cur_name == nameTab[i] then
+            if numNameTab[cur_name] == nil then
+                numNameTab[cur_name] = 0
+            end
+            numNameTab[cur_name] = numNameTab[cur_name] + 1
+            if numNameTab[cur_name] < 10 then
+                return cur_name.."_0"..tostring(numNameTab[cur_name])
+            else
+                return cur_name.."_"..tostring(numNameTab[cur_name])
+            end
+        end
+    end
+    
+    return cur_name
+end
+
+function SetRegionsName()
+    local i = 0
+    while i < num_regions do
+        pos = posTab[i]
+        rgnend = rgnendTab[i]
+        name = nameTab[i]
+        new_name = checkForNameInTab(name, i)
+        indexToSet = indexTab[i]
+        color = colorTab[i]
+        reaper.SetProjectMarkerByIndex(0, i, true, pos, rgnend, indexToSet, new_name, color)
+        i = i + 1
+    end
+end
+
+function clearTabs()
+    posTab = {}
+    rgnendTab = {}
+    nameTab = {}
+    indexTab = {}
+    colorTab = {}
+    numNameTab = {}
+end
+
+-- MAIN SET NUMBERING FOR REGIONS FUNCTION --
+function mainSetNumberRegions()
+    setupVariablesRegionName()
+    getRegionsName()
+    SetRegionsName()
+    clearTabs()
+end
+------------------------------------------
 
 -- MAIN FUNCTION --
 function main()
