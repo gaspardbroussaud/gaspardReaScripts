@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="b9961faeffd0dae4be2aacce47fcba5b3e21b837">
+<index version="1" name="Gaspard ReaScripts" commit="2190141b89298b8cdf765bbd9d19cb4329f1c735">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -93,6 +93,10 @@ parentA_name stays the same and parentB_name is parentB_name_01, parentB_name_02
       <version name="1.6.1" author="gaspard" time="2024-02-29T14:10:37Z">
         <changelog><![CDATA[Change usage of region numbering script use for test]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b9961faeffd0dae4be2aacce47fcba5b3e21b837/Region/gaspard_Create%20region%20for%20clusters%20of%20selected%20items%20(prompt).lua</source>
+      </version>
+      <version name="1.6.2" author="gaspard" time="2024-02-29T15:16:55Z">
+        <changelog><![CDATA[Fx Auto Number script command ID lookup error.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/2190141b89298b8cdf765bbd9d19cb4329f1c735/Region/gaspard_Create%20region%20for%20clusters%20of%20selected%20items%20(prompt).lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Create region for clusters of selected media items (only item overlap).lua" type="script" desc="Create region for clusters of selected media items (only item overlap)">
@@ -275,6 +279,10 @@ v1.0 Initial release.]]></changelog>
         <changelog><![CDATA[Fix errors when using whole number for inputs.
 Added usage of decimal numbers for seconds between copies.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/13a6fdbd512c5501475e123d2883704801f31ee4/Timeline/gaspard_Duplicate%20cluster%20of%20items%20and%20apply%20LKC%20Variator%20preset%20to%20each%20copy.lua</source>
+      </version>
+      <version name="1.4" author="gaspard" time="2024-02-29T15:16:55Z">
+        <changelog><![CDATA[Fix potential error of Variator command ID lookup.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/2190141b89298b8cdf765bbd9d19cb4329f1c735/Timeline/gaspard_Duplicate%20cluster%20of%20items%20and%20apply%20LKC%20Variator%20preset%20to%20each%20copy.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Duplicate items N time with seconds between one at a time.lua" type="script" desc="Duplicate items N times with seconds between one at a time">
