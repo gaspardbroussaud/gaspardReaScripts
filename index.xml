@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="87c46e86d05c5e7428997aad9f19704298468880">
+<index version="1" name="Gaspard ReaScripts" commit="fc0362be2a7ad484a42dde447ea0b631ae97a945">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -85,6 +85,11 @@ Minor fixes in syntax.]]></changelog>
         <changelog><![CDATA[Added first parent and top parent options.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/052b419f9d9fb3354c714d03669690290e963375/Region/gaspard_Create%20region%20for%20clusters%20of%20selected%20items%20(prompt).lua</source>
       </version>
+      <version name="1.6" author="gaspard" time="2024-02-29T11:35:42Z">
+        <changelog><![CDATA[New Auto Number feature that is name aware: if region parentA_name is unique and parentB_name has multiple regions,
+parentA_name stays the same and parentB_name is parentB_name_01, parentB_name_02, etc.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/fc0362be2a7ad484a42dde447ea0b631ae97a945/Region/gaspard_Create%20region%20for%20clusters%20of%20selected%20items%20(prompt).lua</source>
+      </version>
     </reapack>
     <reapack name="gaspard_Create region for clusters of selected media items (only item overlap).lua" type="script" desc="Create region for clusters of selected media items (only item overlap)">
       <metadata>
@@ -153,6 +158,10 @@ v1.0 Initial release.]]></changelog>
       <version name="1.0" author="gaspard" time="2024-02-29T10:59:56Z">
         <changelog><![CDATA[Initial release.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/87c46e86d05c5e7428997aad9f19704298468880/Region/gaspard_Set%20all%20regions%20numbering%20with%20name%20aware.lua</source>
+      </version>
+      <version name="1.0.1" author="gaspard" time="2024-02-29T11:35:42Z">
+        <changelog><![CDATA[Clean init tables and setup variables functions.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/fc0362be2a7ad484a42dde447ea0b631ae97a945/Region/gaspard_Set%20all%20regions%20numbering%20with%20name%20aware.lua</source>
       </version>
     </reapack>
   </category>
