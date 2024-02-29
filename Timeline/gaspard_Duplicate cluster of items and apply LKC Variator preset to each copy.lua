@@ -1,9 +1,8 @@
 --@description Duplicate items N times with X seconds between and apply LKC Variator preset
 --@author gaspard
---@version 1.3
+--@version 1.4
 --@changelog
---    Fix errors when using whole number for inputs.
---    Added usage of decimal numbers for seconds between copies.
+--    Fix potential error of Variator command ID lookup.
 --@about
 --    Duplicates selection of items N times with X seconds between copies and applies selected LKC Variator preset.
 
@@ -15,22 +14,62 @@ function inputsWindow()
         tempNval,secondsVal,tempVariatorFormula = retvals_csv:match("(.+),(.+),(.+)")
         Nval = math.tointeger(tempNval)
         variatorFormula = math.tointeger(tempVariatorFormula)
-        reaper.ShowConsoleMsg(tostring(variatorFormula))
+    end
+end
+
+-- GET RELATIVE ACTION COMMAND ID FOR USER --
+function GetActionCommandIDByFilename(searchfilename, searchsection)
+  -- returns the action-command-id for a given scriptfilename installed in Reaper
+  -- keep in mind: some scripts are stored in subfolders, like Cockos/lyrics.lua
+  --               in that case, you need to give the full path to avoid possible
+  --               confusion between files with the same filenames but in different
+  --               subfolders.
+  --               Scripts that are simply in the Scripts-folder, not within a 
+  --               subfolder of Scripts can be accessed just by their filename
+  --
+  -- Parameters:
+  --            string searchfilename - the filename, whose action-command-id you want to have
+  --            integer section - the section, in which the file is stored
+  --                                0 = Main, 
+  --                                100 = Main (alt recording), 
+  --                                32060 = MIDI Editor, 
+  --                                32061 = MIDI Event List Editor, 
+  --                                32062 = MIDI Inline Editor,
+  --                                32063 = Media Explorer.
+  -- Returnvalue:
+  --            string AID - the actioncommand-id of the scriptfile; "", if no such file is installed
+  for k in io.lines(reaper.GetResourcePath().."/reaper-kb.ini") do
+    if k:sub(1,3)=="SCR" then
+      local section, aid, desc, filename=k:match("SCR .- (.-) (.-) (\".-\") (.*)")
+      local filename=string.gsub(filename, "\"", "") 
+      if filename==searchfilename and tonumber(section)==searchsection then
+        return "_"..aid
+      end
+    end
+  end
+  return ""
+end
+
+-- SET VARIATOR COMMAND ID --
+function variatorCommandId()
+    ActionCommandID = {}
+    for i = 1, 5 do
+        ActionCommandID[i] = GetActionCommandIDByFilename("LKC-Variator/GameAudio/LKC - Variator - Mutate using formula "..i..".lua")
     end
 end
 
 -- SELECT VARIATOR PRESET WITH DATAS --
 function selectVariator()
     if variatorFormula == 1 then
-        reaper.Main_OnCommand(reaper.NamedCommandLookup("_RS2a48ba5fc0b182579659d16911dfe40cad1f52b2"), 0)
+        reaper.Main_OnCommand(reaper.NamedCommandLookup(ActionCommandID[variatorFormula]), 0)
     elseif variatorFormula == 2 then
-        reaper.Main_OnCommand(reaper.NamedCommandLookup("_RS46d75140b8c4f43b0b7ccb06abed363654050c88"), 0)
+        reaper.Main_OnCommand(reaper.NamedCommandLookup(ActionCommandID[variatorFormula]), 0)
     elseif variatorFormula == 3 then
-        reaper.Main_OnCommand(reaper.NamedCommandLookup("_RS3586c97d03f557827627f83f3169523a1556b3cd"), 0)
+        reaper.Main_OnCommand(reaper.NamedCommandLookup(ActionCommandID[variatorFormula]), 0)
     elseif variatorFormula == 4 then
-        reaper.Main_OnCommand(reaper.NamedCommandLookup("_RS56be0ed8723605d9f0b5d98e7daf55f65ce03963"), 0)
+        reaper.Main_OnCommand(reaper.NamedCommandLookup(ActionCommandID[variatorFormula]), 0)
     elseif variatorFormula == 5 then
-        reaper.Main_OnCommand(reaper.NamedCommandLookup("_RS7448400b4bce7db85bdbcc3a3f27846b55ea6f43"), 0)
+        reaper.Main_OnCommand(reaper.NamedCommandLookup(ActionCommandID[variatorFormula]), 0)
     end
 end
 
@@ -163,6 +202,7 @@ if sel_item_count ~= 0 then
         if tostring(variatorFormula) ~= "nil" then
             if variatorFormula < 6 then
                 if tostring(Nval) ~= "nil" then
+                    variatorCommandId()
                     tableOfItems()
                     originalDatas()
                     duplicateItems()

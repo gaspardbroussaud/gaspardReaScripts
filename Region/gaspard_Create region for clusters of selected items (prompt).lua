@@ -1,8 +1,8 @@
 --@description Create region for clusters of selected items (prompt)
 --@author gaspard
---@version 1.6.1
+--@version 1.6.2
 --@changelog
---  Change usage of region numbering script use for test
+--  Fx Auto Number script command ID lookup error.
 --@about
 --  Creates a region for each cluster of selected media items (overlapping or touching items in timeline).
 --  Prompts the renaming choices.
@@ -363,11 +363,46 @@ function applyChoice(temp_choice)
     createClusterRegion()
 end
 
-------------------------------------------
-function setRegionNumbering()
-    reaper.Main_OnCommand(reaper.NamedCommandLookup("_RS545fbe335ffce8fec29edb89e3f5cd76a2c70561"), 0)
+-------------------------------------------------------------------------------------------
+function GetActionCommandIDByFilename(searchfilename, searchsection)
+  -- returns the action-command-id for a given scriptfilename installed in Reaper
+  -- keep in mind: some scripts are stored in subfolders, like Cockos/lyrics.lua
+  --               in that case, you need to give the full path to avoid possible
+  --               confusion between files with the same filenames but in different
+  --               subfolders.
+  --               Scripts that are simply in the Scripts-folder, not within a 
+  --               subfolder of Scripts can be accessed just by their filename
+  --
+  -- Parameters:
+  --            string searchfilename - the filename, whose action-command-id you want to have
+  --            integer section - the section, in which the file is stored
+  --                                0 = Main, 
+  --                                100 = Main (alt recording), 
+  --                                32060 = MIDI Editor, 
+  --                                32061 = MIDI Event List Editor, 
+  --                                32062 = MIDI Inline Editor,
+  --                                32063 = Media Explorer.
+  -- Returnvalue:
+  --            string AID - the actioncommand-id of the scriptfile; "", if no such file is installed
+  for k in io.lines(reaper.GetResourcePath().."/reaper-kb.ini") do
+    if k:sub(1,3)=="SCR" then
+      local section, aid, desc, filename=k:match("SCR .- (.-) (.-) (\".-\") (.*)")
+      local filename=string.gsub(filename, "\"", "") 
+      if filename==searchfilename and tonumber(section)==searchsection then
+        return "_"..aid
+      end
+    end
+  end
+  return ""
 end
-------------------------------------------
+
+function setRegionNumbering()
+    -- the following gets the action-command-id of Cockos/lyrics.lua installed in main-section
+    pathCommand = "Gaspard ReaScripts/Region/gaspard_Set all regions numbering with name aware.lua"
+    ActionCommandID = GetActionCommandIDByFilename(pathCommand, 0)
+    reaper.Main_OnCommand(reaper.NamedCommandLookup(ActionCommandID), 0)
+end
+-------------------------------------------------------------------------------------------
 
 -- MAIN FUNCTION --
 function main()
