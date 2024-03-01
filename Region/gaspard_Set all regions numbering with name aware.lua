@@ -1,8 +1,8 @@
 --@description Set all regions numbering with name aware
 --@author gaspard
---@version 1.2.2
+--@version 1.2.3
 --@changelog
---  Fix _Suffix deleted when renumbering
+--  Fix typo for _Suffix deleted when renumberings
 --@about
 --  Sets the suffix number for region name withe name awareness. If name1_01 exists, another region name1 would be name1_02.
 --  Regardless of the number of region between them.
@@ -45,8 +45,8 @@ end
 function DeleteNumbers()
     for i in pairs(nameTab) do
         if isrgnTab[i] then
-            if nameTab[i]:match("(_%d*%.?%d+)") ~= nil and i ~= tabIndex then
-                nameTab[i] = nameTab[i]:gsub("", "")
+            if nameTab[i]:match("_(%d+)") ~= nil and i ~= tabIndex then
+                nameTab[i] = nameTab[i]:gsub("_(%d+)", "")
             end
         end
     end
