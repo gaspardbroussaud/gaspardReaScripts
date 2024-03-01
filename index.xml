@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="4dee76ad248f5b818d1e8b6ee6342f360f335dc8">
+<index version="1" name="Gaspard ReaScripts" commit="611c3471d9b97789ada079b7839708683ca36552">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -340,6 +340,21 @@ Added usage of decimal numbers for seconds between copies.]]></changelog>
         <changelog><![CDATA[Fix error when using a decimal number for seconds variable.
 Prevent the use of decimal number for number of copies variable.  ]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4b7cd741f193d6ddcc01c1f6ac81bd7ceec05144/Timeline/gaspard_Duplicate%20items%20N%20time%20with%20seconds%20between%20one%20at%20a%20time.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Move cluster of items with space between.lua" type="script" desc="Move cluster of items with space between">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Move clusters of selected items to align them with same inbetween space in seconds.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-03-01T16:00:19Z">
+        <changelog><![CDATA[Initial release.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/611c3471d9b97789ada079b7839708683ca36552/Timeline/gaspard_Move%20cluster%20of%20items%20with%20space%20between.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_ProTools marker go to.lua" type="script" desc="ProTools marker go to">
