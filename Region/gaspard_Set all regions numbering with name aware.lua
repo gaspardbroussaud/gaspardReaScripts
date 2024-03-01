@@ -1,8 +1,8 @@
 --@description Set all regions numbering with name aware
 --@author gaspard
---@version 1.2
+--@version 1.2.1
 --@changelog
---  Fix error if markers in project.
+--  Fix typo in Undo Block flag
 --@about
 --  Sets the sufix number for region name withe name awareness. If name1_01 exists, another region name1 would be name1_02.
 --  Regardless of the number of region between them.
@@ -103,6 +103,6 @@ end
 reaper.PreventUIRefresh(1)
 reaper.Undo_BeginBlock()
 main()
-reaper.Undo_EndBlock("Region number changed with sufix", 1)
+reaper.Undo_EndBlock("Region number changed with sufix", -1)
 reaper.PreventUIRefresh(-1)
 reaper.UpdateArrange()
