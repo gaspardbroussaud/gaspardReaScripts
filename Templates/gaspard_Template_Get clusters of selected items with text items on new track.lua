@@ -4,9 +4,9 @@
 --@changelog
 --  Initial release.
 --@about
---Template for item cluster detection.  
---Creates text items of selected items on new track for cluster identification.
---Copy and add script in lines 104 and 117 (if script in template state) to do something on clusters.
+-- Template for item cluster detection.  
+-- Creates text items of selected items on new track for cluster identification.
+-- Copy and add script in lines 104 and 117 (if script in template state) to do something on clusters.
 
 -- CREATE TEXT ITEMS -- Credit to X-Raym
 function CreateTextItem(track, position, length, parentTrackName)
