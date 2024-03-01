@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="06506478c8a2d09d5b18e6487f4a90c19be0c30c">
+<index version="1" name="Gaspard ReaScripts" commit="310ad7c74774beaebe3fcf0c184535ad44c45f44">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -212,6 +212,23 @@ v1.0 Initial release.]]></changelog>
       </metadata>
       <version name="1.0" author="gaspard" time="2024-02-02T15:28:20Z">
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8b159bbf2ea8d52a402520e68e500ec2e49ead73/Render%20region%20matrix/gaspard_Set%20track%20of%20selected%20media%20items%20in%20region%20render%20matrix%20for%20respective%20regions.lua</source>
+      </version>
+    </reapack>
+  </category>
+  <category name="Templates">
+    <reapack name="gaspard_Template_Get clusters of selected items with text items on new track.lua" type="script" desc="Get clusters of selected items with text items on new track">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Template for item cluster detection.\line Creates text items of selected items on new track for cluster identification. Copy and add script in lines 104 and 117 (if script in template state) to do something on clusters.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-03-01T11:15:03Z">
+        <changelog><![CDATA[Initial release.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/310ad7c74774beaebe3fcf0c184535ad44c45f44/Templates/gaspard_Template_Get%20clusters%20of%20selected%20items%20with%20text%20items%20on%20new%20track.lua</source>
       </version>
     </reapack>
   </category>
