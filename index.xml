@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="310ad7c74774beaebe3fcf0c184535ad44c45f44">
+<index version="1" name="Gaspard ReaScripts" commit="51f17b7057e6a887d8ca068aee59acb983e380a6">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -159,7 +159,7 @@ v1.0 Initial release.]]></changelog>
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 Sets the sufix number for region name withe name awareness. If name1_01 exists, another region name1 would be name1_02. Regardless of the number of region between them.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Sets the suffix number for region name withe name awareness. If name1_01 exists, another region name1 would be name1_02. Regardless of the number of region between them.\par}
 }
 ]]></description>
       </metadata>
@@ -182,6 +182,10 @@ v1.0 Initial release.]]></changelog>
       <version name="1.2.1" author="gaspard" time="2024-03-01T09:47:44Z">
         <changelog><![CDATA[Fix typo in Undo Block flag]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/06506478c8a2d09d5b18e6487f4a90c19be0c30c/Region/gaspard_Set%20all%20regions%20numbering%20with%20name%20aware.lua</source>
+      </version>
+      <version name="1.2.2" author="gaspard" time="2024-03-01T14:10:59Z">
+        <changelog><![CDATA[Fix _Suffix deleted when renumbering]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/51f17b7057e6a887d8ca068aee59acb983e380a6/Region/gaspard_Set%20all%20regions%20numbering%20with%20name%20aware.lua</source>
       </version>
     </reapack>
   </category>
