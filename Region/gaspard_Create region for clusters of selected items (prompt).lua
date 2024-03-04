@@ -1,11 +1,18 @@
 --@description Create region for clusters of selected items (prompt)
 --@author gaspard
---@version 1.6.2
+--@version 1.7
 --@changelog
---  Fx Auto Number script command ID lookup error.
+--  Added space between clusters control with values 0 (default settings for overlapping or touching clusters) to
+--  10 secondes between clusters.
+--  This value can be changed in USER VALUES at script lines 12 to 14.
 --@about
 --  Creates a region for each cluster of selected media items (overlapping or touching items in timeline).
 --  Prompts the renaming choices.
+
+-- USER VALUES --------------------------------------------------
+maxSliderValue = 10 -- Maximum value available in slider
+incrementSliderValue = 0.1 -- Value increment available in slider
+-----------------------------------------------------------------
 
 -- INITIALISATION --
 local libPath = reaper.GetExtState("Scythe v3", "libPath")
@@ -18,7 +25,7 @@ loadfile(libPath .. "scythe.lua")()
 
 -- VARIABLES --
 main_win_w = 250
-main_win_h = 300
+main_win_h = 320
 
 bsw = 140
 bpx = (main_win_w - bsw) / 2
@@ -44,46 +51,6 @@ local customTextLayer = GUI.createLayer({name = "CustomTextLayer"})
 -- Main Layer Elements --
 mainLayer:addElements( GUI.createElements(
   {
-    name = "btn_custom_text",
-    type = "Button",
-    x = bpx,
-    y = 90,
-    w = bsw,
-    h = bsh,
-    caption = "Use custom text",
-    func = function () customTextWindow() end
-  },
-  {
-    name = "btn_parent_name",
-    type = "Button",
-    x = bpx,
-    y = 130,
-    w = bsw,
-    h = bsh,
-    caption = "Use parent's name",
-    func = function () setParent(false) end
-  },
-  {
-    name = "btn_top_parent_name",
-    type = "Button",
-    x = bpx,
-    y = 170,
-    w = bsw,
-    h = bsh,
-    caption = "Use top parent's name",
-    func = function () setParent(true) end
-  },
-  {
-    name = "btn_cancel_main",
-    type = "Button",
-    x = bpx,
-    y = 220,
-    w = bsw,
-    h = bsh,
-    caption = "Cancel",
-    func = function () cancelButton() end
-  },
-  {
     name = "checkbox_auto_number",
     type = "Checklist",
     x = (main_win_w - 110) /2,
@@ -93,6 +60,60 @@ mainLayer:addElements( GUI.createElements(
     caption = "",
     options = {"Auto number"},
     frame = false
+  },
+  {
+    name = "slider_interval",
+    type = "Slider",
+    x = (main_win_w - 110) /2,
+    y = 80,
+    w = 110,
+    h = 30,
+    caption = "",
+    min = 0,
+    max = maxSliderValue,
+    inc = incrementSliderValue,
+    defaults = 0,
+    frame = false
+  },
+  {
+    name = "btn_custom_text",
+    type = "Button",
+    x = bpx,
+    y = 120,
+    w = bsw,
+    h = bsh,
+    caption = "Use custom text",
+    func = function () customTextWindow() end
+  },
+  {
+    name = "btn_parent_name",
+    type = "Button",
+    x = bpx,
+    y = 160,
+    w = bsw,
+    h = bsh,
+    caption = "Use parent's name",
+    func = function () setParent(false) end
+  },
+  {
+    name = "btn_top_parent_name",
+    type = "Button",
+    x = bpx,
+    y = 200,
+    w = bsw,
+    h = bsh,
+    caption = "Use top parent's name",
+    func = function () setParent(true) end
+  },
+  {
+    name = "btn_cancel_main",
+    type = "Button",
+    x = bpx,
+    y = 250,
+    w = bsw,
+    h = bsh,
+    caption = "Cancel",
+    func = function () cancelButton() end
   })
 )
 
@@ -169,6 +190,12 @@ function setCustom()
     valCheckBox = GUI.Val("checkbox_auto_number")
     autoNumber = valCheckBox[1]
     
+    -- Get value for slider --
+    valSlider = GUI.Val("slider_interval")
+    if valSlider == 0 then
+        valSlider = 0.0000001
+    end
+    
     -- Get value for input text --
     textInput = GUI.Val("textBox")
     
@@ -181,6 +208,12 @@ function setParent(tempBool)
     -- Get value for checkbox Auto Number --
     valCheckBox = GUI.Val("checkbox_auto_number")
     autoNumber = valCheckBox[1]
+    
+    -- Get value for slider --
+    valSlider = GUI.Val("slider_interval")
+    if valSlider == 0 then
+        valSlider = 0.0000001
+    end
     
     -- Get value for input text --
     textInput = ""
@@ -299,7 +332,7 @@ function createGroupsRegion()
         cur_item_start_pos = reaper.GetMediaItemInfo_Value(cur_item, "D_POSITION")
         cur_item_end_pos = cur_item_start_pos + reaper.GetMediaItemInfo_Value(cur_item, "D_LENGTH")
         
-        if prev_item_end_pos + 0.0000001 < cur_item_start_pos then
+        if prev_item_end_pos + valSlider < cur_item_start_pos then
             inputsToName()
             reaper.AddProjectMarker(0, true, first_item_start_pos, prev_item_end_pos, rgnName, -1)
             first_item_start_pos = cur_item_start_pos
