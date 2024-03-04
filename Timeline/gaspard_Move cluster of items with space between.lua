@@ -1,17 +1,17 @@
 --@description Move cluster of items with space between
 --@author gaspard
---@version 1.0
+--@version 1.1
 --@changelog
--- Initial release.
+-- Added user input for interval between items in cluster.
 --@about
 -- Move clusters of selected items to align them with same inbetween space in seconds.
 
 -- GET INPUTS FROM USER --
 function inputDatas()
-    defaultDatas = "10"
-    isNotCanceled, retvals_csv = reaper.GetUserInputs("Move clusters data", 1, "Seconds between clusters = ", defaultDatas)
+    defaultDatas = "10, 0"
+    isNotCanceled, retvals_csv = reaper.GetUserInputs("Move clusters data", 2, "Seconds between clusters = ,Cluster interval between items = ", defaultDatas)
     if isNotCanceled == true then
-        secondsVal = retvals_csv:match("(.+)")
+        secondsVal, interVal = retvals_csv:match("(.+),(.+)")
         findClusterRegion()
     end
 end
@@ -99,6 +99,10 @@ function setupVariables()
     clusterEndTab = {}
     clusterTab = {}
     clusterIndex = 0
+    
+    if interVal == 0 then
+        interVal = 0.000001
+    end
 end
 
 -- GET INFOS FOR CLUSTER START AND END POS --
@@ -119,7 +123,7 @@ function getClusters()
         cur_item_start_pos = reaper.GetMediaItemInfo_Value(cur_item, "D_POSITION")
         cur_item_end_pos = cur_item_start_pos + reaper.GetMediaItemInfo_Value(cur_item, "D_LENGTH")
         
-        if prev_item_end_pos + 0.0000001 < cur_item_start_pos then
+        if prev_item_end_pos + interVal < cur_item_start_pos then
         
             getClustersInfos(first_item_start_pos, prev_item_end_pos)
             
@@ -246,4 +250,3 @@ msg = reaper.ShowConsoleMsg
 main()
 reaper.PreventUIRefresh(-1)
 reaper.UpdateArrange()
-
