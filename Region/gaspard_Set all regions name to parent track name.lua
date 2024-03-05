@@ -1,7 +1,7 @@
 --@description Set all regions name to parent track name
 --@author gaspard
---@version 1.0
---@changelog Initial release.
+--@version 1.1
+--@changelog Fix to clear name if empty.
 --@about This scripts sets project regions name to parent track names for selected items.
 
 reaper.Undo_BeginBlock()
@@ -18,7 +18,11 @@ if sel_item_count ~= nil then
         
         _, name = reaper.GetSetMediaTrackInfo_String(reaper.GetParentTrack(reaper.GetMediaItemTrack(item)), "P_NAME", "", false)
         
-        reaper.SetProjectMarker2(0, rgnindex, isrgn, pos, rgnend, name)
+        if name == "" then
+            reaper.SetProjectMarker4(0, rgnindex, isrgn, pos, rgnend, name, 0, 1)
+        else
+            reaper.SetProjectMarker2(0, rgnindex, isrgn, pos, rgnend, name)
+        end
     end
 end
 
