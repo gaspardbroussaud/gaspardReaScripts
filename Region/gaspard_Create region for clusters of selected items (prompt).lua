@@ -1,10 +1,8 @@
 --@description Create region for clusters of selected items (prompt)
 --@author gaspard
---@version 1.7
+--@version 2.0
 --@changelog
---  Added space between clusters control with values 0 (default settings for overlapping or touching clusters) to
---  10 secondes between clusters.
---  This value can be changed in USER VALUES at script lines 12 to 14.
+--  Complete rework of cluster detection
 --@about
 --  Creates a region for each cluster of selected media items (overlapping or touching items in timeline).
 --  Prompts the renaming choices.
@@ -29,17 +27,14 @@ main_win_h = 320
 
 bsw = 140
 bpx = (main_win_w - bsw) / 2
-
 bsh = 30
 
 -- MAIN WINDOW --
 local GUI = require("gui.core")
-local Window = require("gui.window")
-local Listbox = require("gui.elements.Listbox")
 
 -- WINDOW --
 local window = GUI.createWindow({
-  name = "Main Window",
+  name = "User Inputs Window",
   w = main_win_w,
   h = main_win_h,
 })
@@ -93,7 +88,7 @@ mainLayer:addElements( GUI.createElements(
     w = bsw,
     h = bsh,
     caption = "Use parent's name",
-    func = function () setParent(false) end
+    func = function () getUserInputs(1) end
   },
   {
     name = "btn_top_parent_name",
@@ -103,7 +98,7 @@ mainLayer:addElements( GUI.createElements(
     w = bsw,
     h = bsh,
     caption = "Use top parent's name",
-    func = function () setParent(true) end
+    func = function () getUserInputs(2) end
   },
   {
     name = "btn_cancel_main",
@@ -136,7 +131,7 @@ customTextLayer:addElements( GUI.createElements(
     w = bsw,
     h = bsh,
     caption = "Set custom",
-    func = function () setCustom() end
+    func = function () getUserInputs(0) end
   },
   {
     name = "btn_customText_back",
@@ -185,215 +180,122 @@ function cancelButton()
     window:close()
 end
 
-function setCustom()
+-- Choice 0 = custom, 1 = parent track, 2 = top parent track --
+function getUserInputs(tempChoice)
+    choice = tempChoice
+    
     -- Get value for checkbox Auto Number --
     valCheckBox = GUI.Val("checkbox_auto_number")
     autoNumber = valCheckBox[1]
     
     -- Get value for slider --
-    valSlider = GUI.Val("slider_interval")
-    if valSlider == 0 then
-        valSlider = 0.0000001
-    end
+    interVal = GUI.Val("slider_interval")
     
     -- Get value for input text --
-    textInput = GUI.Val("textBox")
-    
-    -- Function script --
-    applyChoice(0) -- 0 = Custom name
-    window:close()
-end
-
-function setParent(tempBool)
-    -- Get value for checkbox Auto Number --
-    valCheckBox = GUI.Val("checkbox_auto_number")
-    autoNumber = valCheckBox[1]
-    
-    -- Get value for slider --
-    valSlider = GUI.Val("slider_interval")
-    if valSlider == 0 then
-        valSlider = 0.0000001
+    if choice == 0 then
+        rgnName = GUI.Val("textBox")
+    else
+        rgnName = ""
     end
     
-    -- Get value for input text --
-    textInput = ""
-    
-    -- Function script --
-    isTopParentName = tempBool
-    applyChoice(1) -- 1 = Parent track name
+    createClusters()
     window:close()
 end
 
 --------------------------------------------------------------------------------------------------------------------
 
--- GET TOP PARENT TRACK --
-local function getTopParentTrack(track)
-  while true do
-    local parent = reaper.GetParentTrack(track)
-    if parent then
-      track = parent
-    else
-      return track
+-- SORT VALUES FUNCTION --
+function sort_on_values(t,...)
+  local a = {...}
+  table.sort(t, function (u,v)
+    for i in pairs(a) do
+      if u[a[i]] > v[a[i]] then return false end
+      if u[a[i]] < v[a[i]] then return true end
     end
-  end
+  end)
 end
 
--- CREATE TEXT ITEMS -- Credit to X-Raym
-function CreateTextItem(track, position, length, parentTrackName)
-
-  local item = reaper.AddMediaItemToTrack(track)
-
-  reaper.SetMediaItemInfo_Value(item, "D_POSITION", position)
-  reaper.SetMediaItemInfo_Value(item, "D_LENGTH", length)
-  reaper.GetSetMediaItemInfo_String(item, "P_NOTES", parentTrackName, true)
-  
-  return item
-
-end
-
--- TABLE INIT -- Credit to X-Raym
-local setSelectedMediaItem = {}
-
--- CREATE NOTE ITEMS -- Credit to X-Raym
-function createNoteItems()
-
-  selected_tracks_count = reaper.CountSelectedTracks(0)
-
-  if selected_tracks_count > 0 then
-
-    -- DEFINE TRACK DESTINATION
-    selected_track = reaper.GetSelectedTrack(0,0)
-
-    -- COUNT SELECTED ITEMS
-    selected_items_count = reaper.CountSelectedMediaItems(0)
-
-    if selected_items_count > 0 then
-
-      -- SAVE TAKES SELECTION
-      for j = 0, selected_items_count-1  do
-        setSelectedMediaItem[j] = reaper.GetSelectedMediaItem(0, j)
-      end
-
-      -- LOOP THROUGH TAKE SELECTION
-      for i = 0, selected_items_count-1  do
-        -- GET ITEMS AND TAKES AND PARENT TRACK
-        item = setSelectedMediaItem[i] -- Get selected item i
-        item_track = reaper.GetMediaItemTrack(item)
-        item_parent_track = reaper.GetParentTrack(item_track)
-        if item_parent_track ~= nil then
-            if isTopParentName then
-                track_top_parent = getTopParentTrack(item_parent_track)
-            else
-                track_top_parent = item_parent_track
-            end
-            _, item_parent_track_name = reaper.GetSetMediaTrackInfo_String(track_top_parent, "P_NAME", "", false)
-        else
-            item_parent_track_name = "MasterTrack"
-        end
-
-        -- TIMES
-        item_start = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-        item_duration = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
-
-        -- ACTION
-        CreateTextItem(selected_track, item_start, item_duration, item_parent_track_name)
-
-      end -- ENDLOOP through selected items
-      reaper.Main_OnCommand(40421, 0)
-      -- Create text items on first selected track from selected items notes
-    else -- no selected item
-      reaper.ShowMessageBox("Select at least one item","Please",0)
-    end -- if select item
-  else -- no selected track
-    reaper.ShowMessageBox("The script met an error when trying to access created track for note items","Error",0)
-  end -- if selected track
-end
-
--- SETUP ALL VARIABLES FOR CLUSTERS --
+-- VARIABLE SETUP AT SCRIPT START --
 function setupVariables()
+    if interVal == 0 then
+        interVal = 0.0000001
+    end
     
-    first_item = reaper.GetSelectedMediaItem(0, 0)
-    
-    first_item_start_pos = reaper.GetMediaItemInfo_Value(first_item, "D_POSITION")
-    
-    prev_item_end_pos = first_item_start_pos
-    
-    regionNumber = 1
+    -- Add selected items to table and sort by start position --
+    sel_item_Tab = {}
+        
+    for i = 1, sel_item_count do
+        local cur_item = reaper.GetSelectedMediaItem(0, i-1)
+        sel_item_Tab[i] = { item = cur_item, item_start = reaper.GetMediaItemInfo_Value(cur_item, "D_POSITION") }
+    end
+        
+    sort_on_values(sel_item_Tab, "item_start")
 end
 
--- CREATE REGION FOR CLUSTERS --
-function createGroupsRegion()
-    setupVariables()
-
-    for i = 0, selected_items_count - 1 do
+-- ITEM CHECK POSITIONS FOR CLUSTERS --
+function checkItemsPositions()
+    prev_start = sel_item_Tab[1].item_start
+    prev_end = sel_item_Tab[1].item_start + reaper.GetMediaItemInfo_Value(sel_item_Tab[1].item, "D_LENGTH")
+    first_start = prev_start
+    first_end = prev_end
     
-        cur_item = reaper.GetSelectedMediaItem(0, i)
+    for i = 1, #sel_item_Tab do
+    
+        local cur_item = sel_item_Tab[i].item
+        local cur_start = reaper.GetMediaItemInfo_Value(cur_item, "D_POSITION")
+        local cur_end = cur_start + reaper.GetMediaItemInfo_Value(cur_item, "D_LENGTH")
         
-        cur_item_start_pos = reaper.GetMediaItemInfo_Value(cur_item, "D_POSITION")
-        cur_item_end_pos = cur_item_start_pos + reaper.GetMediaItemInfo_Value(cur_item, "D_LENGTH")
-        
-        if prev_item_end_pos + valSlider < cur_item_start_pos then
-            inputsToName()
-            reaper.AddProjectMarker(0, true, first_item_start_pos, prev_item_end_pos, rgnName, -1)
-            first_item_start_pos = cur_item_start_pos
-            first_item = cur_item
-        end
+        if prev_end + interVal < cur_start then
             
-        if i == selected_items_count - 1 then
-            if prev_item_end_pos > cur_item_end_pos then
-                last_item_end_pos = prev_item_end_pos
+            reaper.AddProjectMarker(0, true, first_start, prev_end, rgnName, -1)
+            
+            first_start = cur_start
+        
+        elseif i == #sel_item_Tab then
+        
+            if prev_end > cur_end then
+                last_end = prev_end
             else
-                last_item_end_pos = cur_item_end_pos
+                last_end = cur_end
             end
             
-            inputsToName()
-            reaper.AddProjectMarker(0, true, first_item_start_pos, last_item_end_pos, rgnName, -1)
+            reaper.AddProjectMarker(0, true, first_start, last_end, rgnName, -1)
         end
         
-        if prev_item_end_pos > cur_item_end_pos then
+        if prev_end > cur_end then
             --nothing
         else
-            prev_item_end_pos = cur_item_end_pos
+            prev_start = cur_start
+            prev_end = cur_end
+        end
+    end
+end
+
+-- CLUSTER REGION --
+function createClusters()
+    reaper.Undo_BeginBlock()
+    setupVariables()
+    checkItemsPositions()
+    
+    -- Apply region name with choice in input --
+    if choice ~= 0 then
+        if choice == 1 then
+            setRegionParentName("parent track")
+        elseif choice == 2 then
+            setRegionParentName("top parent track")
         end
     end
     
-end
-
--- Get inputs to region name --
-function inputsToName()
-    if choice == 0 then
-        -- Empty because textInput is already set with custom text
-    elseif choice == 1 then
-        _, textInput = reaper.GetSetMediaItemInfo_String(first_item, "P_NOTES", "", false)
+    -- Apply auto numbering via reascript --
+    if autoNumber then
+        setRegionNumbering()
     end
-    rgnName = textInput
-end
-
--- MAIN --
-function createClusterRegion()
-    if reaper.CountSelectedMediaItems(0) > 0 then
-        
-        reaper.Undo_BeginBlock() -- Start of undo block
-        
-        reaper.Main_OnCommand(40001, 0) -- Create new track
     
-        createNoteItems()
-    
-        createGroupsRegion()
-    
-        reaper.Main_OnCommand(40005, 0) -- Delete created track
-        
-        if autoNumber then
-            setRegionNumbering()
-        end
-        
-        reaper.Undo_EndBlock("Create region for selected clusters of items", -1) -- End of undo block
+    -- Unselect all items --
+    for i = 1, #sel_item_Tab do
+        reaper.SetMediaItemSelected(sel_item_Tab[i].item, false)
     end
-end
-
-function applyChoice(temp_choice)
-    choice = temp_choice
-    createClusterRegion()
+    reaper.Undo_EndBlock("Create region for selected clusters of items", -1)
 end
 
 -------------------------------------------------------------------------------------------
@@ -426,30 +328,44 @@ function GetActionCommandIDByFilename(searchfilename, searchsection)
       end
     end
   end
+  reaper.MB("Script: "..searchfilename.."\nPlease install via ReaPack.", "Error script not found", 0)
   return ""
 end
 
+function setRegionParentName(stringScript)
+    if stringScript == "top parent track" then
+        pathC_TopParent = "Gaspard ReaScripts/Region/gaspard_Set all regions name to "..stringScript.." name.lua"
+        ACID_TopParent = GetActionCommandIDByFilename(pathC_TopParent, 0)
+        reaper.Main_OnCommand(reaper.NamedCommandLookup(ACID_TopParent), 0)
+    elseif stringScript == "parent track" then
+        pathC_Parent = "Gaspard ReaScripts/Region/gaspard_Set all regions name to "..stringScript.." name.lua"
+        ACID_Parent = GetActionCommandIDByFilename(pathC_Parent, 0)
+        reaper.Main_OnCommand(reaper.NamedCommandLookup(ACID_Parent), 0)
+    end
+end
+
 function setRegionNumbering()
-    -- the following gets the action-command-id of Cockos/lyrics.lua installed in main-section
-    pathCommand = "Gaspard ReaScripts/Region/gaspard_Set all regions numbering with name aware.lua"
-    ActionCommandID = GetActionCommandIDByFilename(pathCommand, 0)
-    reaper.Main_OnCommand(reaper.NamedCommandLookup(ActionCommandID), 0)
+    pathC_Number = "Gaspard ReaScripts/Region/gaspard_Set all regions numbering with name aware.lua"
+    ACID_Number = GetActionCommandIDByFilename(pathC_Number, 0)
+    reaper.Main_OnCommand(reaper.NamedCommandLookup(ACID_Number), 0)
 end
 -------------------------------------------------------------------------------------------
 
 -- MAIN FUNCTION --
 function main()
-    selected_items_count = reaper.CountSelectedMediaItems(0)
-    if selected_items_count ~= 0 then
+    reaper.ClearConsole()
+    
+    sel_item_count = reaper.CountSelectedMediaItems(0)
+    
+    if sel_item_count ~= 0 then
         mainWindow()
     else
-        reaper.ShowMessageBox("Please select at least one item", "No items selected", 0)
+        reaper.MB("Please select at least one item.", "No item selected", 0)
     end
 end
 
--- MAIN SCRIPT EXECUTION --
+-- SCRIPT EXECUTION --
 reaper.PreventUIRefresh(1)
-reaper.ClearConsole()
 main()
 reaper.PreventUIRefresh(-1)
 reaper.UpdateArrange()
