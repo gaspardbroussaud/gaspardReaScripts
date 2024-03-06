@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="8a6fb319379530606d2c5bb806c1282934e0c0a7">
+<index version="1" name="Gaspard ReaScripts" commit="b437e7f9ccbacf367aa70886fb5fdbcb94610b73">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -163,6 +163,21 @@ v1.0 Initial release.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8b159bbf2ea8d52a402520e68e500ec2e49ead73/Region/gaspard_Create%20region%20for%20each%20selected%20media%20items.lua</source>
       </version>
     </reapack>
+    <reapack name="gaspard_Set all regions name to custom name.lua" type="script" desc="Set all regions name to custom name">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 This scripts sets project regions name to custom user input name for selected items.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-03-06T11:18:05Z">
+        <changelog><![CDATA[Initial release.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b437e7f9ccbacf367aa70886fb5fdbcb94610b73/Region/gaspard_Set%20all%20regions%20name%20to%20custom%20name.lua</source>
+      </version>
+    </reapack>
     <reapack name="gaspard_Set all regions name to parent track name.lua" type="script" desc="Set all regions name to parent track name">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
@@ -180,6 +195,11 @@ v1.0 Initial release.]]></changelog>
       <version name="1.1" author="gaspard" time="2024-03-05T14:07:21Z">
         <changelog><![CDATA[Fix to clear name if empty.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8a6fb319379530606d2c5bb806c1282934e0c0a7/Region/gaspard_Set%20all%20regions%20name%20to%20parent%20track%20name.lua</source>
+      </version>
+      <version name="1.1.1" author="gaspard" time="2024-03-06T11:18:05Z">
+        <changelog><![CDATA[· Fix error in item selection detection.
+· Fix error if there are no regions in project.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b437e7f9ccbacf367aa70886fb5fdbcb94610b73/Region/gaspard_Set%20all%20regions%20name%20to%20parent%20track%20name.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Set all regions name to top parent track name.lua" type="script" desc="Set all regions name to top parent track name">
@@ -199,6 +219,11 @@ v1.0 Initial release.]]></changelog>
       <version name="1.1" author="gaspard" time="2024-03-05T14:07:21Z">
         <changelog><![CDATA[Fix to clear name if empty.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8a6fb319379530606d2c5bb806c1282934e0c0a7/Region/gaspard_Set%20all%20regions%20name%20to%20top%20parent%20track%20name.lua</source>
+      </version>
+      <version name="1.1.1" author="gaspard" time="2024-03-06T11:18:05Z">
+        <changelog><![CDATA[· Fix error in item selection detection.
+· Fix error if there are no regions in project.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b437e7f9ccbacf367aa70886fb5fdbcb94610b73/Region/gaspard_Set%20all%20regions%20name%20to%20top%20parent%20track%20name.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Set all regions numbering with name aware.lua" type="script" desc="Set all regions numbering with name aware">
