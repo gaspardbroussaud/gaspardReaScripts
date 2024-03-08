@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="b437e7f9ccbacf367aa70886fb5fdbcb94610b73">
+<index version="1" name="Gaspard ReaScripts" commit="e335dfb7f82064eb6c478c9f0920839044e8ec27">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -480,6 +480,21 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
     </reapack>
   </category>
   <category name="Track">
+    <reapack name="gaspard_Mute track and hide in TCP and MCP.lua" type="script" desc="Mute track and hide in TCP and MCP">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Mute and hide in TCP and MCP all selected tracks. Hide children from TCP and MCP if selected track is parent.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-03-08T13:18:54Z">
+        <changelog><![CDATA[Initial release.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/e335dfb7f82064eb6c478c9f0920839044e8ec27/Track/gaspard_Mute%20track%20and%20hide%20in%20TCP%20and%20MCP.lua</source>
+      </version>
+    </reapack>
     <reapack name="gaspard_Rename track with selected media item name on it.lua" type="script" desc="Rename track with selected media item name on it">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
