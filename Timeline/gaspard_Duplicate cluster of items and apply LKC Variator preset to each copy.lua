@@ -1,8 +1,8 @@
 --@description Duplicate items N times with X seconds between and apply LKC Variator preset
 --@author gaspard
---@version 1.4.1
+--@version 1.5
 --@changelog
---    Fix typo in script.
+--    Fix the script to work only on selected items.
 --@about
 --    Duplicates selection of items N times with X seconds between copies and applies selected LKC Variator preset.
 
@@ -60,17 +60,12 @@ end
 
 -- SELECT VARIATOR PRESET WITH DATAS --
 function selectVariator()
-    if variatorFormula == 1 then
-        reaper.Main_OnCommand(reaper.NamedCommandLookup(ActionCommandID[variatorFormula]), 0)
-    elseif variatorFormula == 2 then
-        reaper.Main_OnCommand(reaper.NamedCommandLookup(ActionCommandID[variatorFormula]), 0)
-    elseif variatorFormula == 3 then
-        reaper.Main_OnCommand(reaper.NamedCommandLookup(ActionCommandID[variatorFormula]), 0)
-    elseif variatorFormula == 4 then
-        reaper.Main_OnCommand(reaper.NamedCommandLookup(ActionCommandID[variatorFormula]), 0)
-    elseif variatorFormula == 5 then
-        reaper.Main_OnCommand(reaper.NamedCommandLookup(ActionCommandID[variatorFormula]), 0)
-    end
+    reaper.Main_OnCommand(reaper.NamedCommandLookup(ActionCommandID[variatorFormula]), 0)
+end
+
+-- SELECT TRACKS OF SELECTED ITEMS ONLY --
+function selectTracksOfItems()
+    reaper.Main_OnCommand(reaper.NamedCommandLookup(GetActionCommandIDByFilename("Gaspard ReaScripts/Track/gaspard_Select tracks of selected items.lua", 0)), 0)
 end
 
 -- TIMER --
@@ -79,9 +74,7 @@ function runloop()
   if newtime-lasttime >= timeChoice then
     lasttime=newtime
     applyVariator()
-    if stopScriptLoop == true then
-        reaper.ShowConsoleMsg("\nStopped at: "..tostring(loopNB))
-    end
+    
     if loopNB == #regionTab + 1 then
         reaper.Main_OnCommand(40289, 0) -- Unselect all items
         reaper.Main_OnCommand(40635, 0) -- Clear time selection
@@ -117,6 +110,7 @@ function originalDatas()
         if cur_item_start < original_start or original_start == 0 then
             original_start = cur_item_start
         end
+        
         if cur_item_end > original_end then
             original_end = cur_item_end
         end
@@ -125,6 +119,7 @@ function originalDatas()
     original_length = original_end - original_start
     nudge_length = 0
     
+    selectTracksOfItems()
     reaper.Main_OnCommand(40290, 0) -- Set time selection to selected items
 end
 
@@ -134,7 +129,7 @@ function duplicateItems()
     if Nval ~= 0 then
         for i = 0, Nval - 1 do
             reaper.Main_OnCommand(40289, 0) -- Unselect all items
-            reaper.Main_OnCommand(40717, 0) -- Select all items in time selection
+            reaper.Main_OnCommand(40718, 0) -- Select all items in time selection on selected tracks
             
             nudge_length = original_length + secondsVal + nudge_length
             reaper.ApplyNudge(0, 0, 5, 1, nudge_length, 0, 1)
@@ -169,7 +164,7 @@ function applyVariatorIndex0()
     reaper.GetSet_LoopTimeRange(true, true, pos, rgnend, false) --isSet, isLoop, start, end, allowautoseek
     
     reaper.Main_OnCommand(40289, 0) -- Unselect all items
-    reaper.Main_OnCommand(40717, 0) -- Select all items in time selection
+    reaper.Main_OnCommand(40718, 0) -- Select all items in time selection on selected tracks
      
     selectVariator()
 end
@@ -181,7 +176,7 @@ function applyVariator()
     reaper.GetSet_LoopTimeRange(true, true, pos, rgnend, false) --isSet, isLoop, start, end, allowautoseek
     
     reaper.Main_OnCommand(40289, 0) -- Unselect all items
-    reaper.Main_OnCommand(40717, 0) -- Select all items in time selection
+    reaper.Main_OnCommand(40718, 0) -- Select all items in time selection on selected tracks
      
     selectVariator()
     
@@ -215,6 +210,7 @@ if sel_item_count ~= 0 then
                     end
                     reaper.Main_OnCommand(40289, 0) -- Unselect all items
                     reaper.Main_OnCommand(40635, 0) -- Clear time selection
+                    reaper.Main_OnCommand(40297, 0) -- Unselect all tracks
                 else
                     reaper.MB("Error. Please enter a whole number for copies input", "Error decimal number entered", 0)
                 end
@@ -230,5 +226,5 @@ else
 end
 
 reaper.Undo_EndBlock("Duplicated item N times with seconds between", 0)
-reaper.PreventUIRefresh(-1)
 reaper.UpdateArrange()
+reaper.PreventUIRefresh(-1)
