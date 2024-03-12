@@ -1,11 +1,11 @@
 --@description Create region for clusters of selected items (prompt)
 --@author gaspard
---@version 2.0
+--@version 2.1
 --@changelog
---  Complete rework of cluster detection
+--  Fix bug for last region if item solo.
+--  Added track name button to chose region name.
 --@about
---  Creates a region for each cluster of selected media items (overlapping or touching items in timeline).
---  Prompts the renaming choices.
+--  Creates a region for each cluster of selected media items (overlapping or touching items in timeline). Prompts the renaming choices.
 
 -- USER VALUES --------------------------------------------------
 maxSliderValue = 10 -- Maximum value available in slider
@@ -23,7 +23,7 @@ loadfile(libPath .. "scythe.lua")()
 
 -- VARIABLES --
 main_win_w = 250
-main_win_h = 320
+main_win_h = 360
 
 bsw = 140
 bpx = (main_win_w - bsw) / 2
@@ -81,30 +81,40 @@ mainLayer:addElements( GUI.createElements(
     func = function () customTextWindow() end
   },
   {
-    name = "btn_parent_name",
+    name = "btn_track_name",
     type = "Button",
     x = bpx,
     y = 160,
     w = bsw,
     h = bsh,
-    caption = "Use parent's name",
+    caption = "Use track's name",
     func = function () getUserInputs(1) end
   },
   {
-    name = "btn_top_parent_name",
+    name = "btn_parent_name",
     type = "Button",
     x = bpx,
     y = 200,
     w = bsw,
     h = bsh,
-    caption = "Use top parent's name",
+    caption = "Use parent's name",
     func = function () getUserInputs(2) end
+  },
+  {
+    name = "btn_top_parent_name",
+    type = "Button",
+    x = bpx,
+    y = 240,
+    w = bsw,
+    h = bsh,
+    caption = "Use top parent's name",
+    func = function () getUserInputs(3) end
   },
   {
     name = "btn_cancel_main",
     type = "Button",
     x = bpx,
-    y = 250,
+    y = 290,
     w = bsw,
     h = bsh,
     caption = "Cancel",
@@ -185,8 +195,7 @@ function getUserInputs(tempChoice)
     choice = tempChoice
     
     -- Get value for checkbox Auto Number --
-    valCheckBox = GUI.Val("checkbox_auto_number")
-    autoNumber = valCheckBox[1]
+    autoNumber = GUI.Val("checkbox_auto_number")[1]
     
     -- Get value for slider --
     interVal = GUI.Val("slider_interval")
@@ -217,9 +226,7 @@ end
 
 -- VARIABLE SETUP AT SCRIPT START --
 function setupVariables()
-    if interVal == 0 then
-        interVal = 0.0000001
-    end
+    if interVal == 0 then interVal = 0.0000001 end
     
     -- Add selected items to table and sort by start position --
     sel_item_Tab = {}
@@ -250,8 +257,9 @@ function checkItemsPositions()
             reaper.AddProjectMarker(0, true, first_start, prev_end, rgnName, -1)
             
             first_start = cur_start
+        end
         
-        elseif i == #sel_item_Tab then
+        if i == #sel_item_Tab then
         
             if prev_end > cur_end then
                 last_end = prev_end
@@ -280,16 +288,16 @@ function createClusters()
     -- Apply region name with choice in input --
     if choice ~= 0 then
         if choice == 1 then
-            setRegionParentName("parent track")
+            setRegionParentName("track")
         elseif choice == 2 then
+            setRegionParentName("parent track")
+        elseif choice == 3 then
             setRegionParentName("top parent track")
         end
     end
     
     -- Apply auto numbering via reascript --
-    if autoNumber then
-        setRegionNumbering()
-    end
+    if autoNumber then setRegionNumbering() end
     
     -- Unselect all items --
     for i = 1, #sel_item_Tab do
