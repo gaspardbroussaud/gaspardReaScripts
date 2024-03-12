@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="cd0a7aae8a5bcc36d7325ca8501c12a040e84920">
+<index version="1" name="Gaspard ReaScripts" commit="8e7ef107b594fb0f25267a764dcf2adce7b9d4a9">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -107,6 +107,11 @@ This value can be changed in USER VALUES at script lines 12 to 14.]]></changelog
       <version name="2.0" author="gaspard" time="2024-03-05T11:34:25Z">
         <changelog><![CDATA[Complete rework of cluster detection]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4bfad26b837a1c8d22b0bfdc1563bc96dd08f01a/Region/gaspard_Create%20region%20for%20clusters%20of%20selected%20items%20(prompt).lua</source>
+      </version>
+      <version name="2.1" author="gaspard" time="2024-03-12T09:36:10Z">
+        <changelog><![CDATA[Fix bug for last region if item solo.
+Added track name button to chose region name.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8e7ef107b594fb0f25267a764dcf2adce7b9d4a9/Region/gaspard_Create%20region%20for%20clusters%20of%20selected%20items%20(prompt).lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Create region for clusters of selected media items (only item overlap).lua" type="script" desc="Create region for clusters of selected media items (only item overlap)">
@@ -224,6 +229,21 @@ v1.0 Initial release.]]></changelog>
         <changelog><![CDATA[· Fix error in item selection detection.
 · Fix error if there are no regions in project.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b437e7f9ccbacf367aa70886fb5fdbcb94610b73/Region/gaspard_Set%20all%20regions%20name%20to%20top%20parent%20track%20name.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Set all regions name to track name.lua" type="script" desc="Set all regions name to track name">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 This scripts sets project regions name to track names for selected items.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-03-12T09:36:10Z">
+        <changelog><![CDATA[Initial release.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8e7ef107b594fb0f25267a764dcf2adce7b9d4a9/Region/gaspard_Set%20all%20regions%20name%20to%20track%20name.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Set all regions numbering with name aware.lua" type="script" desc="Set all regions numbering with name aware">
