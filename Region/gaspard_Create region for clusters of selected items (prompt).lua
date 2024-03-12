@@ -1,9 +1,8 @@
 --@description Create region for clusters of selected items (prompt)
 --@author gaspard
---@version 2.1
+--@version 2.1.1
 --@changelog
---  Fix bug for last region if item solo.
---  Added track name button to chose region name.
+--  Fix eror in command lookup for name scripts.
 --@about
 --  Creates a region for each cluster of selected media items (overlapping or touching items in timeline). Prompts the renaming choices.
 
@@ -341,14 +340,9 @@ function GetActionCommandIDByFilename(searchfilename, searchsection)
 end
 
 function setRegionParentName(stringScript)
-    if stringScript == "top parent track" then
-        pathC_TopParent = "Gaspard ReaScripts/Region/gaspard_Set all regions name to "..stringScript.." name.lua"
-        ACID_TopParent = GetActionCommandIDByFilename(pathC_TopParent, 0)
-        reaper.Main_OnCommand(reaper.NamedCommandLookup(ACID_TopParent), 0)
-    elseif stringScript == "parent track" then
-        pathC_Parent = "Gaspard ReaScripts/Region/gaspard_Set all regions name to "..stringScript.." name.lua"
-        ACID_Parent = GetActionCommandIDByFilename(pathC_Parent, 0)
-        reaper.Main_OnCommand(reaper.NamedCommandLookup(ACID_Parent), 0)
+    if stringScript == "track" or stringScript == "parent track" or stringScript == "top parent track"then
+        path_command = "Gaspard ReaScripts/Region/gaspard_Set all regions name to "..stringScript.." name.lua"
+        reaper.Main_OnCommand(reaper.NamedCommandLookup(GetActionCommandIDByFilename(path_command, 0)), 0)
     end
 end
 
