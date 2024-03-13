@@ -1,12 +1,15 @@
 --@description Mute track and hide in TCP and MCP
 --@author gaspard
---@version 1.0
---@changelog Initial release.
+--@version 1.1
+--@changelog +Locking tracks when hiding.
 --@about Mute and hide in TCP and MCP all selected tracks. Hide children from TCP and MCP if selected track is parent.
 
 -- HIDE and MUTE TRACK --
 function hideMute(track, mute)
     reaper.SetMediaTrackInfo_Value(track, "B_MUTE", mute)
+    if mute == 1 then
+        reaper.Main_OnCommand(41312, 0) -- Lock selected track
+    end
     reaper.SetMediaTrackInfo_Value(track, "B_SHOWINMIXER", 0)
     reaper.SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
 end
@@ -19,11 +22,13 @@ function main()
         trackTab[i] = reaper.GetSelectedTrack(0, i)
     end
     
-    reaper.Main_OnCommand(40297, 0) --Clear selection of all tracks
+    reaper.Main_OnCommand(40297, 0) -- Clear selection of all tracks
     
     for i = 0, #trackTab do
         if reaper.GetMediaTrackInfo_Value(trackTab[i], "I_FOLDERDEPTH") == 1 then
             reaper.SetTrackSelected(trackTab[i], true)
+            
+            hideMute(trackTab[i], 1)
             
             -- Select only children of selected folders --
             reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_SELCHILDREN"), 0)
@@ -36,11 +41,13 @@ function main()
                 hideMute(child_track, 0)
             end
             
-            reaper.Main_OnCommand(40297, 0) --Clear selection of all tracks
-            hideMute(trackTab[i], 1)
+            reaper.Main_OnCommand(40297, 0) -- Clear selection of all tracks
+            --hideMute(trackTab[i], 1)
             
         else
+            reaper.SetTrackSelected(trackTab[i], true)
             hideMute(trackTab[i], 1)
+            reaper.SetTrackSelected(trackTab[i], false)
         end
     end
 end
