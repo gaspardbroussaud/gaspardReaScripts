@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="86523efc62d1b2541e216fec96997915c012ca71">
+<index version="1" name="Gaspard ReaScripts" commit="32158daeb1bb4aae9e1d4df72229d2f18b6134d9">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -521,6 +521,21 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       <version name="1.0" author="gaspard" time="2024-03-12T14:25:53Z">
         <changelog><![CDATA[Initial release.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/86523efc62d1b2541e216fec96997915c012ca71/Track/gaspard_Collapse%20and%20uncollapse%20on%20double%20click%20track%20in%20TCP%20via%20mouse%20modifiers.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Collapse to small track in folder under mouse in TCP.lua" type="script" desc="Collapse to small track in folder under mouse in TCP">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Set track under mouse as small collapsed state if it is a folder track.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-03-13T10:30:16Z">
+        <changelog><![CDATA[Initial release.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/32158daeb1bb4aae9e1d4df72229d2f18b6134d9/Track/gaspard_Collapse%20to%20small%20track%20in%20folder%20under%20mouse%20in%20TCP.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Mute track and hide in TCP and MCP.lua" type="script" desc="Mute track and hide in TCP and MCP">
