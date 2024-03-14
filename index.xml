@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="98114939f7252b24cff337a2ec5b1ee44f54e547">
+<index version="1" name="Gaspard ReaScripts" commit="2e8a00dcef144bc6365491a0adc02f9c76e8a542">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -303,6 +303,21 @@ v1.0 Initial release.]]></changelog>
       </metadata>
       <version name="1.0" author="gaspard" time="2024-02-02T15:28:20Z">
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8b159bbf2ea8d52a402520e68e500ec2e49ead73/Render%20region%20matrix/gaspard_Set%20parent%20track%20of%20selected%20media%20items%20in%20region%20render%20matrix%20for%20respective%20regions.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Set selected tracks in region render matrix for selected media items regions.lua" type="script" desc="Set selected tracks in region render matrix for selected media items regions">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Set selected tracks in region render matrix for selected media items regions.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-03-14T14:50:23Z">
+        <changelog><![CDATA[Initial release.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/2e8a00dcef144bc6365491a0adc02f9c76e8a542/Render%20region%20matrix/gaspard_Set%20selected%20tracks%20in%20region%20render%20matrix%20for%20selected%20media%20items%20regions.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Set top parent track in region render matrix for selected media items regions.lua" type="script" desc="Set top parent track in region render matrix for selected media items regions">
