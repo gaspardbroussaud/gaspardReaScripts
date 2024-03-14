@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="2f6ab95bacdf35e2c108e10e851eb7f240c8da12">
+<index version="1" name="Gaspard ReaScripts" commit="fbb973b438cbb399a80667b70db965ee21ae849e">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -536,6 +536,10 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       <version name="1.0" author="gaspard" time="2024-03-13T10:30:16Z">
         <changelog><![CDATA[Initial release.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/32158daeb1bb4aae9e1d4df72229d2f18b6134d9/Track/gaspard_Collapse%20to%20small%20track%20in%20folder%20under%20mouse%20in%20TCP.lua</source>
+      </version>
+      <version name="1.1" author="gaspard" time="2024-03-14T08:58:04Z">
+        <changelog><![CDATA[+On and off behaviour.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/fbb973b438cbb399a80667b70db965ee21ae849e/Track/gaspard_Collapse%20to%20small%20track%20in%20folder%20under%20mouse%20in%20TCP.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Mute track and hide in TCP and MCP.lua" type="script" desc="Mute track and hide in TCP and MCP">
