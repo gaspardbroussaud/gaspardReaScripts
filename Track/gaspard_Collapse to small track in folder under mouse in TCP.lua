@@ -1,7 +1,7 @@
 --@description Collapse to small track in folder under mouse in TCP
 --@author gaspard
---@version 1.1
---@changelog +On and off behaviour.
+--@version 1.1.1
+--@changelog +Unselect track after collapse.
 --@about Set track under mouse as small collapsed state if it is a folder track.
 
 track, _, _ = reaper.BR_TrackAtMouseCursor() --Get track under cursor
@@ -17,4 +17,5 @@ if track ~= nil then
             reaper.SetMediaTrackInfo_Value(track, "I_FOLDERCOMPACT", 0) -- If other change to collapsed (to prevent error)
         end
     end
+    reaper.SetTrackSelected(track, false) -- Unselect track
 end

@@ -1,7 +1,7 @@
 --@description Collapse and uncollapse on double click track in TCP via mouse modifiers
 --@author gaspard
---@version 1.0
---@changelog Initial release.
+--@version 1.0.1
+--@changelog +Unselect track after collapse.
 --@about Set script to double click on track in TCP to cycle between collapsed and uncollapsed states for folder track
 
 track, _, _ = reaper.BR_TrackAtMouseCursor() --Get track under cursor
@@ -17,4 +17,5 @@ if track ~= nil then
             reaper.SetMediaTrackInfo_Value(track, "I_FOLDERCOMPACT", 0) -- If other change to collapsed (to prevent error)
         end
     end
+    reaper.SetTrackSelected(track, false) -- Unselect track
 end
