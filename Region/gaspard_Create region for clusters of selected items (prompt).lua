@@ -1,8 +1,8 @@
 --@description Create region for clusters of selected items (prompt)
 --@author gaspard
---@version 2.2
+--@version 2.3
 --@changelog
---  + New Region Render Matrix setting to set tracks for created regions to render.
+--  + Allow selection of multiple render region matrix settings.
 --@about
 --  Creates a region for each cluster of selected media items (overlapping or touching items in timeline). Prompts the renaming choices.
 
@@ -175,54 +175,26 @@ customTextLayer:addElements( GUI.createElements(
 -- Region Render Matrix Layer Elements --
 rrmLayer:addElements( GUI.createElements(
   {
-    name = "btn_sel_track_rrm",
-    type = "Button",
-    x = bpx,
+    name = "checkbox_rrm_set",
+    type = "Checklist",
+    x = (main_win_w - 110) /2 - 10,
     y = rrmY,
-    w = bsw,
-    h = bsh,
-    caption = "Set to selected track",
-    func = function () setRegionRenderMatrix(0) end
+    w = 130,
+    h = 120,
+    caption = "",
+    options = {"Selected track", "Items track", "Parent track", "Top parent track"},
+    pad = 7,
+    frame = false
   },
   {
-    name = "btn_item_track_rrm",
-    type = "Button",
-    x = bpx,
-    y = rrmY + 40,
-    w = bsw,
-    h = bsh,
-    caption = "Set to item track",
-    func = function () setRegionRenderMatrix(1) end
-  },
-  {
-    name = "btn_parent_track_rrm",
-    type = "Button",
-    x = bpx,
-    y = rrmY + 80,
-    w = bsw,
-    h = bsh,
-    caption = "Set to parent track",
-    func = function () setRegionRenderMatrix(2) end
-  },
-  {
-    name = "btn_top_parent_track_rrm",
-    type = "Button",
-    x = bpx,
-    y = rrmY + 120,
-    w = bsw,
-    h = bsh,
-    caption = "Set to top parent track",
-    func = function () setRegionRenderMatrix(3) end
-  },
-  {
-    name = "btn_rrm_back",
+    name = "btn_rrm_confirm",
     type = "Button",
     x = bpx,
     y = rrmY + 170,
     w = bsw,
     h = bsh,
-    caption = "Back",
-    func = function () backFromRRM() end
+    caption = "Confirm",
+    func = function () getRRMvalues() end
   },
   {
     name = "btn_rrm_cancel",
@@ -257,6 +229,13 @@ end
 function backFromCustom()
     mainLayer:show()
     customTextLayer:hide()
+end
+
+function getRRMvalues()
+    rrmTab = {}
+    rrmTab = GUI.Val("checkbox_rrm_set")
+    
+    setRegionRenderMatrix()
 end
 
 function backFromRRM()
@@ -441,28 +420,41 @@ function setRegionNumbering()
     reaper.Main_OnCommand(reaper.NamedCommandLookup(GetActionCommandIDByFilename(path_command, 0)), 0)
 end
 
-function setRegionRenderMatrix(rrm)
-    if rrm == 0 then -- Selected track
-        path_command = "Gaspard ReaScripts/Render region matrix/gaspard_Set selected tracks in region render matrix for selected media items regions.lua"
-    elseif rrm == 1 then -- Item track
-        path_command = "Gaspard ReaScripts/Render region matrix/gaspard_Set track of selected media items in region render matrix for respective regions.lua"
-    elseif rrm == 2 then -- Parent track
-        path_command = "Gaspard ReaScripts/Render region matrix/gaspard_Set parent track of selected media items in region render matrix for respective regions.lua"
-    elseif rrm == 3 then -- Top parent track
-        path_command = "Gaspard ReaScripts/Render region matrix/gaspard_Set top parent track in region render matrix for selected media items regions.lua"
-    end
+function setRegionRenderMatrix()
+    reaper.Undo_BeginBlock()
     
     -- Select all items from Table --
     for i = 1, #sel_item_Tab do
         reaper.SetMediaItemSelected(sel_item_Tab[i].item, true)
     end
     
-    reaper.Main_OnCommand(reaper.NamedCommandLookup(GetActionCommandIDByFilename(path_command, 0)), 0)
+    -- Set RRM command paths --
+    if rrmTab[1] then -- Selected track
+        path_selected_track = "Gaspard ReaScripts/Render region matrix/gaspard_Set selected tracks in region render matrix for selected media items regions.lua"
+        reaper.Main_OnCommand(reaper.NamedCommandLookup(GetActionCommandIDByFilename(path_selected_track, 0)), 0)
+    end
+    
+    if rrmTab[2] then -- Item track
+        path_item_track = "Gaspard ReaScripts/Render region matrix/gaspard_Set track of selected media items in region render matrix for respective regions.lua"
+        reaper.Main_OnCommand(reaper.NamedCommandLookup(GetActionCommandIDByFilename(path_item_track, 0)), 0)
+    end
+    
+    if rrmTab[3] then -- Parent track
+        path_parent_track = "Gaspard ReaScripts/Render region matrix/gaspard_Set parent track of selected media items in region render matrix for respective regions.lua"
+        reaper.Main_OnCommand(reaper.NamedCommandLookup(GetActionCommandIDByFilename(path_parent_track, 0)), 0)
+    end
+    
+    if rrmTab[4] then -- Top parent track
+        path_top_parent_track = "Gaspard ReaScripts/Render region matrix/gaspard_Set top parent track in region render matrix for selected media items regions.lua"
+        reaper.Main_OnCommand(reaper.NamedCommandLookup(GetActionCommandIDByFilename(path_top_parent_track, 0)), 0)
+    end
     
     -- Unselect all items --
     for i = 1, #sel_item_Tab do
         reaper.SetMediaItemSelected(sel_item_Tab[i].item, false)
     end
+    
+    reaper.Undo_EndBlock("Set tracks in render region matrix for regions of selected items", -1)
     
     window:close()
 end
