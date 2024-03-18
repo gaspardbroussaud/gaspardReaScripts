@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="5f1b165b921e20605c973ecc8352982db567c488">
+<index version="1" name="Gaspard ReaScripts" commit="d033bf59f8bf09bfd6c08fc42796a0418ffbd41a">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -512,6 +512,36 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       </metadata>
       <version name="1.0" author="gaspard" time="2024-02-08T14:20:15Z">
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/c9f4f9347e44d8a0cc1d02e1c5c561a378fa7457/Timeline/gaspard_ProTools%20marker%20go%20to.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Remove selected even items in timeline order on multiple tracks.lua" type="script" desc="Remove selected even items in timeline order on multiple tracks">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Remove selected even items in timeline order on multiple tracks.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-03-18T16:43:53Z">
+        <changelog><![CDATA[Initial release.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d033bf59f8bf09bfd6c08fc42796a0418ffbd41a/Timeline/gaspard_Remove%20selected%20even%20items%20in%20timeline%20order%20on%20multiple%20tracks.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Remove selected odd items in timeline order on multiple tracks.lua" type="script" desc="Remove selected odd items in timeline order on multiple tracks">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Remove selected odd items in timeline order on multiple tracks.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-03-18T16:43:53Z">
+        <changelog><![CDATA[Initial release.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d033bf59f8bf09bfd6c08fc42796a0418ffbd41a/Timeline/gaspard_Remove%20selected%20odd%20items%20in%20timeline%20order%20on%20multiple%20tracks.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Set selected items start with seconds between.lua" type="script" desc="Set selected items start with seconds between">
