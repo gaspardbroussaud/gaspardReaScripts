@@ -1,8 +1,8 @@
 --@description Create region for clusters of selected items (prompt)
 --@author gaspard
---@version 2.1.1
+--@version 2.2
 --@changelog
---  Fix eror in command lookup for name scripts.
+--  + New Region Render Matrix setting to set tracks for created regions to render.
 --@about
 --  Creates a region for each cluster of selected media items (overlapping or touching items in timeline). Prompts the renaming choices.
 
@@ -22,11 +22,17 @@ loadfile(libPath .. "scythe.lua")()
 
 -- VARIABLES --
 main_win_w = 250
-main_win_h = 360
+main_win_h = 380
 
 bsw = 140
 bpx = (main_win_w - bsw) / 2
 bsh = 30
+
+space = 40
+posY = 140
+
+-- Buttons in RRM Layer --
+rrmY = (main_win_h - 250) / 2
 
 -- MAIN WINDOW --
 local GUI = require("gui.core")
@@ -41,25 +47,27 @@ local window = GUI.createWindow({
 -- GUI ELEMENTS --
 local mainLayer = GUI.createLayer({name = "MainLayer"})
 local customTextLayer = GUI.createLayer({name = "CustomTextLayer"})
+local rrmLayer = GUI.createLayer({name = "RRMLayer"})
 
 -- Main Layer Elements --
 mainLayer:addElements( GUI.createElements(
   {
-    name = "checkbox_auto_number",
+    name = "checkbox_num_rrm",
     type = "Checklist",
-    x = (main_win_w - 110) /2,
-    y = 30,
+    x = (main_win_w - 110) /2 - 10,
+    y = 25,
     w = 110,
-    h = 30,
+    h = 60,
     caption = "",
-    options = {"Auto number"},
+    options = {"Auto number", "Set Region Matrix"},
+    pad = 7,
     frame = false
   },
   {
     name = "slider_interval",
     type = "Slider",
     x = (main_win_w - 110) /2,
-    y = 80,
+    y = posY - space,
     w = 110,
     h = 30,
     caption = "",
@@ -73,7 +81,7 @@ mainLayer:addElements( GUI.createElements(
     name = "btn_custom_text",
     type = "Button",
     x = bpx,
-    y = 120,
+    y = posY,
     w = bsw,
     h = bsh,
     caption = "Use custom text",
@@ -83,7 +91,7 @@ mainLayer:addElements( GUI.createElements(
     name = "btn_track_name",
     type = "Button",
     x = bpx,
-    y = 160,
+    y = posY + space,
     w = bsw,
     h = bsh,
     caption = "Use track's name",
@@ -93,7 +101,7 @@ mainLayer:addElements( GUI.createElements(
     name = "btn_parent_name",
     type = "Button",
     x = bpx,
-    y = 200,
+    y = posY + space * 2,
     w = bsw,
     h = bsh,
     caption = "Use parent's name",
@@ -103,7 +111,7 @@ mainLayer:addElements( GUI.createElements(
     name = "btn_top_parent_name",
     type = "Button",
     x = bpx,
-    y = 240,
+    y = posY + space * 3,
     w = bsw,
     h = bsh,
     caption = "Use top parent's name",
@@ -113,7 +121,7 @@ mainLayer:addElements( GUI.createElements(
     name = "btn_cancel_main",
     type = "Button",
     x = bpx,
-    y = 290,
+    y = posY + space * 4 + 10,
     w = bsw,
     h = bsh,
     caption = "Cancel",
@@ -150,7 +158,7 @@ customTextLayer:addElements( GUI.createElements(
     w = bsw,
     h = bsh,
     caption = "Back",
-    func = function () backToMain() end
+    func = function () backFromCustom() end
   },
   {
     name = "btn_customText_cancel",
@@ -164,11 +172,77 @@ customTextLayer:addElements( GUI.createElements(
   })
 )
 
+-- Region Render Matrix Layer Elements --
+rrmLayer:addElements( GUI.createElements(
+  {
+    name = "btn_sel_track_rrm",
+    type = "Button",
+    x = bpx,
+    y = rrmY,
+    w = bsw,
+    h = bsh,
+    caption = "Set to selected track",
+    func = function () setRegionRenderMatrix(0) end
+  },
+  {
+    name = "btn_item_track_rrm",
+    type = "Button",
+    x = bpx,
+    y = rrmY + 40,
+    w = bsw,
+    h = bsh,
+    caption = "Set to item track",
+    func = function () setRegionRenderMatrix(1) end
+  },
+  {
+    name = "btn_parent_track_rrm",
+    type = "Button",
+    x = bpx,
+    y = rrmY + 80,
+    w = bsw,
+    h = bsh,
+    caption = "Set to parent track",
+    func = function () setRegionRenderMatrix(2) end
+  },
+  {
+    name = "btn_top_parent_track_rrm",
+    type = "Button",
+    x = bpx,
+    y = rrmY + 120,
+    w = bsw,
+    h = bsh,
+    caption = "Set to top parent track",
+    func = function () setRegionRenderMatrix(3) end
+  },
+  {
+    name = "btn_rrm_back",
+    type = "Button",
+    x = bpx,
+    y = rrmY + 170,
+    w = bsw,
+    h = bsh,
+    caption = "Back",
+    func = function () backFromRRM() end
+  },
+  {
+    name = "btn_rrm_cancel",
+    type = "Button",
+    x = bpx,
+    y = rrmY + 220,
+    w = bsw,
+    h = bsh,
+    caption = "Cancel",
+    func = function () cancelButton() end
+  })
+)
+
 function mainWindow()
     -- Declare GUI --
     window:addLayers(mainLayer)
     window:addLayers(customTextLayer)
+    window:addLayers(rrmLayer)
     customTextLayer:hide()
+    rrmLayer:hide()
     window:open()
     -- Draw GUI --
     GUI.Main()
@@ -180,21 +254,29 @@ function customTextWindow()
     customTextLayer:show()
 end
 
-function backToMain()
+function backFromCustom()
     mainLayer:show()
     customTextLayer:hide()
+end
+
+function backFromRRM()
+    mainLayer:show()
+    rrmLayer:hide()
 end
 
 function cancelButton()
     window:close()
 end
 
--- Choice 0 = custom, 1 = parent track, 2 = top parent track --
+-- Choice: 0 = custom, 1 = track, 2 = parent track, 3 = top parent track --
 function getUserInputs(tempChoice)
     choice = tempChoice
     
     -- Get value for checkbox Auto Number --
-    autoNumber = GUI.Val("checkbox_auto_number")[1]
+    autoNumber = GUI.Val("checkbox_num_rrm")[1]
+    
+    -- Get Region Matrix Set --
+    setRRM = GUI.Val("checkbox_num_rrm")[2]
     
     -- Get value for slider --
     interVal = GUI.Val("slider_interval")
@@ -207,7 +289,14 @@ function getUserInputs(tempChoice)
     end
     
     createClusters()
-    window:close()
+    
+    if GUI.Val("checkbox_num_rrm")[2] == true then
+        mainLayer:hide()
+        customTextLayer:hide()
+        rrmLayer:show()
+    else
+        window:close()
+    end
 end
 
 --------------------------------------------------------------------------------------------------------------------
@@ -302,6 +391,7 @@ function createClusters()
     for i = 1, #sel_item_Tab do
         reaper.SetMediaItemSelected(sel_item_Tab[i].item, false)
     end
+    
     reaper.Undo_EndBlock("Create region for selected clusters of items", -1)
 end
 
@@ -340,16 +430,41 @@ function GetActionCommandIDByFilename(searchfilename, searchsection)
 end
 
 function setRegionParentName(stringScript)
-    if stringScript == "track" or stringScript == "parent track" or stringScript == "top parent track"then
+    if stringScript == "track" or stringScript == "parent track" or stringScript == "top parent track" then
         path_command = "Gaspard ReaScripts/Region/gaspard_Set all regions name to "..stringScript.." name.lua"
         reaper.Main_OnCommand(reaper.NamedCommandLookup(GetActionCommandIDByFilename(path_command, 0)), 0)
     end
 end
 
 function setRegionNumbering()
-    pathC_Number = "Gaspard ReaScripts/Region/gaspard_Set all regions numbering with name aware.lua"
-    ACID_Number = GetActionCommandIDByFilename(pathC_Number, 0)
-    reaper.Main_OnCommand(reaper.NamedCommandLookup(ACID_Number), 0)
+    path_command = "Gaspard ReaScripts/Region/gaspard_Set all regions numbering with name aware.lua"
+    reaper.Main_OnCommand(reaper.NamedCommandLookup(GetActionCommandIDByFilename(path_command, 0)), 0)
+end
+
+function setRegionRenderMatrix(rrm)
+    if rrm == 0 then -- Selected track
+        path_command = "Gaspard ReaScripts/Render region matrix/gaspard_Set selected tracks in region render matrix for selected media items regions.lua"
+    elseif rrm == 1 then -- Item track
+        path_command = "Gaspard ReaScripts/Render region matrix/gaspard_Set track of selected media items in region render matrix for respective regions.lua"
+    elseif rrm == 2 then -- Parent track
+        path_command = "Gaspard ReaScripts/Render region matrix/gaspard_Set parent track of selected media items in region render matrix for respective regions.lua"
+    elseif rrm == 3 then -- Top parent track
+        path_command = "Gaspard ReaScripts/Render region matrix/gaspard_Set top parent track in region render matrix for selected media items regions.lua"
+    end
+    
+    -- Select all items from Table --
+    for i = 1, #sel_item_Tab do
+        reaper.SetMediaItemSelected(sel_item_Tab[i].item, true)
+    end
+    
+    reaper.Main_OnCommand(reaper.NamedCommandLookup(GetActionCommandIDByFilename(path_command, 0)), 0)
+    
+    -- Unselect all items --
+    for i = 1, #sel_item_Tab do
+        reaper.SetMediaItemSelected(sel_item_Tab[i].item, false)
+    end
+    
+    window:close()
 end
 -------------------------------------------------------------------------------------------
 
