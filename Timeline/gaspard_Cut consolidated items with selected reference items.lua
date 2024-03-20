@@ -1,11 +1,8 @@
 --@description Cut consolidated items with selected reference items
 --@author gaspard
---@version 1.1
---@changelog
---      Now works with next to items and distant items (cuts only the start if next to and cuts start and end if far)
---@about
---      Cuts items with selected reference items.
---      For Post-production use.
+--@version 1.1.1
+--@changelog Fix no cutting at end of item if only one item is selected.
+--@about Cuts items with selected reference items. For Post-production use.
 
 -- CREATE TABLE OF SELECTED ITEMS --
 function createItemTab()
@@ -15,7 +12,7 @@ function createItemTab()
         itemTab[i] = reaper.GetSelectedMediaItem(0, i) -- Get all selected items to table
     end
     
-    for i in pairs(itemTab) do
+    for i = 0, #itemTab do
         reaper.SetMediaItemSelected(itemTab[i], false) -- Unselect all items in table
         reaper.UpdateArrange()
     end
@@ -38,7 +35,7 @@ function cutConsolidatedItem()
     
     setupVariables()
     
-    for i in ipairs(itemTab) do
+    for i = 0, #itemTab do
         cur_item_start = reaper.GetMediaItemInfo_Value(itemTab[i], "D_POSITION")
         cur_item_length = reaper.GetMediaItemInfo_Value(itemTab[i], "D_LENGTH")
         cur_item_end = cur_item_start + cur_item_length
