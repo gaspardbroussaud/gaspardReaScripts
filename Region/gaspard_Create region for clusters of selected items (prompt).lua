@@ -1,8 +1,8 @@
 --@description Create region for clusters of selected items (prompt)
 --@author gaspard
---@version 2.3
+--@version 2.4
 --@changelog
---  + Allow selection of multiple render region matrix settings.
+--  + Allow folder track sensitive detection for clusters
 --@about
 --  Creates a region for each cluster of selected media items (overlapping or touching items in timeline). Prompts the renaming choices.
 
@@ -22,14 +22,14 @@ loadfile(libPath .. "scythe.lua")()
 
 -- VARIABLES --
 main_win_w = 250
-main_win_h = 380
+main_win_h = 440
 
 bsw = 140
 bpx = (main_win_w - bsw) / 2
 bsh = 30
 
 space = 40
-posY = 140
+posY = 160
 
 -- Buttons in RRM Layer --
 rrmY = (main_win_h - 250) / 2
@@ -57,9 +57,9 @@ mainLayer:addElements( GUI.createElements(
     x = (main_win_w - 110) /2 - 10,
     y = 25,
     w = 110,
-    h = 60,
+    h = 80,
     caption = "",
-    options = {"Auto number", "Set Region Matrix"},
+    options = {"Auto number", "Set Region Matrix", "Folder sensitive"},
     pad = 7,
     frame = false
   },
@@ -88,40 +88,50 @@ mainLayer:addElements( GUI.createElements(
     func = function () customTextWindow() end
   },
   {
-    name = "btn_track_name",
+    name = "btn_selected_track",
     type = "Button",
     x = bpx,
     y = posY + space,
     w = bsw,
     h = bsh,
-    caption = "Use track's name",
+    caption = "Use selected track",
     func = function () getUserInputs(1) end
   },
   {
-    name = "btn_parent_name",
+    name = "btn_item_track",
     type = "Button",
     x = bpx,
     y = posY + space * 2,
     w = bsw,
     h = bsh,
-    caption = "Use parent's name",
+    caption = "Use items track",
     func = function () getUserInputs(2) end
   },
   {
-    name = "btn_top_parent_name",
+    name = "btn_parent_track",
     type = "Button",
     x = bpx,
     y = posY + space * 3,
     w = bsw,
     h = bsh,
-    caption = "Use top parent's name",
+    caption = "Use parent track",
     func = function () getUserInputs(3) end
+  },
+  {
+    name = "btn_top_parent_track",
+    type = "Button",
+    x = bpx,
+    y = posY + space * 4,
+    w = bsw,
+    h = bsh,
+    caption = "Use top parent track",
+    func = function () getUserInputs(4) end
   },
   {
     name = "btn_cancel_main",
     type = "Button",
     x = bpx,
-    y = posY + space * 4 + 10,
+    y = posY + space * 5 + 10,
     w = bsw,
     h = bsh,
     caption = "Cancel",
@@ -232,9 +242,7 @@ function backFromCustom()
 end
 
 function getRRMvalues()
-    rrmTab = {}
     rrmTab = GUI.Val("checkbox_rrm_set")
-    
     setRegionRenderMatrix()
 end
 
@@ -247,7 +255,7 @@ function cancelButton()
     window:close()
 end
 
--- Choice: 0 = custom, 1 = track, 2 = parent track, 3 = top parent track --
+-- GET INPUTS FROM GUI WINDOW --
 function getUserInputs(tempChoice)
     choice = tempChoice
     
@@ -256,6 +264,9 @@ function getUserInputs(tempChoice)
     
     -- Get Region Matrix Set --
     setRRM = GUI.Val("checkbox_num_rrm")[2]
+    
+    -- Get Folder Sensitive Setting --
+    folderEnabled = GUI.Val("checkbox_num_rrm")[3]
     
     -- Get value for slider --
     interVal = GUI.Val("slider_interval")
@@ -306,43 +317,76 @@ function setupVariables()
     sort_on_values(sel_item_Tab, "item_start")
 end
 
--- ITEM CHECK POSITIONS FOR CLUSTERS --
-function checkItemsPositions()
-    prev_start = sel_item_Tab[1].item_start
-    prev_end = sel_item_Tab[1].item_start + reaper.GetMediaItemInfo_Value(sel_item_Tab[1].item, "D_LENGTH")
-    first_start = prev_start
-    first_end = prev_end
+-- SORT ITEMS IN FOLDER TABLES --
+function sortItemsByFolders()
+    folderTab = {}
     
     for i = 1, #sel_item_Tab do
-    
-        local cur_item = sel_item_Tab[i].item
-        local cur_start = reaper.GetMediaItemInfo_Value(cur_item, "D_POSITION")
-        local cur_end = cur_start + reaper.GetMediaItemInfo_Value(cur_item, "D_LENGTH")
+        local itemTrack =  reaper.GetMediaItemTrack(sel_item_Tab[i].item)
+        local parentTrack = reaper.GetParentTrack(itemTrack)
         
-        if prev_end + interVal < cur_start then
-            
-            reaper.AddProjectMarker(0, true, first_start, prev_end, rgnName, -1)
-            
-            first_start = cur_start
+        -- Create parentTrack Tab for each parent track in folderTab --
+        if parentTrack ~= nil and folderTab[parentTrack] == nil then
+            folderTab[parentTrack] = {}
+            table.insert(folderTab[parentTrack], sel_item_Tab[i].item)
+        elseif parentTrack ~= nil and folderTab[parentTrack] ~= nil then
+            table.insert(folderTab[parentTrack], sel_item_Tab[i].item)
         end
+    end
+end
+
+-- CLUSTER DETECTION --
+function clusterDetection(idx, tab, item)
+    local cur_start = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+    local cur_end = cur_start + reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
         
-        if i == #sel_item_Tab then
-        
-            if prev_end > cur_end then
-                last_end = prev_end
-            else
-                last_end = cur_end
-            end
+    if prev_end + interVal < cur_start then
             
-            reaper.AddProjectMarker(0, true, first_start, last_end, rgnName, -1)
-        end
+        reaper.AddProjectMarker(0, true, first_start, prev_end, rgnName, -1)
+            
+        first_start = cur_start
+    end
+        
+    if idx == #tab then
         
         if prev_end > cur_end then
-            --nothing
+            last_end = prev_end
         else
-            prev_start = cur_start
-            prev_end = cur_end
+            last_end = cur_end
         end
+            
+        reaper.AddProjectMarker(0, true, first_start, last_end, rgnName, -1)
+    end
+        
+    if prev_end > cur_end then
+        --nothing
+    else
+        prev_start = cur_start
+        prev_end = cur_end
+    end
+end
+
+-- ITEM CHECK POSITIONS FOR CLUSTERS Folder Sensitive --
+function checkItemsPositionsFolder()
+    for i in pairs(folderTab) do
+
+        first_start = reaper.GetMediaItemInfo_Value(folderTab[i][1], "D_POSITION")
+        prev_end = first_start + reaper.GetMediaItemInfo_Value(folderTab[i][1], "D_LENGTH")
+        
+        for j in ipairs(folderTab[i]) do
+            clusterDetection(j, folderTab[i], folderTab[i][j])
+        end
+    end
+end
+
+-- ITEM CHECK POSITIONS FOR CLUSTERS Timeline --
+function checkItemsPositionsTimeline()
+
+    first_start = sel_item_Tab[1].item_start
+    prev_end = sel_item_Tab[1].item_start + reaper.GetMediaItemInfo_Value(sel_item_Tab[1].item, "D_LENGTH")
+    
+    for i = 1, #sel_item_Tab do
+        clusterDetection(i, sel_item_Tab, sel_item_Tab[i].item)
     end
 end
 
@@ -350,15 +394,22 @@ end
 function createClusters()
     reaper.Undo_BeginBlock()
     setupVariables()
-    checkItemsPositions()
+    if folderEnabled then
+        sortItemsByFolders()
+        checkItemsPositionsFolder()
+    else
+        checkItemsPositionsTimeline()
+    end
     
     -- Apply region name with choice in input --
     if choice ~= 0 then
         if choice == 1 then
-            setRegionParentName("track")
+            setRegionParentName("selected track")
         elseif choice == 2 then
-            setRegionParentName("parent track")
+            setRegionParentName("track")
         elseif choice == 3 then
+            setRegionParentName("parent track")
+        elseif choice == 4 then
             setRegionParentName("top parent track")
         end
     end
@@ -372,6 +423,10 @@ function createClusters()
     end
     
     reaper.Undo_EndBlock("Create region for selected clusters of items", -1)
+end
+
+function cleanUp()
+    --remove all created regions if rename not successfull (WIP)
 end
 
 -------------------------------------------------------------------------------------------
@@ -405,11 +460,12 @@ function GetActionCommandIDByFilename(searchfilename, searchsection)
     end
   end
   reaper.MB("Script: "..searchfilename.."\nPlease install via ReaPack.", "Error script not found", 0)
+  cleanUp()
   return ""
 end
 
 function setRegionParentName(stringScript)
-    if stringScript == "track" or stringScript == "parent track" or stringScript == "top parent track" then
+    if stringScript == "selected track" or stringScript == "track" or stringScript == "parent track" or stringScript == "top parent track" then
         path_command = "Gaspard ReaScripts/Region/gaspard_Set all regions name to "..stringScript.." name.lua"
         reaper.Main_OnCommand(reaper.NamedCommandLookup(GetActionCommandIDByFilename(path_command, 0)), 0)
     end
