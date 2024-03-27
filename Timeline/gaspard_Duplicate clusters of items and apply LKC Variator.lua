@@ -1,7 +1,7 @@
 --@description Duplicate clusters of items and apply LKC Variator
 --@author gaspard
---@version 1.0
---@changelog Initial release.
+--@version 1.1
+--@changelog + Added a remaining clusters to process window for Variator.
 --@about Prompt to duplicate clusters of selected items N times with X seconds between copies and apply an LKC Variator preset.
 
 -- GET INPUTS FROM WINDOW PROMPT --
@@ -89,6 +89,12 @@ function duplicateItems()
     end
 end
 
+-- WAITING WINDOW --
+function Show_Tooltip(text)
+    local x, y = 500, 250
+    reaper.TrackCtl_SetToolTip(text:gsub('.','%0 '), x, y, true) -- spaced out // topmost true
+end
+
 -- APPLY VARIATOR --
 function applyVariator()
     reaper.GetSet_LoopTimeRange(true, true, clusterPosTab[loopNB].startPos, clusterPosTab[loopNB].endPos, false)
@@ -120,7 +126,10 @@ function runloop()
     
     if loopNB == #clusterPosTab + 1 then
         clean()
+        Show_Tooltip("")
         return
+    else
+        Show_Tooltip("\nRemaining clusters to process: "..tostring(#clusterPosTab - loopNB + 1).."\n")
     end
   end
   reaper.defer(runloop)
@@ -164,4 +173,3 @@ end
 reaper.Undo_EndBlock("Duplicate clusters of items and apply LKC Variator", -1)
 reaper.UpdateArrange()
 reaper.PreventUIRefresh(-1)
-
