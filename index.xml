@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="1bc527384d60ad29178507101bdb76c8ce438a4e">
+<index version="1" name="Gaspard ReaScripts" commit="c87fb9a7dc4b739611c38bebd948d0481b0e468f">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -461,44 +461,19 @@ v1.0 Initial release.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/c4d2d82c21d29905ae2b16c122462413cf93dcb0/Timeline/gaspard_Cut%20consolidated%20items%20with%20selected%20reference%20items.lua</source>
       </version>
     </reapack>
-    <reapack name="gaspard_Duplicate cluster of items and apply LKC Variator preset to each copy.lua" type="script" desc="Duplicate items N times with X seconds between and apply LKC Variator preset">
+    <reapack name="gaspard_Duplicate clusters of items and apply LKC Variator.lua" type="script" desc="Duplicate clusters of items and apply LKC Variator">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 Duplicates selection of items N times with X seconds between copies and applies selected LKC Variator preset.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Prompt to duplicate clusters of selected items N times with X seconds between copies and apply an LKC Variator preset.\par}
 }
 ]]></description>
       </metadata>
-      <version name="1.0" author="gaspard" time="2024-02-15T17:06:04Z">
-        <changelog><![CDATA[Initial release. (WIP for better Undo and speed)]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0592a9c2788cb6a693efb48a539c91dc3915d763/Timeline/gaspard_Duplicate%20cluster%20of%20items%20and%20apply%20LKC%20Variator%20preset%20to%20each%20copy.lua</source>
-      </version>
-      <version name="1.1" author="gaspard" time="2024-02-19T11:29:53Z">
-        <changelog><![CDATA[Fix bug if items not at position 0 on timeline.]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7f501fa37ca66e395cef4a573f80549525a86ec3/Timeline/gaspard_Duplicate%20cluster%20of%20items%20and%20apply%20LKC%20Variator%20preset%20to%20each%20copy.lua</source>
-      </version>
-      <version name="1.2" author="gaspard" time="2024-02-19T11:41:07Z">
-        <changelog><![CDATA[Added Variator formula check.]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b229eaaec28a4b4786a672c7448502d9f8dbcb23/Timeline/gaspard_Duplicate%20cluster%20of%20items%20and%20apply%20LKC%20Variator%20preset%20to%20each%20copy.lua</source>
-      </version>
-      <version name="1.3" author="gaspard" time="2024-02-28T10:10:52Z">
-        <changelog><![CDATA[Fix errors when using whole number for inputs.
-Added usage of decimal numbers for seconds between copies.]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/13a6fdbd512c5501475e123d2883704801f31ee4/Timeline/gaspard_Duplicate%20cluster%20of%20items%20and%20apply%20LKC%20Variator%20preset%20to%20each%20copy.lua</source>
-      </version>
-      <version name="1.4" author="gaspard" time="2024-02-29T15:16:55Z">
-        <changelog><![CDATA[Fix potential error of Variator command ID lookup.]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/2190141b89298b8cdf765bbd9d19cb4329f1c735/Timeline/gaspard_Duplicate%20cluster%20of%20items%20and%20apply%20LKC%20Variator%20preset%20to%20each%20copy.lua</source>
-      </version>
-      <version name="1.4.1" author="gaspard" time="2024-02-29T15:57:34Z">
-        <changelog><![CDATA[Fix typo in script.]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/f305470aa181f492b5b3f96f7c1088346c9361db/Timeline/gaspard_Duplicate%20cluster%20of%20items%20and%20apply%20LKC%20Variator%20preset%20to%20each%20copy.lua</source>
-      </version>
-      <version name="1.5" author="gaspard" time="2024-03-08T14:07:12Z">
-        <changelog><![CDATA[Fix the script to work only on selected items.]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/cd0a7aae8a5bcc36d7325ca8501c12a040e84920/Timeline/gaspard_Duplicate%20cluster%20of%20items%20and%20apply%20LKC%20Variator%20preset%20to%20each%20copy.lua</source>
+      <version name="1.0" author="gaspard" time="2024-03-27T11:24:22Z">
+        <changelog><![CDATA[Initial release.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/c87fb9a7dc4b739611c38bebd948d0481b0e468f/Timeline/gaspard_Duplicate%20clusters%20of%20items%20and%20apply%20LKC%20Variator.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Duplicate items N time with seconds between one at a time.lua" type="script" desc="Duplicate items N times with seconds between one at a time">
