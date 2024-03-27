@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="c87fb9a7dc4b739611c38bebd948d0481b0e468f">
+<index version="1" name="Gaspard ReaScripts" commit="af557a6f8e903a854d9ac29009bf367ef18bcc9d">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -474,6 +474,10 @@ v1.0 Initial release.]]></changelog>
       <version name="1.0" author="gaspard" time="2024-03-27T11:24:22Z">
         <changelog><![CDATA[Initial release.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/c87fb9a7dc4b739611c38bebd948d0481b0e468f/Timeline/gaspard_Duplicate%20clusters%20of%20items%20and%20apply%20LKC%20Variator.lua</source>
+      </version>
+      <version name="1.1" author="gaspard" time="2024-03-27T12:09:40Z">
+        <changelog><![CDATA[+ Added a remaining clusters to process window for Variator.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/af557a6f8e903a854d9ac29009bf367ef18bcc9d/Timeline/gaspard_Duplicate%20clusters%20of%20items%20and%20apply%20LKC%20Variator.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Duplicate items N time with seconds between one at a time.lua" type="script" desc="Duplicate items N times with seconds between one at a time">
