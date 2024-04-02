@@ -1,12 +1,17 @@
 --@description Delete items under Xms and rename with text list
 --@author VincentDcs, gaspard
---@version 1.0
---@changelog Initial release.
+--@version 1.1
+--@changelog
+-- *Changes for 1.1 by gaspard
+-- +Added user value to custom at script top.
+-- ~Changed error message to not display items deletion if there are no items in project.
 --@about Delete items under 100ms in project (default, see script to change value in USER VALUES) and rename visible items with text list input.
 
 -- BEGIN USER VALUES ----------------------------------------------------
 -- Will delete only items under 100ms. --
 deleteLength = 0.1 -- Change this value with: number_in_ms/1000 -> 100ms/1000 = 0.1
+-- Set if it renames items or regions --
+viaRgn = false -- FALSE: rename items, TRUE: rename region (and create them)
 -- END USER VALUES ------------------------------------------------------
 
 -- BEGIN GUI ELEMENTS ---------------------------------------------------
@@ -34,7 +39,6 @@ function guiDraw()
         rv, textInputs = reaper.ImGui_InputTextMultiline(ctx, " ", textInputs, textWinWidth, textWinHeight, ImGui.InputTextFlags_CharsNoBlank(), nil)
       
         if reaper.ImGui_Button(ctx, "Confirm") then
-            viaRgn = false
             if textInputs ~= "\n" and textInputs ~= "" then
                 main()
             end
@@ -72,8 +76,6 @@ function removeItems()
     end
     
     for i = 1, #itemTab do
-        --reaper.SetMediaItemSelected(itemTab[i], true)
-        
         if reaper.GetMediaItemInfo_Value(itemTab[i], "D_LENGTH") < deleteLength then
             reaper.DeleteTrackMediaItem(reaper.GetMediaItemTrack(itemTab[i]), itemTab[i])
         end
@@ -129,7 +131,7 @@ function validityCheck()
     if #textTab == #itemTab then
         applyName()
     else
-        OK = reaper.MB("There are "..tostring(#textTab).." text inputs and "..tostring(#itemTab).." items in project.\nIf this is not an error, select OK, else select CANCEL.\nItems under "..tostring(math.ceil(deleteLength*1000)).."ms have been deleted.", "Warning", 1)
+        OK = reaper.MB("There are "..tostring(#textTab).." text inputs and "..tostring(#itemTab).." items in project.\nIf this is not an error, select OK, else select CANCEL."..itemTextMB, "Warning", 1)
         if OK == 1 then
             applyName()
         else
@@ -148,13 +150,19 @@ end
 reaper.PreventUIRefresh(1)
 reaper.Undo_BeginBlock()
 
+if reaper.CountMediaItems(0) ~= 0 then
+    itemTextMB = "\nItems under "..tostring(math.ceil(deleteLength*1000)).."ms have been deleted."
+else
+    itemTextMB = ""
+end
+
 removeItems()
 getVisibleItems()
 
 if #itemTab ~= 0 then
     guiDraw()
 else
-    reaper.MB("There are no visible items in current project.\nItems under "..tostring(math.ceil(deleteLength*1000)).."ms have been deleted.", "Error", 0)
+    reaper.MB("There are no visible items in current project."..itemTextMB, "Error", 0)
 end
 
 reaper.Undo_EndBlock("Delete items under Xms and rename with text list", -1)
