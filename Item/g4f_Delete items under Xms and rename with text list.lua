@@ -1,10 +1,9 @@
 --@description Delete items under Xms and rename with text list
---@author VincentDcs, gaspard
---@version 1.1
+--@author gaspard, VincentDcs
+--@version 1.2
 --@changelog
--- *Changes for 1.1 by gaspard
--- +Added user value to custom at script top.
--- ~Changed error message to not display items deletion if there are no items in project.
+-- *Changes for 1.2 by gaspard
+-- +Added checkbox to chose item or region based renaming.
 --@about Delete items under 100ms in project (default, see script to change value in USER VALUES) and rename visible items with text list input.
 
 -- BEGIN USER VALUES ----------------------------------------------------
@@ -33,16 +32,21 @@ function guiDraw()
     textWinWidth, textWinHeight = wWidth - 100, wHeight - 100
     
     local function myWindow()
-        local rv
+        -- Text multiline input --
         cur_wWidth, cur_wHeight = reaper.ImGui_GetWindowSize(ctx)
         textWinWidth, textWinHeight = cur_wWidth - 15, cur_wHeight - 40
-        rv, textInputs = reaper.ImGui_InputTextMultiline(ctx, " ", textInputs, textWinWidth, textWinHeight, ImGui.InputTextFlags_CharsNoBlank(), nil)
-      
+        rv_text, textInputs = reaper.ImGui_InputTextMultiline(ctx, " ", textInputs, textWinWidth, textWinHeight, ImGui.InputTextFlags_CharsNoBlank(), nil)
+        
+        -- Button Confirm --
         if reaper.ImGui_Button(ctx, "Confirm") then
             if textInputs ~= "\n" and textInputs ~= "" then
                 main()
             end
         end
+        
+        -- Checkbox for region or item choice --
+        ImGui.SameLine(ctx)
+        rv_check, viaRgn = reaper.ImGui_Checkbox(ctx, "Create regions with name for each item.", viaRgn)
     end
     
     local function loop()
@@ -64,6 +68,18 @@ function guiDraw()
     end
     
     reaper.defer(loop)
+end
+
+-- Helper to display a little (?) mark which shows a tooltip when hovered.
+-- In your own code you may want to display an actual icon if you are using a merged icon fonts (see docs/FONTS.md)
+function HelpMarker(desc)
+  ImGui.TextDisabled(ctx, '(?)')
+  if ImGui.IsItemHovered(ctx, ImGui.HoveredFlags_DelayShort()) and ImGui.BeginTooltip(ctx) then
+    ImGui.PushTextWrapPos(ctx, ImGui.GetFontSize(ctx) * 35.0)
+    ImGui.Text(ctx, desc)
+    ImGui.PopTextWrapPos(ctx)
+    ImGui.EndTooltip(ctx)
+  end
 end
 -- END GUI ELEMENTS -----------------------------------------------------
 
@@ -114,10 +130,16 @@ function applyName()
             local item = itemTab[i]
             local take = reaper.GetActiveTake(item)
             
+            local itemStart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+            local itemEnd = itemStart + reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
+            
+            local _, regionidx = reaper.GetLastMarkerAndCurRegion(0, itemStart)
+            if regionidx ~= nil then
+                local _, isrgn, pos, rgnend, name, rgnindex = reaper.EnumProjectMarkers2(0, regionidx)
+                reaper.DeleteProjectMarker(0, rgnindex, true)
+            end
+            
             if viaRgn then
-                local itemStart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-                local itemEnd = itemStart + reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
-                
                 reaper.AddProjectMarker(0, true, itemStart, itemEnd, textTab[i], -1)
             else
                 reaper.GetSetMediaItemTakeInfo_String(take, "P_NAME", textTab[i], true)
