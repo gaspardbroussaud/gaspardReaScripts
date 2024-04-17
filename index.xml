@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="6735bd0d75a5865cb983aa3c160ebea0ca2330af">
+<index version="1" name="Gaspard ReaScripts" commit="aaf7193441d6ecad5704b59f6861e7e087f2e131">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -44,6 +44,21 @@
       <version name="1.0" author="gaspard" time="2024-02-28T10:38:59Z">
         <changelog><![CDATA[Initial release]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/9125bd45e395466b0c0dc7833d4657dd13bba16e/Debug/gaspard_Display%20selected%20items%20count%20under%20mouse.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_GUI builder.lua" type="script" desc="GUI builder">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 WIP GUI construction for another script\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-04-17T16:07:17Z">
+        <changelog><![CDATA[WIP]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/aaf7193441d6ecad5704b59f6861e7e087f2e131/Debug/gaspard_GUI%20builder.lua</source>
       </version>
     </reapack>
   </category>
