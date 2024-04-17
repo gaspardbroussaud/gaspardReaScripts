@@ -1,3 +1,9 @@
+--@description GUI builder
+--@author gaspard
+--@version 1.0
+--@changelog WIP
+--@about WIP GUI construction for another script
+
 function GuiInit()
     ctx = reaper.ImGui_CreateContext('Region Tool')
     FONT = reaper.ImGui_CreateFont('sans-serif', 15)
