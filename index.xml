@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="aaf7193441d6ecad5704b59f6861e7e087f2e131">
+<index version="1" name="Gaspard ReaScripts" commit="489a04e723add1cc7f73a4f79b2354c5d9ad446e">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -59,6 +59,10 @@
       <version name="1.0" author="gaspard" time="2024-04-17T16:07:17Z">
         <changelog><![CDATA[WIP]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/aaf7193441d6ecad5704b59f6861e7e087f2e131/Debug/gaspard_GUI%20builder.lua</source>
+      </version>
+      <version name="1.0.1" author="gaspard" time="2024-04-18T08:39:06Z">
+        <changelog><![CDATA[WIP and fix destroy context error]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/489a04e723add1cc7f73a4f79b2354c5d9ad446e/Debug/gaspard_GUI%20builder.lua</source>
       </version>
     </reapack>
   </category>
