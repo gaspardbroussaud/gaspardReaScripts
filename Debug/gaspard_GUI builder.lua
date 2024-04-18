@@ -1,7 +1,7 @@
 --@description GUI builder
 --@author gaspard
---@version 1.0
---@changelog WIP
+--@version 1.0.1
+--@changelog WIP and fix destroy context error
 --@about WIP GUI construction for another script
 
 function GuiInit()
@@ -107,8 +107,6 @@ function GuiLoop()
     
     if open and not isClosed then
         reaper.defer(GuiLoop)
-    else
-        reaper.ImGui_DestroyContext(ctx)
     end
 end
 
@@ -118,9 +116,49 @@ function main()
 end
 
 function ConfirmButton()
-    reaper.ShowConsoleMsg("Name choice: "..tostring(r_name))
-    reaper.ShowConsoleMsg("\nRRM: "..tostring(cb_rrm_st).." | "..tostring(cb_rrm_it).." | "..tostring(cb_rrm_pt).." | "..tostring(cb_rrm_tpt))
-    reaper.ShowConsoleMsg("\nSlider: "..tostring(interCluster))
+    reaper.ClearConsole()
+    
+    if cb_an then
+        reaper.ShowConsoleMsg('Auto number: engaged\n')
+    end
+    
+    if cb_fs then
+        reaper.ShowConsoleMsg('\nFolder sensitive: engaged\n')
+    end
+    
+    reaper.ShowConsoleMsg("\nSlider value: "..tostring(interCluster)..'\n')
+    
+    if r_name == 0 then
+        if text_custom == '' then
+            text_custom = '""'
+        end
+        nameChoice = 'Custom name\nName: "'..text_custom..'"'
+    elseif r_name == 1 then
+        nameChoice = 'Selected track name'
+    elseif r_name == 2 then
+        nameChoice = 'Item track name'
+    elseif r_name == 3 then
+        nameChoice = 'Parent track name'
+    elseif r_name == 4 then
+        nameChoice = 'Top parent track name'
+    end
+    reaper.ShowConsoleMsg('\nName choice: '..nameChoice..'\n')
+    
+    if cb_rrm_st or cb_rrm_it or cb_rrm_pt or cb_rrm_tpt then
+        reaper.ShowConsoleMsg("\nRRM choice: ")
+    end
+    if cb_rrm_st then
+        reaper.ShowConsoleMsg('\nSelected track')
+    end
+    if cb_rrm_it then
+        reaper.ShowConsoleMsg('\nItem track')
+    end
+    if cb_rrm_pt then
+        reaper.ShowConsoleMsg('\nParent track')
+    end
+    if cb_rrm_tpt then
+        reaper.ShowConsoleMsg('\nTop parent track')
+    end
 end
 
 -- MAIN CRIPT EXECUTION --
