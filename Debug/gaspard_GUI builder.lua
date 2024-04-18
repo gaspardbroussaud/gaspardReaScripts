@@ -1,7 +1,7 @@
 --@description GUI builder
 --@author gaspard
---@version 1.0.1
---@changelog WIP and fix destroy context error
+--@version 1.0.2
+--@changelog WIP changes in positions
 --@about WIP GUI construction for another script
 
 function GuiInit()
@@ -38,7 +38,10 @@ function GuiElements()
         rv_fs, cb_fs = reaper.ImGui_Checkbox(ctx, 'Folder Sensitive', cb_fs); reaper.ImGui_SameLine(ctx)
         helperTooltip('Cluster detection will take into acount the folder hierarchy')
         
-        reaper.ImGui_Text(ctx, 'Slider for cluster intern space')
+        --reaper.ImGui_Spacing(ctx)
+        reaper.ImGui_Dummy(ctx, 10, 6)
+        reaper.ImGui_Text(ctx, 'Cluster intern space'); reaper.ImGui_SameLine(ctx)
+        helperTooltip('Space between items in cluster for its detection (in seconds)')
         rv_slider, interCluster = reaper.ImGui_SliderDouble(ctx, '##sliderInterCluster', interCluster, 0, 10)
         
         -- Second column --
@@ -119,20 +122,17 @@ function ConfirmButton()
     reaper.ClearConsole()
     
     if cb_an then
-        reaper.ShowConsoleMsg('Auto number: engaged\n')
+        reaper.ShowConsoleMsg('AUTO NUMBER: engaged\n')
     end
     
     if cb_fs then
-        reaper.ShowConsoleMsg('\nFolder sensitive: engaged\n')
+        reaper.ShowConsoleMsg('\nFOLDER SENSITIVE: engaged\n')
     end
     
-    reaper.ShowConsoleMsg("\nSlider value: "..tostring(interCluster)..'\n')
+    reaper.ShowConsoleMsg("\nSLIDER VALUE: "..tostring(interCluster)..'\n')
     
     if r_name == 0 then
-        if text_custom == '' then
-            text_custom = '""'
-        end
-        nameChoice = 'Custom name\nName: "'..text_custom..'"'
+        nameChoice = 'Custom name\nText: "'..text_custom..'"'
     elseif r_name == 1 then
         nameChoice = 'Selected track name'
     elseif r_name == 2 then
@@ -142,10 +142,10 @@ function ConfirmButton()
     elseif r_name == 4 then
         nameChoice = 'Top parent track name'
     end
-    reaper.ShowConsoleMsg('\nName choice: '..nameChoice..'\n')
+    reaper.ShowConsoleMsg('\nNAME CHOICE: '..nameChoice..'\n')
     
     if cb_rrm_st or cb_rrm_it or cb_rrm_pt or cb_rrm_tpt then
-        reaper.ShowConsoleMsg("\nRRM choice: ")
+        reaper.ShowConsoleMsg("\nRRM CHOICE: ")
     end
     if cb_rrm_st then
         reaper.ShowConsoleMsg('\nSelected track')
