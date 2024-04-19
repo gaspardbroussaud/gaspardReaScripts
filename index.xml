@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="99b0fc71adcb63aa54aa0c179ca7b6f5b14afe10">
+<index version="1" name="Gaspard ReaScripts" commit="3fc17c8d8189ce3f3d470afa93064b68f03962d4">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -179,6 +179,10 @@ Added track name button to chose region name.]]></changelog>
       <version name="2.4" author="gaspard" time="2024-03-26T17:03:44Z">
         <changelog><![CDATA[+ Allow folder track sensitive detection for clusters]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1bc527384d60ad29178507101bdb76c8ce438a4e/Region/gaspard_Create%20region%20for%20clusters%20of%20selected%20items%20(prompt).lua</source>
+      </version>
+      <version name="2.5" author="gaspard" time="2024-04-19T13:24:56Z">
+        <changelog><![CDATA[~ Complete GUI rework: now using ImGui]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/3fc17c8d8189ce3f3d470afa93064b68f03962d4/Region/gaspard_Create%20region%20for%20clusters%20of%20selected%20items%20(prompt).lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Create region for clusters of selected media items (only item overlap).lua" type="script" desc="Create region for clusters of selected media items (only item overlap)">
