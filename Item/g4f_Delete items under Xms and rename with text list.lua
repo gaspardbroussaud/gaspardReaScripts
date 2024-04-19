@@ -1,9 +1,8 @@
 --@description Delete items under Xms and rename with text list
 --@author gaspard, VincentDcs
---@version 1.2
+--@version 1.2.1
 --@changelog
--- *Changes for 1.2 by gaspard
--- +Added checkbox to chose item or region based renaming.
+-- - Remove DestroyContext error on window close
 --@about Delete items under 100ms in project (default, see script to change value in USER VALUES) and rename visible items with text list input.
 
 -- BEGIN USER VALUES ----------------------------------------------------
@@ -15,16 +14,10 @@ viaRgn = false -- FALSE: rename items, TRUE: rename region (and create them)
 
 -- BEGIN GUI ELEMENTS ---------------------------------------------------
 function guiDraw()
-    local ImGui = {}
-    for name, func in pairs(reaper) do
-      name = name:match('^ImGui_(.+)$')
-      if name then ImGui[name] = func end
-    end
-    
     local ctx = reaper.ImGui_CreateContext("ContextWindow")
     local sans_serif = reaper.ImGui_CreateFont("sans-serif", 13)
     reaper.ImGui_Attach(ctx, sans_serif)
-    ImGui.SetConfigVar(ctx, reaper.ImGui_ConfigVar_ViewportsNoDecoration(), 0)
+    reaper.ImGui_SetConfigVar(ctx, reaper.ImGui_ConfigVar_ViewportsNoDecoration(), 0)
     wWidth, wHeight = 500, 800
     
     click_count, textInputs = 0, ""
@@ -35,17 +28,18 @@ function guiDraw()
         -- Text multiline input --
         cur_wWidth, cur_wHeight = reaper.ImGui_GetWindowSize(ctx)
         textWinWidth, textWinHeight = cur_wWidth - 15, cur_wHeight - 40
-        rv_text, textInputs = reaper.ImGui_InputTextMultiline(ctx, " ", textInputs, textWinWidth, textWinHeight, ImGui.InputTextFlags_CharsNoBlank(), nil)
+        rv_text, textInputs = reaper.ImGui_InputTextMultiline(ctx, " ", textInputs, textWinWidth, textWinHeight, reaper.ImGui_InputTextFlags_CharsNoBlank(), nil)
         
         -- Button Confirm --
         if reaper.ImGui_Button(ctx, "Confirm") then
             if textInputs ~= "\n" and textInputs ~= "" then
                 main()
+                open = false
             end
         end
         
         -- Checkbox for region or item choice --
-        ImGui.SameLine(ctx)
+        reaper.ImGui_SameLine(ctx)
         rv_check, viaRgn = reaper.ImGui_Checkbox(ctx, "Create regions with name for each item.", viaRgn)
     end
     
@@ -73,12 +67,12 @@ end
 -- Helper to display a little (?) mark which shows a tooltip when hovered.
 -- In your own code you may want to display an actual icon if you are using a merged icon fonts (see docs/FONTS.md)
 function HelpMarker(desc)
-  ImGui.TextDisabled(ctx, '(?)')
-  if ImGui.IsItemHovered(ctx, ImGui.HoveredFlags_DelayShort()) and ImGui.BeginTooltip(ctx) then
-    ImGui.PushTextWrapPos(ctx, ImGui.GetFontSize(ctx) * 35.0)
-    ImGui.Text(ctx, desc)
-    ImGui.PopTextWrapPos(ctx)
-    ImGui.EndTooltip(ctx)
+  reaper.ImGui_TextDisabled(ctx, '(?)')
+  if reaper.ImGui_IsItemHovered(ctx, reaper.ImGui_HoveredFlags_DelayShort()) and reaper.ImGui_BeginTooltip(ctx) then
+    reaper.ImGui_PushTextWrapPos(ctx, reaper.ImGui_GetFontSize(ctx) * 35.0)
+    reaper.ImGui_Text(ctx, desc)
+    reaper.ImGui_PopTextWrapPos(ctx)
+    reaper.ImGui_EndTooltip(ctx)
   end
 end
 -- END GUI ELEMENTS -----------------------------------------------------
@@ -133,10 +127,16 @@ function applyName()
             local itemStart = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
             local itemEnd = itemStart + reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
             
-            local _, regionidx = reaper.GetLastMarkerAndCurRegion(0, itemStart)
+            --[[local _, regionidx = reaper.GetLastMarkerAndCurRegion(0, itemStart)
             if regionidx ~= nil then
                 local _, isrgn, pos, rgnend, name, rgnindex = reaper.EnumProjectMarkers2(0, regionidx)
                 reaper.DeleteProjectMarker(0, rgnindex, true)
+            end]]--
+            
+            local _, num_markers, num_region = reaper.CountProjectMarkers(0)
+            for i = 0, num_markers + num_region do
+                --_, isrgn, pos, rgnend, name, index = reaper.EnumProjectMarkers2(0, i)
+                reaper.DeleteProjectMarker(0, i, true)
             end
             
             if viaRgn then
