@@ -1,292 +1,179 @@
 --@description Create region for clusters of selected items (prompt)
 --@author gaspard
---@version 2.4
+--@version 2.5
 --@changelog
---  + Allow folder track sensitive detection for clusters
+--  ~ Complete GUI rework: now using ImGui
 --@about
 --  Creates a region for each cluster of selected media items (overlapping or touching items in timeline). Prompts the renaming choices.
 
--- USER VALUES --------------------------------------------------
-maxSliderValue = 10 -- Maximum value available in slider
-incrementSliderValue = 0.1 -- Value increment available in slider
------------------------------------------------------------------
+scriptVersion = 'Version 2.5'
 
--- INITIALISATION --
-local libPath = reaper.GetExtState("Scythe v3", "libPath")
-if not libPath or libPath == "" then
-    reaper.MB("Couldn't load the Scythe library. Please install 'Scythe library v3' from ReaPack, then run 'Script: Scythe_Set v3 library path.lua' in your Action List.", "Whoops!", 0)
-    return
+-- ImGui SETUP --
+function GuiInit()
+    ctx = reaper.ImGui_CreateContext('Region Tool')
+    FONT = reaper.ImGui_CreateFont('sans-serif', 15)
+    reaper.ImGui_Attach(ctx, FONT)
+    winW, winH = 400, 350
+    isClosed = false
+    r_name = 0
 end
 
-loadfile(libPath .. "scythe.lua")()
-
--- VARIABLES --
-main_win_w = 250
-main_win_h = 440
-
-bsw = 140
-bpx = (main_win_w - bsw) / 2
-bsh = 30
-
-space = 40
-posY = 160
-
--- Buttons in RRM Layer --
-rrmY = (main_win_h - 250) / 2
-
--- MAIN WINDOW --
-local GUI = require("gui.core")
-
--- WINDOW --
-local window = GUI.createWindow({
-  name = "User Inputs Window",
-  w = main_win_w,
-  h = main_win_h,
-})
-
--- GUI ELEMENTS --
-local mainLayer = GUI.createLayer({name = "MainLayer"})
-local customTextLayer = GUI.createLayer({name = "CustomTextLayer"})
-local rrmLayer = GUI.createLayer({name = "RRMLayer"})
-
--- Main Layer Elements --
-mainLayer:addElements( GUI.createElements(
-  {
-    name = "checkbox_num_rrm",
-    type = "Checklist",
-    x = (main_win_w - 110) /2 - 10,
-    y = 25,
-    w = 110,
-    h = 80,
-    caption = "",
-    options = {"Auto number", "Set Region Matrix", "Folder sensitive"},
-    pad = 7,
-    frame = false
-  },
-  {
-    name = "slider_interval",
-    type = "Slider",
-    x = (main_win_w - 110) /2,
-    y = posY - space,
-    w = 110,
-    h = 30,
-    caption = "",
-    min = 0,
-    max = maxSliderValue,
-    inc = incrementSliderValue,
-    defaults = 0,
-    frame = false
-  },
-  {
-    name = "btn_custom_text",
-    type = "Button",
-    x = bpx,
-    y = posY,
-    w = bsw,
-    h = bsh,
-    caption = "Use custom text",
-    func = function () customTextWindow() end
-  },
-  {
-    name = "btn_selected_track",
-    type = "Button",
-    x = bpx,
-    y = posY + space,
-    w = bsw,
-    h = bsh,
-    caption = "Use selected track",
-    func = function () getUserInputs(1) end
-  },
-  {
-    name = "btn_item_track",
-    type = "Button",
-    x = bpx,
-    y = posY + space * 2,
-    w = bsw,
-    h = bsh,
-    caption = "Use items track",
-    func = function () getUserInputs(2) end
-  },
-  {
-    name = "btn_parent_track",
-    type = "Button",
-    x = bpx,
-    y = posY + space * 3,
-    w = bsw,
-    h = bsh,
-    caption = "Use parent track",
-    func = function () getUserInputs(3) end
-  },
-  {
-    name = "btn_top_parent_track",
-    type = "Button",
-    x = bpx,
-    y = posY + space * 4,
-    w = bsw,
-    h = bsh,
-    caption = "Use top parent track",
-    func = function () getUserInputs(4) end
-  },
-  {
-    name = "btn_cancel_main",
-    type = "Button",
-    x = bpx,
-    y = posY + space * 5 + 10,
-    w = bsw,
-    h = bsh,
-    caption = "Cancel",
-    func = function () cancelButton() end
-  })
-)
-
--- Custom Text Layer Elements --
-customTextLayer:addElements( GUI.createElements(
-  {
-    name = "textBox",
-    type = "TextBox",
-    x = bpx,
-    y = 30,
-    w = bsw,
-    h = bsh,
-    caption = ""
-  },
-  {
-    name = "btn_customText_print",
-    type = "Button",
-    x = bpx,
-    y = 90,
-    w = bsw,
-    h = bsh,
-    caption = "Set custom",
-    func = function () getUserInputs(0) end
-  },
-  {
-    name = "btn_customText_back",
-    type = "Button",
-    x = bpx,
-    y = 130,
-    w = bsw,
-    h = bsh,
-    caption = "Back",
-    func = function () backFromCustom() end
-  },
-  {
-    name = "btn_customText_cancel",
-    type = "Button",
-    x = bpx,
-    y = 180,
-    w = bsw,
-    h = bsh,
-    caption = "Cancel",
-    func = function () cancelButton() end
-  })
-)
-
--- Region Render Matrix Layer Elements --
-rrmLayer:addElements( GUI.createElements(
-  {
-    name = "checkbox_rrm_set",
-    type = "Checklist",
-    x = (main_win_w - 110) /2 - 10,
-    y = rrmY,
-    w = 130,
-    h = 120,
-    caption = "",
-    options = {"Selected track", "Items track", "Parent track", "Top parent track"},
-    pad = 7,
-    frame = false
-  },
-  {
-    name = "btn_rrm_confirm",
-    type = "Button",
-    x = bpx,
-    y = rrmY + 170,
-    w = bsw,
-    h = bsh,
-    caption = "Confirm",
-    func = function () getRRMvalues() end
-  },
-  {
-    name = "btn_rrm_cancel",
-    type = "Button",
-    x = bpx,
-    y = rrmY + 220,
-    w = bsw,
-    h = bsh,
-    caption = "Cancel",
-    func = function () cancelButton() end
-  })
-)
-
-function mainWindow()
-    -- Declare GUI --
-    window:addLayers(mainLayer)
-    window:addLayers(customTextLayer)
-    window:addLayers(rrmLayer)
-    customTextLayer:hide()
-    rrmLayer:hide()
-    window:open()
-    -- Draw GUI --
-    GUI.Main()
+-- INFO QUESTION MARK ELEMENT --
+function helperTooltip(debug, hTtSameLine)
+    reaper.ImGui_TextDisabled(ctx, '(?)')
+    if hTtSameLine then reaper.ImGui_SameLine(ctx) end
+    if reaper.ImGui_IsItemHovered(ctx, reaper.ImGui_HoveredFlags_DelayShort()) and reaper.ImGui_BeginTooltip(ctx) then
+        reaper.ImGui_PushTextWrapPos(ctx, reaper.ImGui_GetFontSize(ctx) * 35.0)
+        reaper.ImGui_Text(ctx, debug)
+        reaper.ImGui_PopTextWrapPos(ctx)
+        reaper.ImGui_EndTooltip(ctx)
+    end
 end
 
--- BUTTONS FUNCTIONS --
-function customTextWindow()
-    mainLayer:hide()
-    customTextLayer:show()
-end
-
-function backFromCustom()
-    mainLayer:show()
-    customTextLayer:hide()
-end
-
-function getRRMvalues()
-    rrmTab = GUI.Val("checkbox_rrm_set")
-    setRegionRenderMatrix()
-end
-
-function backFromRRM()
-    mainLayer:show()
-    rrmLayer:hide()
-end
-
-function cancelButton()
-    window:close()
-end
-
--- GET INPUTS FROM GUI WINDOW --
-function getUserInputs(tempChoice)
-    choice = tempChoice
+function GuiElements()
+    winW, winH = reaper.ImGui_GetWindowSize(ctx)
     
-    -- Get value for checkbox Auto Number --
-    autoNumber = GUI.Val("checkbox_num_rrm")[1]
-    
-    -- Get Region Matrix Set --
-    setRRM = GUI.Val("checkbox_num_rrm")[2]
-    
-    -- Get Folder Sensitive Setting --
-    folderEnabled = GUI.Val("checkbox_num_rrm")[3]
-    
-    -- Get value for slider --
-    interVal = GUI.Val("slider_interval")
-    
-    -- Get value for input text --
-    if choice == 0 then
-        rgnName = GUI.Val("textBox")
-    else
-        rgnName = ""
+    -- Global settings and region render matrix options --
+    if reaper.ImGui_BeginTable(ctx, 'GuiTableRRM', 2) then
+        reaper.ImGui_TableNextRow(ctx)
+        -- First column --
+        reaper.ImGui_TableSetColumnIndex(ctx, 0)
+        
+        reaper.ImGui_Text(ctx, 'Settings')
+        
+        rv_an, cb_an = reaper.ImGui_Checkbox(ctx, 'Auto Number', cb_an); reaper.ImGui_SameLine(ctx)
+        helperTooltip('Add a suffix number for regions in timeline order and with name aware numbering', false)
+        
+        rv_fs, cb_fs = reaper.ImGui_Checkbox(ctx, 'Folder Sensitive', cb_fs); reaper.ImGui_SameLine(ctx)
+        helperTooltip('Cluster detection will take into acount the folder hierarchy', false)
+        
+        reaper.ImGui_Dummy(ctx, 10, 6)
+        reaper.ImGui_Text(ctx, 'Cluster intern space'); reaper.ImGui_SameLine(ctx)
+        helperTooltip('Space between items in cluster for its detection (in seconds)', false)
+        rv_slider, interVal = reaper.ImGui_SliderDouble(ctx, '##sliderInterCluster', interVal, 0, 10)
+        
+        -- Second column --
+        reaper.ImGui_TableSetColumnIndex(ctx, 1)
+        
+        reaper.ImGui_Text(ctx, 'Region Render Matrix'); reaper.ImGui_SameLine(ctx)
+        helperTooltip('Select a render matrix setting to apply for given items regions', false)
+        
+        rv_rrm_st, cb_rrm_st = reaper.ImGui_Checkbox(ctx, 'Selected track', cb_rrm_st)
+        rv_rrm_it, cb_rrm_it = reaper.ImGui_Checkbox(ctx, 'Items track', cb_rrm_it)
+        rv_rrm_pt, cb_rrm_pt = reaper.ImGui_Checkbox(ctx, 'Parent track', cb_rrm_pt)
+        rv_rrm_tpt, cb_rrm_tpt = reaper.ImGui_Checkbox(ctx, 'Top Parent track', cb_rrm_tpt)
+        
+        reaper.ImGui_EndTable(ctx)
     end
     
+    -- Space between setting options --
+    reaper.ImGui_Dummy(ctx, 100, 30)
+    
+    -- Renaming settings --
+    reaper.ImGui_Text(ctx, 'Renaming options'); reaper.ImGui_SameLine(ctx)
+    helperTooltip('Enter text in textbox for "Custom name" option otherwise the regions name will be blank', false)
+    
+    if reaper.ImGui_BeginTable(ctx, 'GuiTableName', 2) then
+        reaper.ImGui_TableNextRow(ctx)
+        -- Custom name textbox input --
+        reaper.ImGui_TableSetColumnIndex(ctx, 0)
+        reaper.ImGui_Text(ctx, 'Custom Name:'); reaper.ImGui_SameLine(ctx)
+        rv_text_custom, text_custom = reaper.ImGui_InputText(ctx, '##inputText', text_custom, reaper.ImGui_InputTextFlags_AutoSelectAll())
+        
+        -- Renaming option choice --
+        reaper.ImGui_TableSetColumnIndex(ctx, 1)
+        rv, r_name = reaper.ImGui_RadioButtonEx(ctx, 'Custom name', r_name, 0)
+        rv, r_name = reaper.ImGui_RadioButtonEx(ctx, 'Selected track name', r_name, 1)
+        rv, r_name = reaper.ImGui_RadioButtonEx(ctx, 'Items track name', r_name, 2)
+        rv, r_name = reaper.ImGui_RadioButtonEx(ctx, 'Parent track name', r_name, 3)
+        rv, r_name = reaper.ImGui_RadioButtonEx(ctx, 'Top Parent track name', r_name, 4)
+        
+        reaper.ImGui_EndTable(ctx)
+    end
+    
+    reaper.ImGui_Dummy(ctx, 10, winH - 10 - 350)
+    
+    if reaper.ImGui_Button(ctx, 'Confirm') then
+        ConfirmButton()
+        isClosed = true
+    end; reaper.ImGui_SameLine(ctx)
+    helperTooltip('"Confirm" will apply values from selected settings and close the window', true)
+    
+    dummySize = winW - 75 - 100
+    reaper.ImGui_Dummy(ctx, dummySize, 10); reaper.ImGui_SameLine(ctx)
+    reaper.ImGui_Text(ctx, scriptVersion)
+end
+
+function GuiLoop()
+    local window_flags = reaper.ImGui_WindowFlags_NoCollapse()
+    reaper.ImGui_SetNextWindowSize(ctx, winW, winH, reaper.ImGui_Cond_Once())
+    reaper.ImGui_PushFont(ctx, FONT)
+    reaper.ImGui_SetConfigVar(ctx, reaper.ImGui_ConfigVar_ViewportsNoDecoration(), 0)
+    
+    local visible, open = reaper.ImGui_Begin(ctx, 'Region Renaming Tool', true, window_flags)
+    
+    if visible then
+        
+        GuiElements()
+        
+        reaper.ImGui_End(ctx)
+    end
+    
+    reaper.ImGui_PopFont(ctx)
+    
+    if open and not isClosed then
+        reaper.defer(GuiLoop)
+    end
+end
+
+function GuiDraw()
+    GuiInit()
+    GuiLoop()
+end
+
+function ConfirmButton()
     createClusters()
     
-    if GUI.Val("checkbox_num_rrm")[2] == true then
-        mainLayer:hide()
-        customTextLayer:hide()
-        rrmLayer:show()
-    else
-        window:close()
+    --[[reaper.ClearConsole()
+    
+    if cb_an then
+        reaper.ShowConsoleMsg('AUTO NUMBER: engaged\n')
     end
+    
+    if cb_fs then
+        reaper.ShowConsoleMsg('\nFOLDER SENSITIVE: engaged\n')
+    end
+    
+    reaper.ShowConsoleMsg("\nSLIDER VALUE: "..tostring(interVal)..'\n')
+    
+    if r_name == 0 then
+        nameChoice = 'Custom name\nText: "'..text_custom..'"'
+    elseif r_name == 1 then
+        nameChoice = 'Selected track name'
+    elseif r_name == 2 then
+        nameChoice = 'Item track name'
+    elseif r_name == 3 then
+        nameChoice = 'Parent track name'
+    elseif r_name == 4 then
+        nameChoice = 'Top parent track name'
+    end
+    reaper.ShowConsoleMsg('\nNAME CHOICE: '..nameChoice..'\n')
+    
+    if cb_rrm_st or cb_rrm_it or cb_rrm_pt or cb_rrm_tpt then
+        reaper.ShowConsoleMsg("\nRRM CHOICE: ")
+    end
+    if cb_rrm_st then
+        reaper.ShowConsoleMsg('\nSelected track')
+    end
+    if cb_rrm_it then
+        reaper.ShowConsoleMsg('\nItem track')
+    end
+    if cb_rrm_pt then
+        reaper.ShowConsoleMsg('\nParent track')
+    end
+    if cb_rrm_tpt then
+        reaper.ShowConsoleMsg('\nTop parent track')
+    end]]--
 end
 
 --------------------------------------------------------------------------------------------------------------------
@@ -342,7 +229,7 @@ function clusterDetection(idx, tab, item)
         
     if prev_end + interVal < cur_start then
             
-        reaper.AddProjectMarker(0, true, first_start, prev_end, rgnName, -1)
+        reaper.AddProjectMarker(0, true, first_start, prev_end, text_custom, -1)
             
         first_start = cur_start
     end
@@ -355,7 +242,7 @@ function clusterDetection(idx, tab, item)
             last_end = cur_end
         end
             
-        reaper.AddProjectMarker(0, true, first_start, last_end, rgnName, -1)
+        reaper.AddProjectMarker(0, true, first_start, last_end, text_custom, -1)
     end
         
     if prev_end > cur_end then
@@ -394,7 +281,7 @@ end
 function createClusters()
     reaper.Undo_BeginBlock()
     setupVariables()
-    if folderEnabled then
+    if cb_fs then
         sortItemsByFolders()
         checkItemsPositionsFolder()
     else
@@ -402,20 +289,20 @@ function createClusters()
     end
     
     -- Apply region name with choice in input --
-    if choice ~= 0 then
-        if choice == 1 then
+    if r_name ~= 0 then
+        if r_name == 1 then
             setRegionParentName("selected track")
-        elseif choice == 2 then
+        elseif r_name == 2 then
             setRegionParentName("track")
-        elseif choice == 3 then
+        elseif r_name == 3 then
             setRegionParentName("parent track")
-        elseif choice == 4 then
+        elseif r_name == 4 then
             setRegionParentName("top parent track")
         end
     end
     
     -- Apply auto numbering via reascript --
-    if autoNumber then setRegionNumbering() end
+    if cb_an then setRegionNumbering() end
     
     -- Unselect all items --
     for i = 1, #sel_item_Tab do
@@ -432,24 +319,8 @@ end
 -------------------------------------------------------------------------------------------
 function GetActionCommandIDByFilename(searchfilename, searchsection)
   -- returns the action-command-id for a given scriptfilename installed in Reaper
-  -- keep in mind: some scripts are stored in subfolders, like Cockos/lyrics.lua
-  --               in that case, you need to give the full path to avoid possible
-  --               confusion between files with the same filenames but in different
-  --               subfolders.
-  --               Scripts that are simply in the Scripts-folder, not within a 
-  --               subfolder of Scripts can be accessed just by their filename
-  --
-  -- Parameters:
-  --            string searchfilename - the filename, whose action-command-id you want to have
-  --            integer section - the section, in which the file is stored
-  --                                0 = Main, 
-  --                                100 = Main (alt recording), 
-  --                                32060 = MIDI Editor, 
-  --                                32061 = MIDI Event List Editor, 
-  --                                32062 = MIDI Inline Editor,
-  --                                32063 = Media Explorer.
-  -- Returnvalue:
-  --            string AID - the actioncommand-id of the scriptfile; "", if no such file is installed
+  -- Parameters: 0 = Main, 100 = Main(alt recording), 32060 = MIDI Editor, 32061 = MIDI Event List Editor, 32062 = MIDI Inline Editor, 32063 = Media Explorer
+  -- Returnvalue: string AID - the actioncommand-id of the scriptfile; "", if no such file is installed
   for k in io.lines(reaper.GetResourcePath().."/reaper-kb.ini") do
     if k:sub(1,3)=="SCR" then
       local section, aid, desc, filename=k:match("SCR .- (.-) (.-) (\".-\") (.*)")
@@ -485,22 +356,22 @@ function setRegionRenderMatrix()
     end
     
     -- Set RRM command paths --
-    if rrmTab[1] then -- Selected track
+    if cb_rrm_st then -- Selected track
         path_selected_track = "Gaspard ReaScripts/Render region matrix/gaspard_Set selected tracks in region render matrix for selected media items regions.lua"
         reaper.Main_OnCommand(reaper.NamedCommandLookup(GetActionCommandIDByFilename(path_selected_track, 0)), 0)
     end
     
-    if rrmTab[2] then -- Item track
+    if cb_rrm_it then -- Item track
         path_item_track = "Gaspard ReaScripts/Render region matrix/gaspard_Set track of selected media items in region render matrix for respective regions.lua"
         reaper.Main_OnCommand(reaper.NamedCommandLookup(GetActionCommandIDByFilename(path_item_track, 0)), 0)
     end
     
-    if rrmTab[3] then -- Parent track
+    if cb_rrm_pt then -- Parent track
         path_parent_track = "Gaspard ReaScripts/Render region matrix/gaspard_Set parent track of selected media items in region render matrix for respective regions.lua"
         reaper.Main_OnCommand(reaper.NamedCommandLookup(GetActionCommandIDByFilename(path_parent_track, 0)), 0)
     end
     
-    if rrmTab[4] then -- Top parent track
+    if cb_rrm_tpt then -- Top parent track
         path_top_parent_track = "Gaspard ReaScripts/Render region matrix/gaspard_Set top parent track in region render matrix for selected media items regions.lua"
         reaper.Main_OnCommand(reaper.NamedCommandLookup(GetActionCommandIDByFilename(path_top_parent_track, 0)), 0)
     end
@@ -511,19 +382,16 @@ function setRegionRenderMatrix()
     end
     
     reaper.Undo_EndBlock("Set tracks in render region matrix for regions of selected items", -1)
-    
-    window:close()
 end
 -------------------------------------------------------------------------------------------
 
 -- MAIN FUNCTION --
 function main()
-    reaper.ClearConsole()
-    
+
     sel_item_count = reaper.CountSelectedMediaItems(0)
     
     if sel_item_count ~= 0 then
-        mainWindow()
+        GuiDraw()
     else
         reaper.MB("Please select at least one item.", "No item selected", 0)
     end
