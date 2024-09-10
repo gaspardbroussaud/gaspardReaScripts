@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="d4f8256f3aea63b9d742aee6713882d719a5f775">
+<index version="1" name="Gaspard ReaScripts" commit="d1e7a055a8627c64e2e3e984c52741d36b5edc4d">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -736,6 +736,21 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       <version name="1.2" author="gaspard" time="2024-03-20T10:34:23Z">
         <changelog><![CDATA[+Togglable state.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8b6d216642ee18a46a614aff4c7f13ffe79a874a/Track/gaspard_Mute%20track%20and%20hide%20in%20TCP%20and%20MCP.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Rename selected tracks to Video.lua" type="script" desc="Rename selected tracks to &quot;Video&quot;">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Renames all selected tracks to "Video".\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-09-10T14:11:44Z">
+        <changelog><![CDATA[Initial release.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d1e7a055a8627c64e2e3e984c52741d36b5edc4d/Track/gaspard_Rename%20selected%20tracks%20to%20Video.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Rename track with selected media item name on it.lua" type="script" desc="Rename track with selected media item name on it">
