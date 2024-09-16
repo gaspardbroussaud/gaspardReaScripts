@@ -1,7 +1,7 @@
 --@description Set selected items fade in and out to value in script (editable)
 --@author gaspard
---@version 1.0
---@changelog Initial release
+--@version 1.1
+--@changelog Added force fade curve to type 2 (equal power)
 --@about Sets fade in and out to specified values in script (editable by user) for each selected items
 
 -- USER EDITABLE VALUES --------------------------------------
@@ -22,7 +22,9 @@ function main()
     -- Apply to all selected items --
         for i = 0, sel_item_count - 1 do
             item = reaper.GetSelectedMediaItem(0, i)
+            reaper.SetMediaItemInfo_Value(item, "C_FADEINSHAPE", 1) -- Set selected item fade in to type 2
             reaper.SetMediaItemInfo_Value(item, "D_FADEINLEN", fade_in_len)
+            reaper.SetMediaItemInfo_Value(item, "C_FADEOUTSHAPE", 1) -- Set selected item fade out to type 2
             reaper.SetMediaItemInfo_Value(item, "D_FADEOUTLEN", fade_out_len)
         end
     end
@@ -35,5 +37,3 @@ main()
 reaper.Undo_EndBlock("Set selected items fade in and out to value in script (editable)", -1)
 reaper.PreventUIRefresh(-1)
 reaper.UpdateArrange()
-
-
