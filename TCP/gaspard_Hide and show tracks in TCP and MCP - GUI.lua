@@ -1,12 +1,24 @@
 -- @description Hide and show tracks in TCP and MCP - GUI
 -- @author gaspard
--- @version 1.0.1
--- @changelog Prevent crash on no tracks in project.
+-- @version 1.0.2
+-- @changelog Prevent crash on project load or project tab change and update displayed tracks.
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- SET ALL GLOBAL VARIABLES --
 function set_variables()
     last_selected = -1
+    project_name = reaper.GetProjectName(0)
+    project_path = reaper.GetProjectPath()
+end
+
+function project_changed()
+    if project_name ~= reaper.GetProjectName(0) or project_path ~= reaper.GetProjectPath() then
+        project_name = reaper.GetProjectName(0)
+        project_path = reaper.GetProjectPath()
+        return true
+    else
+        return false
+    end
 end
 
 -- SET TRACK TO FALSE OR TRUE WITH INDEX --
@@ -256,13 +268,21 @@ function gui_loop()
     reaper.ImGui_PushFont(ctx, FONT)
 
     local visible, open  = reaper.ImGui_Begin(ctx, 'TRACKS VISIBILITY STATE', true, window_flags)
-
+    
+    if project_changed() then
+        set_variables()
+        get_selected_tracks()
+        get_tracks_tab()
+    end
+    
     if visible then
         -- If track count updates (delete or add track) --
         if track_count ~= reaper.CountTracks(0) then
             get_tracks_tab()
         end
-        gui_elements()
+        if reaper.CountTracks(0) ~= 0 then
+            gui_elements()
+        end
         reaper.ImGui_End(ctx)
     end 
 
@@ -276,12 +296,8 @@ function gui_loop()
 end
 
 -- MAIN SCRIPT EXECUSION --
-if reaper.CountTracks(0) ~= 0 then
-    set_variables()
-    get_selected_tracks()
-    get_tracks_tab()
-    gui_init()
-    gui_loop()
-else
-    reaper.MB("No tracks in current project tab.\nPlease create at least one track.", "WARNING", 0)
-end
+set_variables()
+get_selected_tracks()
+get_tracks_tab()
+gui_init()
+gui_loop()
