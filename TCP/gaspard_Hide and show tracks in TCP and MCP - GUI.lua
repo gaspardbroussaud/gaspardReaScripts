@@ -1,7 +1,7 @@
 -- @description Hide and show tracks in TCP and MCP - GUI
 -- @author gaspard
--- @version 1.0.3
--- @changelog Added script opened state displayed in toolbar.
+-- @version 1.0.4
+-- @changelog WIP : Adding folder feature.
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- SET SCRIPT STATE --
@@ -20,8 +20,10 @@ end
 
 function quit_app()
     set_selected_tracks()
-    
+
     set_button_state()
+    
+    window_open = false
 end
 
 function project_changed()
@@ -36,8 +38,8 @@ end
 
 -- SET TRACK TO FALSE OR TRUE WITH INDEX --
 function set_track_visibility(index, visibility)
-    track_select[index] = visibility
-    reaper.SetTrackSelected(tracks_tab[index], visibility)
+    tracks[index].select = visibility
+    reaper.SetTrackSelected(tracks[index].id, visibility)
 end
 
 -- GET SELECTED TRACKS TO RE-SELECT AFTER SCRIPT END --
@@ -59,7 +61,7 @@ end
 -- SELECT TRACKS IF SELECTED BEFORE RUNNING SCRIPT --
 function set_selected_tracks()
     for i = 0, reaper.CountTracks(0) - 1 do
-        reaper.SetTrackSelected(tracks_tab[i], false)
+        reaper.SetTrackSelected(tracks[i].id, false)
     end
     
     if are_tracks_selected then
@@ -84,20 +86,17 @@ end
 
 -- GET ALL TRACKS FROM PROJECT --
 function get_tracks_tab()
-    tracks_tab = {}
+    --[[tracks_tab = {}
     checkbox_state = {}
-    track_select = {}
+    track_select = {}]]
+    tracks = {}
     track_count = reaper.CountTracks(0)
     for i = 0, track_count - 1 do
-        tracks_tab[i] = reaper.GetTrack(0, i)
+        tracks[i] = { id = reaper.GetTrack(0, i), state = reaper.GetMediaTrackInfo_Value(reaper.GetTrack(0, i), "B_SHOWINTCP"), select = false }
+        --[[tracks_tab[i] = reaper.GetTrack(0, i)
         checkbox_state[i] = reaper.GetMediaTrackInfo_Value(tracks_tab[i], "B_SHOWINTCP")
-        track_select[i] = false
+        track_select[i] = false]]
     end
-end
-
--- DETECT IF CURRENT TRACK IS A PARENT --
-function detect_parent_state(track)
-
 end
 
 -- HIDE TRACK WHEN UNSELECTING CHECKBOX --
@@ -152,29 +151,57 @@ function gui_init()
 end
 
 -- GUI ELEMENTS --
-function gui_elements()
+-- Top bar elements --
+function gui_elements_top_bar()
+    table_flags = reaper.ImGui_TableFlags_BordersOuter()
+    if reaper.ImGui_BeginTable(ctx, "table_top_bar", 2, table_flags) then
+        reaper.ImGui_TableNextRow(ctx)
+        reaper.ImGui_TableNextColumn(ctx)
+        reaper.ImGui_Text(ctx, "TRACKS VISIBILITY STATE")
+        reaper.ImGui_SameLine(ctx)
+
+        reaper.ImGui_TableNextColumn(ctx)
+        x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
+        text_x, _ = reaper.ImGui_CalcTextSize(ctx, "X")
+        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (x - text_x - 5))
+        if reaper.ImGui_Button(ctx, "X") then
+            quit_app()
+        end
+
+        reaper.ImGui_EndTable(ctx)
+    end
+end
+
+-- Table of tracks elements --
+function gui_elements_table() 
     flags = reaper.ImGui_TableFlags_SizingFixedFit() | reaper.ImGui_TableFlags_Borders()
-    if reaper.ImGui_BeginTable(ctx, "table_tracks", 3, flags) then
+    if reaper.ImGui_BeginTable(ctx, "table_tracks", 4, flags) then
         reaper.ImGui_TableNextRow(ctx)
         reaper.ImGui_TableNextColumn(ctx)
         reaper.ImGui_Text(ctx, "ID")
         
         reaper.ImGui_TableNextColumn(ctx)
         reaper.ImGui_Text(ctx, "STATE")
+
+        reaper.ImGui_TableNextColumn(ctx)
+        --[[x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
+        text_x, _ = reaper.ImGui_CalcTextSize(ctx, "")
+        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + ((x - text_x) * 0.5) + 0.5)]]
+        reaper.ImGui_Text(ctx, "")
         
         reaper.ImGui_TableNextColumn(ctx)
         reaper.ImGui_Text(ctx, "TRACK NAME")
         
-        for i = 0, #tracks_tab do
+        for i = 0, #tracks do
             reaper.ImGui_TableNextRow(ctx)
             reaper.ImGui_TableNextColumn(ctx)
-            track_number = tostring(reaper.GetMediaTrackInfo_Value(tracks_tab[i], "IP_TRACKNUMBER")):sub(1, -3)
+            track_number = tostring(reaper.GetMediaTrackInfo_Value(tracks[i].id, "IP_TRACKNUMBER")):sub(1, -3)
             x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
             text_x, _ = reaper.ImGui_CalcTextSize(ctx, track_number)
             reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + ((x - text_x) * 0.5))
             selectable_flags = reaper.ImGui_SelectableFlags_SpanAllColumns() | reaper.ImGui_SelectableFlags_AllowOverlap()
             x, y = reaper.ImGui_GetContentRegionAvail(ctx)
-            changed, track_select[i] = reaper.ImGui_Selectable(ctx, track_number, track_select[i], selectable_flags, 0, 21)
+            changed, tracks[i].select = reaper.ImGui_Selectable(ctx, track_number, tracks[i].select, selectable_flags, 0, 21)
             if changed then
                 -- Get key press CTRL = 4096 or CMD = 32768 / SHIFT = 8192 --
                 key_code = reaper.ImGui_GetKeyMods(ctx)
@@ -184,23 +211,23 @@ function gui_elements()
                 
                 -- Multi selection system --
                 if not ctrl and not shift then
-                    if not track_select[i] then
-                        for j = 0, #track_select do
-                            if track_select[j] then
+                    if not tracks[i].select then
+                        for j = 0, #tracks do
+                            if tracks[j].select then
                                 set_track_visibility(i, true)
                             end
                         end
                     end
                     
-                    for j = 0, #track_select do
-                        if track_select[i] == track_select[j] and i ~= j then
+                    for j = 0, #tracks do
+                        if tracks[i].select == tracks[j].select and i ~= j then
                             set_track_visibility(j, false)
                         end
                     end
                 end
                 
                 if not ctrl and shift then
-                    for j = 0, #track_select do
+                    for j = 0, #tracks do
                         if last_selected < j and j < i then
                             set_track_visibility(j, true)
                         end
@@ -211,10 +238,10 @@ function gui_elements()
                 end
                 
                 -- Set track visibility --
-                if track_select[i] then
-                    reaper.SetTrackSelected(tracks_tab[i], true)
+                if tracks[i].select then
+                    reaper.SetTrackSelected(tracks[i].id, true)
                 else
-                    reaper.SetTrackSelected(tracks_tab[i], false)
+                    reaper.SetTrackSelected(tracks[i].id, false)
                 end
                 
                 last_selected = i
@@ -223,46 +250,53 @@ function gui_elements()
             reaper.ImGui_TableNextColumn(ctx)
             x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
             reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + ((x - 21) * 0.5))
-            changed, checkbox_state[i] = reaper.ImGui_Checkbox(ctx, "##checkbox"..tostring(i), checkbox_state[i])
+            changed, tracks[i].state = reaper.ImGui_Checkbox(ctx, "##checkbox"..tostring(i), tracks[i].state)
             if changed then
                 reaper.Main_OnCommand(40297, 0) -- Unselect all tracks
 
-                if track_select[i] then
-                    for j = 0, #track_select do
-                        if track_select[j] then
-                            if checkbox_state[i] then
-                                show_track(tracks_tab[j])
+                if tracks[i].select then
+                    for j = 0, #tracks do
+                        if tracks[j].select then
+                            if tracks[i].state then
+                                show_track(tracks[j].id)
                             else
-                                hide_track(tracks_tab[j])
+                                hide_track(tracks[j].id)
                             end
                         end
                     end
                 else
-                    if checkbox_state[i] then
-                        show_track(tracks_tab[i])
+                    if tracks[i].state then
+                        show_track(tracks[i].id)
                     else
-                        hide_track(tracks_tab[i])
+                        hide_track(tracks[i].id)
                     end
                 end
 
-                for j = 0, #checkbox_state do
-                    checkbox_state[j] = reaper.GetMediaTrackInfo_Value(tracks_tab[j], "B_SHOWINTCP")
+                for j = 0, #tracks do
+                    tracks[j].state = reaper.GetMediaTrackInfo_Value(tracks[j].id, "B_SHOWINTCP")
                 end
 
-                for j = 0, #track_select do
-                    if track_select[j] then
-                        reaper.SetTrackSelected(tracks_tab[j], true)
+                for j = 0, #tracks do
+                    if tracks[j].select then
+                        reaper.SetTrackSelected(tracks[j].id, true)
                     end
                 end
             end
             
             reaper.ImGui_TableNextColumn(ctx)
-            _, text_cell = reaper.GetSetMediaTrackInfo_String(tracks_tab[i], "P_NAME", "", false)
+            if reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERDEPTH") == 1 then
+                if reaper.ImGui_ArrowButton(ctx, "arrow"..tostring(i), reaper.ImGui_Dir_Down()) then
+                    reaper.ShowConsoleMsg("TEST")
+                end
+            end
+
+            reaper.ImGui_TableNextColumn(ctx)
+            _, text_cell = reaper.GetSetMediaTrackInfo_String(tracks[i].id, "P_NAME", "", false)
             
             if text_cell == "" then text_cell = "Track "..track_number end
             
             space = " "
-            parent = reaper.GetParentTrack(tracks_tab[i])
+            parent = reaper.GetParentTrack(tracks[i].id)
             if parent then parent_id = reaper.GetMediaTrackInfo_Value(parent, "IP_TRACKNUMBER") end
             
             text_cell = space..text_cell
@@ -274,13 +308,11 @@ end
 
 -- GUI LOOP --
 function gui_loop()
-
-    local window_flags = reaper.ImGui_WindowFlags_NoCollapse()
-    -- Set the size of the windows. [[reaper.ImGui_Cond_FirstUseEver()]] --
+    local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoDecoration()
     reaper.ImGui_SetNextWindowSize(ctx, 500, 300, reaper.ImGui_Cond_Once())
     reaper.ImGui_PushFont(ctx, FONT)
 
-    local visible, open  = reaper.ImGui_Begin(ctx, 'TRACKS VISIBILITY STATE', true, window_flags)
+    window_visible, window_open  = reaper.ImGui_Begin(ctx, 'TRACKS VISIBILITY STATE', true, window_flags)
     
     if project_changed() then
         set_variables()
@@ -288,20 +320,25 @@ function gui_loop()
         get_tracks_tab()
     end
     
-    if visible then
+    if window_visible then
         -- If track count updates (delete or add track) --
         if track_count ~= reaper.CountTracks(0) then
             get_tracks_tab()
         end
+        
+        -- Gui elements to display --
+        gui_elements_top_bar()
+        
         if reaper.CountTracks(0) ~= 0 then
-            gui_elements()
+            gui_elements_table()
         end
+        
         reaper.ImGui_End(ctx)
     end 
 
     reaper.ImGui_PopFont(ctx)
 
-    if open then
+    if window_open then
         reaper.defer(gui_loop)
     else
         quit_app()
