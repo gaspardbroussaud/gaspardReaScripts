@@ -1,7 +1,7 @@
 -- @description Hide and show tracks in TCP and MCP - GUI
 -- @author gaspard
--- @version 1.0
--- @changelog Initial release
+-- @version 1.0.1
+-- @changelog Prevent crash on no tracks in project.
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- SET ALL GLOBAL VARIABLES --
@@ -276,8 +276,12 @@ function gui_loop()
 end
 
 -- MAIN SCRIPT EXECUSION --
-set_variables()
-get_selected_tracks()
-get_tracks_tab()
-gui_init()
-gui_loop()
+if reaper.CountTracks(0) ~= 0 then
+    set_variables()
+    get_selected_tracks()
+    get_tracks_tab()
+    gui_init()
+    gui_loop()
+else
+    reaper.MB("No tracks in current project tab.\nPlease create at least one track.", "WARNING", 0)
+end
