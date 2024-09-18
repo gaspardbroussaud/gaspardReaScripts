@@ -1,14 +1,27 @@
 -- @description Hide and show tracks in TCP and MCP - GUI
 -- @author gaspard
--- @version 1.0.2
--- @changelog Prevent crash on project load or project tab change and update displayed tracks.
+-- @version 1.0.3
+-- @changelog Added script opened state displayed in toolbar.
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
+
+-- SET SCRIPT STATE --
+function set_button_state(set)
+    local _, _, sec, cmd, _, _, _ = reaper.get_action_context()
+    reaper.SetToggleCommandState(sec, cmd, set or 0)
+    reaper.RefreshToolbar2(sec, cmd)
+end
 
 -- SET ALL GLOBAL VARIABLES --
 function set_variables()
     last_selected = -1
     project_name = reaper.GetProjectName(0)
     project_path = reaper.GetProjectPath()
+end
+
+function quit_app()
+    set_selected_tracks()
+    
+    set_button_state()
 end
 
 function project_changed()
@@ -291,13 +304,15 @@ function gui_loop()
     if open then
         reaper.defer(gui_loop)
     else
-        set_selected_tracks()
+        quit_app()
     end
 end
 
 -- MAIN SCRIPT EXECUSION --
+set_button_state(1)
 set_variables()
 get_selected_tracks()
 get_tracks_tab()
 gui_init()
 gui_loop()
+reaper.atexit(set_button_state)
