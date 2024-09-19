@@ -1,7 +1,7 @@
 -- @description Hide and show tracks in TCP and MCP - GUI
 -- @author gaspard
--- @version 1.0.5
--- @changelog WIP : Adding folder collapse and indent + GUI rework.
+-- @version 1.0.6
+-- @changelog WIP : Fix folders indents.
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- SHOW IMGUI DEMO --
@@ -111,6 +111,7 @@ function get_tracks_tab()
     local parent_check = false
     local inner_depth = 0.0
     local parent_collapse
+    local prev_depth = 0
     for i = 0, track_count - 1 do
         local cur_track = reaper.GetTrack(0, i)
         local cur_state = reaper.GetMediaTrackInfo_Value(cur_track, "B_SHOWINTCP")
@@ -119,7 +120,7 @@ function get_tracks_tab()
         local cur_visible = true
 
         local cur_depth = reaper.GetMediaTrackInfo_Value(cur_track, "I_FOLDERDEPTH")
-        if cur_depth == 1.0 then
+        --[[if cur_depth == 1.0 then
             parent_check = true
             inner_depth = inner_depth + 1.0
             cur_depth = inner_depth
@@ -136,6 +137,18 @@ function get_tracks_tab()
         if parent_check and cur_depth == 0.0 then
             cur_depth = -1.0 * (inner_depth + 1.0)
             if parent_collapse > 0 then cur_visible = false end
+        end]]
+        
+        if cur_depth == 1 then
+            cur_depth = cur_depth + inner_depth
+            inner_depth = inner_depth + 1
+        elseif cur_depth == 0 and inner_depth ~= 0 then
+            if prev_depth < 0 then inner_depth = 0 end
+            cur_depth = -1 * (1 + inner_depth)
+        elseif cur_depth < 0 then
+            prev_depth = cur_depth
+            cur_depth = -1 * (1 + inner_depth)
+            inner_depth = inner_depth - 1
         end
 
         tracks[i] = { id = cur_track, state = cur_state, select = cur_select, collapse = cur_collapse, visible = cur_visible, depth = cur_depth }
@@ -340,10 +353,10 @@ function gui_elements_table()
                 
                 reaper.ImGui_TableNextColumn(ctx)
                 if reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERDEPTH") == 1 then
-                    if tracks[i].collapse > 0 then direction = reaper.ImGui_Dir_Right()
+                    if tracks[i].collapse > 1 then direction = reaper.ImGui_Dir_Right()
                     else direction = reaper.ImGui_Dir_Down() end
                     if reaper.ImGui_ArrowButton(ctx, "arrow"..tostring(i), direction) then
-                        if tracks[i].collapse > 0 then
+                        if tracks[i].collapse > 1 then
                             tracks[i].collapse = 0
                             reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT", tracks[i].collapse)
                             local out = false
@@ -414,6 +427,13 @@ function gui_loop()
         if track_count ~= reaper.CountTracks(0) then
             get_tracks_tab()
         end
+
+        --[[for i = 0, track_count - 1 do
+            local cur_collapse = reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT")
+            if cur_collapse ~= tracks[i].collapse then
+                tracks[i].collapse = cur_collapse
+            end
+        end]]
         
         -- Gui elements to display --
         gui_elements_top_bar()
