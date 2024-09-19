@@ -1,8 +1,27 @@
 -- @description Hide and show tracks in TCP and MCP - GUI
 -- @author gaspard
--- @version 1.0.4
--- @changelog WIP : Adding folder feature.
+-- @version 1.0.5
+-- @changelog WIP : Adding folder collapse and indent + GUI rework.
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
+
+-- SHOW IMGUI DEMO --
+--reaper.Main_OnCommand(reaper.NamedCommandLookup("_RS6b4644d86854e10895485f184942fb69ecc26177"), 0)
+
+-- IMGUI STYLE VARIABLES PUSH AND POP --
+function push_global_imgui_style()
+    reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_WindowRounding(),   6)
+    reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ChildRounding(),    6)
+    reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_PopupRounding(),    6)
+    reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_FrameRounding(),    6)
+    
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_WindowBg(), 0x11111111FF)
+end
+
+function pop_global_imgui_style()
+    reaper.ImGui_PopStyleVar(ctx, 4)
+    
+    reaper.ImGui_PopStyleColor(ctx, 1)
+end
 
 -- SET SCRIPT STATE --
 function set_button_state(set)
@@ -16,6 +35,7 @@ function set_variables()
     last_selected = -1
     project_name = reaper.GetProjectName(0)
     project_path = reaper.GetProjectPath()
+    show_next_tracks = true
 end
 
 function quit_app()
@@ -86,16 +106,39 @@ end
 
 -- GET ALL TRACKS FROM PROJECT --
 function get_tracks_tab()
-    --[[tracks_tab = {}
-    checkbox_state = {}
-    track_select = {}]]
     tracks = {}
     track_count = reaper.CountTracks(0)
+    local parent_check = false
+    local inner_depth = 0.0
+    local parent_collapse
     for i = 0, track_count - 1 do
-        tracks[i] = { id = reaper.GetTrack(0, i), state = reaper.GetMediaTrackInfo_Value(reaper.GetTrack(0, i), "B_SHOWINTCP"), select = false }
-        --[[tracks_tab[i] = reaper.GetTrack(0, i)
-        checkbox_state[i] = reaper.GetMediaTrackInfo_Value(tracks_tab[i], "B_SHOWINTCP")
-        track_select[i] = false]]
+        local cur_track = reaper.GetTrack(0, i)
+        local cur_state = reaper.GetMediaTrackInfo_Value(cur_track, "B_SHOWINTCP")
+        local cur_select = reaper.IsTrackSelected(cur_track)
+        local cur_collapse = reaper.GetMediaTrackInfo_Value(cur_track, "I_FOLDERCOMPACT")
+        local cur_visible = true
+
+        local cur_depth = reaper.GetMediaTrackInfo_Value(cur_track, "I_FOLDERDEPTH")
+        if cur_depth == 1.0 then
+            parent_check = true
+            inner_depth = inner_depth + 1.0
+            cur_depth = inner_depth
+            if cur_depth == 1.0 then parent_collapse = cur_collapse end
+            if cur_depth > 1.0 and parent_collapse > 0 then cur_visible = false end
+        elseif cur_depth < 0.0 then
+            parent_check = false
+            cur_depth = cur_depth - 1.0
+            if parent_collapse > 0 then cur_visible = false end
+            inner_depth = 0.0
+            parent_collapse = 0.0
+        end
+
+        if parent_check and cur_depth == 0.0 then
+            cur_depth = -1.0 * (inner_depth + 1.0)
+            if parent_collapse > 0 then cur_visible = false end
+        end
+
+        tracks[i] = { id = cur_track, state = cur_state, select = cur_select, collapse = cur_collapse, visible = cur_visible, depth = cur_depth }
     end
 end
 
@@ -153,7 +196,7 @@ end
 -- GUI ELEMENTS --
 -- Top bar elements --
 function gui_elements_top_bar()
-    table_flags = reaper.ImGui_TableFlags_BordersOuter()
+    table_flags = reaper.ImGui_TableFlags_None() --reaper.ImGui_TableFlags_BordersOuter()
     if reaper.ImGui_BeginTable(ctx, "table_top_bar", 2, table_flags) then
         reaper.ImGui_TableNextRow(ctx)
         reaper.ImGui_TableNextColumn(ctx)
@@ -163,7 +206,7 @@ function gui_elements_top_bar()
         reaper.ImGui_TableNextColumn(ctx)
         x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
         text_x, _ = reaper.ImGui_CalcTextSize(ctx, "X")
-        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (x - text_x - 5))
+        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (x - text_x - 8))
         if reaper.ImGui_Button(ctx, "X") then
             quit_app()
         end
@@ -172,10 +215,24 @@ function gui_elements_top_bar()
     end
 end
 
+-- Child for elements and scroll --
+function gui_elements_child()
+    x, y = reaper.ImGui_GetContentRegionAvail(ctx)
+    child_flags = reaper.ImGui_WindowFlags_NoScrollbar()
+    if reaper.ImGui_BeginChild(ctx, "child_scroll", x, y, 0, child_flags) then
+        gui_elements_table()
+
+        reaper.ImGui_EndChild(ctx)
+    end
+end
+
 -- Table of tracks elements --
 function gui_elements_table() 
-    flags = reaper.ImGui_TableFlags_SizingFixedFit() | reaper.ImGui_TableFlags_Borders()
-    if reaper.ImGui_BeginTable(ctx, "table_tracks", 4, flags) then
+    table_flags = reaper.ImGui_TableFlags_SizingFixedFit() | reaper.ImGui_TableFlags_Borders() | reaper.ImGui_TableFlags_ScrollY()
+    if reaper.ImGui_BeginTable(ctx, "table_tracks", 4, table_flags) then
+
+        reaper.ImGui_TableSetupScrollFreeze(ctx, 0, 1)
+
         reaper.ImGui_TableNextRow(ctx)
         reaper.ImGui_TableNextColumn(ctx)
         reaper.ImGui_Text(ctx, "ID")
@@ -184,123 +241,151 @@ function gui_elements_table()
         reaper.ImGui_Text(ctx, "STATE")
 
         reaper.ImGui_TableNextColumn(ctx)
-        --[[x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
-        text_x, _ = reaper.ImGui_CalcTextSize(ctx, "")
-        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + ((x - text_x) * 0.5) + 0.5)]]
         reaper.ImGui_Text(ctx, "")
         
         reaper.ImGui_TableNextColumn(ctx)
         reaper.ImGui_Text(ctx, "TRACK NAME")
         
         for i = 0, #tracks do
-            reaper.ImGui_TableNextRow(ctx)
-            reaper.ImGui_TableNextColumn(ctx)
-            track_number = tostring(reaper.GetMediaTrackInfo_Value(tracks[i].id, "IP_TRACKNUMBER")):sub(1, -3)
-            x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
-            text_x, _ = reaper.ImGui_CalcTextSize(ctx, track_number)
-            reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + ((x - text_x) * 0.5))
-            selectable_flags = reaper.ImGui_SelectableFlags_SpanAllColumns() | reaper.ImGui_SelectableFlags_AllowOverlap()
-            x, y = reaper.ImGui_GetContentRegionAvail(ctx)
-            changed, tracks[i].select = reaper.ImGui_Selectable(ctx, track_number, tracks[i].select, selectable_flags, 0, 21)
-            if changed then
-                -- Get key press CTRL = 4096 or CMD = 32768 / SHIFT = 8192 --
-                key_code = reaper.ImGui_GetKeyMods(ctx)
-                ctrl, shift = false, false
-                if key_code == 4096 or key_code == 32768 then ctrl = true
-                elseif key_code == 8192 then shift = true end
-                
-                -- Multi selection system --
-                if not ctrl and not shift then
-                    if not tracks[i].select then
+            if tracks[i].visible then
+                reaper.ImGui_TableNextRow(ctx)
+                reaper.ImGui_TableNextColumn(ctx)
+                track_number = tostring(reaper.GetMediaTrackInfo_Value(tracks[i].id, "IP_TRACKNUMBER")):sub(1, -3)
+                x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
+                text_x, _ = reaper.ImGui_CalcTextSize(ctx, track_number)
+                reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + ((x - text_x) * 0.5))
+                selectable_flags = reaper.ImGui_SelectableFlags_SpanAllColumns() | reaper.ImGui_SelectableFlags_AllowOverlap()
+                x, y = reaper.ImGui_GetContentRegionAvail(ctx)
+                changed, tracks[i].select = reaper.ImGui_Selectable(ctx, track_number, tracks[i].select, selectable_flags, 0, 21)
+                if changed then
+                    -- Get key press CTRL = 4096 or CMD = 32768 / SHIFT = 8192 --
+                    key_code = reaper.ImGui_GetKeyMods(ctx)
+                    ctrl, shift = false, false
+                    if key_code == 4096 or key_code == 32768 then ctrl = true
+                    elseif key_code == 8192 then shift = true end
+                    
+                    -- Multi selection system --
+                    if not ctrl and not shift then
+                        if not tracks[i].select then
+                            for j = 0, #tracks do
+                                if tracks[j].select then
+                                    set_track_visibility(i, true)
+                                end
+                            end
+                        end
+                        
                         for j = 0, #tracks do
-                            if tracks[j].select then
-                                set_track_visibility(i, true)
+                            if tracks[i].select == tracks[j].select and i ~= j then
+                                set_track_visibility(j, false)
                             end
                         end
                     end
                     
-                    for j = 0, #tracks do
-                        if tracks[i].select == tracks[j].select and i ~= j then
-                            set_track_visibility(j, false)
-                        end
-                    end
-                end
-                
-                if not ctrl and shift then
-                    for j = 0, #tracks do
-                        if last_selected < j and j < i then
-                            set_track_visibility(j, true)
-                        end
-                        if last_selected > j and j > i then
-                            set_track_visibility(j, true)
-                        end
-                    end
-                end
-                
-                -- Set track visibility --
-                if tracks[i].select then
-                    reaper.SetTrackSelected(tracks[i].id, true)
-                else
-                    reaper.SetTrackSelected(tracks[i].id, false)
-                end
-                
-                last_selected = i
-            end
-            
-            reaper.ImGui_TableNextColumn(ctx)
-            x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
-            reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + ((x - 21) * 0.5))
-            changed, tracks[i].state = reaper.ImGui_Checkbox(ctx, "##checkbox"..tostring(i), tracks[i].state)
-            if changed then
-                reaper.Main_OnCommand(40297, 0) -- Unselect all tracks
-
-                if tracks[i].select then
-                    for j = 0, #tracks do
-                        if tracks[j].select then
-                            if tracks[i].state then
-                                show_track(tracks[j].id)
-                            else
-                                hide_track(tracks[j].id)
+                    if not ctrl and shift then
+                        for j = 0, #tracks do
+                            if last_selected < j and j < i then
+                                set_track_visibility(j, true)
+                            end
+                            if last_selected > j and j > i then
+                                set_track_visibility(j, true)
                             end
                         end
                     end
-                else
-                    if tracks[i].state then
-                        show_track(tracks[i].id)
+                    
+                    -- Set track visibility --
+                    if tracks[i].select then
+                        reaper.SetTrackSelected(tracks[i].id, true)
                     else
-                        hide_track(tracks[i].id)
+                        reaper.SetTrackSelected(tracks[i].id, false)
+                    end
+                    
+                    last_selected = i
+                end
+                
+                reaper.ImGui_TableNextColumn(ctx)
+                x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
+                reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + ((x - 21) * 0.5))
+                changed, tracks[i].state = reaper.ImGui_Checkbox(ctx, "##checkbox"..tostring(i), tracks[i].state)
+                if changed then
+                    reaper.Main_OnCommand(40297, 0) -- Unselect all tracks
+
+                    if tracks[i].select then
+                        for j = 0, #tracks do
+                            if tracks[j].select then
+                                if tracks[i].state then
+                                    show_track(tracks[j].id)
+                                else
+                                    hide_track(tracks[j].id)
+                                end
+                            end
+                        end
+                    else
+                        if tracks[i].state then
+                            show_track(tracks[i].id)
+                        else
+                            hide_track(tracks[i].id)
+                        end
+                    end
+
+                    for j = 0, #tracks do
+                        tracks[j].state = reaper.GetMediaTrackInfo_Value(tracks[j].id, "B_SHOWINTCP")
+                    end
+
+                    for j = 0, #tracks do
+                        if tracks[j].select then
+                            reaper.SetTrackSelected(tracks[j].id, true)
+                        end
+                    end
+                end
+                
+                reaper.ImGui_TableNextColumn(ctx)
+                if reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERDEPTH") == 1 then
+                    if tracks[i].collapse > 0 then direction = reaper.ImGui_Dir_Right()
+                    else direction = reaper.ImGui_Dir_Down() end
+                    if reaper.ImGui_ArrowButton(ctx, "arrow"..tostring(i), direction) then
+                        if tracks[i].collapse > 0 then
+                            tracks[i].collapse = 0
+                            reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT", tracks[i].collapse)
+                            local out = false
+                            for j = i + 1, #tracks do
+                                if not out then
+                                    tracks[j].visible = true
+                                    if reaper.GetMediaTrackInfo_Value(tracks[j].id, "I_FOLDERDEPTH") > 0 then
+                                        if reaper.GetMediaTrackInfo_Value(tracks[j].id, "I_FOLDERCOMPACT") > 0 then
+                                            out = true
+                                        end
+                                    end
+                                end
+                            end
+                        else
+                            tracks[i].collapse = 2
+                            reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT", tracks[i].collapse)
+                            local out = false
+                            for j = i + 1, #tracks do
+                                if not out then
+                                    tracks[j].visible = false
+                                    if reaper.GetMediaTrackInfo_Value(tracks[j].id, "I_FOLDERDEPTH") < 0 then out = true end
+                                end
+                            end
+                        end
                     end
                 end
 
-                for j = 0, #tracks do
-                    tracks[j].state = reaper.GetMediaTrackInfo_Value(tracks[j].id, "B_SHOWINTCP")
-                end
-
-                for j = 0, #tracks do
-                    if tracks[j].select then
-                        reaper.SetTrackSelected(tracks[j].id, true)
+                reaper.ImGui_TableNextColumn(ctx)
+                _, text_cell = reaper.GetSetMediaTrackInfo_String(tracks[i].id, "P_NAME", "", false)
+                
+                if text_cell == "" then text_cell = "Track "..track_number end
+                
+                space = " "
+                if tracks[i].depth ~= 0 then
+                    for j = 0, math.abs(tracks[i].depth) - 2.0 do
+                        space = space.."     "
                     end
                 end
+                
+                text_cell = space..text_cell.." | "..tostring(tracks[i].depth)
+                reaper.ImGui_Text(ctx, tostring(text_cell))
             end
-            
-            reaper.ImGui_TableNextColumn(ctx)
-            if reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERDEPTH") == 1 then
-                if reaper.ImGui_ArrowButton(ctx, "arrow"..tostring(i), reaper.ImGui_Dir_Down()) then
-                    reaper.ShowConsoleMsg("TEST")
-                end
-            end
-
-            reaper.ImGui_TableNextColumn(ctx)
-            _, text_cell = reaper.GetSetMediaTrackInfo_String(tracks[i].id, "P_NAME", "", false)
-            
-            if text_cell == "" then text_cell = "Track "..track_number end
-            
-            space = " "
-            parent = reaper.GetParentTrack(tracks[i].id)
-            if parent then parent_id = reaper.GetMediaTrackInfo_Value(parent, "IP_TRACKNUMBER") end
-            
-            text_cell = space..text_cell
-            reaper.ImGui_Text(ctx, tostring(text_cell))
         end
         reaper.ImGui_EndTable(ctx)
     end
@@ -308,7 +393,11 @@ end
 
 -- GUI LOOP --
 function gui_loop()
-    local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoDecoration()
+    -- Set global style variables of ImGui --
+    push_global_imgui_style()
+    
+    -- Set Window visibility and settings --
+    local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | reaper.ImGui_WindowFlags_NoScrollbar()
     reaper.ImGui_SetNextWindowSize(ctx, 500, 300, reaper.ImGui_Cond_Once())
     reaper.ImGui_PushFont(ctx, FONT)
 
@@ -330,12 +419,13 @@ function gui_loop()
         gui_elements_top_bar()
         
         if reaper.CountTracks(0) ~= 0 then
-            gui_elements_table()
+            gui_elements_child()
         end
         
         reaper.ImGui_End(ctx)
     end 
-
+    
+    pop_global_imgui_style()
     reaper.ImGui_PopFont(ctx)
 
     if window_open then
