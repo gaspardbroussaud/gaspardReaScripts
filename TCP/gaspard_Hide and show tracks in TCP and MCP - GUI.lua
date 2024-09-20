@@ -1,7 +1,7 @@
 -- @description Hide and show tracks in TCP and MCP - GUI
 -- @author gaspard
--- @version 1.0.6
--- @changelog WIP : Fix folders indents.
+-- @version 1.0.7
+-- @changelog WIP : Fixed folder indent + fixed collapse.
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- SHOW IMGUI DEMO --
@@ -104,54 +104,44 @@ function set_selected_tracks()
     end
 end
 
+-- GET TOP PARENT TRACK --
+local function get_top_parent_track(track)
+    while true do
+        local parent = reaper.GetParentTrack(track)
+        if parent then
+            track = parent
+        else
+            return track
+        end
+    end
+end
+
 -- GET ALL TRACKS FROM PROJECT --
 function get_tracks_tab()
-    tracks = {}
     track_count = reaper.CountTracks(0)
+
+    -- Get all tracks and extract datas --
+    tracks = {}
     local parent_check = false
     local inner_depth = 0.0
-    local parent_collapse
-    local prev_depth = 0
     for i = 0, track_count - 1 do
-        local cur_track = reaper.GetTrack(0, i)
-        local cur_state = reaper.GetMediaTrackInfo_Value(cur_track, "B_SHOWINTCP")
-        local cur_select = reaper.IsTrackSelected(cur_track)
-        local cur_collapse = reaper.GetMediaTrackInfo_Value(cur_track, "I_FOLDERCOMPACT")
-        local cur_visible = true
+        local track_id = reaper.GetTrack(0, i)
+        local track_state = reaper.GetMediaTrackInfo_Value(track_id, "B_SHOWINTCP")
+        local track_select = reaper.IsTrackSelected(track_id)
+        local track_collapse = reaper.GetMediaTrackInfo_Value(track_id, "I_FOLDERCOMPACT")
+        local track_depth = reaper.GetMediaTrackInfo_Value(track_id, "I_FOLDERDEPTH")
+        --local track_top_parent = get_top_parent_track(track_id)
 
-        local cur_depth = reaper.GetMediaTrackInfo_Value(cur_track, "I_FOLDERDEPTH")
-        --[[if cur_depth == 1.0 then
-            parent_check = true
-            inner_depth = inner_depth + 1.0
-            cur_depth = inner_depth
-            if cur_depth == 1.0 then parent_collapse = cur_collapse end
-            if cur_depth > 1.0 and parent_collapse > 0 then cur_visible = false end
-        elseif cur_depth < 0.0 then
-            parent_check = false
-            cur_depth = cur_depth - 1.0
-            if parent_collapse > 0 then cur_visible = false end
-            inner_depth = 0.0
-            parent_collapse = 0.0
-        end
 
-        if parent_check and cur_depth == 0.0 then
-            cur_depth = -1.0 * (inner_depth + 1.0)
-            if parent_collapse > 0 then cur_visible = false end
-        end]]
-        
-        if cur_depth == 1 then
-            cur_depth = cur_depth + inner_depth
-            inner_depth = inner_depth + 1
-        elseif cur_depth == 0 and inner_depth ~= 0 then
-            if prev_depth < 0 then inner_depth = 0 end
-            cur_depth = -1 * (1 + inner_depth)
-        elseif cur_depth < 0 then
-            prev_depth = cur_depth
-            cur_depth = -1 * (1 + inner_depth)
-            inner_depth = inner_depth - 1
-        end
+        if not reaper.GetParentTrack(track_id) then inner_depth = 0 end
+        local cur_depth = inner_depth
+        if track_depth > 0 then inner_depth = inner_depth + 1
+        elseif track_depth < 0 then inner_depth = inner_depth - 1 end
+        track_depth = cur_depth
 
-        tracks[i] = { id = cur_track, state = cur_state, select = cur_select, collapse = cur_collapse, visible = cur_visible, depth = cur_depth }
+        local track_visible = true
+
+        tracks[i] = { id = track_id, state = track_state, select = track_select, collapse = track_collapse, depth = cur_depth, visible = track_visible }
     end
 end
 
@@ -360,13 +350,13 @@ function gui_elements_table()
                             tracks[i].collapse = 0
                             reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT", tracks[i].collapse)
                             local out = false
+                            local first = tracks[i].depth
                             for j = i + 1, #tracks do
                                 if not out then
-                                    tracks[j].visible = true
-                                    if reaper.GetMediaTrackInfo_Value(tracks[j].id, "I_FOLDERDEPTH") > 0 then
-                                        if reaper.GetMediaTrackInfo_Value(tracks[j].id, "I_FOLDERCOMPACT") > 0 then
-                                            out = true
-                                        end
+                                    if tracks[j].depth == 0 or tracks[j].depth <= first then
+                                        out = true
+                                    else
+                                        tracks[j].visible = true
                                     end
                                 end
                             end
@@ -374,10 +364,14 @@ function gui_elements_table()
                             tracks[i].collapse = 2
                             reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT", tracks[i].collapse)
                             local out = false
+                            local first = tracks[i].depth
                             for j = i + 1, #tracks do
                                 if not out then
-                                    tracks[j].visible = false
-                                    if reaper.GetMediaTrackInfo_Value(tracks[j].id, "I_FOLDERDEPTH") < 0 then out = true end
+                                    if tracks[j].depth == 0 or tracks[j].depth <= first then
+                                        out = true
+                                    else
+                                        tracks[j].visible = false
+                                    end
                                 end
                             end
                         end
@@ -389,14 +383,17 @@ function gui_elements_table()
                 
                 if text_cell == "" then text_cell = "Track "..track_number end
                 
-                space = " "
+                space = ""
                 if tracks[i].depth ~= 0 then
-                    for j = 0, math.abs(tracks[i].depth) - 2.0 do
-                        space = space.."     "
+                    for j = 0, math.abs(tracks[i].depth) - 1 do
+                        space = space.."    "
                     end
+                    space = space.." |"
+                else
+                    space = " |"
                 end
                 
-                text_cell = space..text_cell.." | "..tostring(tracks[i].depth)
+                text_cell = space..text_cell--.." | "..tostring(tracks[i].depth)
                 reaper.ImGui_Text(ctx, tostring(text_cell))
             end
         end
