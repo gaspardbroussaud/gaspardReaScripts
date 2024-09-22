@@ -1,7 +1,7 @@
 -- @description Hide and show tracks in TCP and MCP - GUI
 -- @author gaspard
--- @version 1.0.7
--- @changelog WIP : Fixed folder indent + fixed collapse.
+-- @version 1.0.8
+-- @changelog WIP : Added settings window.
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- SHOW IMGUI DEMO --
@@ -14,7 +14,7 @@ function push_global_imgui_style()
     reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_PopupRounding(),    6)
     reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_FrameRounding(),    6)
     
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_WindowBg(), 0x11111111FF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_WindowBg(), 0x111111FF)
 end
 
 function pop_global_imgui_style()
@@ -35,7 +35,9 @@ function set_variables()
     last_selected = -1
     project_name = reaper.GetProjectName(0)
     project_path = reaper.GetProjectPath()
-    show_next_tracks = true
+    show_settings = false
+    link_tcp_select = true
+    link_tcp_collapse = true
 end
 
 function quit_app()
@@ -59,12 +61,14 @@ end
 -- SET TRACK TO FALSE OR TRUE WITH INDEX --
 function set_track_visibility(index, visibility)
     tracks[index].select = visibility
-    reaper.SetTrackSelected(tracks[index].id, visibility)
+    if link_tcp_select then
+        reaper.SetTrackSelected(tracks[index].id, visibility)
+    end
 end
 
 -- GET SELECTED TRACKS TO RE-SELECT AFTER SCRIPT END --
 function get_selected_tracks()
-    if reaper.CountSelectedTracks(0) ~= 0 then
+    if reaper.CountSelectedTracks(0) ~= 0 and link_tcp_select then
         selected_tracks = {}
         for i = 0, reaper.CountSelectedTracks(0) - 1 do
             selected_tracks[i] = reaper.GetSelectedTrack(0, i)
@@ -80,11 +84,11 @@ end
 
 -- SELECT TRACKS IF SELECTED BEFORE RUNNING SCRIPT --
 function set_selected_tracks()
-    for i = 0, reaper.CountTracks(0) - 1 do
-        reaper.SetTrackSelected(tracks[i].id, false)
-    end
-    
     if are_tracks_selected then
+        for i = 0, reaper.CountTracks(0) - 1 do
+            reaper.SetTrackSelected(tracks[i].id, false)
+        end
+        
         for i = 0, #selected_tracks do
             -- Prevents crash on selected track before running script being deleted --
             found = false
@@ -189,6 +193,7 @@ function show_track(track)
     reaper.Main_OnCommand(40297, 0) -- Unselect all tracks
 end
 
+-- GUI RELATED FUNCTIONS -------------------------------------------------------------------------------------------
 -- GUI INIT --
 function gui_init()
     ctx = reaper.ImGui_CreateContext('context_imgui')
@@ -204,18 +209,50 @@ function gui_elements_top_bar()
         reaper.ImGui_TableNextRow(ctx)
         reaper.ImGui_TableNextColumn(ctx)
         reaper.ImGui_Text(ctx, "TRACKS VISIBILITY STATE")
-        reaper.ImGui_SameLine(ctx)
 
         reaper.ImGui_TableNextColumn(ctx)
         x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
-        text_x, _ = reaper.ImGui_CalcTextSize(ctx, "X")
-        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (x - text_x - 8))
+        text_x, _ = reaper.ImGui_CalcTextSize(ctx, "SX")
+        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (x - text_x - 24))
+        
+        if reaper.ImGui_Button(ctx, "S") then
+            show_settings = not show_settings
+        end
+        reaper.ImGui_SameLine(ctx)
         if reaper.ImGui_Button(ctx, "X") then
             quit_app()
         end
 
         reaper.ImGui_EndTable(ctx)
     end
+end
+
+function gui_settings_window()
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_WindowBg(), 0x000000ff)
+    -- Set Window visibility and settings --
+    local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
+    reaper.ImGui_SetNextWindowSize(ctx, 400, 200, reaper.ImGui_Cond_Once())
+    reaper.ImGui_SetNextWindowPos(ctx, window_x + 50, window_y + 50, reaper.ImGui_Cond_Appearing())
+
+    settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
+    if settings_visible then
+        reaper.ImGui_Text(ctx, "Link Track Selection:")
+        reaper.ImGui_SameLine(ctx)
+        _, link_tcp_select = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_select", link_tcp_select)
+
+        reaper.ImGui_Text(ctx, "Link Track Collapse:")
+        reaper.ImGui_SameLine(ctx)
+        _, link_tcp_collapse = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_collapse", link_tcp_collapse)
+
+        reaper.ImGui_End(ctx)
+    else
+        show_settings = false
+    end
+
+    if not settings_open then
+        show_settings = false
+    end
+    reaper.ImGui_PopStyleColor(ctx, 1)
 end
 
 -- Child for elements and scroll --
@@ -296,10 +333,12 @@ function gui_elements_table()
                     end
                     
                     -- Set track visibility --
-                    if tracks[i].select then
-                        reaper.SetTrackSelected(tracks[i].id, true)
-                    else
-                        reaper.SetTrackSelected(tracks[i].id, false)
+                    if link_tcp_select then
+                        if tracks[i].select then
+                            reaper.SetTrackSelected(tracks[i].id, true)
+                        else
+                            reaper.SetTrackSelected(tracks[i].id, false)
+                        end
                     end
                     
                     last_selected = i
@@ -334,9 +373,11 @@ function gui_elements_table()
                         tracks[j].state = reaper.GetMediaTrackInfo_Value(tracks[j].id, "B_SHOWINTCP")
                     end
 
-                    for j = 0, #tracks do
-                        if tracks[j].select then
-                            reaper.SetTrackSelected(tracks[j].id, true)
+                    if link_tcp_select then
+                        for j = 0, #tracks do
+                            if tracks[j].select then
+                                reaper.SetTrackSelected(tracks[j].id, true)
+                            end
                         end
                     end
                 end
@@ -348,7 +389,9 @@ function gui_elements_table()
                     if reaper.ImGui_ArrowButton(ctx, "arrow"..tostring(i), direction) then
                         if tracks[i].collapse > 1 then
                             tracks[i].collapse = 0
-                            reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT", tracks[i].collapse)
+                            if link_tcp_collapse then
+                                reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT", tracks[i].collapse)
+                            end
                             local out = false
                             local first = tracks[i].depth
                             for j = i + 1, #tracks do
@@ -362,7 +405,9 @@ function gui_elements_table()
                             end
                         else
                             tracks[i].collapse = 2
-                            reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT", tracks[i].collapse)
+                            if link_tcp_collapse then
+                                reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT", tracks[i].collapse)
+                            end
                             local out = false
                             local first = tracks[i].depth
                             for j = i + 1, #tracks do
@@ -412,6 +457,7 @@ function gui_loop()
     reaper.ImGui_PushFont(ctx, FONT)
 
     window_visible, window_open  = reaper.ImGui_Begin(ctx, 'TRACKS VISIBILITY STATE', true, window_flags)
+    window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
     
     if project_changed() then
         set_variables()
@@ -425,6 +471,7 @@ function gui_loop()
             get_tracks_tab()
         end
 
+        -- If tracks collapsed state updates in project, update GUI --
         --[[for i = 0, track_count - 1 do
             local cur_collapse = reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT")
             if cur_collapse ~= tracks[i].collapse then
@@ -434,13 +481,18 @@ function gui_loop()
         
         -- Gui elements to display --
         gui_elements_top_bar()
+
+        if show_settings then
+            gui_settings_window()
+        end
         
+        -- Display tracks only if any in project --
         if reaper.CountTracks(0) ~= 0 then
             gui_elements_child()
         end
         
         reaper.ImGui_End(ctx)
-    end 
+    end
     
     pop_global_imgui_style()
     reaper.ImGui_PopFont(ctx)
