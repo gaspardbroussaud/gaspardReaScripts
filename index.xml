@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="32114afcca5075c94848f47e5888ed28511d8d96">
+<index version="1" name="Gaspard ReaScripts" commit="752e125bd95e9fdc7a0fdf21afe10d35216d1ed8">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -531,6 +531,10 @@ v1.0 Initial release.]]></changelog>
       <version name="1.0.8" author="gaspard" time="2024-09-22T22:00:59Z">
         <changelog><![CDATA[WIP : Added settings window.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/32114afcca5075c94848f47e5888ed28511d8d96/TCP/gaspard_Hide%20and%20show%20tracks%20in%20TCP%20and%20MCP%20-%20GUI.lua</source>
+      </version>
+      <version name="1.0.9" author="gaspard" time="2024-09-23T09:41:16Z">
+        <changelog><![CDATA[WIP : Applying settings.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/752e125bd95e9fdc7a0fdf21afe10d35216d1ed8/TCP/gaspard_Hide%20and%20show%20tracks%20in%20TCP%20and%20MCP%20-%20GUI.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Hide and show tracks in TCP and MCP.lua" type="script" desc="Hide and show tracks in TCP and MCP">
