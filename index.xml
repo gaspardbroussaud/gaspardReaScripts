@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="752e125bd95e9fdc7a0fdf21afe10d35216d1ed8">
+<index version="1" name="Gaspard ReaScripts" commit="4de308ead0c7ab07f3effb4cf76141c5f6b854b6">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -565,6 +565,25 @@ v1.0 Initial release.]]></changelog>
       <version name="1.0" author="gaspard" time="2024-09-11T14:22:42Z">
         <changelog><![CDATA[# Initial release]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/44fb0f852568ac9778af500c3af1a70d2b951301/TCP/gaspard_Insert%20new%20track%20with%20one%20less%20folder%20depth%20if%20available.lua</source>
+      </version>
+    </reapack>
+  </category>
+  <category name="TCP/TrackVisibilityTool">
+    <reapack name="TrackVisibilityTool.lua" type="script" desc="Track Visibility Tool">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 GUI to hide and show tracks in TCP and mixer with mute and locking.\par}
+}
+]]></description>
+      </metadata>
+      <version name="0.0.1" author="gaspard" time="2024-09-23T16:09:44Z">
+        <changelog><![CDATA[WIP: Multiple files structure.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4de308ead0c7ab07f3effb4cf76141c5f6b854b6/TCP/TrackVisibilityTool/TrackVisibilityTool.lua</source>
+        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4de308ead0c7ab07f3effb4cf76141c5f6b854b6/TCP/TrackVisibilityTool/Utilities/System.lua</source>
+        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4de308ead0c7ab07f3effb4cf76141c5f6b854b6/TCP/TrackVisibilityTool/Utilities/UserInterface.lua</source>
       </version>
     </reapack>
   </category>
