@@ -1,7 +1,7 @@
 -- @description Hide and show tracks in TCP and MCP - GUI
 -- @author gaspard
--- @version 1.0.8
--- @changelog WIP : Added settings window.
+-- @version 1.0.9
+-- @changelog WIP : Applying settings.
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- SHOW IMGUI DEMO --
@@ -41,8 +41,6 @@ function set_variables()
 end
 
 function quit_app()
-    set_selected_tracks()
-
     set_button_state()
     
     window_open = false
@@ -68,21 +66,46 @@ end
 
 -- GET SELECTED TRACKS TO RE-SELECT AFTER SCRIPT END --
 function get_selected_tracks()
-    if reaper.CountSelectedTracks(0) ~= 0 and link_tcp_select then
+    --are_tracks_selected = false
+    if reaper.CountSelectedTracks(0) ~= 0 then
         selected_tracks = {}
         for i = 0, reaper.CountSelectedTracks(0) - 1 do
             selected_tracks[i] = reaper.GetSelectedTrack(0, i)
         end
-        for i = 0, #selected_tracks do
-            reaper.SetTrackSelected(selected_tracks[i], false)
-        end
-        are_tracks_selected = true
-    else
-        are_tracks_selected = false
+        --are_tracks_selected = true
     end
 end
 
--- SELECT TRACKS IF SELECTED BEFORE RUNNING SCRIPT --
+function check_track_selection()
+    if reaper.CountSelectedTracks(0) ~= 0 then
+        update_tracks_selection = false
+        for i = 0, reaper.CountSelectedTracks(0) - 1 do
+            if selected_tracks[i] ~= reaper.GetSelectedTrack(0, i) then
+                update_tracks_selection = true
+            end
+        end
+        if update_tracks_selection then
+            get_selected_tracks()
+            get_tracks_tab()
+        end
+    else
+        for i = 0, #tracks do
+            tracks[i].select = false
+        end
+    end
+end
+
+function check_collapse_tracks()
+    if reaper.CountTracks(0) ~= 0 then
+        for i = 0, reaper.CountTracks(0) - 1 do
+            if tracks[i].collapse ~= reaper.GetMediaTrackInfo_Value(reaper.GetTrack(0, i), "I_FOLDERCOMPACT") then
+                tracks[i].collapse = reaper.GetMediaTrackInfo_Value(reaper.GetTrack(0, i), "I_FOLDERCOMPACT")
+            end
+        end
+    end
+end
+
+--[[SELECT TRACKS IF SELECTED BEFORE RUNNING SCRIPT --
 function set_selected_tracks()
     if are_tracks_selected then
         for i = 0, reaper.CountTracks(0) - 1 do
@@ -106,7 +129,7 @@ function set_selected_tracks()
             end
         end
     end
-end
+end]]
 
 -- GET TOP PARENT TRACK --
 local function get_top_parent_track(track)
@@ -123,6 +146,7 @@ end
 -- GET ALL TRACKS FROM PROJECT --
 function get_tracks_tab()
     track_count = reaper.CountTracks(0)
+    selected_track_count = reaper.CountSelectedTracks(0)
 
     -- Get all tracks and extract datas --
     tracks = {}
@@ -470,6 +494,7 @@ function gui_loop()
         if track_count ~= reaper.CountTracks(0) then
             get_tracks_tab()
         end
+        check_track_selection()
 
         -- If tracks collapsed state updates in project, update GUI --
         --[[for i = 0, track_count - 1 do
