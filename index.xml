@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="d47cc5071f08fc06e329b16a8e35486f151126cc">
+<index version="1" name="Gaspard ReaScripts" commit="7369658061f9d367107613b792d7e9ece646f10b">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -608,6 +608,12 @@ v1.0 Initial release.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d47cc5071f08fc06e329b16a8e35486f151126cc/TCP/TrackVisibilityTool/TrackVisibilityTool.lua</source>
         <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d47cc5071f08fc06e329b16a8e35486f151126cc/TCP/TrackVisibilityTool/Utilities/System.lua</source>
         <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d47cc5071f08fc06e329b16a8e35486f151126cc/TCP/TrackVisibilityTool/Utilities/UserInterface.lua</source>
+      </version>
+      <version name="0.0.6" author="gaspard" time="2024-09-24T15:26:24Z">
+        <changelog><![CDATA[WIP: Fix collapse bug on some tracks layout in some projects.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7369658061f9d367107613b792d7e9ece646f10b/TCP/TrackVisibilityTool/TrackVisibilityTool.lua</source>
+        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7369658061f9d367107613b792d7e9ece646f10b/TCP/TrackVisibilityTool/Utilities/System.lua</source>
+        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7369658061f9d367107613b792d7e9ece646f10b/TCP/TrackVisibilityTool/Utilities/UserInterface.lua</source>
       </version>
     </reapack>
   </category>
