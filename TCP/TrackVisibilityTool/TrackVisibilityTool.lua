@@ -1,13 +1,10 @@
 -- @description Track Visibility Tool
 -- @author gaspard
--- @version 0.0.1
+-- @version 0.0.2
 -- @provides
 --    [nomain] Utilities/*.lua
--- @changelog WIP: Multiple files structure.
+-- @changelog WIP: Fix crash if no tracks in project.
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
-
--- SHOW IMGUI DEMO --
---reaper.Main_OnCommand(reaper.NamedCommandLookup("_RS6b4644d86854e10895485f184942fb69ecc26177"), 0)
 
 -- Global Variables
 ScriptVersion = "v0.0.1"
@@ -35,6 +32,8 @@ System_SetButtonState(1)
 System_SetVariables()
 System_GetSelectedTracksTable()
 System_GetTracksTable()
-System_UpdateTrackCollapse()
+if track_count ~= 0 then
+  System_UpdateTrackCollapse()
+end
 reaper.defer(Gui_Loop)
 reaper.atexit(System_SetButtonState)

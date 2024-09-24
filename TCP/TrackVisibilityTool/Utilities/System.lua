@@ -60,8 +60,9 @@ function System_GetTracksTable()
 
         tracks[i] = { id = track_id, state = track_state, select = track_select, depth = cur_depth, collapse = track_collapse, visible = track_visible }
     end
-
-    System_UpdateTrackCollapse()
+    if track_count ~= 0 then
+        System_UpdateTrackCollapse()
+    end
 end
 
 -- HIDE TRACK WHEN UNSELECTING CHECKBOX --
@@ -155,7 +156,25 @@ end
 function System_UpdateTrackCollapse()
     local parent_depth = 0
     for i = 0, #tracks do
-        if tracks[i].collapse ~= -1 then
+        if tracks[i].collapse > 1 then
+            if tracks[i].depth <= parent_depth then
+                local out = false
+                local first = tracks[i].depth
+                for j = i + 1, #tracks do
+                    if not out then
+                        if tracks[j].depth == 0 or tracks[j].depth <= first then
+                            out = true
+                        else
+                            tracks[j].visible = false
+                        end
+                    end
+                end
+                parent_depth = tracks[i].depth
+            else
+                --parent_depth = tracks[i].depth
+            end
+        end
+        --[[if tracks[i].collapse ~= -1 then
             if tracks[i].collapse > 1 then
                 if tracks[i].depth <= parent_depth then
                     if tracks[i].collapse > 1 then
@@ -173,48 +192,9 @@ function System_UpdateTrackCollapse()
                     end
                     parent_depth = tracks[i].depth
                 end
-            else
-                parent_depth = tracks[i].depth
             end
-        end
-
-        --[[if tracks[i].collapse ~= -1 then
-            if tracks[i].depth <= prev_depth then
-                reaper.ShowConsoleMsg("Track "..tostring(i + 1).."\n")
-                if tracks[i].collapse > 1 then
-                    local out = false
-                    local first = tracks[i].depth
-                    for j = i + 1, #tracks do
-                        if not out then
-                            if tracks[j].depth <= first then
-                                out = true
-                            else
-                                tracks[j].visible = false
-                                reaper.ShowConsoleMsg(tostring(j + 1).." not visible\n")
-                            end
-                        end
-                    end
-                end
-                --else
-                    reaper.ShowConsoleMsg("To Show\n")
-                    tracks[i].collapse = 2
-                    if link_tcp_collapse then
-                        reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT", tracks[i].collapse)
-                    end
-                    local out = false
-                    local first = tracks[i].depth
-                    for j = i + 1, #tracks do
-                        if not out then
-                            if tracks[j].depth == 0 or tracks[j].depth <= first then
-                                out = true
-                            else
-                                tracks[j].visible = false
-                            end
-                        end
-                    end
-                end--
-                prev_depth = tracks[i].depth
-            end
+        else
+            parent_depth = tracks[i].depth
         end]]
     end
 end
