@@ -1,13 +1,13 @@
 -- @description Track Visibility Tool
 -- @author gaspard
--- @version 0.0.3
+-- @version 0.0.4
 -- @provides
 --    [nomain] Utilities/*.lua
--- @changelog WIP: Update collapse + change layout.
+-- @changelog WIP: Add reorder track check.
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
-ScriptVersion = "v0.0.3"
+ScriptVersion = "v0.0.4"
 ScriptName = 'TRACK  VISIBILITY  TOOL'
 Settings = {
     link_select = false,

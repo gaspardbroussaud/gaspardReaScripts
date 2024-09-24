@@ -35,18 +35,21 @@ function Gui_Loop()
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
 
-    if Gui_ProjectChanged() then
+    if Gui_ProjectChanged() or Gui_CheckTracksOrder() then
         System_SetVariables()
         System_GetSelectedTracksTable()
         System_GetTracksTable()
     end
 
+    -- If track count updates (delete or add track)
+    if track_count ~= reaper.CountTracks(0) then
+        System_GetTracksTable()
+    end
+
+    Gui_CheckTrackCollapse()
+
     if visible then
-        -- If track count updates (delete or add track)
-        if track_count ~= reaper.CountTracks(0) then
-            System_GetTracksTable()
-        end
-        
+        -- Top bar elements
         Gui_TopBar()
         
         if show_settings then
@@ -114,9 +117,6 @@ function Gui_TableTracks()
             
             reaper.ImGui_TableNextColumn(ctx)
             reaper.ImGui_Text(ctx, "STATE")
-
-            --[[reaper.ImGui_TableNextColumn(ctx)
-            reaper.ImGui_Text(ctx, "")]]
             
             reaper.ImGui_TableNextColumn(ctx)
             reaper.ImGui_Text(ctx, "TRACK NAME")
@@ -125,13 +125,12 @@ function Gui_TableTracks()
                 if tracks[i].visible then
                     reaper.ImGui_TableNextRow(ctx)
                     reaper.ImGui_TableNextColumn(ctx)
-                    local track_number = tostring(reaper.GetMediaTrackInfo_Value(tracks[i].id, "IP_TRACKNUMBER")):sub(1, -3)
                     x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
-                    local text_x, _ = reaper.ImGui_CalcTextSize(ctx, track_number)
+                    local text_x, _ = reaper.ImGui_CalcTextSize(ctx, tracks[i].number)
                     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + ((x - text_x) * 0.5))
                     local selectable_flags = reaper.ImGui_SelectableFlags_SpanAllColumns() | reaper.ImGui_SelectableFlags_AllowOverlap()
                     x, y = reaper.ImGui_GetContentRegionAvail(ctx)
-                    changed, tracks[i].select = reaper.ImGui_Selectable(ctx, track_number, tracks[i].select, selectable_flags, 0, 21)
+                    changed, tracks[i].select = reaper.ImGui_Selectable(ctx, tracks[i].number, tracks[i].select, selectable_flags, 0, 21)
                     if changed then
                         -- Get key press CTRL = 4096 or CMD = 32768 / SHIFT = 8192
                         local key_code = reaper.ImGui_GetKeyMods(ctx)
@@ -262,23 +261,10 @@ function Gui_TableTracks()
                         reaper.ImGui_SameLine(ctx)
                     end
 
-                    --reaper.ImGui_TableNextColumn(ctx)
                     reaper.ImGui_SameLine(ctx)
                     local _, text_cell = reaper.GetSetMediaTrackInfo_String(tracks[i].id, "P_NAME", "", false)
                     
-                    if text_cell == "" then text_cell = "Track "..track_number end
-                    
-                    --[[local space = ""
-                    if tracks[i].depth ~= 0 then
-                        for j = 0, math.abs(tracks[i].depth) - 1 do
-                            space = space.."    "
-                        end
-                        space = space.." "
-                    else
-                        space = " "
-                    end]]
-                    
-                    --text_cell = space..text_cell--.." | "..tostring(tracks[i].depth)
+                    if text_cell == "" then text_cell = "Track "..tracks[i].number end
                     reaper.ImGui_Text(ctx, tostring(text_cell))
                 end
             end
@@ -345,15 +331,26 @@ end
 
 -- CHECK FOR TRACK COLLAPSE CHANGE IN PROJECT
 function Gui_CheckTrackCollapse()
-    --[[local test = false
-    if link_tcp_collapse and test then
-        if reaper.CountTracks(0) ~= 0 then
-            for i = 0, reaper.CountTracks(0) - 1 do
-                if tracks[i].collapse ~= reaper.GetMediaTrackInfo_Value(reaper.GetTrack(0, i), "I_FOLDERCOMPACT") then
-                    tracks[i].collapse = reaper.GetMediaTrackInfo_Value(reaper.GetTrack(0, i), "I_FOLDERCOMPACT")
-                    System_UpdateTrackCollapse()
-                end
+    if reaper.CountTracks(0) ~= 0 and link_tcp_collapse then
+        for i = 0, reaper.CountTracks(0) - 1 do
+            if tracks[i].collapse ~= reaper.GetMediaTrackInfo_Value(reaper.GetTrack(0, i), "I_FOLDERCOMPACT") then
+                tracks[i].collapse = reaper.GetMediaTrackInfo_Value(reaper.GetTrack(0, i), "I_FOLDERCOMPACT")
+                System_UpdateTrackCollapse()
             end
         end
-    end]]
+    end
+end
+
+-- CHECK FOR TRACK ORDER
+function Gui_CheckTracksOrder()
+    if reaper.CountTracks(0) ~= 0 then
+        for i = 0, #tracks do
+            local number = tostring(reaper.GetMediaTrackInfo_Value(tracks[i].id, "IP_TRACKNUMBER")):sub(1, -3)
+
+            if number ~= tracks[i].number then
+                return true
+            end
+        end
+    end
+    return false
 end
