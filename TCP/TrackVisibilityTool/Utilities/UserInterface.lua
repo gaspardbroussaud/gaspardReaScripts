@@ -4,18 +4,15 @@ local window_name = ScriptName..'  -  '..ScriptVersion
 local gui_W = 500
 local gui_H = 300
 local pin = false
-local font = reaper.ImGui_CreateFont('sans-serif', 14)
-local FLTMIN = reaper.ImGui_NumericLimits_Float()
-local held_keys = {}
+local font = reaper.ImGui_CreateFont('sans-serif', 15)
 local last_selected = -1
 local show_settings = false
-local link_tcp_select = false
-local link_tcp_collapse = true
+link_tcp_select = true
+link_tcp_collapse = true
 local changed = false
 local direction = nil
 local project_name = ""
 local project_path = ""
-local update_track_collapse = false
 local visible = false
 local open = false
 
@@ -35,18 +32,19 @@ function Gui_Loop()
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
 
+    -- If track count updates (delete or add track)
+    if track_count ~= reaper.CountTracks(0) then
+        System_GetTracksTable()
+    end
+
     if Gui_ProjectChanged() or Gui_CheckTracksOrder() then
         System_SetVariables()
         System_GetSelectedTracksTable()
         System_GetTracksTable()
     end
 
-    -- If track count updates (delete or add track)
-    if track_count ~= reaper.CountTracks(0) then
-        System_GetTracksTable()
-    end
-
     Gui_CheckTrackCollapse()
+    Gui_CheckTrackSelection()
 
     if visible then
         -- Top bar elements
@@ -183,6 +181,9 @@ function Gui_TableTracks()
                     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + ((x - 21) * 0.5))
                     changed, tracks[i].state = reaper.ImGui_Checkbox(ctx, "##checkbox"..tostring(i), tracks[i].state)
                     if changed then
+                        reaper.PreventUIRefresh(1)
+                        reaper.Undo_BeginBlock()
+
                         reaper.Main_OnCommand(40297, 0) -- Unselect all tracks
 
                         if tracks[i].select then
@@ -212,6 +213,10 @@ function Gui_TableTracks()
                                 reaper.SetTrackSelected(tracks[j].id, true)
                             end
                         end
+
+                        reaper.Undo_EndBlock("Tracks hidden or shown via Track Visibility Tool.", -1)
+                        reaper.PreventUIRefresh(-1)
+                        reaper.UpdateArrange()
                     end
                     
                     reaper.ImGui_TableNextColumn(ctx)
@@ -222,39 +227,37 @@ function Gui_TableTracks()
                         if tracks[i].collapse > 1 then direction = reaper.ImGui_Dir_Right()
                         else direction = reaper.ImGui_Dir_Down() end
                         if reaper.ImGui_ArrowButton(ctx, "arrow"..tostring(i), direction) then
-                            if tracks[i].collapse > 1 then
-                                tracks[i].collapse = 0
-                                if link_tcp_collapse then
-                                    reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT", tracks[i].collapse)
-                                end
-                                local out = false
-                                local first = tracks[i].depth
-                                for j = i + 1, #tracks do
-                                    if not out then
-                                        if tracks[j].depth == 0 or tracks[j].depth <= first then
-                                            out = true
-                                        else
+                            reaper.PreventUIRefresh(1)
+                            reaper.Undo_BeginBlock()
+                            
+                            -- Set collapsed state for track if link enabled in settings
+                            if link_tcp_collapse then
+                                if tracks[i].collapse > 1 then tracks[i].collapse = 0
+                                else tracks[i].collapse = 2 end
+                                reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT", tracks[i].collapse)
+                            end
+                            
+                            local parent_visible = true
+                            local out = false
+                            for j = i + 1, #tracks do
+                                if not out then
+                                    if tracks[j].depth == 0 or tracks[j].depth <= tracks[i].depth then
+                                        out = true
+                                    else
+                                        if tracks[j].collapse > -1 then
                                             tracks[j].visible = true
-                                        end
-                                    end
-                                end
-                            else
-                                tracks[i].collapse = 2
-                                if link_tcp_collapse then
-                                    reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT", tracks[i].collapse)
-                                end
-                                local out = false
-                                local first = tracks[i].depth
-                                for j = i + 1, #tracks do
-                                    if not out then
-                                        if tracks[j].depth == 0 or tracks[j].depth <= first then
-                                            out = true
+                                            if tracks[j].collapse > 1 then parent_visible = false
+                                            else parent_visible = true end
                                         else
-                                            tracks[j].visible = false
+                                            tracks[j].visible = parent_visible
                                         end
                                     end
                                 end
                             end
+
+                            reaper.Undo_EndBlock("Tracks collapsed or uncollapsed via Track Visibility Tool.", -1)
+                            reaper.PreventUIRefresh(-1)
+                            reaper.UpdateArrange()
                         end
                     else
                         reaper.ImGui_Dummy(ctx, tracks[i].depth * 10 + 28, 1)
@@ -353,4 +356,33 @@ function Gui_CheckTracksOrder()
         end
     end
     return false
+end
+
+-- CHECK FOR TRACK SELECTION CHANGE IN PROJECT
+function Gui_CheckTrackSelection()
+    if link_tcp_select then
+        if reaper.CountSelectedTracks(0) ~= 0 and selected_tracks then
+            local update_tracks_selection = false
+            for i = 0, reaper.CountSelectedTracks(0) - 1 do
+                if selected_tracks[i] ~= reaper.GetSelectedTrack(0, i) then
+                    update_tracks_selection = true
+                end
+            end
+            if update_tracks_selection then
+                System_GetSelectedTracksTable()
+                System_GetTracksTable()
+            end
+        else
+            if selected_tracks then
+                if #selected_tracks ~= 0 then
+                    for i = 0, #selected_tracks do
+                        reaper.SetTrackSelected(selected_tracks[i], false)
+                    end
+                else
+                    System_GetSelectedTracksTable()
+                    System_GetTracksTable()
+                end
+            end
+        end
+    end
 end

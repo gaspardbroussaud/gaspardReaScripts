@@ -34,13 +34,28 @@ function System_GetTopParentTrack(track)
     end
 end
 
+-- GET PARENT TRACK MATCH FOR TRACK VISIBILITY
+function System_GetParentTrackMatch(track, target)
+    while true do
+        local parent = reaper.GetParentTrack(track)
+        if parent then
+            if parent ~= target then
+                track = parent
+            else
+                return true
+            end
+        else
+            return false
+        end
+    end
+end
+
 -- GET ALL TRACKS FROM PROJECT
 function System_GetTracksTable()
     track_count = reaper.CountTracks(0)
 
     -- Get all tracks and extract datas
     tracks = {}
-    local parent_check = false
     local inner_depth = 0.0
     for i = 0, track_count - 1 do
         local track_id = reaper.GetTrack(0, i)
@@ -53,11 +68,10 @@ function System_GetTracksTable()
             track_collapse = reaper.GetMediaTrackInfo_Value(track_id, "I_FOLDERCOMPACT")
         end
         
-        local track_top_parent, depth_in_parent = nil, 0
         local track_parent = reaper.GetParentTrack(track_id)
 
         if not track_parent then inner_depth = 0
-        else track_top_parent, inner_depth = System_GetTopParentTrack(track_id) end
+        else _, inner_depth = System_GetTopParentTrack(track_id) end
         local cur_depth = inner_depth
         if track_depth > 0 then inner_depth = inner_depth + 1
         elseif track_depth < 0 then inner_depth = inner_depth - 1 end
@@ -128,35 +142,6 @@ function System_SetTrackVisibility(index, visibility)
     tracks[index].select = visibility
     if link_tcp_select then
         reaper.SetTrackSelected(tracks[index].id, visibility)
-    end
-end
-
--- CHECK FOR TRACK SELECTION CHANGE IN PROJECT
-function System_CheckTrackSelection()
-    if link_tcp_select then
-        if reaper.CountSelectedTracks(0) ~= 0 and selected_tracks then
-            local update_tracks_selection = false
-            for i = 0, reaper.CountSelectedTracks(0) - 1 do
-                if selected_tracks[i] ~= reaper.GetSelectedTrack(0, i) then
-                    update_tracks_selection = true
-                end
-            end
-            if update_tracks_selection then
-                System_GetSelectedTracksTable()
-                System_GetTracksTable()
-            end
-        else
-            if selected_tracks then
-                if #selected_tracks ~= 0 then
-                    for i = 0, #selected_tracks do
-                        reaper.SetTrackSelected(selected_tracks[i], false)
-                    end
-                else
-                    System_GetSelectedTracksTable()
-                    System_GetTracksTable()
-                end
-            end
-        end
     end
 end
 
