@@ -1,4 +1,6 @@
 -- @noindex
+
+-- SET GLOBAL VARIABLES
 function System_SetVariables()
     selected_tracks = {}
     track_count = 0
@@ -6,7 +8,7 @@ function System_SetVariables()
     tracks = {}
 end
 
--- GET SELECTED TRACKS TO RE-SELECT AFTER SCRIPT END --
+-- GET SELECTED TRACKS TO RE-SELECT AFTER SCRIPT END
 function System_GetSelectedTracksTable()
     selected_tracks = {}
     selected_track_count = reaper.CountSelectedTracks(0)
@@ -18,23 +20,25 @@ function System_GetSelectedTracksTable()
     end
 end
 
--- GET TOP PARENT TRACK --
+-- GET TOP PARENT TRACK
 function System_GetTopParentTrack(track)
+    local depth = 0
     while true do
         local parent = reaper.GetParentTrack(track)
         if parent then
             track = parent
+            depth = depth + 1
         else
-            return track
+            return track, depth
         end
     end
 end
 
--- GET ALL TRACKS FROM PROJECT --
+-- GET ALL TRACKS FROM PROJECT
 function System_GetTracksTable()
     track_count = reaper.CountTracks(0)
 
-    -- Get all tracks and extract datas --
+    -- Get all tracks and extract datas
     tracks = {}
     local parent_check = false
     local inner_depth = 0.0
@@ -48,9 +52,11 @@ function System_GetTracksTable()
             track_collapse = reaper.GetMediaTrackInfo_Value(track_id, "I_FOLDERCOMPACT")
         end
         
-        --local track_top_parent = get_top_parent_track(track_id)
+        local track_top_parent, depth_in_parent = nil, 0
+        local track_parent = reaper.GetParentTrack(track_id)
 
-        if not reaper.GetParentTrack(track_id) then inner_depth = 0 end
+        if not track_parent then inner_depth = 0
+        else track_top_parent, inner_depth = System_GetTopParentTrack(track_id) end
         local cur_depth = inner_depth
         if track_depth > 0 then inner_depth = inner_depth + 1
         elseif track_depth < 0 then inner_depth = inner_depth - 1 end
@@ -58,14 +64,14 @@ function System_GetTracksTable()
 
         local track_visible = true
 
-        tracks[i] = { id = track_id, state = track_state, select = track_select, depth = cur_depth, collapse = track_collapse, visible = track_visible }
+        tracks[i] = { id = track_id, state = track_state, select = track_select, depth = track_depth, collapse = track_collapse, visible = track_visible }
     end
     if track_count ~= 0 then
         System_UpdateTrackCollapse()
     end
 end
 
--- HIDE TRACK WHEN UNSELECTING CHECKBOX --
+-- HIDE TRACK WHEN UNSELECTING CHECKBOX
 function System_HideTrack(track)
     reaper.SetTrackSelected(track, true)
     if reaper.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
@@ -87,7 +93,7 @@ function System_HideTrack(track)
     reaper.Main_OnCommand(40297, 0) -- Unselect all tracks
 end
 
--- SHOW TRACK WHEN SELECTING CHECKBOX --
+-- SHOW TRACK WHEN SELECTING CHECKBOX
 function System_ShowTrack(track)
     reaper.SetTrackSelected(track, true)
     if reaper.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
@@ -109,13 +115,14 @@ function System_ShowTrack(track)
     reaper.Main_OnCommand(40297, 0) -- Unselect all tracks
 end
 
+-- TOGGLE BUTTON STATE IN REAPER
 function System_SetButtonState(set)
     local _, _, sec, cmd, _, _, _ = reaper.get_action_context()
     reaper.SetToggleCommandState(sec, cmd, set or 0)
     reaper.RefreshToolbar2(sec, cmd)
 end
 
--- SET TRACK TO FALSE OR TRUE WITH INDEX --
+-- SET TRACK TO FALSE OR TRUE WITH INDEX
 function System_SetTrackVisibility(index, visibility)
     tracks[index].select = visibility
     if link_tcp_select then
@@ -123,7 +130,7 @@ function System_SetTrackVisibility(index, visibility)
     end
 end
 
--- CHECK FOR TRACK SELECTION CHANGE IN PROJECT --
+-- CHECK FOR TRACK SELECTION CHANGE IN PROJECT
 function System_CheckTrackSelection()
     if link_tcp_select then
         if reaper.CountSelectedTracks(0) ~= 0 and selected_tracks then
@@ -152,29 +159,56 @@ function System_CheckTrackSelection()
     end
 end
 
--- UPDATE TRACK COLLAPSE IF ENABLED --
+-- UPDATE TRACK COLLAPSE IF ENABLED
 function System_UpdateTrackCollapse()
+    local in_parent = false
+    local parent_collapse = 0
     local parent_depth = 0
     for i = 0, #tracks do
-        if tracks[i].collapse > 1 then
-            if tracks[i].depth <= parent_depth then
-                local out = false
-                local first = tracks[i].depth
-                for j = i + 1, #tracks do
-                    if not out then
-                        if tracks[j].depth == 0 or tracks[j].depth <= first then
-                            out = true
-                        else
-                            tracks[j].visible = false
+        if tracks[i].depth <= parent_depth or tracks[i].collapse ~= parent_collapse and parent_collapse < 2 then
+            in_parent = false
+        end
+
+        if in_parent then
+            if parent_collapse > 1 then
+                tracks[i].visible = false
+            else
+                tracks[i].visible = true
+            end
+        end
+
+        if tracks[i].collapse > -1 and not in_parent then
+            --reaper.ShowConsoleMsg("New parent at track: "..tostring(i+1).."\n")
+            parent_collapse = tracks[i].collapse
+            parent_depth = tracks[i].depth
+            in_parent = true
+        end
+    end
+end
+
+    --[[local parent_depth = 0
+    for i = 0, #tracks do
+        local collapsed = tracks[i].collapse
+        if collapsed > -1 then
+            if collapsed > 1 then
+                if tracks[i].depth <= parent_depth then
+                    reaper.ShowConsoleMsg(tostring(i + 1).."\n")
+                    local out = false
+                    local first = tracks[i].depth
+                    for j = i + 1, #tracks do
+                        if not out then
+                            if tracks[j].depth == 0 or tracks[j].depth <= first then
+                                out = true
+                            else
+                                tracks[j].visible = false
+                            end
                         end
                     end
                 end
-                parent_depth = tracks[i].depth
-            else
-                --parent_depth = tracks[i].depth
             end
         end
-        --[[if tracks[i].collapse ~= -1 then
+
+        if tracks[i].collapse ~= -1 then
             if tracks[i].collapse > 1 then
                 if tracks[i].depth <= parent_depth then
                     if tracks[i].collapse > 1 then
@@ -195,9 +229,9 @@ function System_UpdateTrackCollapse()
             end
         else
             parent_depth = tracks[i].depth
-        end]]
+        end
     end
-end
+end]]
 
 --[[function System_QuitApp()
     System_SetButtonState()

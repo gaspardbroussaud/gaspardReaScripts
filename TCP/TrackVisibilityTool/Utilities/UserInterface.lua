@@ -1,6 +1,6 @@
 -- @noindex
 local ctx = reaper.ImGui_CreateContext('My script')
-local window_name = ScriptName..' - '..ScriptVersion
+local window_name = ScriptName..'  -  '..ScriptVersion
 local gui_W = 500
 local gui_H = 300
 local pin = false
@@ -23,15 +23,15 @@ reaper.ImGui_Attach(ctx, font)
 function Gui_Loop()
     Gui_PushTheme()
 
-    -- Window Settings --
+    -- Window Settings
     local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | reaper.ImGui_WindowFlags_NoScrollbar()
     if pin then
         window_flags = window_flags | reaper.ImGui_WindowFlags_TopMost()
     end
     reaper.ImGui_SetNextWindowSize(ctx, gui_W, gui_H, reaper.ImGui_Cond_Once())
-    -- Font --
+    -- Font
     reaper.ImGui_PushFont(ctx, font)
-    -- Begin --
+    -- Begin
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
 
@@ -42,7 +42,7 @@ function Gui_Loop()
     end
 
     if visible then
-        -- If track count updates (delete or add track) --
+        -- If track count updates (delete or add track)
         if track_count ~= reaper.CountTracks(0) then
             System_GetTracksTable()
         end
@@ -59,7 +59,7 @@ function Gui_Loop()
 
         reaper.ImGui_End(ctx)
     end
-    --demo.PopStyle(ctx)
+    
     Gui_PopTheme()
     reaper.ImGui_PopFont(ctx)
     if open then
@@ -67,9 +67,9 @@ function Gui_Loop()
     end 
 end
 
--- GUI ELEMENTS FOR TOP BAR --
+-- GUI ELEMENTS FOR TOP BAR
 function Gui_TopBar()
-    -- GUI Menu Bar --
+    -- GUI Menu Bar
     local table_flags = reaper.ImGui_TableFlags_None() --reaper.ImGui_TableFlags_BordersOuter()
     if reaper.ImGui_BeginTable(ctx, "table_top_bar", 2, table_flags) then
         reaper.ImGui_TableNextRow(ctx)
@@ -94,14 +94,14 @@ function Gui_TopBar()
     end
 end
 
--- GUI ELEMENTS FOR TABLE TRACKS --
+-- GUI ELEMENTS FOR TABLE TRACKS
 function Gui_TableTracks()
-    -- GUI Tracks Table --
+    -- GUI Tracks Table
     local x, y = reaper.ImGui_GetContentRegionAvail(ctx)
     local child_flags = reaper.ImGui_WindowFlags_NoScrollbar()
     if reaper.ImGui_BeginChild(ctx, "child_scroll", x, y, 0, child_flags) and track_count ~= 0 then
         local table_flags = reaper.ImGui_TableFlags_SizingFixedFit() | reaper.ImGui_TableFlags_Borders() | reaper.ImGui_TableFlags_ScrollY()
-        if reaper.ImGui_BeginTable(ctx, "table_tracks", 4, table_flags) then
+        if reaper.ImGui_BeginTable(ctx, "table_tracks", 3, table_flags) then
 
             reaper.ImGui_TableSetupScrollFreeze(ctx, 0, 1)
 
@@ -115,8 +115,8 @@ function Gui_TableTracks()
             reaper.ImGui_TableNextColumn(ctx)
             reaper.ImGui_Text(ctx, "STATE")
 
-            reaper.ImGui_TableNextColumn(ctx)
-            reaper.ImGui_Text(ctx, "")
+            --[[reaper.ImGui_TableNextColumn(ctx)
+            reaper.ImGui_Text(ctx, "")]]
             
             reaper.ImGui_TableNextColumn(ctx)
             reaper.ImGui_Text(ctx, "TRACK NAME")
@@ -133,13 +133,13 @@ function Gui_TableTracks()
                     x, y = reaper.ImGui_GetContentRegionAvail(ctx)
                     changed, tracks[i].select = reaper.ImGui_Selectable(ctx, track_number, tracks[i].select, selectable_flags, 0, 21)
                     if changed then
-                        -- Get key press CTRL = 4096 or CMD = 32768 / SHIFT = 8192 --
+                        -- Get key press CTRL = 4096 or CMD = 32768 / SHIFT = 8192
                         local key_code = reaper.ImGui_GetKeyMods(ctx)
                         local ctrl, shift = false, false
                         if key_code == 4096 or key_code == 32768 then ctrl = true
                         elseif key_code == 8192 then shift = true end
                         
-                        -- Multi selection system --
+                        -- Multi selection system
                         if not ctrl and not shift then
                             if not tracks[i].select then
                                 for j = 0, #tracks do
@@ -167,7 +167,7 @@ function Gui_TableTracks()
                             end
                         end
                         
-                        -- Set track visibility --
+                        -- Set track visibility
                         if link_tcp_select then
                             if tracks[i].select then
                                 reaper.SetTrackSelected(tracks[i].id, true)
@@ -217,6 +217,9 @@ function Gui_TableTracks()
                     
                     reaper.ImGui_TableNextColumn(ctx)
                     if reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERDEPTH") == 1 then
+                        reaper.ImGui_Dummy(ctx, tracks[i].depth * 10, 1)
+                        reaper.ImGui_SameLine(ctx)
+
                         if tracks[i].collapse > 1 then direction = reaper.ImGui_Dir_Right()
                         else direction = reaper.ImGui_Dir_Down() end
                         if reaper.ImGui_ArrowButton(ctx, "arrow"..tostring(i), direction) then
@@ -254,14 +257,18 @@ function Gui_TableTracks()
                                 end
                             end
                         end
+                    else
+                        reaper.ImGui_Dummy(ctx, tracks[i].depth * 10 + 28, 1)
+                        reaper.ImGui_SameLine(ctx)
                     end
 
-                    reaper.ImGui_TableNextColumn(ctx)
+                    --reaper.ImGui_TableNextColumn(ctx)
+                    reaper.ImGui_SameLine(ctx)
                     local _, text_cell = reaper.GetSetMediaTrackInfo_String(tracks[i].id, "P_NAME", "", false)
                     
                     if text_cell == "" then text_cell = "Track "..track_number end
                     
-                    local space = ""
+                    --[[local space = ""
                     if tracks[i].depth ~= 0 then
                         for j = 0, math.abs(tracks[i].depth) - 1 do
                             space = space.."    "
@@ -269,9 +276,9 @@ function Gui_TableTracks()
                         space = space.." "
                     else
                         space = " "
-                    end
+                    end]]
                     
-                    text_cell = space..text_cell--.." | "..tostring(tracks[i].depth)
+                    --text_cell = space..text_cell--.." | "..tostring(tracks[i].depth)
                     reaper.ImGui_Text(ctx, tostring(text_cell))
                 end
             end
@@ -281,10 +288,10 @@ function Gui_TableTracks()
     end
 end
 
--- GUI ELEMENTS FOR SETTINGS WINDOW --
+-- GUI ELEMENTS FOR SETTINGS WINDOW
 function Gui_SettingsWindow()
     reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_WindowBg(), 0x000000ff)
-    -- Set Window visibility and settings --
+    -- Set Window visibility and settings
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
     reaper.ImGui_SetNextWindowSize(ctx, 400, 200, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowPos(ctx, window_x + 50, window_y + 50, reaper.ImGui_Cond_Appearing())
@@ -325,7 +332,7 @@ function Gui_PopTheme()
     reaper.ImGui_PopStyleColor(ctx, 1)
 end
 
--- CHECK CURRENT PROJECT CHANGE --
+-- CHECK CURRENT PROJECT CHANGE
 function Gui_ProjectChanged()
     if project_name ~= reaper.GetProjectName(0) or project_path ~= reaper.GetProjectPath() then
         project_name = reaper.GetProjectName(0)
@@ -336,9 +343,9 @@ function Gui_ProjectChanged()
     end
 end
 
--- CHECK FOR TRACK COLLAPSE CHANGE IN PROJECT --
+-- CHECK FOR TRACK COLLAPSE CHANGE IN PROJECT
 function Gui_CheckTrackCollapse()
-    local test = false
+    --[[local test = false
     if link_tcp_collapse and test then
         if reaper.CountTracks(0) ~= 0 then
             for i = 0, reaper.CountTracks(0) - 1 do
@@ -348,5 +355,5 @@ function Gui_CheckTrackCollapse()
                 end
             end
         end
-    end
+    end]]
 end

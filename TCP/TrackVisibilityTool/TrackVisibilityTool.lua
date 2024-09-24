@@ -1,14 +1,14 @@
 -- @description Track Visibility Tool
 -- @author gaspard
--- @version 0.0.2
+-- @version 0.0.3
 -- @provides
 --    [nomain] Utilities/*.lua
--- @changelog WIP: Fix crash if no tracks in project.
+-- @changelog WIP: Update collapse + change layout.
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
-ScriptVersion = "v0.0.1"
-ScriptName = 'Track Visibility Tool'
+ScriptVersion = "v0.0.3"
+ScriptName = 'TRACK  VISIBILITY  TOOL'
 Settings = {
     link_select = false,
     link_collapse = false,
@@ -31,9 +31,5 @@ local proj = 0
 System_SetButtonState(1)
 System_SetVariables()
 System_GetSelectedTracksTable()
-System_GetTracksTable()
-if track_count ~= 0 then
-  System_UpdateTrackCollapse()
-end
 reaper.defer(Gui_Loop)
 reaper.atexit(System_SetButtonState)
