@@ -43,8 +43,8 @@ function Gui_Loop()
         System_GetTracksTable()
     end
 
-    Gui_CheckTrackCollapse()
     Gui_CheckTrackSelection()
+    Gui_CheckTrackCollapse()
 
     if visible then
         -- Top bar elements
@@ -231,7 +231,7 @@ function Gui_TableTracks()
                             reaper.Undo_BeginBlock()
                             
                             -- Set collapsed state for track if link enabled in settings
-                            if link_tcp_collapse then
+                            if link_tcp_collapse and tracks[i].collapse > -1 then
                                 if tracks[i].collapse > 1 then tracks[i].collapse = 0
                                 else tracks[i].collapse = 2 end
                                 reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT", tracks[i].collapse)
@@ -268,6 +268,7 @@ function Gui_TableTracks()
                     local _, text_cell = reaper.GetSetMediaTrackInfo_String(tracks[i].id, "P_NAME", "", false)
                     
                     if text_cell == "" then text_cell = "Track "..tracks[i].number end
+                    text_cell = text_cell.." | "..tostring(tracks[i].collapse)
                     reaper.ImGui_Text(ctx, tostring(text_cell))
                 end
             end
@@ -336,9 +337,11 @@ end
 function Gui_CheckTrackCollapse()
     if reaper.CountTracks(0) ~= 0 and link_tcp_collapse then
         for i = 0, reaper.CountTracks(0) - 1 do
-            if tracks[i].collapse ~= reaper.GetMediaTrackInfo_Value(reaper.GetTrack(0, i), "I_FOLDERCOMPACT") then
-                tracks[i].collapse = reaper.GetMediaTrackInfo_Value(reaper.GetTrack(0, i), "I_FOLDERCOMPACT")
-                System_UpdateTrackCollapse()
+            if reaper.GetMediaTrackInfo_Value(reaper.GetTrack(0, i), "I_FOLDERDEPTH")  == 1 then
+                if tracks[i].collapse ~= reaper.GetMediaTrackInfo_Value(reaper.GetTrack(0, i), "I_FOLDERCOMPACT") then
+                    tracks[i].collapse = reaper.GetMediaTrackInfo_Value(reaper.GetTrack(0, i), "I_FOLDERCOMPACT")
+                    System_UpdateTrackCollapse()
+                end
             end
         end
     end

@@ -1,14 +1,14 @@
 -- @description Track Visibility Tool
 -- @author gaspard
--- @version 0.0.5
+-- @version 0.0.6
 -- @provides
 --    [nomain] Utilities/*.lua
--- @changelog WIP: Rewrite and fix collapse tracks and settings links.
+-- @changelog WIP: Fix collapse bug on some tracks layout in some projects.
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
-ScriptVersion = "v0.0.5"
-ScriptName = 'TRACK  VISIBILITY  TOOL'
+ScriptVersion = "v0.0.6"
+ScriptName = 'TRACK VISIBILITY TOOL'
 Settings = {
     link_select = false,
     link_collapse = false,
