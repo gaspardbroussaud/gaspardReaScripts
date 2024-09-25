@@ -1,13 +1,13 @@
 -- @description Track Visibility Tool
 -- @author gaspard
--- @version 0.0.6
+-- @version 0.0.7
 -- @provides
 --    [nomain] Utilities/*.lua
--- @changelog WIP: Fix collapse bug on some tracks layout in some projects.
+-- @changelog WIP: Ready for QA.
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
-ScriptVersion = "v0.0.6"
+ScriptVersion = "v0.0.7"
 ScriptName = 'TRACK VISIBILITY TOOL'
 Settings = {
     link_select = false,
@@ -15,7 +15,7 @@ Settings = {
     tracks = {}
 }
 
-settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/Data/settings_file'
+settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/Data/settings_file.dat'
 ------
 -- Load Utilities
 dofile(reaper.GetResourcePath() ..
@@ -24,12 +24,11 @@ dofile(reaper.GetResourcePath() ..
 package.path = package.path..';'..debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]] .. "?.lua;" -- GET DIRECTORY FOR REQUIRE
 require('Utilities/UserInterface')
 require('Utilities/System')
---[[json = require('Utilities/json')
-require('Data')]]
 
 local proj = 0
 System_SetButtonState(1)
 System_SetVariables()
 System_GetSelectedTracksTable()
+System_ReadSettingsFile()
 reaper.defer(Gui_Loop)
 reaper.atexit(System_SetButtonState)

@@ -20,6 +20,10 @@ function System_GetSelectedTracksTable()
     end
 end
 
+---comment
+---@param track any
+---@return any track
+---@return integer depth
 -- GET TOP PARENT TRACK
 function System_GetTopParentTrack(track)
     local depth = 0
@@ -80,9 +84,6 @@ function System_GetTracksTable()
         local track_visible = true
 
         tracks[i] = { id = track_id, number = track_number, state = track_state, select = track_select, depth = track_depth, collapse = track_collapse, visible = track_visible }
-    end
-    if track_count ~= 0 then
-        System_UpdateTrackCollapse()
     end
 end
 
@@ -145,28 +146,68 @@ function System_SetTrackVisibility(index, visibility)
     end
 end
 
--- UPDATE TRACK COLLAPSE IF ENABLED
-function System_UpdateTrackCollapse()
-    local in_parent = false
-    local parent_collapse = 0
-    local parent_depth = 0
+-- UPDATE TRACK SELECTION IF ENABLED
+function System_UpdateTrackSelection()
     for i = 0, #tracks do
-        if tracks[i].depth <= parent_depth or tracks[i].collapse ~= parent_collapse and parent_collapse < 2 then
-            in_parent = false
-        end
+        tracks[i].select = reaper.IsTrackSelected(tracks[i].id)
+    end
+end
 
-        if in_parent then
-            if parent_collapse > 1 then
+-- UPDATE TRACK COLLAPSE IF ENABLED
+function System_UpdateTrackCollapse(index)
+    reaper.PreventUIRefresh(1)
+    reaper.Undo_BeginBlock()
+
+    if tracks[index].collapse > 1 then
+        tracks[index].collapse = 0
+    else
+        tracks[index].collapse = 2
+    end
+
+    for i = index + 1, #tracks do
+        if System_GetParentTrackMatch(tracks[i].id, tracks[index].id) then
+            if tracks[index].collapse > 1 then
                 tracks[i].visible = false
             else
                 tracks[i].visible = true
             end
-        end
-
-        if tracks[i].collapse > -1 and not in_parent then
-            parent_collapse = tracks[i].collapse
-            parent_depth = tracks[i].depth
-            in_parent = true
+        else
+            return
         end
     end
+    
+    reaper.Undo_EndBlock("Tracks collapsed or uncollapsed via Track Visibility Tool.", -1)
+    reaper.PreventUIRefresh(-1)
+    reaper.UpdateArrange()
+end
+
+-- WRITE SETTINGS IN FILE
+function System_WriteSettingsFile(setting_select, setting_colapse)
+    local file = io.open(settings_path, "w")
+    if file then
+        file:write(tostring(setting_select).."\n"..tostring(setting_colapse))
+        file:close()
+    end
+end
+
+-- READ SETTINGS IN FILE AT LAUNCH
+function System_ReadSettingsFile()
+    local setting_select = false
+    local setting_collapse = false
+    local file = io.open(settings_path, "r")
+    if file then
+        setting_select = file:read("l")
+        setting_collapse = file:read("l")
+        file:close()
+        if setting_select == "true" then setting_select = true
+        else setting_select = false end
+        if setting_collapse == "true" then setting_collapse = true
+        else setting_collapse = false end
+    else
+        setting_select = false
+        setting_collapse = false
+        System_WriteSettingsFile(setting_select, setting_collapse)
+    end
+    link_tcp_select = setting_select
+    link_tcp_collapse = setting_collapse
 end
