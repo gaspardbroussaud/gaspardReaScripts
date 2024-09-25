@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="df2c54c84e6bd70b9006803f64f6558033bbc8f4">
+<index version="1" name="Gaspard ReaScripts" commit="2acf299a9b8fca1162ce4936d502a75d796cc2cd">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -565,67 +565,6 @@ v1.0 Initial release.]]></changelog>
       <version name="1.0" author="gaspard" time="2024-09-11T14:22:42Z">
         <changelog><![CDATA[# Initial release]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/44fb0f852568ac9778af500c3af1a70d2b951301/TCP/gaspard_Insert%20new%20track%20with%20one%20less%20folder%20depth%20if%20available.lua</source>
-      </version>
-    </reapack>
-  </category>
-  <category name="TCP/TrackVisibilityTool">
-    <reapack name="TrackVisibilityTool.lua" type="script" desc="Track Visibility Tool">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 GUI to hide and show tracks in TCP and mixer with mute and locking.\par}
-}
-]]></description>
-      </metadata>
-      <version name="0.0.1" author="gaspard" time="2024-09-23T16:09:44Z">
-        <changelog><![CDATA[WIP: Multiple files structure.]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4de308ead0c7ab07f3effb4cf76141c5f6b854b6/TCP/TrackVisibilityTool/TrackVisibilityTool.lua</source>
-        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4de308ead0c7ab07f3effb4cf76141c5f6b854b6/TCP/TrackVisibilityTool/Utilities/System.lua</source>
-        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4de308ead0c7ab07f3effb4cf76141c5f6b854b6/TCP/TrackVisibilityTool/Utilities/UserInterface.lua</source>
-      </version>
-      <version name="0.0.2" author="gaspard" time="2024-09-24T07:30:02Z">
-        <changelog><![CDATA[WIP: Fix crash if no tracks in project.]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/54a7c3e5d33163133c83c6a32dea3b27c115c938/TCP/TrackVisibilityTool/TrackVisibilityTool.lua</source>
-        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/54a7c3e5d33163133c83c6a32dea3b27c115c938/TCP/TrackVisibilityTool/Utilities/System.lua</source>
-        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/54a7c3e5d33163133c83c6a32dea3b27c115c938/TCP/TrackVisibilityTool/Utilities/UserInterface.lua</source>
-      </version>
-      <version name="0.0.3" author="gaspard" time="2024-09-24T09:27:36Z">
-        <changelog><![CDATA[WIP: Update collapse + change layout.]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/41e69f59305e66ae3bd84e40d73b797784809ee4/TCP/TrackVisibilityTool/TrackVisibilityTool.lua</source>
-        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/41e69f59305e66ae3bd84e40d73b797784809ee4/TCP/TrackVisibilityTool/Utilities/System.lua</source>
-        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/41e69f59305e66ae3bd84e40d73b797784809ee4/TCP/TrackVisibilityTool/Utilities/UserInterface.lua</source>
-      </version>
-      <version name="0.0.4" author="gaspard" time="2024-09-24T13:24:30Z">
-        <changelog><![CDATA[WIP: Add reorder track check.]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/ac29ac0c9b60ab758acf941722287cd880d082ef/TCP/TrackVisibilityTool/TrackVisibilityTool.lua</source>
-        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/ac29ac0c9b60ab758acf941722287cd880d082ef/TCP/TrackVisibilityTool/Utilities/System.lua</source>
-        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/ac29ac0c9b60ab758acf941722287cd880d082ef/TCP/TrackVisibilityTool/Utilities/UserInterface.lua</source>
-      </version>
-      <version name="0.0.5" author="gaspard" time="2024-09-24T14:25:36Z">
-        <changelog><![CDATA[WIP: Rewrite and fix collapse tracks and settings links.]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d47cc5071f08fc06e329b16a8e35486f151126cc/TCP/TrackVisibilityTool/TrackVisibilityTool.lua</source>
-        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d47cc5071f08fc06e329b16a8e35486f151126cc/TCP/TrackVisibilityTool/Utilities/System.lua</source>
-        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d47cc5071f08fc06e329b16a8e35486f151126cc/TCP/TrackVisibilityTool/Utilities/UserInterface.lua</source>
-      </version>
-      <version name="0.0.6" author="gaspard" time="2024-09-24T15:26:24Z">
-        <changelog><![CDATA[WIP: Fix collapse bug on some tracks layout in some projects.]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7369658061f9d367107613b792d7e9ece646f10b/TCP/TrackVisibilityTool/TrackVisibilityTool.lua</source>
-        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7369658061f9d367107613b792d7e9ece646f10b/TCP/TrackVisibilityTool/Utilities/System.lua</source>
-        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7369658061f9d367107613b792d7e9ece646f10b/TCP/TrackVisibilityTool/Utilities/UserInterface.lua</source>
-      </version>
-      <version name="0.0.7" author="gaspard" time="2024-09-25T10:28:35Z">
-        <changelog><![CDATA[WIP: Ready for QA.]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/42931ef5f4fb48a10b77b2764de765331e8ab99a/TCP/TrackVisibilityTool/TrackVisibilityTool.lua</source>
-        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/42931ef5f4fb48a10b77b2764de765331e8ab99a/TCP/TrackVisibilityTool/Utilities/System.lua</source>
-        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/42931ef5f4fb48a10b77b2764de765331e8ab99a/TCP/TrackVisibilityTool/Utilities/UserInterface.lua</source>
-      </version>
-      <version name="0.0.8" author="gaspard" time="2024-09-25T13:56:14Z">
-        <changelog><![CDATA[WIP: Update settings_file.txt location path.]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/df2c54c84e6bd70b9006803f64f6558033bbc8f4/TCP/TrackVisibilityTool/TrackVisibilityTool.lua</source>
-        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/df2c54c84e6bd70b9006803f64f6558033bbc8f4/TCP/TrackVisibilityTool/Utilities/System.lua</source>
-        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/df2c54c84e6bd70b9006803f64f6558033bbc8f4/TCP/TrackVisibilityTool/Utilities/UserInterface.lua</source>
       </version>
     </reapack>
   </category>
