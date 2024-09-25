@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="bad86573c2c7914c0a00128ced4799c7c3402abd">
+<index version="1" name="Gaspard ReaScripts" commit="42931ef5f4fb48a10b77b2764de765331e8ab99a">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -614,6 +614,12 @@ v1.0 Initial release.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7369658061f9d367107613b792d7e9ece646f10b/TCP/TrackVisibilityTool/TrackVisibilityTool.lua</source>
         <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7369658061f9d367107613b792d7e9ece646f10b/TCP/TrackVisibilityTool/Utilities/System.lua</source>
         <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7369658061f9d367107613b792d7e9ece646f10b/TCP/TrackVisibilityTool/Utilities/UserInterface.lua</source>
+      </version>
+      <version name="0.0.7" author="gaspard" time="2024-09-25T10:28:35Z">
+        <changelog><![CDATA[WIP: Ready for QA.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/42931ef5f4fb48a10b77b2764de765331e8ab99a/TCP/TrackVisibilityTool/TrackVisibilityTool.lua</source>
+        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/42931ef5f4fb48a10b77b2764de765331e8ab99a/TCP/TrackVisibilityTool/Utilities/System.lua</source>
+        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/42931ef5f4fb48a10b77b2764de765331e8ab99a/TCP/TrackVisibilityTool/Utilities/UserInterface.lua</source>
       </version>
     </reapack>
   </category>
