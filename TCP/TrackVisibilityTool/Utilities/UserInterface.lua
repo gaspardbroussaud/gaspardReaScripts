@@ -281,6 +281,20 @@ function Gui_SettingsWindow()
 end
 
 function Gui_PushTheme()
+    for i = 0, #gui_style_var do
+        reaper.ImGui_PushStyleVar(ctx, gui_style_var[i].variable, gui_style_var[i].value)
+    end
+    for i = 0, #gui_style_color do
+        reaper.ImGui_PushStyleColor(ctx, gui_style_color[i].variable, gui_style_color[i].value) --0x111111FF
+    end
+end
+
+function Gui_PopTheme()
+    reaper.ImGui_PopStyleVar(ctx, #gui_style_var)
+    reaper.ImGui_PopStyleColor(ctx, #gui_style_color)
+end
+
+--[[function Gui_PushTheme()
     -- Vars
     reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_WindowRounding(),   6)
     reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ChildRounding(),    6)
@@ -293,7 +307,7 @@ end
 function Gui_PopTheme()
     reaper.ImGui_PopStyleVar(ctx, 4)
     reaper.ImGui_PopStyleColor(ctx, 1)
-end
+end]]
 
 -- CHECK CURRENT PROJECT CHANGE
 function Gui_CheckProjectChanged()
