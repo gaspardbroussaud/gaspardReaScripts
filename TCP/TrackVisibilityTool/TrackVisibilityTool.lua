@@ -25,7 +25,6 @@ package.path = package.path..';'..debug.getinfo(1, "S").source:match [[^@?(.*[\/
 require('Utilities/UserInterface')
 require('Utilities/System')
 
-local proj = 0
 System_SetButtonState(1)
 System_SetVariables()
 System_GetSelectedTracksTable()
