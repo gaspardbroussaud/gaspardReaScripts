@@ -1,13 +1,13 @@
 -- @description Track Visibility Tool
 -- @author gaspard
--- @version 0.0.7
+-- @version 0.0.8
 -- @provides
 --    [nomain] Utilities/*.lua
--- @changelog WIP: Ready for QA.
+-- @changelog WIP: Update settings_file.txt location path.
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
-ScriptVersion = "v0.0.7"
+ScriptVersion = "v0.0.8"
 ScriptName = 'TRACK VISIBILITY TOOL'
 Settings = {
     link_select = false,
@@ -15,7 +15,7 @@ Settings = {
     tracks = {}
 }
 
-settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/Data/settings_file.dat'
+settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/Utilities/settings_file.txt'
 ------
 -- Load Utilities
 dofile(reaper.GetResourcePath() ..
