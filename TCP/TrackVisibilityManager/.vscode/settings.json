@@ -19,8 +19,6 @@
         "selected_tracks",
         "track_count",
         "selected_track_count",
-        "settings_path",
-        "gui_style_var",
-        "gui_style_color"
+        "settings_path"
     ]
 }

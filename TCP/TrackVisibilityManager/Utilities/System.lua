@@ -1,4 +1,9 @@
 -- @noindex
+-- @description Track Visibility Manager functions
+-- @author gaspard
+-- @version 1.0
+-- @changelog Release
+-- @about All functions used in gaspard_ Track Visibility Manager.lua script
 
 -- SET GLOBAL VARIABLES
 function System_SetVariables()
@@ -71,7 +76,7 @@ function System_GetTracksTable()
         if track_depth == 1 then
             track_collapse = reaper.GetMediaTrackInfo_Value(track_id, "I_FOLDERCOMPACT")
         end
-        
+
         local track_parent = reaper.GetParentTrack(track_id)
 
         if not track_parent then inner_depth = 0
@@ -98,14 +103,14 @@ function System_HideTrack(track)
     for m = 0, reaper.CountSelectedTracks(0) - 1 do
         reaper.SetMediaTrackInfo_Value(reaper.GetSelectedTrack(0, m), "B_MUTE", 1)
     end
-    
+
     reaper.Main_OnCommand(41312, 0) -- Lock selected track
 
     for m = 0, reaper.CountSelectedTracks(0) - 1 do
         reaper.SetMediaTrackInfo_Value(reaper.GetSelectedTrack(0, m), "B_SHOWINTCP", 0)
         reaper.SetMediaTrackInfo_Value(reaper.GetSelectedTrack(0, m), "B_SHOWINMIXER", 0)
     end
-    
+
     reaper.Main_OnCommand(40297, 0) -- Unselect all tracks
 end
 
@@ -116,18 +121,18 @@ function System_ShowTrack(track)
         reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_SELCHILDREN"), 0) -- Select all children
         reaper.SetTrackSelected(track, true)
     end
-    
+
     for m = 0, reaper.CountSelectedTracks(0) - 1 do
         reaper.SetMediaTrackInfo_Value(reaper.GetSelectedTrack(0, m), "B_SHOWINTCP", 1)
         reaper.SetMediaTrackInfo_Value(reaper.GetSelectedTrack(0, m), "B_SHOWINMIXER", 1)
     end
 
     reaper.Main_OnCommand(41313, 0) -- Unlock selected track
-    
+
     for m = 0, reaper.CountSelectedTracks(0) - 1 do
         reaper.SetMediaTrackInfo_Value(reaper.GetSelectedTrack(0, m), "B_MUTE", 0)
     end
-    
+
     reaper.Main_OnCommand(40297, 0) -- Unselect all tracks
 end
 
@@ -175,7 +180,7 @@ function System_UpdateTrackCollapse(index)
             return
         end
     end
-    
+
     reaper.Undo_EndBlock("Tracks collapsed or uncollapsed via Track Visibility Tool.", -1)
     reaper.PreventUIRefresh(-1)
     reaper.UpdateArrange()

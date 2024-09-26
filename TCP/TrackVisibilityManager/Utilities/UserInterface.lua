@@ -1,4 +1,10 @@
 -- @noindex
+-- @description Track Visibility Manager interafce
+-- @author gaspard
+-- @version 1.0
+-- @changelog Release
+-- @about Complete user interface used in gaspard_ Track Visibility Manager.lua script
+
 local ctx = reaper.ImGui_CreateContext('My script')
 local window_name = ScriptName..'  -  '..ScriptVersion
 local gui_W = 500
@@ -7,8 +13,6 @@ local pin = false
 local font = reaper.ImGui_CreateFont('sans-serif', 15)
 local last_selected = -1
 local show_settings = false
-link_tcp_select = true
-link_tcp_collapse = true
 local changed = false
 local direction = nil
 local project_name = ""
@@ -70,7 +74,7 @@ end
 -- GUI ELEMENTS FOR TOP BAR
 function Gui_TopBar()
     -- GUI Menu Bar
-    local table_flags = reaper.ImGui_TableFlags_None() --reaper.ImGui_TableFlags_BordersOuter()
+    local table_flags = reaper.ImGui_TableFlags_None()
     if reaper.ImGui_BeginTable(ctx, "table_top_bar", 2, table_flags) then
         reaper.ImGui_TableNextRow(ctx)
         reaper.ImGui_TableNextColumn(ctx)
@@ -229,7 +233,8 @@ function Gui_TableTracks()
 
                         -- Arrow Button for folders
                         if reaper.ImGui_ArrowButton(ctx, "arrow"..tostring(i), direction) then
-                            System_UpdateTrackCollapse(i) -- Set collapsed state for track if link enabled in settings
+                            System_UpdateTrackCollapse(i)
+                            -- Set collapsed state for track if link enabled in settings
                             if link_tcp_collapse then reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT", tracks[i].collapse) end
                         end
                     else
@@ -252,7 +257,7 @@ end
 -- GUI ELEMENTS FOR SETTINGS WINDOW
 function Gui_SettingsWindow()
     reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_WindowBg(), 0x000000ff)
-    -- Set Window visibility and settings
+    -- Set Settings Window visibility and settings
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
     reaper.ImGui_SetNextWindowSize(ctx, 400, 200, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowPos(ctx, window_x + 50, window_y + 50, reaper.ImGui_Cond_Appearing())
@@ -280,35 +285,6 @@ function Gui_SettingsWindow()
     reaper.ImGui_PopStyleColor(ctx, 1)
 end
 
-function Gui_PushTheme()
-    for i = 0, #gui_style_var do
-        reaper.ImGui_PushStyleVar(ctx, gui_style_var[i].variable, gui_style_var[i].value)
-    end
-    for i = 0, #gui_style_color do
-        reaper.ImGui_PushStyleColor(ctx, gui_style_color[i].variable, gui_style_color[i].value) --0x111111FF
-    end
-end
-
-function Gui_PopTheme()
-    reaper.ImGui_PopStyleVar(ctx, #gui_style_var)
-    reaper.ImGui_PopStyleColor(ctx, #gui_style_color)
-end
-
---[[function Gui_PushTheme()
-    -- Vars
-    reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_WindowRounding(),   6)
-    reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ChildRounding(),    6)
-    reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_PopupRounding(),    6)
-    reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_FrameRounding(),    6)
-    -- Colors
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_WindowBg(), 0x111111FF)
-end
-
-function Gui_PopTheme()
-    reaper.ImGui_PopStyleVar(ctx, 4)
-    reaper.ImGui_PopStyleColor(ctx, 1)
-end]]
-
 -- CHECK CURRENT PROJECT CHANGE
 function Gui_CheckProjectChanged()
     if project_name ~= reaper.GetProjectName(0) or project_path ~= reaper.GetProjectPath() then
@@ -333,6 +309,7 @@ function Gui_CheckTracksOrder()
     return false
 end
 
+-- CHECK FOR TRACK SELECTION AND COLLAPSED STATE
 function Gui_CheckLinksSelectCollapse()
     if reaper.CountTracks ~= 0 then
         if link_tcp_select then
@@ -359,4 +336,86 @@ function Gui_CheckLinksSelectCollapse()
             end
         end
     end
+end
+
+-- PUSH ALL GUI STYLE SETTINGS
+function Gui_PushTheme()
+    -- Style Vars
+    reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_WindowRounding(), 6)
+    reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ChildRounding(), 6)
+    reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_PopupRounding(), 6)
+    reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_FrameRounding(), 6)
+
+    -- Style Colors
+    -- Backgrounds
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_WindowBg(), 0x14141BFF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_MenuBarBg(), 0x1F1F28FF)
+
+    -- Bordures
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Border(), 0x594A8C4A)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_BorderShadow(), 0x0000003D)
+
+    -- Texte
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xFFFFFFFF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_TextDisabled(), 0x808080FF)
+
+    -- En-têtes (Headers)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Header(), 0x23232BFF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_HeaderHovered(), 0x2C2D39FF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_HeaderActive(), 0x272734FF)
+
+    -- Boutons
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Button(), 0x574F8EFF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ButtonHovered(), 0x7C71C2FF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ButtonActive(), 0x6B60B5FF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_CheckMark(), 0xFFFFFFFF)
+
+    -- Popups
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_PopupBg(), 0x14141B99)
+
+    -- Curseur (Slider)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_SliderGrab(), 0x796BB6FF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_SliderGrabActive(), 0x9A8BE1FF)
+
+    -- Fond de cadre (Frame BG)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_FrameBg(), 0x23232BFF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_FrameBgHovered(), 0x2C2D39FF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_FrameBgActive(), 0x272734FF)
+
+    -- Onglets (Tabs)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Tab(), 0x23232BFF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_TabHovered(), 0x3B2F66FF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_TabActive(), 0x312652FF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_TabUnfocused(), 0x23232BFF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_TabUnfocusedActive(), 0x23232BFF)
+
+    -- Titre
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_TitleBg(), 0x23232BFF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_TitleBgActive(), 0x23232BFF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_TitleBgCollapsed(), 0x23232BFF)
+
+    -- Scrollbar
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ScrollbarBg(), 0x14141BFF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ScrollbarGrab(), 0x1F1F28FF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ScrollbarGrabHovered(), 0x2C2D39FF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ScrollbarGrabActive(), 0x3B2F66FF)
+
+    -- Séparateurs
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Separator(), 0x594A8CFF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_SeparatorHovered(), 0x796BB6FF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_SeparatorActive(), 0x9A8BE1FF)
+
+    -- Redimensionnement (Resize Grip)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ResizeGrip(), 0x594A8C4A)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ResizeGripHovered(), 0x796BB64A)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ResizeGripActive(), 0x9A8BE14A)
+
+    -- Docking
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_DockingPreview(), 0x796BB6FF)
+end
+
+-- POP ALL GUI STYLE SETTINGS
+function Gui_PopTheme()
+    reaper.ImGui_PopStyleVar(ctx, 4)
+    reaper.ImGui_PopStyleColor(ctx, 38)
 end
