@@ -3,7 +3,7 @@
 -- @version 1.0
 -- @provides
 --    [nomain] Utilities/*.lua
--- @changelog WIP: Update settings_file.txt location path.
+-- @changelog Release
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
