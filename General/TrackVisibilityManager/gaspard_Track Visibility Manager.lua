@@ -1,13 +1,16 @@
 -- @description Track Visibility Tool
 -- @author gaspard
--- @version 1.0
+-- @version 1.0.1
 -- @provides
 --    [nomain] Utilities/*.lua
--- @changelog Release
+-- @changelog
+--  • Fix track visibility in collapsed folders inside folders.
+--  • Update selection and collapse check.
+--  • Optimisation and small fixes.
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
-ScriptVersion = "v1.0"
+ScriptVersion = "v1.0.1"
 ScriptName = 'TRACK VISIBILITY MANAGER'
 Settings = {
     link_select = false,

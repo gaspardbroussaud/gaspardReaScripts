@@ -1,9 +1,7 @@
 -- @noindex
 -- @description Track Visibility Manager functions
 -- @author gaspard
--- @version 1.0
--- @changelog Release
--- @about All functions used in gaspard_ Track Visibility Manager.lua script
+-- @about All functions used in gaspard_Track Visibility Manager.lua script
 
 -- SET GLOBAL VARIABLES
 function System_SetVariables()
@@ -21,6 +19,17 @@ function System_GetSelectedTracksTable()
     if selected_track_count ~= 0 then
         for i = 0, selected_track_count - 1 do
             selected_tracks[i] = reaper.GetSelectedTrack(0, i)
+        end
+    end
+end
+
+-- SET SELECTED TRACKS BACK TO THEIR SELECTION STATE IF VISIBLE
+function System_SetSelectedTracksBack()
+    if selected_track_count ~= 0 then
+        for i = 0, #selected_tracks do
+            if reaper.GetMediaTrackInfo_Value(selected_tracks[i], "B_SHOWINTCP") ~= 10 then
+                reaper.SetTrackSelected(selected_tracks[i], true)
+            end
         end
     end
 end
@@ -90,6 +99,10 @@ function System_GetTracksTable()
 
         tracks[i] = { id = track_id, number = track_number, state = track_state, select = track_select, depth = track_depth, collapse = track_collapse, visible = track_visible }
     end
+
+    for i = 0, #tracks do
+        System_UpdateTrackCollapse(i)
+    end
 end
 
 -- HIDE TRACK WHEN UNSELECTING CHECKBOX
@@ -151,30 +164,46 @@ function System_SetTrackVisibility(index, visibility)
     end
 end
 
--- UPDATE TRACK SELECTION IF ENABLED
-function System_UpdateTrackSelection()
-    for i = 0, #tracks do
-        tracks[i].select = reaper.IsTrackSelected(tracks[i].id)
-    end
-end
-
 -- UPDATE TRACK COLLAPSE IF ENABLED
 function System_UpdateTrackCollapse(index)
     reaper.PreventUIRefresh(1)
     reaper.Undo_BeginBlock()
+    
+    local parent_visible = true
+    local parent_depth = 0
 
+    -- Update collapse state for parent track
     if tracks[index].collapse > 1 then
         tracks[index].collapse = 0
+        parent_visible = true
     else
+        parent_visible = false
         tracks[index].collapse = 2
     end
 
+    -- Apply collapse state of parent to children
     for i = index + 1, #tracks do
         if System_GetParentTrackMatch(tracks[i].id, tracks[index].id) then
             if tracks[index].collapse > 1 then
                 tracks[i].visible = false
             else
-                tracks[i].visible = true
+                if reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERDEPTH") == 1 then
+                    if parent_visible then
+                        tracks[i].visible = true
+                        if tracks[i].collapse > 1 then
+                            parent_visible = false
+                            parent_depth = tracks[i].depth
+                        end
+                    else
+                        tracks[i].visible = false
+                    end
+                else
+                    if tracks[i].depth <= parent_depth then
+                        parent_visible = true
+                        parent_depth = tracks[i].depth
+                    end
+                    tracks[i].visible = parent_visible
+                end
             end
         else
             return

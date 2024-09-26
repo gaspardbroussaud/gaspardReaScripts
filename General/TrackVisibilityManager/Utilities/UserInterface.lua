@@ -1,15 +1,14 @@
 -- @noindex
--- @description Track Visibility Manager interafce
+-- @description Track Visibility Manager interface
 -- @author gaspard
--- @version 1.0
--- @changelog Release
--- @about Complete user interface used in gaspard_ Track Visibility Manager.lua script
+-- @about Complete user interface used in gaspard_Track Visibility Manager.lua script
 
 local ctx = reaper.ImGui_CreateContext('My script')
 local window_name = ScriptName..'  -  '..ScriptVersion
+local window_width = 500
+local window_height = 300
 local gui_W = 500
 local gui_H = 300
-local pin = false
 local font = reaper.ImGui_CreateFont('sans-serif', 15)
 local last_selected = -1
 local show_settings = false
@@ -26,15 +25,13 @@ function Gui_Loop()
 
     -- Window Settings
     local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | reaper.ImGui_WindowFlags_NoScrollbar()
-    if pin then
-        window_flags = window_flags | reaper.ImGui_WindowFlags_TopMost()
-    end
     reaper.ImGui_SetNextWindowSize(ctx, gui_W, gui_H, reaper.ImGui_Cond_Once())
     -- Font
     reaper.ImGui_PushFont(ctx, font)
     -- Begin
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
+    window_width, window_height = reaper.ImGui_GetWindowSize(ctx)
 
     -- If track count updates (delete or add track)
     if track_count ~= reaper.CountTracks(0) then
@@ -47,7 +44,7 @@ function Gui_Loop()
         System_GetTracksTable()
     end
 
-    Gui_CheckLinksSelectCollapse()
+    --Gui_CheckLinkCollapse()
 
     if visible then
         -- Top bar elements
@@ -74,26 +71,39 @@ end
 -- GUI ELEMENTS FOR TOP BAR
 function Gui_TopBar()
     -- GUI Menu Bar
-    local table_flags = reaper.ImGui_TableFlags_None()
+    local table_flags = --[[reaper.ImGui_TableFlags_None()]] reaper.ImGui_TableFlags_SizingFixedFit()
+
     if reaper.ImGui_BeginTable(ctx, "table_top_bar", 2, table_flags) then
+
+        --reaper.ImGui_TableSetupColumn(ctx, "##ID_col", reaper.ImGui_TableColumnFlags_WidthStretch())
+
         reaper.ImGui_TableNextRow(ctx)
         reaper.ImGui_TableNextColumn(ctx)
-        reaper.ImGui_Text(ctx, window_name)
+        local child_w = window_width - 80
+        if reaper.ImGui_BeginChild(ctx, "child_top_bar_logo_name", child_w, 25) then
+            reaper.ImGui_Text(ctx, window_name)
+
+            reaper.ImGui_EndChild(ctx)
+        end
 
         reaper.ImGui_TableNextColumn(ctx)
-        local x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
-        local text_x, _ = reaper.ImGui_CalcTextSize(ctx, "SX")
-        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (x - text_x - 24))
+        --reaper.ImGui_BeginChild(ctx, str_id, optional_size_wIn, optional_size_hIn, optional_child_flagsIn, optional_window_flagsIn)
+        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", 40, 25) then
+            reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing(), 5, 0)
 
-        if reaper.ImGui_Button(ctx, "S") then
-            show_settings = not show_settings
-        end
-        reaper.ImGui_SameLine(ctx)
-        if reaper.ImGui_Button(ctx, "X") then
-            System_SetButtonState()
-            open = false
-        end
+            if reaper.ImGui_Button(ctx, "S") then
+                show_settings = not show_settings
+            end
 
+            reaper.ImGui_SameLine(ctx)
+            if reaper.ImGui_Button(ctx, "X") then
+                System_SetButtonState()
+                open = false
+            end
+
+            reaper.ImGui_PopStyleVar(ctx, 1)
+            reaper.ImGui_EndChild(ctx)
+        end
         reaper.ImGui_EndTable(ctx)
     end
 end
@@ -123,7 +133,6 @@ function Gui_TableTracks()
             reaper.ImGui_Text(ctx, "TRACK NAME")
 
             for i = 0, #tracks do
-                local test = true
                 if tracks[i].visible then
                     reaper.ImGui_TableNextRow(ctx)
                     reaper.ImGui_TableNextColumn(ctx)
@@ -132,6 +141,9 @@ function Gui_TableTracks()
                     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + ((x - text_x) * 0.5))
                     local selectable_flags = reaper.ImGui_SelectableFlags_SpanAllColumns() | reaper.ImGui_SelectableFlags_AllowOverlap()
                     x, y = reaper.ImGui_GetContentRegionAvail(ctx)
+                    -- Link track selection between project and GUI
+                    if link_tcp_select then tracks[i].select = reaper.IsTrackSelected(tracks[i].id) end
+                    -- Selection element
                     changed, tracks[i].select = reaper.ImGui_Selectable(ctx, tracks[i].number, tracks[i].select, selectable_flags, 0, 21)
                     if changed then
                         -- Get key press CTRL = 4096 or CMD = 32768 / SHIFT = 8192
@@ -178,6 +190,9 @@ function Gui_TableTracks()
                         end
 
                         last_selected = i
+
+                        -- Link track selection between project and GUI
+                        if link_tcp_select then reaper.SetTrackSelected(tracks[i].id, tracks[i].select) end
                     end
 
                     reaper.ImGui_TableNextColumn(ctx)
@@ -187,6 +202,8 @@ function Gui_TableTracks()
                     if changed then
                         reaper.PreventUIRefresh(1)
                         reaper.Undo_BeginBlock()
+
+                        System_GetSelectedTracksTable()
 
                         reaper.Main_OnCommand(40297, 0) -- Unselect all tracks
 
@@ -212,11 +229,7 @@ function Gui_TableTracks()
                             tracks[j].state = reaper.GetMediaTrackInfo_Value(tracks[j].id, "B_SHOWINTCP")
                         end
 
-                        for j = 0, #tracks do
-                            if tracks[j].select then
-                                reaper.SetTrackSelected(tracks[j].id, true)
-                            end
-                        end
+                        System_SetSelectedTracksBack()
 
                         reaper.Undo_EndBlock("Tracks hidden or shown via Track Visibility Tool.", -1)
                         reaper.PreventUIRefresh(-1)
@@ -227,6 +240,12 @@ function Gui_TableTracks()
                     if reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERDEPTH") == 1 then
                         reaper.ImGui_Dummy(ctx, tracks[i].depth * 10, 1)
                         reaper.ImGui_SameLine(ctx)
+
+                        if link_tcp_collapse then
+                            if tracks[i].collapse ~= reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT") then
+                                System_UpdateTrackCollapse(i)
+                            end
+                        end
 
                         if tracks[i].collapse > 1 then direction = reaper.ImGui_Dir_Right()
                         else direction = reaper.ImGui_Dir_Down() end
@@ -274,6 +293,8 @@ function Gui_SettingsWindow()
         changed, link_tcp_collapse = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_collapse", link_tcp_collapse)
         if changed then System_WriteSettingsFile(link_tcp_select, link_tcp_collapse) end
 
+        reaper.ImGui_Text(ctx, tostring(reaper.ImGui_GetFramerate(ctx)))
+
         reaper.ImGui_End(ctx)
     else
         show_settings = false
@@ -309,33 +330,15 @@ function Gui_CheckTracksOrder()
     return false
 end
 
--- CHECK FOR TRACK SELECTION AND COLLAPSED STATE
-function Gui_CheckLinksSelectCollapse()
-    if reaper.CountTracks ~= 0 then
-        if link_tcp_select then
-            local update_tracks_selection = false
-            if selected_track_count ~= reaper.CountSelectedTracks(0) then
-                update_tracks_selection = true
-            else
-                for i = 0, reaper.CountSelectedTracks(0) - 1 do
-                    if selected_tracks[i] ~= reaper.GetSelectedTrack(0, i) then
-                        update_tracks_selection = true
-                    end
-                end
-            end
-            if update_tracks_selection then
-                System_UpdateTrackSelection()
-            end
-        end
-
+-- CHECK FOR TRACKS COLLAPSED STATE
+function Gui_CheckLinkCollapse()
+    --[[if reaper.CountTracks ~= 0 then
         if link_tcp_collapse then
-            for i = 0, #tracks do
-                if tracks[i].collapse > -1 and tracks[i].collapse ~= reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT") then
-                    System_UpdateTrackCollapse(i)
-                end
+            if tracks[i].collapse > -1 and tracks[i].collapse ~= reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT") then
+                System_UpdateTrackCollapse(i)
             end
         end
-    end
+    end]]
 end
 
 -- PUSH ALL GUI STYLE SETTINGS
