@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="2a163b66cbce20b0d8b493024e9c4712689d6b26">
+<index version="1" name="Gaspard ReaScripts" commit="037b5ae963edffaa49e0eb756bfc249e1e972815">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -94,6 +94,12 @@
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/2a163b66cbce20b0d8b493024e9c4712689d6b26/General/TrackVisibilityManager/gaspard_Track%20Visibility%20Manager.lua</source>
         <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/2a163b66cbce20b0d8b493024e9c4712689d6b26/General/TrackVisibilityManager/Utilities/System.lua</source>
         <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/2a163b66cbce20b0d8b493024e9c4712689d6b26/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
+      </version>
+      <version name="1.0.2" author="gaspard" time="2024-09-26T15:56:16Z">
+        <changelog><![CDATA[• Fix crash if empty project.]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/037b5ae963edffaa49e0eb756bfc249e1e972815/General/TrackVisibilityManager/gaspard_Track%20Visibility%20Manager.lua</source>
+        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/037b5ae963edffaa49e0eb756bfc249e1e972815/General/TrackVisibilityManager/Utilities/System.lua</source>
+        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/037b5ae963edffaa49e0eb756bfc249e1e972815/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
       </version>
     </reapack>
   </category>
