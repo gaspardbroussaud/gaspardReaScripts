@@ -100,8 +100,10 @@ function System_GetTracksTable()
         tracks[i] = { id = track_id, number = track_number, state = track_state, select = track_select, depth = track_depth, collapse = track_collapse, visible = track_visible }
     end
 
-    for i = 0, #tracks do
-        System_UpdateTrackCollapse(i)
+    if track_count ~= 0 then
+        for i = 0, #tracks do
+            System_UpdateTrackCollapse(i)
+        end
     end
 end
 
