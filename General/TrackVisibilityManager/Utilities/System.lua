@@ -190,6 +190,10 @@ function System_UpdateTrackCollapse(index)
                 tracks[i].visible = false
             else
                 if reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERDEPTH") == 1 then
+                    if tracks[i].depth <= parent_depth then
+                        parent_visible = true
+                        parent_depth = tracks[i].depth
+                    end
                     if parent_visible then
                         tracks[i].visible = true
                         if tracks[i].collapse > 1 then
