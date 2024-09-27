@@ -44,8 +44,6 @@ function Gui_Loop()
         System_GetTracksTable()
     end
 
-    --Gui_CheckLinkCollapse()
-
     if visible then
         -- Top bar elements
         Gui_TopBar()
@@ -71,40 +69,33 @@ end
 -- GUI ELEMENTS FOR TOP BAR
 function Gui_TopBar()
     -- GUI Menu Bar
-    local table_flags = --[[reaper.ImGui_TableFlags_None()]] reaper.ImGui_TableFlags_SizingFixedFit()
+    if reaper.ImGui_BeginChild(ctx, "child_top_bar", window_width, 30) then
+        reaper.ImGui_Text(ctx, window_name)
 
-    if reaper.ImGui_BeginTable(ctx, "table_top_bar", 2, table_flags) then
+        reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing(), 5, 0)
 
-        --reaper.ImGui_TableSetupColumn(ctx, "##ID_col", reaper.ImGui_TableColumnFlags_WidthStretch())
+        reaper.ImGui_SameLine(ctx)
 
-        reaper.ImGui_TableNextRow(ctx)
-        reaper.ImGui_TableNextColumn(ctx)
-        local child_w = window_width - 80
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_logo_name", child_w, 25) then
-            reaper.ImGui_Text(ctx, window_name)
+        local w, h = reaper.ImGui_CalcTextSize(ctx, "S X")
+        reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 40, 0)
 
-            reaper.ImGui_EndChild(ctx)
-        end
-
-        reaper.ImGui_TableNextColumn(ctx)
-        --reaper.ImGui_BeginChild(ctx, str_id, optional_size_wIn, optional_size_hIn, optional_child_flagsIn, optional_window_flagsIn)
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", 40, 25) then
-            reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing(), 5, 0)
-
-            if reaper.ImGui_Button(ctx, "S") then
+        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", 60, 22) then
+            reaper.ImGui_Dummy(ctx, 3, 1)
+            reaper.ImGui_SameLine(ctx)
+            if reaper.ImGui_Button(ctx, 'S##settings_button') then
                 show_settings = not show_settings
             end
 
             reaper.ImGui_SameLine(ctx)
-            if reaper.ImGui_Button(ctx, "X") then
+            if reaper.ImGui_Button(ctx, 'X##quit_button') then
                 System_SetButtonState()
                 open = false
             end
-
-            reaper.ImGui_PopStyleVar(ctx, 1)
             reaper.ImGui_EndChild(ctx)
         end
-        reaper.ImGui_EndTable(ctx)
+
+        reaper.ImGui_PopStyleVar(ctx, 1)
+        reaper.ImGui_EndChild(ctx)
     end
 end
 
@@ -275,11 +266,10 @@ end
 
 -- GUI ELEMENTS FOR SETTINGS WINDOW
 function Gui_SettingsWindow()
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_WindowBg(), 0x000000ff)
     -- Set Settings Window visibility and settings
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
-    reaper.ImGui_SetNextWindowSize(ctx, 400, 200, reaper.ImGui_Cond_Once())
-    reaper.ImGui_SetNextWindowPos(ctx, window_x + 50, window_y + 50, reaper.ImGui_Cond_Appearing())
+    reaper.ImGui_SetNextWindowSize(ctx, gui_W - 100, gui_H - 100, reaper.ImGui_Cond_Once())
+    reaper.ImGui_SetNextWindowPos(ctx, window_x + window_width / 2 - (gui_W - 100) / 2, window_y + 25, reaper.ImGui_Cond_Appearing())
 
     local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
     if settings_visible then
@@ -293,8 +283,6 @@ function Gui_SettingsWindow()
         changed, link_tcp_collapse = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_collapse", link_tcp_collapse)
         if changed then System_WriteSettingsFile(link_tcp_select, link_tcp_collapse) end
 
-        reaper.ImGui_Text(ctx, tostring(reaper.ImGui_GetFramerate(ctx)))
-
         reaper.ImGui_End(ctx)
     else
         show_settings = false
@@ -303,7 +291,6 @@ function Gui_SettingsWindow()
     if not settings_open then
         show_settings = false
     end
-    reaper.ImGui_PopStyleColor(ctx, 1)
 end
 
 -- CHECK CURRENT PROJECT CHANGE
@@ -330,17 +317,6 @@ function Gui_CheckTracksOrder()
     return false
 end
 
--- CHECK FOR TRACKS COLLAPSED STATE
-function Gui_CheckLinkCollapse()
-    --[[if reaper.CountTracks ~= 0 then
-        if link_tcp_collapse then
-            if tracks[i].collapse > -1 and tracks[i].collapse ~= reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT") then
-                System_UpdateTrackCollapse(i)
-            end
-        end
-    end]]
-end
-
 -- PUSH ALL GUI STYLE SETTINGS
 function Gui_PushTheme()
     -- Style Vars
@@ -352,6 +328,7 @@ function Gui_PushTheme()
     -- Style Colors
     -- Backgrounds
     reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_WindowBg(), 0x14141BFF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ChildBg(), 0x14141BFF) --Added
     reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_MenuBarBg(), 0x1F1F28FF)
 
     -- Bordures
@@ -420,5 +397,5 @@ end
 -- POP ALL GUI STYLE SETTINGS
 function Gui_PopTheme()
     reaper.ImGui_PopStyleVar(ctx, 4)
-    reaper.ImGui_PopStyleColor(ctx, 38)
+    reaper.ImGui_PopStyleColor(ctx, 39)
 end

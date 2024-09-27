@@ -1,14 +1,15 @@
 -- @description Track Visibility Tool
 -- @author gaspard
--- @version 1.0.2
+-- @version 1.0.3
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  • Fix crash if empty project.
+--  • Update GUI elements
+--  • Small fixes and improvements
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
-ScriptVersion = "v1.0.2"
+ScriptVersion = "v1.0.3"
 ScriptName = 'TRACK VISIBILITY MANAGER'
 Settings = {
     link_select = false,
