@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="68d6f400dbc5143087576d9fd6c8e19bfdddcae6">
+<index version="1" name="Gaspard ReaScripts" commit="6d6492c7ba4cd66c7a2924ec41be978a31d6b5f3">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -175,6 +175,11 @@
       <version name="1.0.0" author="gaspard" time="2024-10-01T14:43:28Z">
         <changelog><![CDATA[Initial commit]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/68d6f400dbc5143087576d9fd6c8e19bfdddcae6/Item/gaspard_Scan%20for%20missing%20source%20files%20in%20Sources%20folder.lua</source>
+      </version>
+      <version name="1.0.1" author="gaspard" time="2024-10-01T16:06:57Z">
+        <changelog><![CDATA[• Show message if files not found at script end
+• Cleanup of debug lines]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/6d6492c7ba4cd66c7a2924ec41be978a31d6b5f3/Item/gaspard_Scan%20for%20missing%20source%20files%20in%20Sources%20folder.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Set selected items fade in and out to value in script (editable).lua" type="script" desc="Set selected items fade in and out to value in script (editable)">
