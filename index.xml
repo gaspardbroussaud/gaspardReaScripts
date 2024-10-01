@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="8def47f6ec181237ceaae6f04ffc02480ac07dc9">
+<index version="1" name="Gaspard ReaScripts" commit="68d6f400dbc5143087576d9fd6c8e19bfdddcae6">
   <category name="Debug">
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
@@ -160,6 +160,21 @@
       <version name="0.1" author="gaspard" time="2024-08-08T13:47:03Z">
         <changelog><![CDATA[Script creation]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d4f8256f3aea63b9d742aee6713882d719a5f775/Item/gaspard_Crop%20right%20X%20seconds%20of%20selected%20items.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Scan for missing source files in Sources folder.lua" type="script" desc="Scan for missing source files in Sources folder">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Scan all items in current project and copy missing source file in Audio folder (can be edited to user Audio folder path and name)\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2024-10-01T14:43:28Z">
+        <changelog><![CDATA[Initial commit]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/68d6f400dbc5143087576d9fd6c8e19bfdddcae6/Item/gaspard_Scan%20for%20missing%20source%20files%20in%20Sources%20folder.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Set selected items fade in and out to value in script (editable).lua" type="script" desc="Set selected items fade in and out to value in script (editable)">
