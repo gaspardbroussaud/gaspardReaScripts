@@ -1,7 +1,9 @@
 -- @description Scan for missing source files in Sources folder
 -- @author gaspard
--- @version 1.0.0
--- @changelog Initial commit
+-- @version 1.0.1
+-- @changelog
+-- • Show message if files not found at script end
+-- • Cleanup of debug lines
 -- @about Scan all items in current project and copy missing source file in Audio folder (can be edited to user Audio folder path and name)
 
 -- USER SOURCE FOLDER NAME ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -26,6 +28,23 @@ function RestoreItemSelection(item_count, item_selection)
         for i = 0, #item_selection do
             local item = reaper.GetMediaItem(0, i)
             reaper.SetMediaItemSelected(item, item_selection[i])
+        end
+    end
+end
+
+-- Select all offline items from errors
+function SelectOfflineItems(item_count, error_msgs)
+    if item_count == reaper.CountMediaItems(0) then
+        -- Unselect all items
+        for i = 0, item_count - 1 do
+            local item = reaper.GetMediaItem(0, i)
+            reaper.SetMediaItemSelected(item, false)
+        end
+
+        -- Select error items
+        for i = 1, #error_msgs do
+            local item = reaper.GetMediaItem(0, error_msgs[i].index)
+            reaper.SetMediaItemSelected(item, true)
         end
     end
 end
@@ -57,8 +76,8 @@ end
 
 -- Go throug hall media items and check for source in source directory.
 -- If not in source directory, copy file and reassign source to media item.
-function ScanAllMediaItems(project_sources_dir, separator, item_count)
-    local test = true
+function ScanAllMediaItems(project_sources_dir, separator, item_count, item_selection)
+    local error_msgs = {}
     for i = 0, item_count - 1 do
         local item = reaper.GetMediaItem(0, i)
         local take = reaper.GetMediaItemTake(item, 0)
@@ -80,7 +99,7 @@ function ScanAllMediaItems(project_sources_dir, separator, item_count)
                     local destination_path = project_sources_dir..separator..source_name.."-imported_source"..source_extension
                     local new_file = io.open(destination_path, "wb")
 
-                    if new_file ~= nil and test then
+                    if new_file ~= nil then
                         new_file:write(source_file)
                         new_file:close()
                         reaper.BR_SetTakeSourceFromFile(take, destination_path, true)
@@ -89,24 +108,49 @@ function ScanAllMediaItems(project_sources_dir, separator, item_count)
                         reaper.BR_SetTakeSourceFromFile(take, destination_path, true)
                         reaper.SetMediaItemSelected(item, true)
                     end
+                else
+                    -- If there is no file in directory
+                    local _, take_name = reaper.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                    table.insert(error_msgs, {take_name = take_name, index = i})
                 end
             end
         end
     end
+
+    if #error_msgs > 0 then
+        local error_msg_display = "Items with source file not found:"
+        local loop_length = #error_msgs
+        local above_10 = ""
+        if #error_msgs > 10 then
+            loop_length = 10
+            above_10 = "There are "..tostring(#error_msgs).." errors. Displaying only 10.\n"
+        end
+
+        for i = 1, loop_length do
+            error_msg_display = error_msg_display.."\n\n".." - Item "..tostring(error_msgs[i].index).." as source name: "..tostring(error_msgs[i].take_name)
+        end
+
+        local input = reaper.MB(error_msg_display.."\n\n"..above_10, "--------SELECT OFFLINE ITEMS ?--------", 4)
+        if input == 6 then -- 6 = Yes, 7 = No
+            SelectOfflineItems(item_count, error_msgs)
+        else
+            RestoreItemSelection(item_count, item_selection)
+        end
+    else
+        RestoreItemSelection(item_count, item_selection)
+    end
 end
 
 function Main()
-    reaper.ClearConsole()
     local item_count = reaper.CountMediaItems(0) -- Current project = 0
     if item_count ~= 0 then
         local item_selection = SaveSelectedItems(item_count)
         local separator = GetSeperator()
         local project_sources_dir = GetSourceDirectory(separator, source_folder_name)
         if project_sources_dir ~= "" then
-            ScanAllMediaItems(project_sources_dir, separator, item_count)
+            ScanAllMediaItems(project_sources_dir, separator, item_count, item_selection)
             reaper.Main_OnCommand(40441, 0) -- Rebuild peaks for selected items
         end
-        RestoreItemSelection(item_count, item_selection)
     end
 end
 
@@ -116,5 +160,3 @@ Main()
 reaper.Undo_EndBlock("Scan for missing source files in Sources folder", -1)
 reaper.PreventUIRefresh(-1)
 reaper.UpdateArrange()
-
-
