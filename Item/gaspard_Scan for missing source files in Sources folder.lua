@@ -2,8 +2,8 @@
 -- @author gaspard
 -- @version 1.0.1
 -- @changelog
--- • Show message if files not found at script end
--- • Cleanup of debug lines
+--  • Show message if files not found at script end
+--  • Cleanup of debug lines
 -- @about Scan all items in current project and copy missing source file in Audio folder (can be edited to user Audio folder path and name)
 
 -- USER SOURCE FOLDER NAME ---------------------------------------------------------------------------------------------------------------------------------------------------------
