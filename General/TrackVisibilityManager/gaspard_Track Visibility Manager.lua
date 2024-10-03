@@ -1,14 +1,14 @@
 -- @description Track Visibility Tool
 -- @author gaspard
--- @version 1.0.4
+-- @version 1.0.5
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  • Fix collapsed state of folders at same depth in same parent folder.
+--  • Replace Settings button "S" with "O"
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
-ScriptVersion = "v1.0.4"
+ScriptVersion = "v1.0.5"
 ScriptName = 'TRACK VISIBILITY MANAGER'
 Settings = {
     link_select = false,

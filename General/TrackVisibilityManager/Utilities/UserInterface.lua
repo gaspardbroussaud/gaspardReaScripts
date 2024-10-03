@@ -76,13 +76,13 @@ function Gui_TopBar()
 
         reaper.ImGui_SameLine(ctx)
 
-        local w, h = reaper.ImGui_CalcTextSize(ctx, "S X")
+        local w, h = reaper.ImGui_CalcTextSize(ctx, "O X")
         reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 40, 0)
 
         if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", 60, 22) then
             reaper.ImGui_Dummy(ctx, 3, 1)
             reaper.ImGui_SameLine(ctx)
-            if reaper.ImGui_Button(ctx, 'S##settings_button') then
+            if reaper.ImGui_Button(ctx, 'O##settings_button') then
                 show_settings = not show_settings
             end
 
