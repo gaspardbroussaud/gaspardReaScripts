@@ -1,3 +1,4 @@
+--@noindex
 --@description Create region for clusters of selected items (prompt)
 --@author gaspard
 --@version 2.5

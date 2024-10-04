@@ -1,8 +1,8 @@
---@description Cut consolidated items with selected reference items
---@author gaspard
---@version 1.1.1
---@changelog Fix no cutting at end of item if only one item is selected.
---@about Cuts items with selected reference items. For Post-production use.
+-- @description Cut consolidated items with selected reference items
+-- @author gaspard
+-- @version 1.1.1
+-- @changelog Fix no cutting at end of item if only one item is selected.
+-- @about Cuts items with selected reference items. For Post-production use.
 
 -- CREATE TABLE OF SELECTED ITEMS --
 function createItemTab()

@@ -1,3 +1,4 @@
+-- @noindex
 -- @description Hide and show tracks in TCP and MCP - GUI
 -- @author gaspard
 -- @version 1.0.9

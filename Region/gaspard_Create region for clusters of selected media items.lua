@@ -1,3 +1,4 @@
+-- @noindex
 -- @description Create region for clusters of selected media items
 -- @author gaspard
 -- @version 1.1

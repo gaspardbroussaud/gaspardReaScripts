@@ -1,3 +1,4 @@
+--@noindex
 --@description Set all regions numbering with name aware
 --@author gaspard
 --@version 1.2.3

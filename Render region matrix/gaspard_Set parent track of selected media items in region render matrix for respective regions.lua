@@ -1,3 +1,4 @@
+-- @noindex
 -- @description Set parent track in region render matrix for selected media items regions
 -- @author gaspard
 -- @version 1.0

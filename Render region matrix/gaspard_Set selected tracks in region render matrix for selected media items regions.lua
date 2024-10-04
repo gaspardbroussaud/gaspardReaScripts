@@ -1,8 +1,9 @@
---@description Set selected tracks in region render matrix for selected media items regions
---@author gaspard
---@version 1.0
---@changelog Initial release.
---@about Set selected tracks in region render matrix for selected media items regions.
+-- @noindex
+-- @description Set selected tracks in region render matrix for selected media items regions
+-- @author gaspard
+-- @version 1.0
+-- @changelog Initial release.
+-- @about Set selected tracks in region render matrix for selected media items regions.
 
 function main()
     for i = 0, sel_item_count - 1 do

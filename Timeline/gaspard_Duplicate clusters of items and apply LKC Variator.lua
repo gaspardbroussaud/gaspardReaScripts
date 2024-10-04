@@ -1,8 +1,8 @@
---@description Duplicate clusters of items and apply LKC Variator
---@author gaspard
---@version 1.1
---@changelog + Added a remaining clusters to process window for Variator.
---@about Prompt to duplicate clusters of selected items N times with X seconds between copies and apply an LKC Variator preset.
+-- @description Duplicate clusters of items and apply LKC Variator
+-- @author gaspard
+-- @version 1.1
+-- @changelog + Added a remaining clusters to process window for Variator.
+-- @about Prompt to duplicate clusters of selected items N times with X seconds between copies and apply an LKC Variator preset.
 
 -- GET INPUTS FROM WINDOW PROMPT --
 function inputsWindow()

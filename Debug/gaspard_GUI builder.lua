@@ -1,3 +1,4 @@
+--@noindex
 --@description GUI builder
 --@author gaspard
 --@version 1.0.2

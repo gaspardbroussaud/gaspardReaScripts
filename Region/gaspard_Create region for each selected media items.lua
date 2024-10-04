@@ -1,3 +1,4 @@
+-- @noindex
 -- @description Create region for each selected media item
 -- @author gaspard
 -- @version 1.0

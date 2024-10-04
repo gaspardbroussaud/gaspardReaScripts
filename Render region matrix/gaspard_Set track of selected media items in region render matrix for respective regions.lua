@@ -1,3 +1,4 @@
+-- @noindex
 -- @description Set track of selected media items in region render matrix for respective regions
 -- @author gaspard
 -- @version 1.0

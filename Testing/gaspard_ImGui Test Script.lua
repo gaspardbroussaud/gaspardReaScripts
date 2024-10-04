@@ -1,3 +1,4 @@
+-- @noindex
 -- @description Test ImGui
 -- @author gaspard
 -- @version 1.0

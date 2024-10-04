@@ -1,8 +1,9 @@
---@description Mute track and hide in TCP and MCP
---@author gaspard
---@version 1.2
---@changelog +Togglable state.
---@about Mute and hide in TCP and MCP all selected tracks. Hide children from TCP and MCP if selected track is parent.
+-- @noindex
+-- @description Mute track and hide in TCP and MCP
+-- @author gaspard
+-- @version 1.2
+-- @changelog +Togglable state.
+-- @about Mute and hide in TCP and MCP all selected tracks. Hide children from TCP and MCP if selected track is parent.
 
 -- HIDE and MUTE TRACK --
 function hideMute(track, mute)

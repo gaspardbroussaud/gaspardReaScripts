@@ -1,3 +1,4 @@
+--@noindex
 --@description Set all regions name to top parent track name
 --@author gaspard
 --@version 1.1.1

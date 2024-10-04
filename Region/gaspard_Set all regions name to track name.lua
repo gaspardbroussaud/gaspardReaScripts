@@ -1,3 +1,4 @@
+--@noindex
 --@description Set all regions name to track name
 --@author gaspard
 --@version 1.0

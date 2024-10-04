@@ -1,3 +1,4 @@
+-- @noindex
 -- @description Hello world
 -- @author gaspard
 -- @version 1.0
