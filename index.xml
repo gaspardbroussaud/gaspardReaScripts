@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="70950e080591855d9ebe76f8704321aed33beb3d">
+<index version="1" name="Gaspard ReaScripts" commit="7ba91f60f091586d4135d85bad9a66788ff96d1b">
   <category name="Debug">
+    <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Display items count in message box.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-10-04T13:48:48Z">
+        <changelog><![CDATA[• Initial release]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7ba91f60f091586d4135d85bad9a66788ff96d1b/Debug/gaspard_Display%20items%20count%20in%20message%20box.lua</source>
+      </version>
+    </reapack>
     <reapack name="gaspard_Display selected items count in console.lua" type="script" desc="Display selected items count in console">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
