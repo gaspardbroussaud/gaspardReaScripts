@@ -1,7 +1,9 @@
 -- @description Region Render Matrix Tool
 -- @author gaspard
--- @version 1.0.0
--- @changelog Initial release
+-- @version 1.0.1
+-- @changelog
+--  • Fix crash on selected track without items
+--  • Fix using unselected items on selected tracks 
 -- @about Retrieves all selected items, identifies clusters with the selected tracks as parents, and uses them as the region's name and render matrix.
 
 -- UTILITY FUNCTIONS
@@ -67,7 +69,7 @@ function System_GetItemsFromProject()
         System_GetSelectedTracksTab()
 
         for i = 0, item_count - 1 do
-            local cur_item = reaper.GetMediaItem(0, i)
+            local cur_item = reaper.GetSelectedMediaItem(0, i)
             local cur_start = reaper.GetMediaItemInfo_Value(cur_item, "D_POSITION")
             local cur_track = reaper.GetMediaItemTrack(cur_item)
             --local cur_track_id = reaper.GetMediaTrackInfo_Value(cur_track, "IP_TRACKNUMBER")
@@ -91,7 +93,9 @@ function System_SortItemsInTimelineOrder()
     end
 
     for i = 1, #render_folders do
-        System_FindClusters(render_folders[i], render_tracks_name[i], render_tracks[i])
+        if #render_folders[i] ~= 0 then
+            System_FindClusters(render_folders[i], render_tracks_name[i], render_tracks[i])
+        end
     end
 end
 
@@ -130,6 +134,7 @@ function System_FindClusters(folder, region_name, render_track)
 
             local region_index = reaper.AddProjectMarker(0, true, first_start, last_end, display, -1)
             reaper.SetRegionRenderMatrix(0, region_index, render_track, 1)
+            reaper.ShowConsoleMsg("end pos: "..tostring(last_end).."\n")
         end
 
         if prev_end < cur_end then
