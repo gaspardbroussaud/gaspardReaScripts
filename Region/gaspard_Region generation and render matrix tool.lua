@@ -1,11 +1,23 @@
--- @description Region Render Matrix Tool
+-- @description Region generation and render matrix Tool
 -- @author gaspard
--- @version 1.0.2
+-- @version 1.0.3
 -- @changelog
---  • Remove console print
--- @about Retrieves all selected items, identifies clusters with the selected tracks as parents, and uses them as the region's name and render matrix.
+--  • Added region colors based on their corresponding render track colors.
+-- @about
+--  Retrieves all selected items, identifies clusters where the selected tracks serve as parents, and uses these clusters as the region's name and render matrix.
+--  To use: select items to detect clusters and the tracks through which to render.
+
+-- USER SETTINGS ----------
+local color_regions = true
+---------------------------
 
 -- UTILITY FUNCTIONS
+-- MESSAGE BOX ON ERROR
+---@param message string
+function Utility_MessageBox(message)
+    reaper.MB(tostring(message), "Message box", 0)
+end
+
 -- SORT VALUES FUNCTION
 function Utility_SortOnValue(t,...)
     local a = {...}
@@ -57,6 +69,8 @@ function System_GetSelectedTracksTab()
             end
             table.insert(render_tracks_name, track_name)
         end
+    else
+        Utility_MessageBox("Please select at least one track that contains selected items.")
     end
 end
 
@@ -82,6 +96,8 @@ function System_GetItemsFromProject()
 
         -- Sort items in parent tables
         System_SortItemsInTimelineOrder()
+    else
+        Utility_MessageBox("Please select at least one item along with its corresponding track and/or parent track.")
     end
 end
 
@@ -113,7 +129,10 @@ function System_FindClusters(folder, region_name, render_track)
 
         if prev_end + 0.000001 < cur_start then
             index = index + 1
-            local region_index = reaper.AddProjectMarker(0, true, first_start, prev_end, region_name..suffix..tostring(index), -1)
+
+            local track_color = 0
+            if color_regions then track_color = reaper.GetMediaTrackInfo_Value(render_track, "I_CUSTOMCOLOR") end
+            local region_index = reaper.AddProjectMarker2(0, true, first_start, prev_end, region_name..suffix..tostring(index), -1, track_color)
             reaper.SetRegionRenderMatrix(0, region_index, render_track, 1)
             first_start = cur_start
         end
@@ -131,7 +150,9 @@ function System_FindClusters(folder, region_name, render_track)
                 display = region_name..suffix..tostring(index)
             end
 
-            local region_index = reaper.AddProjectMarker(0, true, first_start, last_end, display, -1)
+            local track_color = 0
+            if color_regions then track_color = reaper.GetMediaTrackInfo_Value(render_track, "I_CUSTOMCOLOR") end
+            local region_index = reaper.AddProjectMarker2(0, true, first_start, last_end, display, -1, track_color)
             reaper.SetRegionRenderMatrix(0, region_index, render_track, 1)
         end
 
