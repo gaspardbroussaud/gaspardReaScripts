@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="67a3432b2bfe38ed12f2e073591b57576be58df0">
+<index version="1" name="Gaspard ReaScripts" commit="179119a67ad1d1ac053faa569f063391e41c293b">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -81,6 +81,15 @@
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/df275701bf381f2d30823b9e47d37f0b4b45fd70/General/TrackVisibilityManager/gaspard_Track%20Visibility%20Manager.lua</source>
         <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/df275701bf381f2d30823b9e47d37f0b4b45fd70/General/TrackVisibilityManager/Utilities/System.lua</source>
         <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/df275701bf381f2d30823b9e47d37f0b4b45fd70/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
+      </version>
+      <version name="1.0.6" author="gaspard" time="2024-10-07T14:19:00Z">
+        <changelog><![CDATA[• Bugfix: Removed flicker on collapse track to state 1 (medium) with link tcp collapse enabled
+• Bugfix: Unlink selection at start if setting disabled
+• Gui fixes and improvements
+• Added debug lines in script]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/179119a67ad1d1ac053faa569f063391e41c293b/General/TrackVisibilityManager/gaspard_Track%20Visibility%20Manager.lua</source>
+        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/179119a67ad1d1ac053faa569f063391e41c293b/General/TrackVisibilityManager/Utilities/System.lua</source>
+        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/179119a67ad1d1ac053faa569f063391e41c293b/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
       </version>
     </reapack>
   </category>
