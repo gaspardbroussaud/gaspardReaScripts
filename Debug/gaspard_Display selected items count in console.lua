@@ -1,3 +1,4 @@
+--@noindex
 --@description Display selected items count in console
 --@author gaspard
 --@version 1.0

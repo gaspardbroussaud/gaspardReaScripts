@@ -1,3 +1,4 @@
+--@noindex
 --@description Display selected items count under mouse
 --@author gaspard
 --@version 1.0
