@@ -76,7 +76,7 @@ function Gui_TopBar()
 
         reaper.ImGui_SameLine(ctx)
 
-        local w, h = reaper.ImGui_CalcTextSize(ctx, "O X")
+        local w, _ = reaper.ImGui_CalcTextSize(ctx, "O X")
         reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 40, 0)
 
         if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", 60, 22) then
@@ -102,9 +102,9 @@ end
 -- GUI ELEMENTS FOR TABLE TRACKS
 function Gui_TableTracks()
     -- GUI Tracks Table
-    local x, y = reaper.ImGui_GetContentRegionAvail(ctx)
+    local table_x, table_y = reaper.ImGui_GetContentRegionAvail(ctx)
     local child_flags = reaper.ImGui_WindowFlags_NoScrollbar()
-    if reaper.ImGui_BeginChild(ctx, "child_scroll", x, y, 0, child_flags) and track_count ~= 0 then
+    if reaper.ImGui_BeginChild(ctx, "child_scroll", table_x, table_y, 0, child_flags) and track_count ~= 0 then
         local table_flags = reaper.ImGui_TableFlags_SizingFixedFit() | reaper.ImGui_TableFlags_Borders() | reaper.ImGui_TableFlags_ScrollY()
         if reaper.ImGui_BeginTable(ctx, "table_tracks", 3, table_flags) then
 
@@ -112,7 +112,7 @@ function Gui_TableTracks()
 
             reaper.ImGui_TableNextRow(ctx)
             reaper.ImGui_TableNextColumn(ctx)
-            x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
+            local x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
             local text_x, _ = reaper.ImGui_CalcTextSize(ctx, "ID")
             reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + ((x - text_x) * 0.5))
             reaper.ImGui_Text(ctx, "ID")
@@ -128,10 +128,9 @@ function Gui_TableTracks()
                     reaper.ImGui_TableNextRow(ctx)
                     reaper.ImGui_TableNextColumn(ctx)
                     x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
-                    local text_x, _ = reaper.ImGui_CalcTextSize(ctx, tracks[i].number)
+                    text_x, _ = reaper.ImGui_CalcTextSize(ctx, tracks[i].number)
                     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + ((x - text_x) * 0.5))
                     local selectable_flags = reaper.ImGui_SelectableFlags_SpanAllColumns() | reaper.ImGui_SelectableFlags_AllowOverlap()
-                    x, y = reaper.ImGui_GetContentRegionAvail(ctx)
                     -- Link track selection between project and GUI
                     if link_tcp_select then tracks[i].select = reaper.IsTrackSelected(tracks[i].id) end
                     -- Selection element
@@ -234,7 +233,7 @@ function Gui_TableTracks()
 
                         if link_tcp_collapse then
                             if tracks[i].collapse ~= reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT") then
-                                System_UpdateTrackCollapse(i)
+                                System_UpdateTrackCollapse(i, reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT"))
                             end
                         end
 
@@ -243,7 +242,7 @@ function Gui_TableTracks()
 
                         -- Arrow Button for folders
                         if reaper.ImGui_ArrowButton(ctx, "arrow"..tostring(i), direction) then
-                            System_UpdateTrackCollapse(i)
+                            System_UpdateTrackCollapse(i, nil)
                             -- Set collapsed state for track if link enabled in settings
                             if link_tcp_collapse then reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERCOMPACT", tracks[i].collapse) end
                         end

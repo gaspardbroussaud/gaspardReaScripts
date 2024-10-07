@@ -76,16 +76,29 @@ function System_GetTracksTable()
     tracks = {}
     local inner_depth = 0.0
     for i = 0, track_count - 1 do
+        -- Track reaper data 
         local track_id = reaper.GetTrack(0, i)
+
+        -- Track number top to bottom
         local track_number = tostring(reaper.GetMediaTrackInfo_Value(track_id, "IP_TRACKNUMBER")):sub(1, -3)
+
+        -- Track visibility in TCP state (shown or hidden)
         local track_state = reaper.GetMediaTrackInfo_Value(track_id, "B_SHOWINTCP")
-        local track_select = reaper.IsTrackSelected(track_id)
+
+        -- Track selection state in TCP
+        local track_select = false
+        if link_tcp_select then track_select = reaper.IsTrackSelected(track_id) end
+
+        -- Track folder depth with parent folders
         local track_depth = reaper.GetMediaTrackInfo_Value(track_id, "I_FOLDERDEPTH")
+
+        -- Track collapsed state for folders (-1 if not a folder track)
         local track_collapse = -1
         if track_depth == 1 then
             track_collapse = reaper.GetMediaTrackInfo_Value(track_id, "I_FOLDERCOMPACT")
         end
 
+        -- Parent of track
         local track_parent = reaper.GetParentTrack(track_id)
 
         if not track_parent then inner_depth = 0
@@ -95,6 +108,7 @@ function System_GetTracksTable()
         elseif track_depth < 0 then inner_depth = inner_depth - 1 end
         track_depth = cur_depth
 
+        -- Track visibility in GUI
         local track_visible = true
 
         tracks[i] = { id = track_id, number = track_number, state = track_state, select = track_select, depth = track_depth, collapse = track_collapse, visible = track_visible }
@@ -102,7 +116,7 @@ function System_GetTracksTable()
 
     if track_count ~= 0 then
         for i = 0, #tracks do
-            System_UpdateTrackCollapse(i)
+            System_UpdateTrackCollapse(i, nil)
         end
     end
 end
@@ -167,20 +181,29 @@ function System_SetTrackVisibility(index, visibility)
 end
 
 -- UPDATE TRACK COLLAPSE IF ENABLED
-function System_UpdateTrackCollapse(index)
+function System_UpdateTrackCollapse(index, new_collapse)
     reaper.PreventUIRefresh(1)
     reaper.Undo_BeginBlock()
-    
+
     local parent_visible = true
     local parent_depth = 0
 
     -- Update collapse state for parent track
-    if tracks[index].collapse > 1 then
-        tracks[index].collapse = 0
-        parent_visible = true
+    if not new_collapse then
+        if tracks[index].collapse > 1 then
+            tracks[index].collapse = 0
+            parent_visible = true
+        else
+            parent_visible = false
+            tracks[index].collapse = 2
+        end
     else
-        parent_visible = false
-        tracks[index].collapse = 2
+        tracks[index].collapse = new_collapse
+        if new_collapse > 1 then
+            parent_visible = false
+        else
+            parent_visible = true
+        end
     end
 
     -- Apply collapse state of parent to children
