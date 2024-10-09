@@ -1,14 +1,14 @@
 -- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.0.7
+-- @version 1.0.8
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  • Feature: Added link tcp mute setting and visual in GUI
+--  • GUI Fix: invisible inner borders in tables
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
-ScriptVersion = "v1.0.7"
+ScriptVersion = "v1.0.8"
 ScriptName = 'TRACK VISIBILITY MANAGER'
 Settings = {
     link_select = false,
