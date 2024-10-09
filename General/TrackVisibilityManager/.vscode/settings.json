@@ -16,6 +16,7 @@
         "tracks",
         "link_tcp_select",
         "link_tcp_collapse",
+        "link_tcp_mute",
         "selected_tracks",
         "track_count",
         "selected_track_count",

@@ -254,7 +254,19 @@ function Gui_TableTracks()
                     reaper.ImGui_SameLine(ctx)
                     local _, text_cell = reaper.GetSetMediaTrackInfo_String(tracks[i].id, "P_NAME", "", false)
                     if text_cell == "" then text_cell = "Track "..tracks[i].number end
+
+                    local push_color = false
+                    tracks[i].mute = reaper.GetMediaTrackInfo_Value(tracks[i].id, "B_MUTE")
+                    if link_tcp_mute then
+                        if tracks[i].mute == 1 then push_color = true
+                        elseif tracks[i].depth > 0 and System_IsParentMute(tracks[i].id) then push_color = true end
+
+                        if push_color then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xefb7b7cc) end
+                    end
+
                     reaper.ImGui_Text(ctx, tostring(text_cell))
+
+                    if link_tcp_mute and push_color then reaper.ImGui_PopStyleColor(ctx, 1) end
                 end
             end
             reaper.ImGui_EndTable(ctx)
@@ -275,12 +287,17 @@ function Gui_SettingsWindow()
         reaper.ImGui_Text(ctx, "Link Track Selection:")
         reaper.ImGui_SameLine(ctx)
         changed, link_tcp_select = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_select", link_tcp_select)
-        if changed then System_WriteSettingsFile(link_tcp_select, link_tcp_collapse) end
+        if changed then System_WriteSettingsFile(link_tcp_select, link_tcp_collapse, link_tcp_mute) end
 
         reaper.ImGui_Text(ctx, "Link Track Collapse:")
         reaper.ImGui_SameLine(ctx)
         changed, link_tcp_collapse = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_collapse", link_tcp_collapse)
-        if changed then System_WriteSettingsFile(link_tcp_select, link_tcp_collapse) end
+        if changed then System_WriteSettingsFile(link_tcp_select, link_tcp_collapse, link_tcp_mute) end
+
+        reaper.ImGui_Text(ctx, "Link Track Mute:")
+        reaper.ImGui_SameLine(ctx)
+        changed, link_tcp_mute = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_mute", link_tcp_mute)
+        if changed then System_WriteSettingsFile(link_tcp_select, link_tcp_collapse, link_tcp_mute) end
 
         reaper.ImGui_End(ctx)
     else

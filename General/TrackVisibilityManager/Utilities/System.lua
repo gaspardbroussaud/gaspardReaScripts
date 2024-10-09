@@ -52,6 +52,24 @@ function System_GetTopParentTrack(track)
     end
 end
 
+---comment
+---@param track any
+-- GET TOP PARENT TRACK
+function System_IsParentMute(track)
+    while true do
+        if reaper.GetMediaTrackInfo_Value(track, "B_MUTE") == 1 then
+            return true
+        end
+
+        local parent = reaper.GetParentTrack(track)
+        if parent then
+            track = parent
+        else
+            return false
+        end
+    end
+end
+
 -- GET PARENT TRACK MATCH FOR TRACK VISIBILITY
 function System_GetParentTrackMatch(track, target)
     while true do
@@ -90,7 +108,7 @@ function System_GetTracksTable()
         if link_tcp_select then track_select = reaper.IsTrackSelected(track_id) end
 
         -- Track folder depth with parent folders
-        local track_depth = reaper.GetMediaTrackInfo_Value(track_id, "I_FOLDERDEPTH")
+        local track_depth = reaper.GetTrackDepth(track_id)
 
         -- Track collapsed state for folders (-1 if not a folder track)
         local track_collapse = -1
@@ -98,20 +116,14 @@ function System_GetTracksTable()
             track_collapse = reaper.GetMediaTrackInfo_Value(track_id, "I_FOLDERCOMPACT")
         end
 
-        -- Parent of track
-        local track_parent = reaper.GetParentTrack(track_id)
-
-        if not track_parent then inner_depth = 0
-        else _, inner_depth = System_GetTopParentTrack(track_id) end
-        local cur_depth = inner_depth
-        if track_depth > 0 then inner_depth = inner_depth + 1
-        elseif track_depth < 0 then inner_depth = inner_depth - 1 end
-        track_depth = cur_depth
+        -- Track mute state if link tcp mute setting enabled
+        local track_mute = 0
+        if link_tcp_mute then track_mute = reaper.GetMediaTrackInfo_Value(track_id, "I_FOLDERDEPTH") end
 
         -- Track visibility in GUI
         local track_visible = true
 
-        tracks[i] = { id = track_id, number = track_number, state = track_state, select = track_select, depth = track_depth, collapse = track_collapse, visible = track_visible }
+        tracks[i] = { id = track_id, number = track_number, state = track_state, select = track_select, depth = track_depth, collapse = track_collapse, mute = track_mute, visible = track_visible }
     end
 
     if track_count ~= 0 then
@@ -119,6 +131,16 @@ function System_GetTracksTable()
             System_UpdateTrackCollapse(i, nil)
         end
     end
+end
+
+-- GET TRACK MUTE
+function System_GetTrackMuteIndex(track)
+    for i = 0, #tracks do
+        if tracks[i].id == track then
+            return i
+        end
+    end
+    return nil
 end
 
 -- HIDE TRACK WHEN UNSELECTING CHECKBOX
@@ -130,7 +152,15 @@ function System_HideTrack(track)
     end
 
     for m = 0, reaper.CountSelectedTracks(0) - 1 do
-        reaper.SetMediaTrackInfo_Value(reaper.GetSelectedTrack(0, m), "B_MUTE", 1)
+        local cur_track = reaper.GetSelectedTrack(0, m)
+        if reaper.GetMediaTrackInfo_Value(cur_track, "B_MUTE") == 1 then
+            --local index = System_GetTrackMuteIndex(cur_track)
+            --tracks[index].mute = 1
+        else
+            --local index = System_GetTrackMuteIndex(cur_track)
+            --tracks[index].mute = 0
+            reaper.SetMediaTrackInfo_Value(cur_track, "B_MUTE", 1)
+        end
     end
 
     reaper.Main_OnCommand(41312, 0) -- Lock selected track
@@ -159,7 +189,12 @@ function System_ShowTrack(track)
     reaper.Main_OnCommand(41313, 0) -- Unlock selected track
 
     for m = 0, reaper.CountSelectedTracks(0) - 1 do
-        reaper.SetMediaTrackInfo_Value(reaper.GetSelectedTrack(0, m), "B_MUTE", 0)
+        local cur_track = reaper.GetSelectedTrack(0, m)
+        local mute = 0
+        local index = System_GetTrackMuteIndex(cur_track)
+        if index then mute = tracks[index].mute end
+
+        reaper.SetMediaTrackInfo_Value(cur_track, "B_MUTE", mute)
     end
 
     reaper.Main_OnCommand(40297, 0) -- Unselect all tracks
@@ -245,10 +280,10 @@ function System_UpdateTrackCollapse(index, new_collapse)
 end
 
 -- WRITE SETTINGS IN FILE
-function System_WriteSettingsFile(setting_select, setting_colapse)
+function System_WriteSettingsFile(setting_select, setting_colapse, setting_mute)
     local file = io.open(settings_path, "w")
     if file then
-        file:write(tostring(setting_select).."\n"..tostring(setting_colapse))
+        file:write(tostring(setting_select).."\n"..tostring(setting_colapse).."\n"..tostring(setting_mute))
         file:close()
     end
 end
@@ -257,20 +292,26 @@ end
 function System_ReadSettingsFile()
     local setting_select = false
     local setting_collapse = false
+    local setting_mute = false
     local file = io.open(settings_path, "r")
     if file then
         setting_select = file:read("l")
         setting_collapse = file:read("l")
+        setting_mute = file:read("l")
         file:close()
         if setting_select == "true" then setting_select = true
         else setting_select = false end
         if setting_collapse == "true" then setting_collapse = true
         else setting_collapse = false end
+        if setting_mute == "true" then setting_mute = true
+        else setting_mute = false end
     else
         setting_select = false
         setting_collapse = false
-        System_WriteSettingsFile(setting_select, setting_collapse)
+        setting_mute = false
+        System_WriteSettingsFile(setting_select, setting_collapse, setting_mute)
     end
     link_tcp_select = setting_select
     link_tcp_collapse = setting_collapse
+    link_tcp_mute = setting_mute
 end

@@ -1,17 +1,14 @@
--- @description Track Visibility Tool
+-- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.0.6
+-- @version 1.0.7
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  • Bugfix: Removed flicker on collapse track to state 1 (medium) with link tcp collapse enabled
---  • Bugfix: Unlink selection at start if setting disabled
---  • Gui fixes and improvements
---  • Added debug lines in script
+--  • Feature: Added link tcp mute setting and visual in GUI
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
-ScriptVersion = "v1.0.6"
+ScriptVersion = "v1.0.7"
 ScriptName = 'TRACK VISIBILITY MANAGER'
 Settings = {
     link_select = false,
