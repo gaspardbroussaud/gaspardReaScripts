@@ -154,11 +154,9 @@ function System_HideTrack(track)
     for m = 0, reaper.CountSelectedTracks(0) - 1 do
         local cur_track = reaper.GetSelectedTrack(0, m)
         if reaper.GetMediaTrackInfo_Value(cur_track, "B_MUTE") == 1 then
-            --local index = System_GetTrackMuteIndex(cur_track)
-            --tracks[index].mute = 1
+            reaper.SetMediaTrackInfo_Value(cur_track, "I_HEIGHTOVERRIDE", 1)
+            reaper.SetMediaTrackInfo_Value(cur_track, "B_HEIGHTLOCK", 1)
         else
-            --local index = System_GetTrackMuteIndex(cur_track)
-            --tracks[index].mute = 0
             reaper.SetMediaTrackInfo_Value(cur_track, "B_MUTE", 1)
         end
     end
@@ -191,8 +189,13 @@ function System_ShowTrack(track)
     for m = 0, reaper.CountSelectedTracks(0) - 1 do
         local cur_track = reaper.GetSelectedTrack(0, m)
         local mute = 0
-        local index = System_GetTrackMuteIndex(cur_track)
-        if index then mute = tracks[index].mute end
+        local height = reaper.GetMediaTrackInfo_Value(cur_track, "I_HEIGHTOVERRIDE")
+        local locked_height = reaper.GetMediaTrackInfo_Value(cur_track, "B_HEIGHTLOCK")
+        if locked_height and height == 1 then
+            mute = 1
+            reaper.SetMediaTrackInfo_Value(cur_track, "I_HEIGHTOVERRIDE", 0)
+            reaper.SetMediaTrackInfo_Value(cur_track, "B_HEIGHTLOCK", 0)
+        end
 
         reaper.SetMediaTrackInfo_Value(cur_track, "B_MUTE", mute)
     end

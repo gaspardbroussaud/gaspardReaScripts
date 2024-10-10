@@ -256,8 +256,8 @@ function Gui_TableTracks()
                     if text_cell == "" then text_cell = "Track "..tracks[i].number end
 
                     local push_color = false
-                    tracks[i].mute = reaper.GetMediaTrackInfo_Value(tracks[i].id, "B_MUTE")
                     if link_tcp_mute then
+                        tracks[i].mute = reaper.GetMediaTrackInfo_Value(tracks[i].id, "B_MUTE")
                         if tracks[i].mute == 1 then push_color = true
                         elseif tracks[i].depth > 0 and System_IsParentMute(tracks[i].id) then push_color = true end
 
