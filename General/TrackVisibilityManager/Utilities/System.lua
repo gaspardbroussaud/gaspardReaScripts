@@ -70,6 +70,24 @@ function System_IsParentMute(track)
     end
 end
 
+---comment
+---@param track any
+-- GET TOP PARENT TRACK
+function System_IsParentCollapsed(track)
+    while true do
+        if reaper.GetMediaTrackInfo_Value(track, "I_FOLDERCOMPACT") > 1 then
+            return true
+        end
+
+        local parent = reaper.GetParentTrack(track)
+        if parent then
+            track = parent
+        else
+            return false
+        end
+    end
+end
+
 -- GET PARENT TRACK MATCH FOR TRACK VISIBILITY
 function System_GetParentTrackMatch(track, target)
     while true do
@@ -112,13 +130,14 @@ function System_GetTracksTable()
 
         -- Track collapsed state for folders (-1 if not a folder track)
         local track_collapse = -1
-        if track_depth == 1 then
-            track_collapse = reaper.GetMediaTrackInfo_Value(track_id, "I_FOLDERCOMPACT")
+        if reaper.GetMediaTrackInfo_Value(track_id, "I_FOLDERDEPTH") == 1 then
+            if link_tcp_collapse then track_collapse = reaper.GetMediaTrackInfo_Value(track_id, "I_FOLDERCOMPACT")
+            else track_collapse = 0 end
         end
 
         -- Track mute state if link tcp mute setting enabled
         local track_mute = 0
-        if link_tcp_mute then track_mute = reaper.GetMediaTrackInfo_Value(track_id, "I_FOLDERDEPTH") end
+        if link_tcp_mute then track_mute = reaper.GetMediaTrackInfo_Value(track_id, "B_MUTE") end
 
         -- Track visibility in GUI
         local track_visible = true
@@ -126,9 +145,11 @@ function System_GetTracksTable()
         tracks[i] = { id = track_id, number = track_number, state = track_state, select = track_select, depth = track_depth, collapse = track_collapse, mute = track_mute, visible = track_visible }
     end
 
-    if track_count ~= 0 then
+    if track_count ~= 0 and link_tcp_collapse then
         for i = 0, #tracks do
-            System_UpdateTrackCollapse(i, nil)
+            if tracks[i].collapse ~= -1 then
+                System_UpdateTrackCollapse(i, tracks[i].collapse)
+            end
         end
     end
 end
@@ -241,6 +262,9 @@ function System_UpdateTrackCollapse(index, new_collapse)
             parent_visible = false
         else
             parent_visible = true
+            if System_IsParentCollapsed(tracks[index].id) then
+                parent_visible = false
+            end
         end
     end
 
@@ -283,10 +307,11 @@ function System_UpdateTrackCollapse(index, new_collapse)
 end
 
 -- WRITE SETTINGS IN FILE
-function System_WriteSettingsFile(setting_select, setting_colapse, setting_mute)
+function System_WriteSettingsFile()--setting_select, setting_colapse, setting_mute, setting_mute_buttons, setting_solo_buttons)
     local file = io.open(settings_path, "w")
     if file then
-        file:write(tostring(setting_select).."\n"..tostring(setting_colapse).."\n"..tostring(setting_mute))
+        --file:write(tostring(setting_select).."\n"..tostring(setting_colapse).."\n"..tostring(setting_mute).."\n"..tostring(setting_mute_buttons).."\n"..tostring(setting_solo_buttons))
+        file:write(tostring(link_tcp_select).."\n"..tostring(link_tcp_collapse).."\n"..tostring(link_tcp_mute).."\n"..tostring(show_mute_buttons).."\n"..tostring(show_solo_buttons))
         file:close()
     end
 end
@@ -296,11 +321,15 @@ function System_ReadSettingsFile()
     local setting_select = false
     local setting_collapse = false
     local setting_mute = false
+    local setting_mute_buttons = false
+    local setting_solo_buttons = false
     local file = io.open(settings_path, "r")
     if file then
         setting_select = file:read("l")
         setting_collapse = file:read("l")
         setting_mute = file:read("l")
+        setting_mute_buttons = file:read("l")
+        setting_solo_buttons = file:read("l")
         file:close()
         if setting_select == "true" then setting_select = true
         else setting_select = false end
@@ -308,13 +337,21 @@ function System_ReadSettingsFile()
         else setting_collapse = false end
         if setting_mute == "true" then setting_mute = true
         else setting_mute = false end
+        if setting_mute_buttons == "true" then setting_mute_buttons = true
+        else setting_mute_buttons = false end
+        if setting_solo_buttons == "true" then setting_solo_buttons = true
+        else setting_solo_buttons = false end
     else
-        setting_select = false
-        setting_collapse = false
-        setting_mute = false
-        System_WriteSettingsFile(setting_select, setting_collapse, setting_mute)
+        link_tcp_select = false
+        link_tcp_collapse = false
+        link_tcp_mute = false
+        show_mute_buttons = false
+        show_solo_buttons = false
+        System_WriteSettingsFile()
     end
     link_tcp_select = setting_select
     link_tcp_collapse = setting_collapse
     link_tcp_mute = setting_mute
+    show_mute_buttons = setting_mute_buttons
+    show_solo_buttons = setting_solo_buttons
 end

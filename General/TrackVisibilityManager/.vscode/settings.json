@@ -20,6 +20,8 @@
         "selected_tracks",
         "track_count",
         "selected_track_count",
-        "settings_path"
+        "settings_path",
+        "show_mute_buttons",
+        "show_solo_buttons"
     ]
 }

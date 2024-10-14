@@ -1,15 +1,15 @@
 -- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.1
+-- @version 1.2
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  • Bugfix: Tracks display not updated on depth change
---  • Update: Add text if no tracks in project
+--  • New feature: Added Mute for tracks (toggle in settings)
+--  • Minor bugfix and improvements
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
-ScriptVersion = "v1.1"
+ScriptVersion = "v1.2"
 ScriptName = 'TRACK VISIBILITY MANAGER'
 Settings = {
     link_select = false,
