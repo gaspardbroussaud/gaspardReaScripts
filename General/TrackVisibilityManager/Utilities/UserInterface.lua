@@ -54,6 +54,8 @@ function Gui_Loop()
 
         if track_count ~= 0 then
             Gui_TableTracks()
+        else
+            reaper.ImGui_Text(ctx, "Add tracks to begin.")
         end
 
         reaper.ImGui_End(ctx)
@@ -63,7 +65,7 @@ function Gui_Loop()
     reaper.ImGui_PopFont(ctx)
     if open then
       reaper.defer(Gui_Loop)
-    end 
+    end
 end
 
 -- GUI ELEMENTS FOR TOP BAR
@@ -124,6 +126,10 @@ function Gui_TableTracks()
             reaper.ImGui_Text(ctx, "TRACK NAME")
 
             for i = 0, #tracks do
+                if tracks[i].depth ~= reaper.GetTrackDepth(tracks[i].id) then
+                    System_GetTracksTable()
+                end
+
                 if tracks[i].visible then
                     reaper.ImGui_TableNextRow(ctx)
                     reaper.ImGui_TableNextColumn(ctx)
