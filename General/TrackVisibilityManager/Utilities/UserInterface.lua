@@ -164,14 +164,18 @@ function Gui_TableTracks()
                 end
 
                 if is_one_track_solo then
-                    if tracks[i].solo < 1 and System_IsParentSolo(tracks[i].id) then
-                        tracks[i].solo = -1
+                    local parent_track, parent_is_solo = System_IsParentSolo(tracks[i].id)
+                    if tracks[i].solo < 1 and parent_is_solo then
+                        local index = System_FindTrackInTracksTab(parent_track)
+                        if index and not System_IsOneSubParentsSolo(index) then
+                            tracks[i].solo = -1
+                        end
                     end
                 end
 
                 if link_tcp_solo then
                     if tracks[i].solo < 1 and tracks[i].collapse ~= -1 then
-                        if System_SetAllParentsSolo(tracks[i].id, i) and tracks[i].mute == 0 then tracks[i].solo = -1 end
+                        if System_IsOneSubParentsSolo(i) and tracks[i].mute == 0 then tracks[i].solo = -1 end
                     end
                 end
 

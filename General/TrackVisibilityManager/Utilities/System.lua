@@ -76,27 +76,36 @@ end
 function System_IsParentSolo(track)
     while true do
         if reaper.GetMediaTrackInfo_Value(track, "I_SOLO") > 0 then
-            return true
+            return track, true
         end
 
         local parent = reaper.GetParentTrack(track)
         if parent then
             track = parent
         else
-            return false
+            return track, false
         end
     end
 end
 
 ---comment
----@param track any
+---@param index integer
 -- SET ALL PARENT SOLO OF TRACK TO -1
-function System_SetAllParentsSolo(track, index)
+function System_IsOneSubParentsSolo(index)
     for i = index + 1, #tracks do
         if tracks[i].depth <= tracks[index].depth then return false end
         if tracks[i].mute == 0 and tracks[i].solo == 1 then return true end
     end
     return false
+end
+
+function System_IsOtherChildSoloed(index)
+    if tracks[index].solo < 1 then
+        for i = index, #tracks do
+            if tracks[i].depth < tracks[index].depth then return false end
+            if tracks[i].solo == 1 then return true end
+        end
+    end
 end
 
 function System_FindTrackInTracksTab(track)
