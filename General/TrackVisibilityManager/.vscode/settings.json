@@ -17,11 +17,13 @@
         "link_tcp_select",
         "link_tcp_collapse",
         "link_tcp_mute",
+        "show_mute_buttons",
+        "link_tcp_solo",
+        "show_solo_buttons",
         "selected_tracks",
         "track_count",
         "selected_track_count",
         "settings_path",
-        "show_mute_buttons",
-        "show_solo_buttons"
+        "is_one_track_solo"
     ]
 }

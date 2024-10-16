@@ -5,10 +5,10 @@
 
 local ctx = reaper.ImGui_CreateContext('track_manager_context')
 local window_name = ScriptName..'  -  '..ScriptVersion
-local window_width = 500
-local window_height = 300
-local gui_W = 500
-local gui_H = 300
+local window_width = 550
+local window_height = 350
+local gui_W = window_width
+local gui_H = window_height
 local font = reaper.ImGui_CreateFont('sans-serif', 15)
 local last_selected = -1
 local show_settings = false
@@ -18,13 +18,15 @@ local project_name = ""
 local project_path = ""
 local visible = false
 local open = false
+local is_one_track_solo = false
 
 reaper.ImGui_Attach(ctx, font)
 function Gui_Loop()
+    reaper.ClearConsole()
     Gui_PushTheme()
 
     -- Window Settings
-    local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | reaper.ImGui_WindowFlags_NoScrollbar()
+    local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | reaper.ImGui_WindowFlags_NoScrollWithMouse()
     reaper.ImGui_SetNextWindowSize(ctx, gui_W, gui_H, reaper.ImGui_Cond_Once())
     -- Font
     reaper.ImGui_PushFont(ctx, font)
@@ -43,6 +45,8 @@ function Gui_Loop()
         System_GetSelectedTracksTable()
         System_GetTracksTable()
     end
+
+    is_one_track_solo = System_UpdateSoloState()
 
     if visible then
         -- Top bar elements
@@ -135,7 +139,26 @@ function Gui_TableTracks()
                     System_GetTracksTable()
                 end
 
+                if link_tcp_solo then
+                    local solo = reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_SOLO")
+                    if solo > 0 then tracks[i].solo = 1
+                    else tracks[i].solo = 0 end
+                end
+
+                if is_one_track_solo then
+                    if tracks[i].solo < 1 and System_IsParentSolo(tracks[i].id) then
+                        tracks[i].solo = -1
+                    end
+                end
+
+                if link_tcp_solo then
+                    if tracks[i].solo < 1 and tracks[i].collapse ~= -1 then
+                        if System_SetAllParentsSolo(tracks[i].id, i) and tracks[i].mute == 0 then tracks[i].solo = -1 end
+                    end
+                end
+
                 if tracks[i].visible then
+                    --#region Selectable item for multi edit
                     reaper.ImGui_TableNextRow(ctx)
                     reaper.ImGui_TableNextColumn(ctx)
                     x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
@@ -195,9 +218,11 @@ function Gui_TableTracks()
                         -- Link track selection between project and GUI
                         if link_tcp_select then reaper.SetTrackSelected(tracks[i].id, tracks[i].select) end
                     end
+                    --#endregion
 
+                    --#region Checkbox for visibility state
                     reaper.ImGui_TableNextColumn(ctx)
-                    if not show_mute_buttons then
+                    if not show_mute_buttons and not show_solo_buttons then
                         x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
                         reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + ((x - 21) * 0.5))
                     end
@@ -238,17 +263,27 @@ function Gui_TableTracks()
                         reaper.PreventUIRefresh(-1)
                         reaper.UpdateArrange()
                     end
+                    --#endregion
 
-                    local push_color = false
-                    local push_color_light = false
+                    --#region Mute button in GUI
                     if show_mute_buttons and link_tcp_mute then
+                        local push_color = false
+                        local push_color_light = false
+
                         reaper.ImGui_SameLine(ctx)
 
                         if tracks[i].mute == 1 then push_color = true
-                        elseif tracks[i].depth > 0 and System_IsParentMute(tracks[i].id) then push_color_light = true end
+                        elseif tracks[i].depth > 0 and System_IsParentMute(tracks[i].id) or is_one_track_solo and tracks[i].solo == 0 then push_color_light = true end
 
-                        if push_color then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xff0000ff)
-                        elseif push_color_light then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0x9c3636ff) end
+                        if push_color then
+                            reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Button(), 0xaa0000ff)
+                            reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ButtonHovered(), 0xcc0000ff)
+                            reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ButtonActive(), 0x880000ff)
+                        elseif push_color_light then
+                            reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Button(), 0x360036ff)
+                            reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ButtonHovered(), 0xcc0000ff)
+                            reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ButtonActive(), 0x880000ff)
+                        end
 
                         if reaper.ImGui_Button(ctx, "M##mute_button"..tostring(i)) then
                             tracks[i].mute = math.abs(tracks[i].mute - 1)
@@ -264,37 +299,49 @@ function Gui_TableTracks()
                             end
                         end
 
-                        if push_color or push_color_light then reaper.ImGui_PopStyleColor(ctx, 1) end
+                        if push_color or push_color_light then reaper.ImGui_PopStyleColor(ctx, 3) end
                     end
+                    --#endregion
 
-                    --[[push_color = false
-                    push_color_light = false
-                    if show_solo_buttons then
+                    --#region Solo button in GUI
+                    if show_solo_buttons and link_tcp_solo then
+                        local push_color = false
+                        local push_color_light = false
+
                         reaper.ImGui_SameLine(ctx)
 
-                        if tracks[i].mute == 1 then push_color = true
-                        elseif tracks[i].depth > 0 and System_IsParentMute(tracks[i].id) then push_color_light = true end
+                        if tracks[i].solo == 1 then push_color = true
+                        elseif tracks[i].mute == 0 and not System_IsParentMute(tracks[i].id) and tracks[i].solo == -1 then push_color_light = true end
 
-                        if push_color then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xff0000ff)
-                        elseif push_color_light then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0x9c3636ff) end
+                        if push_color then
+                            reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Button(), 0xaaaa00ff)
+                            reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ButtonHovered(), 0xcccc00ff)
+                            reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ButtonActive(), 0x888800ff)
+                        elseif push_color_light then
+                            reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Button(), 0x363600ff)
+                            reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ButtonHovered(), 0xcccc00ff)
+                            reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ButtonActive(), 0x888800ff)
+                        end
 
-                        if reaper.ImGui_Button(ctx, "M##mute_button"..tostring(i)) then
-                            tracks[i].mute = math.abs(tracks[i].mute - 1)
+                        if reaper.ImGui_Button(ctx, "S##solo_button"..tostring(i)) then
+                            tracks[i].solo = math.abs(tracks[i].solo - 1)
                             if tracks[i].select then
                                 for j = 0, #tracks do
                                     if tracks[j].select then
-                                        tracks[j].mute = tracks[i].mute
-                                        reaper.SetMediaTrackInfo_Value(tracks[j].id, "B_MUTE", tracks[j].mute)
+                                        tracks[j].solo = tracks[i].solo
+                                        reaper.SetMediaTrackInfo_Value(tracks[j].id, "I_SOLO", tracks[j].solo)
                                     end
                                 end
                             else
-                                reaper.SetMediaTrackInfo_Value(tracks[i].id, "B_MUTE", tracks[i].mute)
+                                reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_SOLO", tracks[i].solo)
                             end
                         end
 
-                        if push_color or push_color_light then reaper.ImGui_PopStyleColor(ctx, 1) end
-                    end]]
+                        if push_color or push_color_light then reaper.ImGui_PopStyleColor(ctx, 3) end
+                    end
+                    --#endregion
 
+                    --#region Arrow button for collapse
                     reaper.ImGui_TableNextColumn(ctx)
                     if reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERDEPTH") == 1 then
                         reaper.ImGui_Dummy(ctx, tracks[i].depth * 10, 1)
@@ -319,23 +366,28 @@ function Gui_TableTracks()
                         reaper.ImGui_Dummy(ctx, tracks[i].depth * 10 + 28, 1)
                         reaper.ImGui_SameLine(ctx)
                     end
+                    --#endregion
 
+                    --#region Text display for tracks name
                     reaper.ImGui_SameLine(ctx)
                     local _, text_cell = reaper.GetSetMediaTrackInfo_String(tracks[i].id, "P_NAME", "", false)
                     if text_cell == "" then text_cell = "Track "..tracks[i].number end
 
-                    push_color = false
+                    local push_color_mute = false
                     if link_tcp_mute then
                         tracks[i].mute = reaper.GetMediaTrackInfo_Value(tracks[i].id, "B_MUTE")
-                        if tracks[i].mute == 1 then push_color = true
-                        elseif tracks[i].depth > 0 and System_IsParentMute(tracks[i].id) then push_color = true end
 
-                        if push_color then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xefb7b7cc) end
+                        if tracks[i].mute == 1 then push_color_mute = true
+                        elseif tracks[i].depth > 0 and System_IsParentMute(tracks[i].id) then push_color_mute = true
+                        elseif is_one_track_solo and tracks[i].solo == 0 then push_color_mute = true end
+
+                        if push_color_mute then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xefb7b7cc) end
                     end
 
-                    reaper.ImGui_Text(ctx, tostring(text_cell).." | "..tostring(tracks[i].collapse))
+                    reaper.ImGui_Text(ctx, tostring(text_cell).." | "..tostring(tracks[i].solo))
 
-                    if link_tcp_mute and push_color then reaper.ImGui_PopStyleColor(ctx, 1) end
+                    if link_tcp_mute and push_color_mute then reaper.ImGui_PopStyleColor(ctx, 1) end
+                    --#endregion
                 end
             end
             reaper.ImGui_EndTable(ctx)
@@ -348,11 +400,13 @@ end
 function Gui_SettingsWindow()
     -- Set Settings Window visibility and settings
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
-    reaper.ImGui_SetNextWindowSize(ctx, gui_W - 100, gui_H - 100, reaper.ImGui_Cond_Once())
+    reaper.ImGui_SetNextWindowSize(ctx, gui_W - 150, gui_H - 140, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowPos(ctx, window_x + window_width / 2 - (gui_W - 100) / 2, window_y + 25, reaper.ImGui_Cond_Appearing())
 
     local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
     if settings_visible then
+        reaper.ImGui_Text(ctx, tostring(reaper.ImGui_GetFramerate(ctx)))
+
         reaper.ImGui_Text(ctx, "Link Track Selection:")
         reaper.ImGui_SameLine(ctx)
         changed, link_tcp_select = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_select", link_tcp_select)
@@ -363,15 +417,19 @@ function Gui_SettingsWindow()
         changed, link_tcp_collapse = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_collapse", link_tcp_collapse)
         if changed then System_WriteSettingsFile() end
 
+        reaper.ImGui_Dummy(ctx, 1, 5)
+
         reaper.ImGui_Text(ctx, "Link Track Mute:")
         reaper.ImGui_SameLine(ctx)
         changed, link_tcp_mute = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_mute", link_tcp_mute)
         if changed then
-            if not link_tcp_mute then show_mute_buttons = false end
+            if not link_tcp_mute then
+                show_mute_buttons = false
+                link_tcp_solo = false
+                show_solo_buttons = false
+            end
             System_WriteSettingsFile()
         end
-
-        reaper.ImGui_Dummy(ctx, 1, 5)
 
         reaper.ImGui_Text(ctx, "Show Mute Buttons:")
         reaper.ImGui_SameLine(ctx)
@@ -381,10 +439,31 @@ function Gui_SettingsWindow()
             System_WriteSettingsFile()
         end
 
-        --[[reaper.ImGui_Text(ctx, "Show Solo Buttons:")
+        reaper.ImGui_Dummy(ctx, 1, 5)
+
+        reaper.ImGui_Text(ctx, "Link Track Solo:")
+        reaper.ImGui_SameLine(ctx)
+        changed, link_tcp_solo = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_solo", link_tcp_solo)
+        if changed then
+            if link_tcp_solo then
+                link_tcp_mute = true
+            else
+                show_mute_buttons = false
+            end
+
+            System_WriteSettingsFile()
+        end
+
+        reaper.ImGui_Text(ctx, "Show Solo Buttons:")
         reaper.ImGui_SameLine(ctx)
         changed, show_solo_buttons = reaper.ImGui_Checkbox(ctx, "##checkbox_show_solo_buttons", show_solo_buttons)
-        if changed then System_WriteSettingsFile() end]]
+        if changed then
+            if show_solo_buttons then
+                link_tcp_mute = true
+                link_tcp_solo = true
+            end
+            System_WriteSettingsFile()
+        end
 
         reaper.ImGui_End(ctx)
     else
@@ -479,9 +558,9 @@ function Gui_PushTheme()
 
     -- Scrollbar
     reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ScrollbarBg(), 0x14141BFF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ScrollbarGrab(), 0x1F1F28FF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ScrollbarGrabHovered(), 0x2C2D39FF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ScrollbarGrabActive(), 0x3B2F66FF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ScrollbarGrab(), 0x574F8EFF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ScrollbarGrabHovered(), 0x7C71C2FF)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ScrollbarGrabActive(), 0x6B60B5FF)
 
     -- Séparateurs
     reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Separator(), 0x594A8CFF)

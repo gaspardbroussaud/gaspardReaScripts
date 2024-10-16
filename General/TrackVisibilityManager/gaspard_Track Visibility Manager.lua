@@ -1,15 +1,15 @@
 -- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.2
+-- @version 1.2.1
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  • New feature: Added Mute for tracks (toggle in settings)
---  • Minor bugfix and improvements
+--  • New feature: Added Solo for tracks (toggle in settings)
+--  • Numerous bugfix and improvements
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
-ScriptVersion = "v1.2"
+ScriptVersion = "v1.2.1"
 ScriptName = 'TRACK VISIBILITY MANAGER'
 Settings = {
     link_select = false,

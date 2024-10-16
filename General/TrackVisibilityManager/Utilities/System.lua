@@ -54,7 +54,7 @@ end
 
 ---comment
 ---@param track any
--- GET TOP PARENT TRACK
+-- RETURN TRUE IF A PARENT IS MUTE
 function System_IsParentMute(track)
     while true do
         if reaper.GetMediaTrackInfo_Value(track, "B_MUTE") == 1 then
@@ -68,6 +68,42 @@ function System_IsParentMute(track)
             return false
         end
     end
+end
+
+---comment
+---@param track any
+-- RETURN TRUE IF A PARENT IS SOLO
+function System_IsParentSolo(track)
+    while true do
+        if reaper.GetMediaTrackInfo_Value(track, "I_SOLO") > 0 then
+            return true
+        end
+
+        local parent = reaper.GetParentTrack(track)
+        if parent then
+            track = parent
+        else
+            return false
+        end
+    end
+end
+
+---comment
+---@param track any
+-- SET ALL PARENT SOLO OF TRACK TO -1
+function System_SetAllParentsSolo(track, index)
+    for i = index + 1, #tracks do
+        if tracks[i].depth <= tracks[index].depth then return false end
+        if tracks[i].mute == 0 and tracks[i].solo == 1 then return true end
+    end
+    return false
+end
+
+function System_FindTrackInTracksTab(track)
+    for i = 0, #tracks do
+        if tracks[i].id == track then return i end
+    end
+    return nil
 end
 
 ---comment
@@ -113,36 +149,38 @@ function System_GetTracksTable()
     local inner_depth = 0.0
     for i = 0, track_count - 1 do
         -- Track reaper data 
-        local track_id = reaper.GetTrack(0, i)
+        local t_id = reaper.GetTrack(0, i)
 
         -- Track number top to bottom
-        local track_number = tostring(reaper.GetMediaTrackInfo_Value(track_id, "IP_TRACKNUMBER")):sub(1, -3)
+        local t_number = tostring(reaper.GetMediaTrackInfo_Value(t_id, "IP_TRACKNUMBER")):sub(1, -3)
 
         -- Track visibility in TCP state (shown or hidden)
-        local track_state = reaper.GetMediaTrackInfo_Value(track_id, "B_SHOWINTCP")
+        local t_state = reaper.GetMediaTrackInfo_Value(t_id, "B_SHOWINTCP")
 
         -- Track selection state in TCP
-        local track_select = false
-        if link_tcp_select then track_select = reaper.IsTrackSelected(track_id) end
+        local t_select = false
+        if link_tcp_select then t_select = reaper.IsTrackSelected(t_id) end
 
         -- Track folder depth with parent folders
-        local track_depth = reaper.GetTrackDepth(track_id)
+        local t_depth = reaper.GetTrackDepth(t_id)
 
         -- Track collapsed state for folders (-1 if not a folder track)
-        local track_collapse = -1
-        if reaper.GetMediaTrackInfo_Value(track_id, "I_FOLDERDEPTH") == 1 then
-            if link_tcp_collapse then track_collapse = reaper.GetMediaTrackInfo_Value(track_id, "I_FOLDERCOMPACT")
-            else track_collapse = 0 end
+        local t_collapse = -1
+        if reaper.GetMediaTrackInfo_Value(t_id, "I_FOLDERDEPTH") == 1 then
+            if link_tcp_collapse then t_collapse = reaper.GetMediaTrackInfo_Value(t_id, "I_FOLDERCOMPACT")
+            else t_collapse = 0 end
         end
 
         -- Track mute state if link tcp mute setting enabled
-        local track_mute = 0
-        if link_tcp_mute then track_mute = reaper.GetMediaTrackInfo_Value(track_id, "B_MUTE") end
+        local t_mute = 0
+        if link_tcp_mute then t_mute = reaper.GetMediaTrackInfo_Value(t_id, "B_MUTE") end
+
+        local t_solo = reaper.GetMediaTrackInfo_Value(t_id, "I_SOLO")
 
         -- Track visibility in GUI
-        local track_visible = true
+        local t_visible = true
 
-        tracks[i] = { id = track_id, number = track_number, state = track_state, select = track_select, depth = track_depth, collapse = track_collapse, mute = track_mute, visible = track_visible }
+        tracks[i] = { id = t_id, number = t_number, state = t_state, select = t_select, depth = t_depth, collapse = t_collapse, mute = t_mute, solo = t_solo, visible = t_visible }
     end
 
     if track_count ~= 0 and link_tcp_collapse then
@@ -180,6 +218,8 @@ function System_HideTrack(track)
         else
             reaper.SetMediaTrackInfo_Value(cur_track, "B_MUTE", 1)
         end
+
+        reaper.SetMediaTrackInfo_Value(cur_track, "I_SOLO", 0)
     end
 
     reaper.Main_OnCommand(41312, 0) -- Lock selected track
@@ -306,52 +346,55 @@ function System_UpdateTrackCollapse(index, new_collapse)
     reaper.UpdateArrange()
 end
 
+-- UPDATE THE SOLO STATE COMPARED TO SOLO AND MUTE ON TRACKS
+function System_UpdateSoloState()
+    for i = 0, #tracks do
+        if tracks[i].solo > 0 then return true end
+    end
+    return false
+end
+
 -- WRITE SETTINGS IN FILE
-function System_WriteSettingsFile()--setting_select, setting_colapse, setting_mute, setting_mute_buttons, setting_solo_buttons)
+function System_WriteSettingsFile()
     local file = io.open(settings_path, "w")
     if file then
-        --file:write(tostring(setting_select).."\n"..tostring(setting_colapse).."\n"..tostring(setting_mute).."\n"..tostring(setting_mute_buttons).."\n"..tostring(setting_solo_buttons))
-        file:write(tostring(link_tcp_select).."\n"..tostring(link_tcp_collapse).."\n"..tostring(link_tcp_mute).."\n"..tostring(show_mute_buttons).."\n"..tostring(show_solo_buttons))
+        file:write(tostring(link_tcp_select).."\n"..tostring(link_tcp_collapse).."\n"..tostring(link_tcp_mute).."\n"..tostring(show_mute_buttons).."\n"..tostring(link_tcp_solo).."\n"..tostring(show_solo_buttons))
         file:close()
     end
 end
 
 -- READ SETTINGS IN FILE AT LAUNCH
 function System_ReadSettingsFile()
-    local setting_select = false
-    local setting_collapse = false
-    local setting_mute = false
-    local setting_mute_buttons = false
-    local setting_solo_buttons = false
+    link_tcp_select = false
+    link_tcp_collapse = false
+    link_tcp_mute = false
+    show_mute_buttons = false
+    link_tcp_solo = false
+    show_solo_buttons = false
+
     local file = io.open(settings_path, "r")
     if file then
-        setting_select = file:read("l")
-        setting_collapse = file:read("l")
-        setting_mute = file:read("l")
-        setting_mute_buttons = file:read("l")
-        setting_solo_buttons = file:read("l")
+        link_tcp_select = System_StringToBool(file:read("l"))
+        link_tcp_collapse = System_StringToBool(file:read("l"))
+        link_tcp_mute = System_StringToBool(file:read("l"))
+        show_mute_buttons = System_StringToBool(file:read("l"))
+        link_tcp_solo = System_StringToBool(file:read("l"))
+        show_solo_buttons = System_StringToBool(file:read("l"))
         file:close()
-        if setting_select == "true" then setting_select = true
-        else setting_select = false end
-        if setting_collapse == "true" then setting_collapse = true
-        else setting_collapse = false end
-        if setting_mute == "true" then setting_mute = true
-        else setting_mute = false end
-        if setting_mute_buttons == "true" then setting_mute_buttons = true
-        else setting_mute_buttons = false end
-        if setting_solo_buttons == "true" then setting_solo_buttons = true
-        else setting_solo_buttons = false end
-    else
-        link_tcp_select = false
-        link_tcp_collapse = false
-        link_tcp_mute = false
-        show_mute_buttons = false
-        show_solo_buttons = false
-        System_WriteSettingsFile()
     end
-    link_tcp_select = setting_select
-    link_tcp_collapse = setting_collapse
-    link_tcp_mute = setting_mute
-    show_mute_buttons = setting_mute_buttons
-    show_solo_buttons = setting_solo_buttons
+
+    System_WriteSettingsFile()
+end
+
+function System_StringToBool(str)
+    if str then
+        str = string.lower(str)
+        if str == "true" then
+            return true
+        elseif str == "false" then
+            return false
+        else
+            return false
+        end
+    end
 end
