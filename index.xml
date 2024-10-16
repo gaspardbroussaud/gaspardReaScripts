@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="d90c18dd54cc83484744e04ca823e96ad7e946d5">
+<index version="1" name="Gaspard ReaScripts" commit="bb90b2cc154bfcc1a3a7410fa5173f4a071da372">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -146,6 +146,13 @@
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d90c18dd54cc83484744e04ca823e96ad7e946d5/General/TrackVisibilityManager/gaspard_Track%20Visibility%20Manager.lua</source>
         <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d90c18dd54cc83484744e04ca823e96ad7e946d5/General/TrackVisibilityManager/Utilities/System.lua</source>
         <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d90c18dd54cc83484744e04ca823e96ad7e946d5/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
+      </version>
+      <version name="1.2.2" author="gaspard" time="2024-10-16T08:33:52Z">
+        <changelog><![CDATA[• Remove debug logs
+• Bugfix and improvements]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/bb90b2cc154bfcc1a3a7410fa5173f4a071da372/General/TrackVisibilityManager/gaspard_Track%20Visibility%20Manager.lua</source>
+        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/bb90b2cc154bfcc1a3a7410fa5173f4a071da372/General/TrackVisibilityManager/Utilities/System.lua</source>
+        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/bb90b2cc154bfcc1a3a7410fa5173f4a071da372/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
       </version>
     </reapack>
   </category>
