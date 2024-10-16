@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="bb90b2cc154bfcc1a3a7410fa5173f4a071da372">
+<index version="1" name="Gaspard ReaScripts" commit="f12e96a5cc60652707111516ebe5dc90123c6c01">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -153,6 +153,12 @@
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/bb90b2cc154bfcc1a3a7410fa5173f4a071da372/General/TrackVisibilityManager/gaspard_Track%20Visibility%20Manager.lua</source>
         <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/bb90b2cc154bfcc1a3a7410fa5173f4a071da372/General/TrackVisibilityManager/Utilities/System.lua</source>
         <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/bb90b2cc154bfcc1a3a7410fa5173f4a071da372/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
+      </version>
+      <version name="1.2.3" author="gaspard" time="2024-10-16T13:02:27Z">
+        <changelog><![CDATA[• Added Ctrl+A and Escape shortcuts to select and unselect all tracks in GUI]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/f12e96a5cc60652707111516ebe5dc90123c6c01/General/TrackVisibilityManager/gaspard_Track%20Visibility%20Manager.lua</source>
+        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/f12e96a5cc60652707111516ebe5dc90123c6c01/General/TrackVisibilityManager/Utilities/System.lua</source>
+        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/f12e96a5cc60652707111516ebe5dc90123c6c01/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
       </version>
     </reapack>
   </category>
