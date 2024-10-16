@@ -134,6 +134,23 @@ function Gui_TableTracks()
             reaper.ImGui_TableNextColumn(ctx)
             reaper.ImGui_Text(ctx, "TRACK NAME")
 
+            -- Detect MacOS or Windows
+            local ctrl_key = reaper.ImGui_Key_LeftCtrl()
+            if not reaper.GetOS():match("Win") then ctrl_key = reaper.ImGui_Mod_Super() end
+            -- CTRL + A Select all tracks
+            if reaper.ImGui_IsKeyDown(ctx, ctrl_key) and reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_A()) then
+                for i = 0, #tracks do
+                    tracks[i].select = true
+                end
+            end
+
+            -- ESCAPE Key to unselect al tracks
+            if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Escape()) then
+                for i = 0, #tracks do
+                    tracks[i].select = false
+                end
+            end
+
             for i = 0, #tracks do
                 if tracks[i].depth ~= reaper.GetTrackDepth(tracks[i].id) then
                     System_GetTracksTable()
@@ -165,8 +182,10 @@ function Gui_TableTracks()
                     text_x, _ = reaper.ImGui_CalcTextSize(ctx, tracks[i].number)
                     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + ((x - text_x) * 0.5))
                     local selectable_flags = reaper.ImGui_SelectableFlags_SpanAllColumns() | reaper.ImGui_SelectableFlags_AllowOverlap()
+
                     -- Link track selection between project and GUI
                     if link_tcp_select then tracks[i].select = reaper.IsTrackSelected(tracks[i].id) end
+
                     -- Selection element
                     changed, tracks[i].select = reaper.ImGui_Selectable(ctx, tracks[i].number, tracks[i].select, selectable_flags, 0, 21)
                     if changed then
