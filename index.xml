@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="5af09cd719920b744d8c793d16589cd11411ec11">
+<index version="1" name="Gaspard ReaScripts" commit="d90c18dd54cc83484744e04ca823e96ad7e946d5">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -139,6 +139,13 @@
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/5af09cd719920b744d8c793d16589cd11411ec11/General/TrackVisibilityManager/gaspard_Track%20Visibility%20Manager.lua</source>
         <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/5af09cd719920b744d8c793d16589cd11411ec11/General/TrackVisibilityManager/Utilities/System.lua</source>
         <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/5af09cd719920b744d8c793d16589cd11411ec11/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
+      </version>
+      <version name="1.2.1" author="gaspard" time="2024-10-16T08:20:39Z">
+        <changelog><![CDATA[• New feature: Added Solo for tracks (toggle in settings)
+• Numerous bugfix and improvements]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d90c18dd54cc83484744e04ca823e96ad7e946d5/General/TrackVisibilityManager/gaspard_Track%20Visibility%20Manager.lua</source>
+        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d90c18dd54cc83484744e04ca823e96ad7e946d5/General/TrackVisibilityManager/Utilities/System.lua</source>
+        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d90c18dd54cc83484744e04ca823e96ad7e946d5/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
       </version>
     </reapack>
   </category>
