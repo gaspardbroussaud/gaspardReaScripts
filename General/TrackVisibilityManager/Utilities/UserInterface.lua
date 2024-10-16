@@ -384,7 +384,7 @@ function Gui_TableTracks()
                         if push_color_mute then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xefb7b7cc) end
                     end
 
-                    reaper.ImGui_Text(ctx, tostring(text_cell).." | "..tostring(tracks[i].solo))
+                    reaper.ImGui_Text(ctx, tostring(text_cell))
 
                     if link_tcp_mute and push_color_mute then reaper.ImGui_PopStyleColor(ctx, 1) end
                     --#endregion
@@ -405,8 +405,6 @@ function Gui_SettingsWindow()
 
     local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
     if settings_visible then
-        reaper.ImGui_Text(ctx, tostring(reaper.ImGui_GetFramerate(ctx)))
-
         reaper.ImGui_Text(ctx, "Link Track Selection:")
         reaper.ImGui_SameLine(ctx)
         changed, link_tcp_select = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_select", link_tcp_select)
