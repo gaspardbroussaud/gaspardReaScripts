@@ -141,6 +141,7 @@ function Gui_TableTracks()
             if reaper.ImGui_IsKeyDown(ctx, ctrl_key) and reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_A()) then
                 for i = 0, #tracks do
                     tracks[i].select = true
+                    if link_tcp_select then reaper.SetTrackSelected(tracks[i].id, true) end
                 end
             end
 

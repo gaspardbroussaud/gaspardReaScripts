@@ -1,14 +1,14 @@
 -- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.2.4
+-- @version 1.2.5
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  • Minor GUI color update
+--  • Bugfix: CTRL+A shortcut not working with TCP link selection enabled
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
-ScriptVersion = "v1.2.4"
+ScriptVersion = "v1.2.5"
 ScriptName = 'TRACK VISIBILITY MANAGER'
 Settings = {
     link_select = false,
