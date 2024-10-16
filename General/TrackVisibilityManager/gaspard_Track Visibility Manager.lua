@@ -1,14 +1,14 @@
 -- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.2.3
+-- @version 1.2.4
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  • Added Ctrl+A and Escape shortcuts to select and unselect all tracks in GUI
+--  • Minor GUI color update
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
-ScriptVersion = "v1.2.3"
+ScriptVersion = "v1.2.4"
 ScriptName = 'TRACK VISIBILITY MANAGER'
 Settings = {
     link_select = false,
