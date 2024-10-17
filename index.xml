@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="b0961193ffe949f2b4ffa473bc27190d570d484a">
+<index version="1" name="Gaspard ReaScripts" commit="f02858aa02cc79d76bf52128c61c25df00938ea9">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -244,6 +244,21 @@
         <changelog><![CDATA[• Show message if files not found at script end
 • Cleanup of debug lines]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/6d6492c7ba4cd66c7a2924ec41be978a31d6b5f3/Item/gaspard_Scan%20for%20missing%20source%20files%20in%20Sources%20folder.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Set marker to first transient in selected items.lua" type="script" desc="Set marker to first transient in selected items">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Set marker to first transient in selected items\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2024-10-17T13:29:52Z">
+        <changelog><![CDATA[Initial release]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/f02858aa02cc79d76bf52128c61c25df00938ea9/Item/gaspard_Set%20marker%20to%20first%20transient%20in%20selected%20items.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Set selected items fade in and out to value in script (editable).lua" type="script" desc="Set selected items fade in and out to value in script (editable)">
