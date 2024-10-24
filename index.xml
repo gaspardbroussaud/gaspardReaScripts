@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="65f10e8a33ea9c813b6d427a09fd5831208dce28">
+<index version="1" name="Gaspard ReaScripts" commit="be92832eddbad01f7d7a2099d759d893903fa457">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -390,6 +390,21 @@
     </reapack>
   </category>
   <category name="Timeline">
+    <reapack name="gaspard_Add space between each selected items.lua" type="script" desc="Add space between each selected items">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Add space between each selected items.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2024-10-24T12:51:56Z">
+        <changelog><![CDATA[initial release]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/be92832eddbad01f7d7a2099d759d893903fa457/Timeline/gaspard_Add%20space%20between%20each%20selected%20items.lua</source>
+      </version>
+    </reapack>
     <reapack name="gaspard_Cut consolidated items with selected reference items.lua" type="script" desc="Cut consolidated items with selected reference items">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
@@ -523,6 +538,21 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       </metadata>
       <version name="1.0" author="gaspard" time="2024-09-10T15:47:29Z">
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a68f00a9e69ae63f934dc911b0a7aeb078c63039/Timeline/gaspard_Set%20master%20playrate%20to%20400%25.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Set random space between selected items.lua" type="script" desc="Set random space between selected items">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Set random space between selected items.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2024-10-24T12:51:56Z">
+        <changelog><![CDATA[initial release]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/be92832eddbad01f7d7a2099d759d893903fa457/Timeline/gaspard_Set%20random%20space%20between%20selected%20items.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Set selected items start with seconds between.lua" type="script" desc="Set selected items start with seconds between">
