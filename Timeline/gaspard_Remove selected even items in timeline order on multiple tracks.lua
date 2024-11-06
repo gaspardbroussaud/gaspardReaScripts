@@ -1,18 +1,20 @@
 --@description Remove selected even items in timeline order on multiple tracks
 --@author gaspard
---@version 1.0.1
+--@version 1.0.2
 --@changelog Update script nomenclature and cleanup
 --@about Remove selected even items in timeline order on multiple tracks.
 
 -- SORT VALUES FUNCTION --
 function SortOnValues(t,...)
-  local a = {...}
-  table.sort(t, function (u,v)
-    for i in pairs(a) do
-      if u[a[i]] > v[a[i]] then return false end
-      if u[a[i]] < v[a[i]] then return true end
-    end
-  end)
+    local a = {...}
+    table.sort(t, function (u,v)
+        for i in pairs(a) do
+            if u[a[i]] > v[a[i]] then return false end
+            if u[a[i]] < v[a[i]] then return true end
+        end
+        -- Default return if others fail
+        return false
+    end)
 end
 
 -- VARIABLE SETUP AT SCRIPT START --
