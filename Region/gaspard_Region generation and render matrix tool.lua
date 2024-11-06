@@ -1,8 +1,8 @@
 -- @description Region generation and render matrix Tool
 -- @author gaspard
--- @version 1.0.4
+-- @version 1.0.5
 -- @changelog
---  • Fix "_010" numbering if 10th cluster is last cluster in folder.
+--  • Fix "Track 1.0" to "Track 1" for empty render tracks' name.
 -- @about
 --  Retrieves all selected items, identifies clusters where the selected tracks serve as parents, and uses these clusters as the region's name and render matrix.
 --  To use: select items to detect clusters and the tracks through which to render.
@@ -71,7 +71,7 @@ function GetSelectedTracksTab()
 
             local _, track_name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
             if track_name == "" then
-                track_name = "Track "..tostring(reaper.GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER"))
+                track_name = "Track "..tostring(reaper.GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")):sub(1, -3)
             end
             table.insert(render_tracks_name, track_name)
         end
