@@ -11,6 +11,5 @@
         "undefined-global"
     ],
     "Lua.diagnostics.globals": [
-        "reaper"
     ]
 }
