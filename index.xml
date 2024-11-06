@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="9c46fc1cda11db01700b853a74349a2705478d3e">
+<index version="1" name="Gaspard ReaScripts" commit="6eed1cf35209d9829d273c431b1cddededdd6b22">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -655,6 +655,21 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       <version name="1.1.1" author="gaspard" time="2024-03-14T09:53:17Z">
         <changelog><![CDATA[+Unselect track after collapse.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/98114939f7252b24cff337a2ec5b1ee44f54e547/Track/gaspard_Collapse%20to%20small%20track%20in%20folder%20under%20mouse%20in%20TCP.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Invert selected tracks phase, add 'inv phase' in name and change color.lua" type="script" desc="Invert selected tracks phase, add 'inv phase' in name and change color">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Invert selected tracks phase, add 'inv phase' in name and change color\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2024-11-06T13:10:45Z">
+        <changelog><![CDATA[Initial release]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/6eed1cf35209d9829d273c431b1cddededdd6b22/Track/gaspard_Invert%20selected%20tracks%20phase,%20add%20'inv%20phase'%20in%20name%20and%20change%20color.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Rename selected tracks to Video.lua" type="script" desc="Rename selected tracks to &quot;Video&quot;">
