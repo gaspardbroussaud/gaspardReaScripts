@@ -20,6 +20,7 @@
         "show_mute_buttons",
         "link_tcp_solo",
         "show_solo_buttons",
+        "F_commandID",
         "selected_tracks",
         "track_count",
         "selected_track_count",

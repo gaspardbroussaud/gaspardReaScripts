@@ -366,8 +366,11 @@ end
 -- WRITE SETTINGS IN FILE
 function System_WriteSettingsFile()
     local file = io.open(settings_path, "w")
+    local w_settings = { link_tcp_select, link_tcp_collapse, link_tcp_mute, show_mute_buttons, link_tcp_solo, show_solo_buttons, F_commandID }
     if file then
-        file:write(tostring(link_tcp_select).."\n"..tostring(link_tcp_collapse).."\n"..tostring(link_tcp_mute).."\n"..tostring(show_mute_buttons).."\n"..tostring(link_tcp_solo).."\n"..tostring(show_solo_buttons))
+        for i = 1, #w_settings do
+            file:write(tostring(w_settings[i]).."\n")
+        end
         file:close()
     end
 end
@@ -380,6 +383,7 @@ function System_ReadSettingsFile()
     show_mute_buttons = false
     link_tcp_solo = false
     show_solo_buttons = false
+    F_commandID = ""
 
     local file = io.open(settings_path, "r")
     if file then
@@ -389,6 +393,7 @@ function System_ReadSettingsFile()
         show_mute_buttons = System_StringToBool(file:read("l"))
         link_tcp_solo = System_StringToBool(file:read("l"))
         show_solo_buttons = System_StringToBool(file:read("l"))
+        F_commandID = file:read("l")
         file:close()
     end
 

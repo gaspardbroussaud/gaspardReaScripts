@@ -1,10 +1,11 @@
 -- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.2.6
+-- @version 1.2.7
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  • Bugfix: Track not mute if parent solo and other child solo while itself not solo
+--  • Feature: Added F key shortcut to any custom command ID (set in settings)
+--  • Bugfix: Error on empty project
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables

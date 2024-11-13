@@ -35,6 +35,12 @@ function Gui_Loop()
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
     window_width, window_height = reaper.ImGui_GetWindowSize(ctx)
 
+    -- F key shortcut
+    if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_F()) then
+        if not F_commandID then F_commandID = "" end
+        reaper.Main_OnCommand(reaper.NamedCommandLookup(F_commandID), 0) -- Input command ID in Settings
+    end
+
     -- If track count updates (delete or add track)
     if track_count ~= reaper.CountTracks(0) then
         System_GetTracksTable()
@@ -46,7 +52,11 @@ function Gui_Loop()
         System_GetTracksTable()
     end
 
-    is_one_track_solo = System_UpdateSoloState()
+    if track_count > 0 then
+        is_one_track_solo = System_UpdateSoloState()
+    else
+        is_one_track_solo = false
+    end
 
     if visible then
         -- Top bar elements
@@ -429,62 +439,95 @@ function Gui_SettingsWindow()
 
     local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
     if settings_visible then
-        reaper.ImGui_Text(ctx, "Link Track Selection:")
-        reaper.ImGui_SameLine(ctx)
-        changed, link_tcp_select = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_select", link_tcp_select)
-        if changed then System_WriteSettingsFile() end
+        local table_flags = reaper.ImGui_TableFlags_SizingFixedFit() | reaper.ImGui_TableFlags_Borders() | reaper.ImGui_TableFlags_ScrollY()
+        if reaper.ImGui_BeginTable(ctx, "table_settings", 2, table_flags) then
+            reaper.ImGui_TableNextRow(ctx)
+            reaper.ImGui_TableNextColumn(ctx)
 
-        reaper.ImGui_Text(ctx, "Link Track Collapse:")
-        reaper.ImGui_SameLine(ctx)
-        changed, link_tcp_collapse = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_collapse", link_tcp_collapse)
-        if changed then System_WriteSettingsFile() end
+            -- Link Track Selection
+            reaper.ImGui_Text(ctx, "Link Track Selection:")
+            reaper.ImGui_SameLine(ctx)
+            changed, link_tcp_select = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_select", link_tcp_select)
+            if changed then System_WriteSettingsFile() end
 
-        reaper.ImGui_Dummy(ctx, 1, 5)
+            reaper.ImGui_TableNextColumn(ctx)
 
-        reaper.ImGui_Text(ctx, "Link Track Mute:")
-        reaper.ImGui_SameLine(ctx)
-        changed, link_tcp_mute = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_mute", link_tcp_mute)
-        if changed then
-            if not link_tcp_mute then
-                show_mute_buttons = false
-                link_tcp_solo = false
-                show_solo_buttons = false
-            end
-            System_WriteSettingsFile()
-        end
+            -- Link Track Collapse
+            reaper.ImGui_Text(ctx, "Link Track Collapse:")
+            reaper.ImGui_SameLine(ctx)
+            changed, link_tcp_collapse = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_collapse", link_tcp_collapse)
+            if changed then System_WriteSettingsFile() end
 
-        reaper.ImGui_Text(ctx, "Show Mute Buttons:")
-        reaper.ImGui_SameLine(ctx)
-        changed, show_mute_buttons = reaper.ImGui_Checkbox(ctx, "##checkbox_show_mute_buttons", show_mute_buttons)
-        if changed then
-            if show_mute_buttons then link_tcp_mute = true end
-            System_WriteSettingsFile()
-        end
+            reaper.ImGui_TableNextRow(ctx)
+            reaper.ImGui_TableNextColumn(ctx)
 
-        reaper.ImGui_Dummy(ctx, 1, 5)
-
-        reaper.ImGui_Text(ctx, "Link Track Solo:")
-        reaper.ImGui_SameLine(ctx)
-        changed, link_tcp_solo = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_solo", link_tcp_solo)
-        if changed then
-            if link_tcp_solo then
-                link_tcp_mute = true
-            else
-                show_mute_buttons = false
+            -- Link Track Mute
+            reaper.ImGui_Text(ctx, "Link Track Mute:")
+            reaper.ImGui_SameLine(ctx)
+            changed, link_tcp_mute = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_mute", link_tcp_mute)
+            if changed then
+                if not link_tcp_mute then
+                    show_mute_buttons = false
+                    link_tcp_solo = false
+                    show_solo_buttons = false
+                end
+                System_WriteSettingsFile()
             end
 
-            System_WriteSettingsFile()
-        end
+            reaper.ImGui_TableNextColumn(ctx)
 
-        reaper.ImGui_Text(ctx, "Show Solo Buttons:")
-        reaper.ImGui_SameLine(ctx)
-        changed, show_solo_buttons = reaper.ImGui_Checkbox(ctx, "##checkbox_show_solo_buttons", show_solo_buttons)
-        if changed then
-            if show_solo_buttons then
-                link_tcp_mute = true
-                link_tcp_solo = true
+            -- Show Mute Buttons
+            reaper.ImGui_Text(ctx, "Show Mute Buttons:")
+            reaper.ImGui_SameLine(ctx)
+            changed, show_mute_buttons = reaper.ImGui_Checkbox(ctx, "##checkbox_show_mute_buttons", show_mute_buttons)
+            if changed then
+                if show_mute_buttons then link_tcp_mute = true end
+                System_WriteSettingsFile()
             end
-            System_WriteSettingsFile()
+
+            reaper.ImGui_TableNextRow(ctx)
+            reaper.ImGui_TableNextColumn(ctx)
+
+            -- Link Track Solo
+            reaper.ImGui_Text(ctx, "Link Track Solo:")
+            reaper.ImGui_SameLine(ctx)
+            changed, link_tcp_solo = reaper.ImGui_Checkbox(ctx, "##checkbox_link_tcp_solo", link_tcp_solo)
+            if changed then
+                if link_tcp_solo then
+                    link_tcp_mute = true
+                else
+                    show_solo_buttons = false
+                end
+
+                System_WriteSettingsFile()
+            end
+
+            reaper.ImGui_TableNextColumn(ctx)
+
+            -- Show Solo Buttons
+            reaper.ImGui_Text(ctx, "Show Solo Buttons:")
+            reaper.ImGui_SameLine(ctx)
+            changed, show_solo_buttons = reaper.ImGui_Checkbox(ctx, "##checkbox_show_solo_buttons", show_solo_buttons)
+            if changed then
+                if show_solo_buttons then
+                    link_tcp_mute = true
+                    link_tcp_solo = true
+                end
+                System_WriteSettingsFile()
+            end
+
+            reaper.ImGui_TableNextRow(ctx)
+            reaper.ImGui_TableNextColumn(ctx)
+
+            -- Custom Command ID for F shortcut
+            reaper.ImGui_Text(ctx, "Custom F key command ID:")
+
+            reaper.ImGui_TableNextColumn(ctx)
+
+            changed, F_commandID = reaper.ImGui_InputText(ctx, "##input_F_commandID", F_commandID)
+            if changed then System_WriteSettingsFile() end
+
+            reaper.ImGui_EndTable(ctx)
         end
 
         reaper.ImGui_End(ctx)
