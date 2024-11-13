@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="6eed1cf35209d9829d273c431b1cddededdd6b22">
+<index version="1" name="Gaspard ReaScripts" commit="dbf199e58a7ed8a867f874044521c1bf3e1fc46f">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -208,6 +208,13 @@
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b0961193ffe949f2b4ffa473bc27190d570d484a/General/TrackVisibilityManager/gaspard_Track%20Visibility%20Manager.lua</source>
         <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b0961193ffe949f2b4ffa473bc27190d570d484a/General/TrackVisibilityManager/Utilities/System.lua</source>
         <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b0961193ffe949f2b4ffa473bc27190d570d484a/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
+      </version>
+      <version name="1.2.7" author="gaspard" time="2024-11-13T14:38:18Z">
+        <changelog><![CDATA[• Feature: Added F key shortcut to any custom command ID (set in settings)
+• Bugfix: Error on empty project]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/dbf199e58a7ed8a867f874044521c1bf3e1fc46f/General/TrackVisibilityManager/gaspard_Track%20Visibility%20Manager.lua</source>
+        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/dbf199e58a7ed8a867f874044521c1bf3e1fc46f/General/TrackVisibilityManager/Utilities/System.lua</source>
+        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/dbf199e58a7ed8a867f874044521c1bf3e1fc46f/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
       </version>
     </reapack>
   </category>
