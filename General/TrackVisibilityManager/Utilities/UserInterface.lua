@@ -320,16 +320,23 @@ function Gui_TableTracks()
                         end
 
                         if reaper.ImGui_Button(ctx, "M##mute_button"..tostring(i)) then
-                            tracks[i].mute = math.abs(tracks[i].mute - 1)
-                            if tracks[i].select then
+                            if ctrl_key then
+                                reaper.Main_OnCommand(40339, 0) -- Unmute all tracks
                                 for j = 0, #tracks do
-                                    if tracks[j].select then
-                                        tracks[j].mute = tracks[i].mute
-                                        reaper.SetMediaTrackInfo_Value(tracks[j].id, "B_MUTE", tracks[j].mute)
-                                    end
+                                    tracks[j].mute = 0
                                 end
                             else
-                                reaper.SetMediaTrackInfo_Value(tracks[i].id, "B_MUTE", tracks[i].mute)
+                                tracks[i].mute = math.abs(tracks[i].mute - 1)
+                                if tracks[i].select then
+                                    for j = 0, #tracks do
+                                        if tracks[j].select then
+                                            tracks[j].mute = tracks[i].mute
+                                            reaper.SetMediaTrackInfo_Value(tracks[j].id, "B_MUTE", tracks[j].mute)
+                                        end
+                                    end
+                                else
+                                    reaper.SetMediaTrackInfo_Value(tracks[i].id, "B_MUTE", tracks[i].mute)
+                                end
                             end
                         end
 
@@ -358,16 +365,23 @@ function Gui_TableTracks()
                         end
 
                         if reaper.ImGui_Button(ctx, "S##solo_button"..tostring(i)) then
-                            tracks[i].solo = math.abs(tracks[i].solo - 1)
-                            if tracks[i].select then
+                            if ctrl_key then
+                                reaper.Main_OnCommand(40340, 0) -- Unsolo all tracks
                                 for j = 0, #tracks do
-                                    if tracks[j].select then
-                                        tracks[j].solo = tracks[i].solo
-                                        reaper.SetMediaTrackInfo_Value(tracks[j].id, "I_SOLO", tracks[j].solo)
-                                    end
+                                    tracks[j].solo = 0
                                 end
                             else
-                                reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_SOLO", tracks[i].solo)
+                                tracks[i].solo = math.abs(tracks[i].solo - 1)
+                                if tracks[i].select then
+                                    for j = 0, #tracks do
+                                        if tracks[j].select then
+                                            tracks[j].solo = tracks[i].solo
+                                            reaper.SetMediaTrackInfo_Value(tracks[j].id, "I_SOLO", tracks[j].solo)
+                                        end
+                                    end
+                                else
+                                    reaper.SetMediaTrackInfo_Value(tracks[i].id, "I_SOLO", tracks[i].solo)
+                                end
                             end
                         end
 

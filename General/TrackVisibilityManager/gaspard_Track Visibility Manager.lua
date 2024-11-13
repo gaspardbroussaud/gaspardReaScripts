@@ -1,12 +1,10 @@
 -- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.2.8
+-- @version 1.2.9
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  • Update: Remove borders in settings window
---  • Update: Pushed settings input text width for long command IDs
---  • Update: Changed settings window size
+--  • Feature: Added Ctrl Clic on solo and mute buttons to unsolo or unmute all tracks
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
