@@ -320,7 +320,7 @@ function Gui_TableTracks()
                         end
 
                         if reaper.ImGui_Button(ctx, "M##mute_button"..tostring(i)) then
-                            if ctrl_key then
+                            if reaper.ImGui_IsKeyDown(ctx, ctrl_key) then
                                 reaper.Main_OnCommand(40339, 0) -- Unmute all tracks
                                 for j = 0, #tracks do
                                     tracks[j].mute = 0
@@ -365,7 +365,7 @@ function Gui_TableTracks()
                         end
 
                         if reaper.ImGui_Button(ctx, "S##solo_button"..tostring(i)) then
-                            if ctrl_key then
+                            if reaper.ImGui_IsKeyDown(ctx, ctrl_key) then
                                 reaper.Main_OnCommand(40340, 0) -- Unsolo all tracks
                                 for j = 0, #tracks do
                                     tracks[j].solo = 0

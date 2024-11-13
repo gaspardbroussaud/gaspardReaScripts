@@ -1,14 +1,14 @@
 -- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.2.9
+-- @version 1.3.0
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  • Feature: Added Ctrl Clic on solo and mute buttons to unsolo or unmute all tracks
+--  • Bugfix: Solo and mute buttons not working as expected
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
-ScriptVersion = "v1.2.6"
+ScriptVersion = "v1.3"
 ScriptName = 'TRACK VISIBILITY MANAGER'
 Settings = {
     link_select = false,
