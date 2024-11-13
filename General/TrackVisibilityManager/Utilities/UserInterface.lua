@@ -92,15 +92,21 @@ function Gui_TopBar()
 
         reaper.ImGui_SameLine(ctx)
 
-        local w, _ = reaper.ImGui_CalcTextSize(ctx, "O X")
+        local w, _ = reaper.ImGui_CalcTextSize(ctx, "Settings X")
         reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 40, 0)
 
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", 60, 22) then
+        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 40, 22) then
             reaper.ImGui_Dummy(ctx, 3, 1)
             reaper.ImGui_SameLine(ctx)
-            if reaper.ImGui_Button(ctx, 'O##settings_button') then
+            local push_color = false
+            if show_settings then
+                reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Button(), 0x9C91F2FF)
+                push_color = true
+            end
+            if reaper.ImGui_Button(ctx, 'Settings##settings_button') then
                 show_settings = not show_settings
             end
+            if push_color then reaper.ImGui_PopStyleColor(ctx) end
 
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'X##quit_button') then
@@ -449,7 +455,7 @@ function Gui_SettingsWindow()
     -- Set Settings Window visibility and settings
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
     reaper.ImGui_SetNextWindowSize(ctx, gui_W - 200, gui_H - 200, reaper.ImGui_Cond_Once())
-    reaper.ImGui_SetNextWindowPos(ctx, window_x + window_width / 2 - (gui_W - 100) / 2, window_y + 25, reaper.ImGui_Cond_Appearing())
+    reaper.ImGui_SetNextWindowPos(ctx, window_x + window_width / 2 - (gui_W - 200) / 2, window_y + 10, reaper.ImGui_Cond_Appearing())
 
     local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
     if settings_visible then

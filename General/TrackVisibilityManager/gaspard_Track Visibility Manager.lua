@@ -1,14 +1,14 @@
 -- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.3.0
+-- @version 1.3.1
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  • Bugfix: Solo and mute buttons not working as expected
+--  • Update: Change settings button color on show settings
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables
-ScriptVersion = "v1.3"
+ScriptVersion = "v1.3.1"
 ScriptName = 'TRACK VISIBILITY MANAGER'
 Settings = {
     link_select = false,
