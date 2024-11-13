@@ -1,11 +1,12 @@
 -- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.2.7
+-- @version 1.2.8
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  • Feature: Added F key shortcut to any custom command ID (set in settings)
---  • Bugfix: Error on empty project
+--  • Update: Remove borders in settings window
+--  • Update: Pushed settings input text width for long command IDs
+--  • Update: Changed settings window size
 -- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
 
 -- Global Variables

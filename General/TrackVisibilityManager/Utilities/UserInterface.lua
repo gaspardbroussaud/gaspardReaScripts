@@ -434,12 +434,12 @@ end
 function Gui_SettingsWindow()
     -- Set Settings Window visibility and settings
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
-    reaper.ImGui_SetNextWindowSize(ctx, gui_W - 150, gui_H - 140, reaper.ImGui_Cond_Once())
+    reaper.ImGui_SetNextWindowSize(ctx, gui_W - 200, gui_H - 200, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowPos(ctx, window_x + window_width / 2 - (gui_W - 100) / 2, window_y + 25, reaper.ImGui_Cond_Appearing())
 
     local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
     if settings_visible then
-        local table_flags = reaper.ImGui_TableFlags_SizingFixedFit() | reaper.ImGui_TableFlags_Borders() | reaper.ImGui_TableFlags_ScrollY()
+        local table_flags = reaper.ImGui_TableFlags_SizingFixedFit()
         if reaper.ImGui_BeginTable(ctx, "table_settings", 2, table_flags) then
             reaper.ImGui_TableNextRow(ctx)
             reaper.ImGui_TableNextColumn(ctx)
@@ -524,6 +524,7 @@ function Gui_SettingsWindow()
 
             reaper.ImGui_TableNextColumn(ctx)
 
+            reaper.ImGui_PushItemWidth(ctx, -1)
             changed, F_commandID = reaper.ImGui_InputText(ctx, "##input_F_commandID", F_commandID)
             if changed then System_WriteSettingsFile() end
 
