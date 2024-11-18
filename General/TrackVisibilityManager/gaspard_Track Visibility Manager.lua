@@ -4,11 +4,15 @@
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  • Update: Change settings button color on show settings
--- @about GUI to hide and show tracks in TCP and mixer with mute and locking.
+--  • Update about for Reapack package browser.
+-- @about
+--  • GUI to hide and show tracks in TCP and mixer with mute and locking.
+--  • You can change settings for links between manager and TCP.
+--    Control selection, mute, solo, and hide/show tracks.
+--  • Set an action ID in settings to use with F key while in manager window's focus.
 
 -- Global Variables
-ScriptVersion = "v1.3.1"
+ScriptVersion = "v1.3.2"
 ScriptName = 'TRACK VISIBILITY MANAGER'
 Settings = {
     link_select = false,

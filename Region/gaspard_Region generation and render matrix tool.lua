@@ -1,11 +1,13 @@
 -- @description Region generation and render matrix Tool
 -- @author gaspard
--- @version 1.0.5
+-- @version 1.0.6
 -- @changelog
---  • Fix "Track 1.0" to "Track 1" for empty render tracks' name.
+--  • Update about for Reapack package browser.
 -- @about
---  Retrieves all selected items, identifies clusters where the selected tracks serve as parents, and uses these clusters as the region's name and render matrix.
---  To use: select items to detect clusters and the tracks through which to render.
+--  • Retrives clusters of selected items depending on selected tracks.
+--  • How to use:
+--    1) Select all items to render (script will auto detect clusters: overlaping on same track or tracks in same track folder, depending on track selection).
+--    2) Select tracks to use as render matrix (will be used for region's names too).
 
 -- USER SETTINGS ----------
 local color_regions = true
