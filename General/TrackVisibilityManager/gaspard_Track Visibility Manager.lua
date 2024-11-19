@@ -1,15 +1,14 @@
 -- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.3.1
+-- @version 1.3.2
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  • Update about for Reapack package browser.
+--  - Update about for Reapack package browser.
 -- @about
---  • GUI to hide and show tracks in TCP and mixer with mute and locking.
---  • You can change settings for links between manager and TCP.
---    Control selection, mute, solo, and hide/show tracks.
---  • Set an action ID in settings to use with F key while in manager window's focus.
+--  - GUI to hide and show tracks in TCP and mixer with mute and locking.
+--  - You can change settings for links between manager and TCP to control selection, mute, solo, and hide/show tracks.
+--  - Set an action ID in settings to use with F key while in manager window's focus.
 
 -- Global Variables
 ScriptVersion = "v1.3.2"

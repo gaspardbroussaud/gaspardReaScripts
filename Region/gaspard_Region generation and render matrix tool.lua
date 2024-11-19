@@ -2,12 +2,12 @@
 -- @author gaspard
 -- @version 1.0.6
 -- @changelog
---  • Update about for Reapack package browser.
+--  - Update about for Reapack package browser.
 -- @about
---  • Retrives clusters of selected items depending on selected tracks.
---  • How to use:
---    1) Select all items to render (script will auto detect clusters: overlaping on same track or tracks in same track folder, depending on track selection).
---    2) Select tracks to use as render matrix (will be used for region's names too).
+--  - Retrives clusters of selected items depending on selected tracks.
+--  - How to use:
+--    1. Select all items to render (script will auto detect clusters: overlaping on same track or tracks in same track folder, depending on track selection).
+--    2. Select tracks to use as render matrix (will be used for region's names too).
 
 -- USER SETTINGS ----------
 local color_regions = true
