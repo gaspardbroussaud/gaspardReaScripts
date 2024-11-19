@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="b03be1a242e24b7d62264ecf4c3ad346285d6dda">
+<index version="1" name="Gaspard ReaScripts" commit="7847cd7ccc2b188087c33109f03ca2f083d6986a">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -245,36 +245,6 @@
     </reapack>
   </category>
   <category name="Item">
-    <reapack name="g4f_Delete items under Xms and rename with text list.lua" type="script" desc="Delete items under Xms and rename with text list">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Delete items under 100ms in project (default, see script to change value in USER VALUES) and rename visible items with text list input.\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="VincentDcs, gaspard" time="2024-04-02T10:23:57Z">
-        <changelog><![CDATA[Initial release.]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/28a2fb8e12f13bf1e264eeb59edee6c1538a07ea/Item/g4f_Delete%20items%20under%20Xms%20and%20rename%20with%20text%20list.lua</source>
-      </version>
-      <version name="1.1" author="VincentDcs, gaspard" time="2024-04-02T22:07:47Z">
-        <changelog><![CDATA[*Changes for 1.1 by gaspard
-+Added user value to custom at script top.
-~Changed error message to not display items deletion if there are no items in project.]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/117fe2b9ccda65ff09d078064ae4b04e08d171a9/Item/g4f_Delete%20items%20under%20Xms%20and%20rename%20with%20text%20list.lua</source>
-      </version>
-      <version name="1.2" author="gaspard, VincentDcs" time="2024-04-05T07:37:59Z">
-        <changelog><![CDATA[*Changes for 1.2 by gaspard
-+Added checkbox to chose item or region based renaming.]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/6735bd0d75a5865cb983aa3c160ebea0ca2330af/Item/g4f_Delete%20items%20under%20Xms%20and%20rename%20with%20text%20list.lua</source>
-      </version>
-      <version name="1.2.1" author="gaspard, VincentDcs" time="2024-04-19T15:57:04Z">
-        <changelog><![CDATA[- Remove DestroyContext error on window close]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/21b2cb9584a376dcd1b48ef810666c2da07d296b/Item/g4f_Delete%20items%20under%20Xms%20and%20rename%20with%20text%20list.lua</source>
-      </version>
-    </reapack>
     <reapack name="gaspard_Crop right X seconds of selected items.lua" type="script" desc="Crop right X seconds of selected items">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
