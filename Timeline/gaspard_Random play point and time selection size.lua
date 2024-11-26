@@ -1,9 +1,8 @@
 --@description Random play point and time selection size
 --@author gaspard
---@version 0.0.2
+--@version 0.0.3
 --@changelog
---  - Added min and max for length
---  - Update GUI elements positions and labels
+--  - Update frequency display and randomness
 --  - Bug fix
 --@about
 --  ### How to:
@@ -22,9 +21,9 @@ end
 
 -- All initial variable for script and GUI
 function InitialVariables()
-    version = "0.0.2"
-    window_width = 300
-    window_height = 200
+    version = "0.0.3"
+    window_width = 250
+    window_height = 235
     playing = false
     timer = 1
     temp_length = 0
@@ -37,12 +36,12 @@ end
 -- GUI Initialize function
 function Gui_Init()
     ctx = reaper.ImGui_CreateContext('random_play_context')
-    font = reaper.ImGui_CreateFont('sans-serif', 15)
+    font = reaper.ImGui_CreateFont('sans-serif', 16)
     reaper.ImGui_Attach(ctx, font)
     window_name = "RANDOM TIME SELECTION"
 end
 
--- GUI Elements
+-- GUI Top Bar
 function Gui_TopBar()
     -- GUI Menu Bar
     if reaper.ImGui_BeginChild(ctx, "child_top_bar", window_width, 30) then
@@ -59,7 +58,7 @@ function Gui_TopBar()
             reaper.ImGui_Dummy(ctx, 3, 1)
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'X##quit_button') then
-                --SetButtonState()
+                if playing then StartStopLoop() end
                 open = false
             end
             reaper.ImGui_EndChild(ctx)
@@ -67,6 +66,77 @@ function Gui_TopBar()
 
         reaper.ImGui_PopStyleVar(ctx, 1)
         reaper.ImGui_EndChild(ctx)
+    end
+end
+
+-- Gui Elements
+function Gui_Elements()
+    item_size = 165
+    reaper.ImGui_SetCursorPosX(ctx, (window_width - item_size) * 0.5)
+    if reaper.ImGui_BeginChild(ctx, "child_length_elements", item_size, reaper.ImGui_GetFontSize(ctx)) then
+        reaper.ImGui_Text(ctx, "Set length in seconds")
+        reaper.ImGui_SameLine(ctx)
+        reaper.ImGui_TextDisabled(ctx, "(?)")
+        if reaper.ImGui_IsItemHovered(ctx, reaper.ImGui_HoveredFlags_Stationary()) then
+            reaper.ImGui_SetTooltip(ctx, "Drag with mouse left click.\nHold Left Shift to slow down.\nHold Left Ctrl or double mouse left click to input value.")
+        end
+        reaper.ImGui_EndChild(ctx)
+    end
+
+    if length_pos == nil or length_pos <= 0 then
+        reaper.ImGui_BeginDisabled(ctx)
+    end
+
+    speed = 0.1
+    if reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftShift()) then speed = 0.0001 end
+
+    reaper.ImGui_Dummy(ctx, 1, 1)
+
+    item_size = 120
+    reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (window_width - item_size - 13) * 0.5)
+    reaper.ImGui_PushItemWidth(ctx, item_size)
+    _, min_rnd, max_rnd = reaper.ImGui_DragFloatRange2(ctx, "##range_length", min_rnd, max_rnd, speed, 0, length_pos)
+    if length_pos == nil or length_pos <= 0 then
+        reaper.ImGui_EndDisabled(ctx)
+    end
+
+    reaper.ImGui_Dummy(ctx, 10, 10)
+
+    item_size = 165
+    reaper.ImGui_SetCursorPosX(ctx, (window_width - item_size) * 0.5)
+    if reaper.ImGui_BeginChild(ctx, "child_frequency_elements", item_size, reaper.ImGui_GetFontSize(ctx)) then
+        reaper.ImGui_Text(ctx, "Frequency in seconds")
+        reaper.ImGui_SameLine(ctx)
+        reaper.ImGui_TextDisabled(ctx, "(?)")
+        if reaper.ImGui_IsItemHovered(ctx, reaper.ImGui_HoveredFlags_Stationary()) then
+            reaper.ImGui_SetTooltip(ctx, "Frequency is expressed in seconds.\nBelow is the randomness around the frequency's value.\nFor example:\n - Randomness = 5 and Frequency = 10.\n - Frequency random range is 5 to 15.\n   (Plus and minus randomness)")
+        end
+        reaper.ImGui_EndChild(ctx)
+    end
+
+    reaper.ImGui_Dummy(ctx, 1, 1)
+
+    item_size = 60
+    reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (window_width - item_size - 13) * 0.5)
+    reaper.ImGui_PushItemWidth(ctx, item_size)
+    _, frequency = reaper.ImGui_DragDouble(ctx, "##drag_frequency", frequency, speed, 0, 9999.99, "%.2f")
+    if frequency > 9999.99 then frequency = 9999.99 end
+
+    item_size = (frequency_rnd + 6) * 10
+    if item_size < 25 then item_size = 25 end
+    if item_size > window_width - 40 then item_size = window_width - 40 end
+    reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (window_width - item_size - 13) * 0.5)
+    reaper.ImGui_PushItemWidth(ctx, item_size)
+    _, frequency_rnd = reaper.ImGui_DragDouble(ctx, "##drag_frequency_rnd", frequency_rnd, speed, 0, 100, "%.2f")
+
+    reaper.ImGui_Dummy(ctx, 10, 10)
+
+    if playing then start_button_text = "Stop"
+    else start_button_text = "Start" end
+    item_size = 70
+    reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (window_width - item_size - 13) * 0.5)
+    if reaper.ImGui_Button(ctx, start_button_text, item_size) then
+        StartStopLoop()
     end
 end
 
@@ -84,6 +154,7 @@ function Gui_Loop()
     window_width, window_height = reaper.ImGui_GetWindowSize(ctx)
 
     current_time = reaper.ImGui_GetTime(ctx)
+    show_elements = true
 
     -- Script Execution
     if playing then
@@ -91,12 +162,15 @@ function Gui_Loop()
     else
         GetTimeSelection()
         --if max_rnd > length_pos then max_rnd = length_pos end
-        if temp_length ~= length_pos then max_rnd = length_pos end
+        if temp_length ~= length_pos then
+            min_rnd = 0
+            max_rnd = length_pos
+        end
         temp_length = length_pos
     end
 
     if current_time < 0.1 then
-        visible = false
+        show_elements = false
         max_rnd = length_pos
     end
 
@@ -107,49 +181,21 @@ function Gui_Loop()
         -- Top bar elements
         Gui_TopBar()
 
-        reaper.ImGui_Text(ctx, "Set length in seconds (hold Shift to slow):")
-        if length_pos == nil or length_pos <= 0 then
-            reaper.ImGui_BeginDisabled(ctx)
-        end
-
-        speed = 0.1
-        if reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftShift()) then speed = 0.0001 end
-        _, min_rnd, max_rnd = reaper.ImGui_DragFloatRange2(ctx, "##range_length", min_rnd, max_rnd, speed, 0, length_pos)
-        if length_pos == nil or length_pos <= 0 then
-            reaper.ImGui_EndDisabled(ctx)
-        end
-
-        reaper.ImGui_Dummy(ctx, 10, 10)
-
-        reaper.ImGui_Text(ctx, "Frequency (s):")
-        reaper.ImGui_SameLine(ctx)
-        reaper.ImGui_PushItemWidth(ctx, 100)
-        _, frequency = reaper.ImGui_InputText(ctx, "##input_text_frequency", tostring(frequency))
-        if frequency == nil or frequency == "" then frequency = 1 end
-        frequency = tonumber(frequency)
-
-        reaper.ImGui_Text(ctx, "Add random +-:")
-        reaper.ImGui_SameLine(ctx)
-        _, frequency_rnd = reaper.ImGui_InputText(ctx, "##input_text_frequency_rnd", tostring(frequency_rnd))
-        if frequency_rnd == nil or frequency_rnd == "" then frequency_rnd = 0 end
-        frequency_rnd = tonumber(frequency_rnd)
-
-        reaper.ImGui_Dummy(ctx, 10, 10)
-
-        if playing then start_button_text = "Stop"
-        else start_button_text = "Start" end
-        x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
-        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (x - 50) * 0.5)
-        if reaper.ImGui_Button(ctx, start_button_text, 50) then
-            StartStopLoop()
+        -- All Gui Elements
+        if show_elements then
+            if reaper.ImGui_BeginChild(ctx, "child_gui_elements") then
+                Gui_Elements()
+                reaper.ImGui_EndChild(ctx)
+            end
         end
 
         w, h = reaper.ImGui_CalcTextSize(ctx, "v"..version)
         reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
         reaper.ImGui_SetCursorPosY(ctx, window_height - h - 10)
         reaper.ImGui_Text(ctx, "v"..version)
+
+        reaper.ImGui_End(ctx)
     end
-    reaper.ImGui_End(ctx)
 
     Gui_PopTheme()
     reaper.ImGui_PopFont(ctx)
@@ -267,7 +313,7 @@ function StartStopLoop()
 
         timer = current_time + frequency
 
-        region_index = reaper.AddProjectMarker(0, true, start_pos, end_pos, "Random_Time_Selection_Script", -1)
+        region_index = reaper.AddProjectMarker2(0, true, start_pos, end_pos, "Random_Time_Selection_Script", 0, 0xffffffff)
 
         reaper.UpdateArrange()
 
