@@ -1,8 +1,9 @@
 --@description Random play point and time selection size
 --@author gaspard
---@version 0.0.3
+--@version 0.0.4
 --@changelog
 --  - Update frequency display and randomness
+--  - Update other GUI
 --  - Bug fix
 --@about
 --  ### How to:
@@ -21,7 +22,7 @@ end
 
 -- All initial variable for script and GUI
 function InitialVariables()
-    version = "0.0.3"
+    version = "0.0.4"
     window_width = 250
     window_height = 235
     playing = false
@@ -29,7 +30,7 @@ function InitialVariables()
     temp_length = 0
     min_rnd = 0
     max_rnd = 1
-    frequency = 0.25
+    frequency = 20
     frequency_rnd = 0
 end
 
@@ -102,32 +103,48 @@ function Gui_Elements()
 
     reaper.ImGui_Dummy(ctx, 10, 10)
 
-    item_size = 165
+    item_size = 175
     reaper.ImGui_SetCursorPosX(ctx, (window_width - item_size) * 0.5)
     if reaper.ImGui_BeginChild(ctx, "child_frequency_elements", item_size, reaper.ImGui_GetFontSize(ctx)) then
-        reaper.ImGui_Text(ctx, "Frequency in seconds")
+        reaper.ImGui_Text(ctx, "Frequency per seconds")
         reaper.ImGui_SameLine(ctx)
         reaper.ImGui_TextDisabled(ctx, "(?)")
         if reaper.ImGui_IsItemHovered(ctx, reaper.ImGui_HoveredFlags_Stationary()) then
-            reaper.ImGui_SetTooltip(ctx, "Frequency is expressed in seconds.\nBelow is the randomness around the frequency's value.\nFor example:\n - Randomness = 5 and Frequency = 10.\n - Frequency random range is 5 to 15.\n   (Plus and minus randomness)")
+            local part_1 = "Frequency is expressed in beats per seconds.\n"
+            local part_2 = "Below is the randomness around the frequency's value.\n"
+            local part_3 = "For example:\n - Randomness = 5 and Frequency = 10.\n - Frequency random range is 5 to 15.\n   (Plus and minus randomness)"
+            reaper.ImGui_SetTooltip(ctx, part_1..part_2..part_3)
         end
         reaper.ImGui_EndChild(ctx)
     end
 
     reaper.ImGui_Dummy(ctx, 1, 1)
 
+    reaper.ImGui_SetNextItemAllowOverlap(ctx)
+
+    item_size = (frequency_rnd + 30) * 2
+    if item_size < 60 then item_size = 60 end
+    if item_size > window_width - 40 then item_size = window_width - 40 end
+    x, y = reaper.ImGui_GetCursorPos(ctx)
+    reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (window_width - item_size - 13) * 0.5)
+    reaper.ImGui_PushItemWidth(ctx, item_size)
+    reaper.ImGui_BeginDisabled(ctx, optional_disabledIn)
+    _, _ = reaper.ImGui_DragDouble(ctx, "##drag_frequency_rnd_visual", frequency_rnd, speed, 0, 10000, "")
+    reaper.ImGui_EndDisabled(ctx)
+
+    speed = 0.1
+    max_frequency = 10000
     item_size = 60
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (window_width - item_size - 13) * 0.5)
+    reaper.ImGui_SetCursorPosY(ctx, y+1)
     reaper.ImGui_PushItemWidth(ctx, item_size)
-    _, frequency = reaper.ImGui_DragDouble(ctx, "##drag_frequency", frequency, speed, 0, 9999.99, "%.2f")
-    if frequency > 9999.99 then frequency = 9999.99 end
+    changed, frequency = reaper.ImGui_DragDouble(ctx, "##drag_frequency", frequency, speed, 0, max_frequency, "%.2f")
+    if frequency > max_frequency then frequency = max_frequency end
+    if changed then timer = current_time end
 
-    item_size = (frequency_rnd + 6) * 10
-    if item_size < 25 then item_size = 25 end
-    if item_size > window_width - 40 then item_size = window_width - 40 end
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (window_width - item_size - 13) * 0.5)
     reaper.ImGui_PushItemWidth(ctx, item_size)
-    _, frequency_rnd = reaper.ImGui_DragDouble(ctx, "##drag_frequency_rnd", frequency_rnd, speed, 0, 100, "%.2f")
+    _, frequency_rnd = reaper.ImGui_DragDouble(ctx, "##drag_frequency_rnd", frequency_rnd, speed, 0, 10000, "%.2f")
 
     reaper.ImGui_Dummy(ctx, 10, 10)
 
@@ -161,7 +178,6 @@ function Gui_Loop()
         TimeLoopRandom()
     else
         GetTimeSelection()
-        --if max_rnd > length_pos then max_rnd = length_pos end
         if temp_length ~= length_pos then
             min_rnd = 0
             max_rnd = length_pos
@@ -311,7 +327,7 @@ function StartStopLoop()
         -- Set playhead/edit cursor to time selection start
         reaper.SetEditCurPos(start_pos, true, true)
 
-        timer = current_time + frequency
+        timer = current_time + 1 / frequency
 
         region_index = reaper.AddProjectMarker2(0, true, start_pos, end_pos, "Random_Time_Selection_Script", 0, 0xffffffff)
 
@@ -338,7 +354,7 @@ function TimeLoopRandom()
     if timer <= current_time then
         RandomizeTimeSelection()
         temp_frequency = IntervalSwap(math.random(), frequency - frequency_rnd, frequency + frequency_rnd)
-        timer = current_time + temp_frequency
+        timer = current_time + 1 / temp_frequency
     end
 end
 
