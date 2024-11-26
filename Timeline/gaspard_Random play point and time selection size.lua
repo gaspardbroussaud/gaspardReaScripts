@@ -1,7 +1,10 @@
 --@description Random play point and time selection size
 --@author gaspard
---@version 0.0.1
---@changelog Pre alpha tests
+--@version 0.0.2
+--@changelog
+--  - Added min and max for length
+--  - Update GUI elements positions and labels
+--  - Bug fix
 --@about
 --  ### How to:
 --  - Set a time selection in your project, start and end position will be used.
@@ -19,15 +22,14 @@ end
 
 -- All initial variable for script and GUI
 function InitialVariables()
-    version = "0.0.1"
+    version = "0.0.2"
     window_width = 300
-    window_height = 165
-    --min_input = 0
-    --min_rnd = min_input
-    --max_input = 1
-    --max_rnd = max_input
+    window_height = 200
     playing = false
     timer = 1
+    temp_length = 0
+    min_rnd = 0
+    max_rnd = 1
     frequency = 0.25
     frequency_rnd = 0
 end
@@ -57,7 +59,7 @@ function Gui_TopBar()
             reaper.ImGui_Dummy(ctx, 3, 1)
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'X##quit_button') then
-                SetButtonState()
+                --SetButtonState()
                 open = false
             end
             reaper.ImGui_EndChild(ctx)
@@ -86,6 +88,16 @@ function Gui_Loop()
     -- Script Execution
     if playing then
         TimeLoopRandom()
+    else
+        GetTimeSelection()
+        --if max_rnd > length_pos then max_rnd = length_pos end
+        if temp_length ~= length_pos then max_rnd = length_pos end
+        temp_length = length_pos
+    end
+
+    if current_time < 0.1 then
+        visible = false
+        max_rnd = length_pos
     end
 
     -- Play/Stop transport on Space key pressed while in script window focus
@@ -95,30 +107,19 @@ function Gui_Loop()
         -- Top bar elements
         Gui_TopBar()
 
-        --[[reaper.ImGui_Text(ctx, "Set time selection length (s):")
-
-        if reaper.ImGui_BeginTable(ctx, "table_input_time_selection", 2, reaper.ImGui_TableFlags_SizingFixedFit(), window_width) then
-            reaper.ImGui_TableNextRow(ctx)
-            reaper.ImGui_TableNextColumn(ctx)
-            reaper.ImGui_Text(ctx, "min")
-            reaper.ImGui_SameLine(ctx)
-            reaper.ImGui_PushItemWidth(ctx, 45)
-            _, min_input = reaper.ImGui_InputText(ctx, "##input_text_min_rnd", tostring(min_input))
-            if min_input == nil or min_input == "" then min_input = 0 end
-            min_input = tonumber(min_input)
-
-            reaper.ImGui_TableNextColumn(ctx)
-            reaper.ImGui_Text(ctx, "max")
-            reaper.ImGui_SameLine(ctx)
-            reaper.ImGui_PushItemWidth(ctx, 45)
-            _, max_input = reaper.ImGui_InputText(ctx, "##input_text_max_rnd", tostring(max_input))
-            if max_input == nil or max_input == "" then max_input = 1 end
-            max_input = tonumber(max_input)
-
-            reaper.ImGui_EndTable(ctx)
+        reaper.ImGui_Text(ctx, "Set length in seconds (hold Shift to slow):")
+        if length_pos == nil or length_pos <= 0 then
+            reaper.ImGui_BeginDisabled(ctx)
         end
 
-        reaper.ImGui_Dummy(ctx, 10, 10)]]
+        speed = 0.1
+        if reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftShift()) then speed = 0.0001 end
+        _, min_rnd, max_rnd = reaper.ImGui_DragFloatRange2(ctx, "##range_length", min_rnd, max_rnd, speed, 0, length_pos)
+        if length_pos == nil or length_pos <= 0 then
+            reaper.ImGui_EndDisabled(ctx)
+        end
+
+        reaper.ImGui_Dummy(ctx, 10, 10)
 
         reaper.ImGui_Text(ctx, "Frequency (s):")
         reaper.ImGui_SameLine(ctx)
@@ -147,8 +148,8 @@ function Gui_Loop()
         reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
         reaper.ImGui_SetCursorPosY(ctx, window_height - h - 10)
         reaper.ImGui_Text(ctx, "v"..version)
-        reaper.ImGui_End(ctx)
     end
+    reaper.ImGui_End(ctx)
 
     Gui_PopTheme()
     reaper.ImGui_PopFont(ctx)
@@ -240,14 +241,25 @@ function Gui_PopTheme()
     reaper.ImGui_PopStyleColor(ctx, 39)
 end
 
+-- GET TIME SELECTION POSITIONS AND LENGTH
+function GetTimeSelection()
+    -- Get time selection start and end positions
+    start_pos, end_pos = reaper.GetSet_LoopTimeRange(false, false, 0, 1, false)
+    length_pos = end_pos - start_pos
+end
+
 -- BUTTON PLAY FUNCTION
 function StartStopLoop()
     playing = not playing
     if playing then
-        -- Get time selection start and end positions
-        start_pos, end_pos = reaper.GetSet_LoopTimeRange(false, false, 0, 1, false)
-        length_pos = end_pos - start_pos
+        -- Toggle repeat state
+        reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_SAVEREPEAT"), 0) -- Save repeat state to restore on stop
+        reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_SETREPEAT"), 0) -- Toggle repeat state to ON
 
+        -- Get time selection start and end positions
+        GetTimeSelection()
+
+        -- Randomize once to prepare play
         RandomizeTimeSelection()
 
         -- Set playhead/edit cursor to time selection start
@@ -255,12 +267,23 @@ function StartStopLoop()
 
         timer = current_time + frequency
 
+        region_index = reaper.AddProjectMarker(0, true, start_pos, end_pos, "Random_Time_Selection_Script", -1)
+
+        reaper.UpdateArrange()
+
         reaper.Main_OnCommand(1007, 0) -- Play transport
     else
         reaper.Main_OnCommand(1016, 0) -- Stop transport
 
+        -- Restore repeat state
+        reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_RESTREPEAT"), 0)
+
+        reaper.DeleteProjectMarker(0, region_index, true)
+
         -- Set time selection start and end positions to first selected ones
         reaper.GetSet_LoopTimeRange(true, true, start_pos, end_pos, true)
+
+        reaper.UpdateArrange()
     end
 end
 
@@ -274,7 +297,7 @@ function TimeLoopRandom()
 end
 
 function RandomizeTimeSelection()
-    length_rnd = IntervalSwap(math.random(), 0, length_pos)
+    length_rnd = IntervalSwap(math.random(), min_rnd, max_rnd)--0, length_pos)
     start_rnd = IntervalSwap(math.random(), start_pos, end_pos - length_rnd)
     end_rnd = start_rnd + length_rnd
 
