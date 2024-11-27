@@ -1,9 +1,9 @@
 --@description Random play point and time selection size
 --@author gaspard
---@version 0.0.6
+--@version 0.0.7
 --@changelog
---  - Start button disabled without time selection in project
---  - Stop script on project change
+--  - Update gui style fetch
+--  - Minor gui updates
 --  - Bug fix
 --@about
 --  ### How to:
@@ -20,9 +20,18 @@ function SetButtonState(set)
     reaper.RefreshToolbar2(sec, cmd)
 end
 
+-- GET GUI STYLES
+function GetGuiStylesFromFile()
+    gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
+    local style = dofile(gui_style_settings_path)
+    style_vars = style.vars
+    style_colors = style.colors
+end
+
 -- All initial variable for script and GUI
 function InitialVariables()
-    version = "0.0.6"
+    GetGuiStylesFromFile()
+    version = "0.0.7"
     window_width = 250
     window_height = 235
     playing = false
@@ -30,7 +39,7 @@ function InitialVariables()
     temp_length = 0
     min_rnd = 0
     max_rnd = 1
-    frequency = 20
+    frequency = 4
     frequency_rnd = 0
     project_name = reaper.GetProjectName(0)
     project_path = reaper.GetProjectPath()
@@ -129,7 +138,7 @@ function Gui_Elements()
 
     reaper.ImGui_SetNextItemAllowOverlap(ctx)
 
-    item_size = (frequency_rnd + 30) * 2
+    item_size = frequency_rnd * 2 + 60
     if item_size < 60 then item_size = 60 end
     if item_size > window_width - 40 then item_size = window_width - 40 end
     x, y = reaper.ImGui_GetCursorPos(ctx)
@@ -250,84 +259,20 @@ end
 -- PUSH ALL GUI STYLE SETTINGS
 function Gui_PushTheme()
     -- Style Vars
-    reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_WindowRounding(), 6)
-    reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ChildRounding(), 6)
-    reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_PopupRounding(), 6)
-    reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_FrameRounding(), 6)
+    for i = 1, #style_vars do
+        reaper.ImGui_PushStyleVar(ctx, style_vars[i].var, style_vars[i].value)
+    end
 
     -- Style Colors
-    -- Backgrounds
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_WindowBg(), 0x14141BFF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ChildBg(), 0x14141BFF) --Added
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_MenuBarBg(), 0x1F1F28FF)
-
-    -- Bordures
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Border(), 0x594A8C4A)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_BorderShadow(), 0x0000003D)
-
-    -- Texte
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xFFFFFFFF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_TextDisabled(), 0x808080FF)
-
-    -- En-têtes (Headers)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Header(), 0x574F8E55)--0x23232BAF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_HeaderHovered(), 0x7C71C255)--0x2C2D39AF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_HeaderActive(), 0x6B60B555)--0x272734AF)
-
-    -- Boutons
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Button(), 0x574F8EFF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ButtonHovered(), 0x7C71C2FF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ButtonActive(), 0x6B60B5FF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_CheckMark(), 0xFFFFFFFF)
-
-    -- Popups
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_PopupBg(), 0x14141B99)
-
-    -- Curseur (Slider)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_SliderGrab(), 0x796BB6FF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_SliderGrabActive(), 0x9A8BE1FF)
-
-    -- Fond de cadre (Frame BG)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_FrameBg(), 0x574F8EAA)--0x23232BFF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_FrameBgHovered(), 0x7C71C2AA)--0x2C2D39FF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_FrameBgActive(), 0x6B60B5AA)--0x272734FF)
-
-    -- Onglets (Tabs)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Tab(), 0x23232BFF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_TabHovered(), 0x3B2F66FF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_TabSelected(), 0x312652FF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_TabDimmed(), 0x23232BFF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_TabDimmedSelected(), 0x23232BFF)
-
-    -- Titre
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_TitleBg(), 0x23232BFF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_TitleBgActive(), 0x23232BFF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_TitleBgCollapsed(), 0x23232BFF)
-
-    -- Scrollbar
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ScrollbarBg(), 0x14141BFF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ScrollbarGrab(), 0x574F8EFF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ScrollbarGrabHovered(), 0x7C71C2FF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ScrollbarGrabActive(), 0x6B60B5FF)
-
-    -- Séparateurs
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Separator(), 0x594A8CFF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_SeparatorHovered(), 0x796BB6FF)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_SeparatorActive(), 0x9A8BE1FF)
-
-    -- Redimensionnement (Resize Grip)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ResizeGrip(), 0x594A8C4A)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ResizeGripHovered(), 0x796BB64A)
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ResizeGripActive(), 0x9A8BE14A)
-
-    -- Docking
-    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_DockingPreview(), 0x796BB6FF)
+    for i = 1, #style_colors do
+        reaper.ImGui_PushStyleColor(ctx, style_colors[i].col, style_colors[i].value)
+    end
 end
 
 -- POP ALL GUI STYLE SETTINGS
 function Gui_PopTheme()
-    reaper.ImGui_PopStyleVar(ctx, 4)
-    reaper.ImGui_PopStyleColor(ctx, 39)
+    reaper.ImGui_PopStyleVar(ctx, #style_vars)
+    reaper.ImGui_PopStyleColor(ctx, #style_colors)
 end
 
 -- GET TIME SELECTION POSITIONS AND LENGTH
