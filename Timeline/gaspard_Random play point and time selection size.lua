@@ -1,7 +1,9 @@
 --@description Random play point and time selection size
 --@author gaspard
---@version 0.0.5
+--@version 0.0.6
 --@changelog
+--  - Start button disabled without time selection in project
+--  - Stop script on project change
 --  - Bug fix
 --@about
 --  ### How to:
@@ -20,7 +22,7 @@ end
 
 -- All initial variable for script and GUI
 function InitialVariables()
-    version = "0.0.5"
+    version = "0.0.6"
     window_width = 250
     window_height = 235
     playing = false
@@ -30,6 +32,9 @@ function InitialVariables()
     max_rnd = 1
     frequency = 20
     frequency_rnd = 0
+    project_name = reaper.GetProjectName(0)
+    project_path = reaper.GetProjectPath()
+    project_id, _ = reaper.EnumProjects(-1)
 end
 
 -- GUI Initialize function
@@ -151,6 +156,7 @@ function Gui_Elements()
 
     reaper.ImGui_Dummy(ctx, 10, 10)
 
+    if start_button_disable then reaper.ImGui_BeginDisabled(ctx) end
     if playing then start_button_text = "Stop"
     else start_button_text = "Start" end
     item_size = 70
@@ -158,6 +164,7 @@ function Gui_Elements()
     if reaper.ImGui_Button(ctx, start_button_text, item_size) then
         StartStopLoop()
     end
+    if start_button_disable then reaper.ImGui_EndDisabled(ctx) end
 end
 
 -- GUI function for all elements
@@ -175,10 +182,26 @@ function Gui_Loop()
 
     current_time = reaper.ImGui_GetTime(ctx)
     show_elements = true
+    start_button_disable = true
+
+    if CheckProjectChanged() then
+        if playing then
+            new_project_id, _ = reaper.EnumProjects(-1)
+            reaper.SelectProjectInstance(project_id)
+            StartStopLoop()
+            reaper.SelectProjectInstance(new_project_id)
+            project_id = new_project_id
+            start_pos = 0
+            end_pos = 0
+        else
+            project_id, _ = reaper.EnumProjects(-1)
+        end
+    end
 
     -- Script Execution
     if playing then
         TimeLoopRandom()
+        start_button_disable = false
     else
         GetTimeSelection()
         if temp_length ~= length_pos then
@@ -186,6 +209,7 @@ function Gui_Loop()
             max_rnd = length_pos
         end
         temp_length = length_pos
+        if length_pos > 0 then start_button_disable = false end
     end
 
     if current_time < 0.1 then
@@ -315,37 +339,40 @@ end
 
 -- BUTTON PLAY FUNCTION
 function StartStopLoop()
-    playing = not playing
-    if playing then
-        -- Toggle repeat state
-        reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_SAVEREPEAT"), 0) -- Save repeat state to restore on stop
-        reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_SETREPEAT"), 0) -- Toggle repeat state to ON
+    if not playing then GetTimeSelection() end
+    if length_pos > 0 then
+        playing = not playing
+        if playing then
+            -- Toggle repeat state
+            reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_SAVEREPEAT"), 0) -- Save repeat state to restore on stop
+            reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_SETREPEAT"), 0) -- Toggle repeat state to ON
 
-        -- Get time selection start and end positions
-        GetTimeSelection()
+            -- Get time selection start and end positions
+            GetTimeSelection()
 
-        -- Randomize once to prepare play
-        RandomizeTimeSelection()
+            -- Randomize once to prepare play
+            RandomizeTimeSelection()
 
-        timer = current_time + 1 / frequency
+            timer = current_time + 1 / frequency
 
-        region_index = reaper.AddProjectMarker2(0, true, start_pos, end_pos, "Random_Time_Selection_Script", 0, 0xffffffff)
+            region_index = reaper.AddProjectMarker2(0, true, start_pos, end_pos, "Random_Time_Selection_Script", 0, 0xffffffff)
 
-        reaper.UpdateArrange()
+            reaper.UpdateArrange()
 
-        reaper.Main_OnCommand(1007, 0) -- Play transport
-    else
-        reaper.Main_OnCommand(1016, 0) -- Stop transport
+            reaper.Main_OnCommand(1007, 0) -- Play transport
+        else
+            reaper.Main_OnCommand(1016, 0) -- Stop transport
 
-        -- Restore repeat state
-        reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_RESTREPEAT"), 0)
+            -- Restore repeat state
+            reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_RESTREPEAT"), 0)
 
-        reaper.DeleteProjectMarker(0, region_index, true)
+            reaper.DeleteProjectMarker(0, region_index, true)
 
-        -- Set time selection start and end positions to first selected ones
-        reaper.GetSet_LoopTimeRange(true, true, start_pos, end_pos, true)
+            -- Set time selection start and end positions to first selected ones
+            reaper.GetSet_LoopTimeRange(true, true, start_pos, end_pos, true)
 
-        reaper.UpdateArrange()
+            reaper.UpdateArrange()
+        end
     end
 end
 
@@ -368,6 +395,17 @@ function RandomizeTimeSelection()
 
     -- Set playhead/edit cursor to time selection start
     reaper.SetEditCurPos(start_rnd, true, true)
+end
+
+-- CHECK CURRENT PROJECT CHANGE
+function CheckProjectChanged()
+    if project_name ~= reaper.GetProjectName(0) or project_path ~= reaper.GetProjectPath() then
+        project_name = reaper.GetProjectName(0)
+        project_path = reaper.GetProjectPath()
+        return true
+    else
+        return false
+    end
 end
 
 -- CONVERTS A VALUE TO ANOTHER IN NEW RANGE
