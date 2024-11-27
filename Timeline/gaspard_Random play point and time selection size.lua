@@ -1,9 +1,7 @@
 --@description Random play point and time selection size
 --@author gaspard
---@version 0.0.4
+--@version 0.0.5
 --@changelog
---  - Update frequency display and randomness
---  - Update other GUI
 --  - Bug fix
 --@about
 --  ### How to:
@@ -22,7 +20,7 @@ end
 
 -- All initial variable for script and GUI
 function InitialVariables()
-    version = "0.0.4"
+    version = "0.0.5"
     window_width = 250
     window_height = 235
     playing = false
@@ -39,7 +37,7 @@ function Gui_Init()
     ctx = reaper.ImGui_CreateContext('random_play_context')
     font = reaper.ImGui_CreateFont('sans-serif', 16)
     reaper.ImGui_Attach(ctx, font)
-    window_name = "RANDOM TIME SELECTION"
+    window_name = "Time Selection Randomizer"
 end
 
 -- GUI Top Bar
@@ -88,8 +86,9 @@ function Gui_Elements()
         reaper.ImGui_BeginDisabled(ctx)
     end
 
-    speed = 0.1
-    if reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftShift()) then speed = 0.0001 end
+    shift_key = false
+    if reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftShift()) then shift_key = true end
+    SetSliderSpeed(0.1)
 
     reaper.ImGui_Dummy(ctx, 1, 1)
 
@@ -100,6 +99,9 @@ function Gui_Elements()
     if length_pos == nil or length_pos <= 0 then
         reaper.ImGui_EndDisabled(ctx)
     end
+    if min_rnd < 0 then min_rnd = 0 end
+    if max_rnd < 0 then max_rnd = 0 end
+    if min_rnd > max_rnd then min_rnd = max_rnd end
 
     reaper.ImGui_Dummy(ctx, 10, 10)
 
@@ -132,7 +134,7 @@ function Gui_Elements()
     _, _ = reaper.ImGui_DragDouble(ctx, "##drag_frequency_rnd_visual", frequency_rnd, speed, 0, 10000, "")
     reaper.ImGui_EndDisabled(ctx)
 
-    speed = 0.1
+    SetSliderSpeed(0.05)
     max_frequency = 10000
     item_size = 60
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (window_width - item_size - 13) * 0.5)
@@ -144,7 +146,8 @@ function Gui_Elements()
 
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (window_width - item_size - 13) * 0.5)
     reaper.ImGui_PushItemWidth(ctx, item_size)
-    _, frequency_rnd = reaper.ImGui_DragDouble(ctx, "##drag_frequency_rnd", frequency_rnd, speed, 0, 10000, "%.2f")
+    changed, frequency_rnd = reaper.ImGui_DragDouble(ctx, "##drag_frequency_rnd", frequency_rnd, speed, 0, 10000, "%.2f")
+    if changed then timer = current_time end
 
     reaper.ImGui_Dummy(ctx, 10, 10)
 
@@ -324,9 +327,6 @@ function StartStopLoop()
         -- Randomize once to prepare play
         RandomizeTimeSelection()
 
-        -- Set playhead/edit cursor to time selection start
-        reaper.SetEditCurPos(start_pos, true, true)
-
         timer = current_time + 1 / frequency
 
         region_index = reaper.AddProjectMarker2(0, true, start_pos, end_pos, "Random_Time_Selection_Script", 0, 0xffffffff)
@@ -359,16 +359,26 @@ function TimeLoopRandom()
 end
 
 function RandomizeTimeSelection()
-    length_rnd = IntervalSwap(math.random(), min_rnd, max_rnd)--0, length_pos)
+    length_rnd = IntervalSwap(math.random(), min_rnd, max_rnd)
     start_rnd = IntervalSwap(math.random(), start_pos, end_pos - length_rnd)
     end_rnd = start_rnd + length_rnd
 
     -- Set time selection start and end positions
     reaper.GetSet_LoopTimeRange(true, true, start_rnd, end_rnd, true)
+
+    -- Set playhead/edit cursor to time selection start
+    reaper.SetEditCurPos(start_rnd, true, true)
 end
 
+-- CONVERTS A VALUE TO ANOTHER IN NEW RANGE
 function IntervalSwap(value, min, max)
     return min + ((max - min) * value)
+end
+
+-- SET SPEED FOR SLIDERS IN GUI
+function SetSliderSpeed(prefered_speed)
+    speed = prefered_speed
+    if shift_key then speed = 0.0001 end
 end
 
 -- MAIN SCRIPT EXECUTION
