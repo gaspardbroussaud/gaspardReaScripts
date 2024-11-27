@@ -1,4 +1,5 @@
 --@noindex
+--@provides [nomain] .
 --@description Gui Settings for all gaspard's scripts
 --@author gaspard
 --@version 1.0.0
