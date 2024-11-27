@@ -1,8 +1,8 @@
 --@noindex
---@provides [nomain] .
 --@description Gui Settings for all gaspard's scripts
 --@author gaspard
 --@version 1.0.0
+--@provides [nomain] .
 --@about Gui Settings for all gaspard's scripts, called at frame 1 on each GUI script.
 
 local style_vars = {
