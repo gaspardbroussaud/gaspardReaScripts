@@ -9,7 +9,7 @@ local window_width = 550
 local window_height = 350
 local gui_W = window_width
 local gui_H = window_height
-local font = reaper.ImGui_CreateFont('sans-serif', 15)
+local font = reaper.ImGui_CreateFont('sans-serif', 16)
 local last_selected = -1
 local show_settings = false
 local changed = false
@@ -588,6 +588,25 @@ end
 -- PUSH ALL GUI STYLE SETTINGS
 function Gui_PushTheme()
     -- Style Vars
+    for i = 1, #style_vars do
+        reaper.ImGui_PushStyleVar(ctx, style_vars[i].var, style_vars[i].value)
+    end
+
+    -- Style Colors
+    for i = 1, #style_colors do
+        reaper.ImGui_PushStyleColor(ctx, style_colors[i].col, style_colors[i].value)
+    end
+end
+
+-- POP ALL GUI STYLE SETTINGS
+function Gui_PopTheme()
+    reaper.ImGui_PopStyleVar(ctx, #style_vars)
+    reaper.ImGui_PopStyleColor(ctx, #style_colors)
+end
+
+--[[ PUSH ALL GUI STYLE SETTINGS
+function Gui_PushTheme()
+    -- Style Vars
     reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_WindowRounding(), 6)
     reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ChildRounding(), 6)
     reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_PopupRounding(), 6)
@@ -666,4 +685,4 @@ end
 function Gui_PopTheme()
     reaper.ImGui_PopStyleVar(ctx, 4)
     reaper.ImGui_PopStyleColor(ctx, 39)
-end
+end]]

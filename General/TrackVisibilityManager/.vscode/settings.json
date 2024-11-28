@@ -25,6 +25,8 @@
         "track_count",
         "selected_track_count",
         "settings_path",
-        "is_one_track_solo"
+        "is_one_track_solo",
+        "style_colors",
+        "style_vars"
     ]
 }
