@@ -1,8 +1,8 @@
 -- @description Region generation and render matrix Tool
 -- @author gaspard
--- @version 1.0.6
+-- @version 1.0.7
 -- @changelog
---  - Update about for Reapack package browser.
+--  - Add user setting to name regions with parent cascade (top-Parent_parent_..._selected-Track)
 -- @about
 --  - Retrives clusters of selected items depending on selected tracks.
 --  - How to use:
@@ -10,7 +10,8 @@
 --    2. Select tracks to use as render matrix (will be used for region's names too).
 
 -- USER SETTINGS ----------
-local color_regions = true
+local color_regions_with_track_color = true
+local region_naming_parent_casacde = false
 ---------------------------
 
 ----------------------------------------------------------------
@@ -57,6 +58,38 @@ function GetParentTrackMatch(track, target)
     end
 end
 
+---comment
+---@param track any
+---@return string name
+-- GET TOP PARENT TRACK
+function GetConcatenatedParentNames(track)
+    local _, name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    while true do
+        local parent = reaper.GetParentTrack(track)
+        if parent then
+            track = parent
+            local _, parent_name = reaper.GetSetMediaTrackInfo_String(parent, "P_NAME", "", false)
+            name = parent_name.."_"..name
+        else
+            return name
+        end
+    end
+end
+
+-- GET REGION NAME WITH TWO METHODS
+function GetRegionNaming(track)
+    local track_name = ""
+    if region_naming_parent_casacde then
+        track_name = GetConcatenatedParentNames(track)
+    else
+        _, track_name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+        if track_name == "" then
+            track_name = "Track "..tostring(reaper.GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")):sub(1, -3)
+        end
+    end
+    return track_name
+end
+
 -- SYSTEM FUNCTIONS
 -- GET SELECTED TRACKS TAB
 function GetSelectedTracksTab()
@@ -71,11 +104,11 @@ function GetSelectedTracksTab()
             table.insert(render_tracks, track)
             table.insert(render_folders, {})
 
-            local _, track_name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            --[[local _, track_name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
             if track_name == "" then
                 track_name = "Track "..tostring(reaper.GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")):sub(1, -3)
-            end
-            table.insert(render_tracks_name, track_name)
+            end]]
+            table.insert(render_tracks_name, GetRegionNaming(track))
         end
     else
         MessageBox("Please select at least one track that contains selected items.")
@@ -138,7 +171,7 @@ function FindClusters(folder, region_name, render_track)
             index = index + 1
 
             local track_color = 0
-            if color_regions then track_color = reaper.GetMediaTrackInfo_Value(render_track, "I_CUSTOMCOLOR") end
+            if color_regions_with_track_color then track_color = reaper.GetMediaTrackInfo_Value(render_track, "I_CUSTOMCOLOR") end
             local region_index = reaper.AddProjectMarker2(0, true, first_start, prev_end, region_name..suffix..tostring(index), -1, track_color)
             reaper.SetRegionRenderMatrix(0, region_index, render_track, 1)
             first_start = cur_start
@@ -159,7 +192,7 @@ function FindClusters(folder, region_name, render_track)
             end
 
             local track_color = 0
-            if color_regions then track_color = reaper.GetMediaTrackInfo_Value(render_track, "I_CUSTOMCOLOR") end
+            if color_regions_with_track_color then track_color = reaper.GetMediaTrackInfo_Value(render_track, "I_CUSTOMCOLOR") end
             local region_index = reaper.AddProjectMarker2(0, true, first_start, last_end, display, -1, track_color)
             reaper.SetRegionRenderMatrix(0, region_index, render_track, 1)
         end
