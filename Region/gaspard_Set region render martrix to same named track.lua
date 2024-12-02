@@ -1,13 +1,17 @@
 -- @description Set region render martrix to same named track
 -- @author gaspard
--- @version 1.0.0
+-- @version 1.0.1
 -- @changelog
---  - New script
+--  - Added pattern ignore in region names.
+--  - Change message box to console message.
 -- @about
---  - Set region's render matrix track to track with same name
+--  - Set region's render matrix track to track with same name.
+--  - Edit settings in scripts USER SETTINGS section.
 
 -- USER SETTINGS ----------
 local region_naming_parent_casacde = false
+local look_for_patterns = false
+local region_naming_pattern = ""
 ---------------------------
 
 ----------------------------------------------------------------
@@ -59,12 +63,18 @@ function SetRenderMatrixTracks()
             for i = 0, num_regions - 1 do
                 local _, isrgn, _, _, name, index = reaper.EnumProjectMarkers2(0, i)
                 if isrgn then
-                    table.insert(missing, { name = name, index = index })
-                    for j = 0, #tracks do
-                        if tracks[j].name == name then
-                            reaper.SetRegionRenderMatrix(0, index, tracks[j].track, 1)
-                            table.remove(missing, #missing)
-                            break
+                    local should_look = true
+                    if look_for_patterns and name:match(region_naming_pattern) and region_naming_pattern ~= "" then
+                        should_look = false
+                    end
+                    if should_look then
+                        table.insert(missing, { name = name, index = index })
+                        for j = 0, #tracks do
+                            if tracks[j].name == name then
+                                reaper.SetRegionRenderMatrix(0, index, tracks[j].track, 1)
+                                table.remove(missing, #missing)
+                                break
+                            end
                         end
                     end
                 end
@@ -74,7 +84,7 @@ function SetRenderMatrixTracks()
                 for i = 1, #missing do
                     error_message = error_message.." - "..tostring(missing[i].name).."; index: "..tostring(missing[i].index).."\n"
                 end
-                reaper.ShowMessageBox("There are errors in region/track links.\nRegions affected:\n"..error_message, "ERROR", 0)
+                reaper.ShowConsoleMsg("\nThere are errors in region/track links.\nRegions affected:\n"..error_message)
             end
         else
             reaper.ShowMessageBox("There are no tracks in current project.", "MESSAGE", 0)
