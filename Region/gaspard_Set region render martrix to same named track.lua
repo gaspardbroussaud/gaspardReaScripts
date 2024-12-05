@@ -3,6 +3,7 @@
 -- @version 1.1
 -- @changelog
 --  - Added GUI
+--  - Added settings system
 -- @about
 --  - Set region's render matrix track to track with same name.
 
