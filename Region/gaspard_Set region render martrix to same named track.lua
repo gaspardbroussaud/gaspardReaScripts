@@ -1,9 +1,8 @@
 -- @description Set region render martrix to same named track
 -- @author gaspard
--- @version 1.1
+-- @version 1.1.1
 -- @changelog
---  - Added GUI
---  - Added settings system
+--  - Some GUi updates and fixes
 -- @about
 --  - Set region's render matrix track to track with same name.
 
@@ -228,8 +227,11 @@ function Gui_SettingsWindow()
 
         reaper.ImGui_Text(ctx, "Pattern:")
         reaper.ImGui_SameLine(ctx)
+        if not Setting.look_for_patterns then reaper.ImGui_BeginDisabled(ctx) end
         reaper.ImGui_PushItemWidth(ctx, -1)
         changed, Settings.region_naming_pattern = reaper.ImGui_InputText(ctx, "##setting_text_pattern", Settings.region_naming_pattern)
+        if reaper.ImGui_IsItemHovered(ctx) then reaper.ImGui_SetTooltip(ctx, 'CAREFUL: Do not set pattern to only "-".') end
+        if not Setting.look_for_patterns then reaper.ImGui_EndDisabled(ctx) end
         if changed then one_changed = true end
 
         if one_changed then gson.SaveJSON(settings_path, Settings) end
