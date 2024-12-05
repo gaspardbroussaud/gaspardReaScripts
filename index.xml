@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="3dc0e8201ef47756337c423c6bbd24989ca69dfa">
+<index version="1" name="Gaspard ReaScripts" commit="6606a9f5e06f0c7974c4513aeed6ea964797110b">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -361,6 +361,39 @@
       </version>
     </reapack>
   </category>
+  <category name="JSON">
+    <reapack name="gaspard_json_lib.lua" type="script" desc="Json functions for gaspard's scripts">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Json functions for gaspard's scripts\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-12-05T15:24:25Z">
+        <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/3af568cdca1aae2925818cf1931cee4d2ca720fd/JSON/gaspard_json_lib.lua</source>
+      </version>
+    </reapack>
+    <reapack name="json.lua" type="script" desc="Json utilities for gaspard's scripts">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Copyright (c) 2020 rxi\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-12-05T15:24:25Z">
+        <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/3af568cdca1aae2925818cf1931cee4d2ca720fd/JSON/json.lua</source>
+      </version>
+    </reapack>
+  </category>
   <category name="Region">
     <reapack name="gaspard_Region generation and render matrix tool.lua" type="script" desc="Region generation and render matrix Tool">
       <metadata>
@@ -430,8 +463,7 @@
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab Set region's render matrix track to track with same name.\par}
-{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab Edit settings in scripts USER SETTINGS section.\sa180\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab Set region's render matrix track to track with same name.\sa180\par}
 }
 ]]></description>
       </metadata>
@@ -443,6 +475,10 @@
         <changelog><![CDATA[- Added pattern ignore in region names.
 - Change message box to console message.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/3dc0e8201ef47756337c423c6bbd24989ca69dfa/Region/gaspard_Set%20region%20render%20martrix%20to%20same%20named%20track.lua</source>
+      </version>
+      <version name="1.1" author="gaspard" time="2024-12-05T15:25:14Z">
+        <changelog><![CDATA[- Added GUI]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/5c4c62684319fd468201c7fc39270ca0eb780bac/Region/gaspard_Set%20region%20render%20martrix%20to%20same%20named%20track.lua</source>
       </version>
     </reapack>
   </category>
