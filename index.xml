@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="6606a9f5e06f0c7974c4513aeed6ea964797110b">
+<index version="1" name="Gaspard ReaScripts" commit="655fe78f7a1260e70d7776b308480e315b2423d8">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -479,6 +479,10 @@
       <version name="1.1" author="gaspard" time="2024-12-05T15:25:14Z">
         <changelog><![CDATA[- Added GUI]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/5c4c62684319fd468201c7fc39270ca0eb780bac/Region/gaspard_Set%20region%20render%20martrix%20to%20same%20named%20track.lua</source>
+      </version>
+      <version name="1.1.1" author="gaspard" time="2024-12-05T15:57:03Z">
+        <changelog><![CDATA[- Some GUi updates and fixes]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/655fe78f7a1260e70d7776b308480e315b2423d8/Region/gaspard_Set%20region%20render%20martrix%20to%20same%20named%20track.lua</source>
       </version>
     </reapack>
   </category>
