@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="a56ebd184d67ead5cdf56fb83a2a1a312b691346">
+<index version="1" name="Gaspard ReaScripts" commit="7893b0c6542ed3244fbf701d23bc1b23426c94d3">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -362,20 +362,6 @@
     </reapack>
   </category>
   <category name="JSON">
-    <reapack name="gaspard_json_lib.lua" type="script" desc="Json functions for gaspard's scripts">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 Json functions for gaspard's scripts\par}
-}
-]]></description>
-      </metadata>
-      <version name="1.0" author="gaspard" time="2024-12-05T15:24:25Z">
-        <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/3af568cdca1aae2925818cf1931cee4d2ca720fd/JSON/gaspard_json_lib.lua</source>
-      </version>
-    </reapack>
     <reapack name="json.lua" type="script" desc="Json utilities for gaspard's scripts">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
@@ -391,6 +377,20 @@
       </metadata>
       <version name="1.0" author="gaspard" time="2024-12-05T15:24:25Z">
         <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/3af568cdca1aae2925818cf1931cee4d2ca720fd/JSON/json.lua</source>
+      </version>
+    </reapack>
+    <reapack name="json_utilities_lib.lua" type="script" desc="Json functions for gaspard's scripts">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Json functions for gaspard's scripts\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-12-06T09:46:28Z">
+        <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7893b0c6542ed3244fbf701d23bc1b23426c94d3/JSON/json_utilities_lib.lua</source>
       </version>
     </reapack>
   </category>
