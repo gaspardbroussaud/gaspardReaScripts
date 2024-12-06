@@ -1,10 +1,8 @@
 --@description Random play point and time selection size
 --@author gaspard
---@version 0.0.7
+--@version 1.0
 --@changelog
---  - Update gui style fetch
---  - Minor gui updates
---  - Bug fix
+--  - Update settings system
 --@about
 --  ### How to:
 --  - Set a time selection in your project, start and end position will be used.
@@ -31,7 +29,7 @@ end
 -- All initial variable for script and GUI
 function InitialVariables()
     GetGuiStylesFromFile()
-    version = "0.0.7"
+    version = "1.0"
     window_width = 250
     window_height = 235
     playing = false
@@ -39,8 +37,22 @@ function InitialVariables()
     temp_length = 0
     min_rnd = 0
     max_rnd = 1
-    frequency = 4
-    frequency_rnd = 0
+    Settings = {
+        frequency = {
+            value = 4,
+            min = 0,
+            max = 10000,
+            name = "Frequency",
+            description = "Frequency in frames per seconds."
+        },
+        frequency_rnd = {
+            value = 0,
+            min = 0,
+            max = 10000,
+            name = "Randomize frequency",
+            ddescription = "Randomize frequency by + or - this value around frequency's value."
+        }
+    }
     project_name = reaper.GetProjectName(0)
     project_path = reaper.GetProjectPath()
     project_id, _ = reaper.EnumProjects(-1)
@@ -138,29 +150,28 @@ function Gui_Elements()
 
     reaper.ImGui_SetNextItemAllowOverlap(ctx)
 
-    item_size = frequency_rnd * 2 + 60
+    item_size = Settings.frequency_rnd.value * 2 + 60
     if item_size < 60 then item_size = 60 end
     if item_size > window_width - 40 then item_size = window_width - 40 end
     x, y = reaper.ImGui_GetCursorPos(ctx)
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (window_width - item_size - 13) * 0.5)
     reaper.ImGui_PushItemWidth(ctx, item_size)
     reaper.ImGui_BeginDisabled(ctx, optional_disabledIn)
-    _, _ = reaper.ImGui_DragDouble(ctx, "##drag_frequency_rnd_visual", frequency_rnd, speed, 0, 10000, "")
+    _, _ = reaper.ImGui_DragDouble(ctx, "##drag_frequency_rnd_visual", Settings.frequency_rnd.value, speed, Settings.frequency_rnd.min, Settings.frequency_rnd.max, "")
     reaper.ImGui_EndDisabled(ctx)
 
     SetSliderSpeed(0.05)
-    max_frequency = 10000
     item_size = 60
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (window_width - item_size - 13) * 0.5)
     reaper.ImGui_SetCursorPosY(ctx, y+1)
     reaper.ImGui_PushItemWidth(ctx, item_size)
-    changed, frequency = reaper.ImGui_DragDouble(ctx, "##drag_frequency", frequency, speed, 0, max_frequency, "%.2f")
-    if frequency > max_frequency then frequency = max_frequency end
+    changed, Settings.frequency.value = reaper.ImGui_DragDouble(ctx, "##drag_frequency", Settings.frequency.value, speed, Settings.frequency.min, Settings.frequency.max, "%.2f")
+    if Settings.frequency.value > Settings.frequency.max then Settings.frequency.value = Settings.frequency.max end
     if changed then timer = current_time end
 
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (window_width - item_size - 13) * 0.5)
     reaper.ImGui_PushItemWidth(ctx, item_size)
-    changed, frequency_rnd = reaper.ImGui_DragDouble(ctx, "##drag_frequency_rnd", frequency_rnd, speed, 0, 10000, "%.2f")
+    changed, Settings.frequency_rnd.value = reaper.ImGui_DragDouble(ctx, "##drag_frequency_rnd", Settings.frequency_rnd.value, speed, Settings.frequency_rnd.max, Settings.frequency_rnd.max, "%.2f")
     if changed then timer = current_time end
 
     reaper.ImGui_Dummy(ctx, 10, 10)
@@ -298,7 +309,7 @@ function StartStopLoop()
             -- Randomize once to prepare play
             RandomizeTimeSelection()
 
-            timer = current_time + 1 / frequency
+            timer = current_time + 1 / Settings.frequency.value
 
             region_index = reaper.AddProjectMarker2(0, true, start_pos, end_pos, "Random_Time_Selection_Script", 0, 0xffffffff)
 
@@ -325,7 +336,7 @@ end
 function TimeLoopRandom()
     if timer <= current_time then
         RandomizeTimeSelection()
-        temp_frequency = IntervalSwap(math.random(), frequency - frequency_rnd, frequency + frequency_rnd)
+        temp_frequency = IntervalSwap(math.random(), Settings.frequency.value - Settings.frequency_rnd.value, Settings.frequency.value + Settings.frequency_rnd.value)
         timer = current_time + 1 / temp_frequency
     end
 end

@@ -1,7 +1,7 @@
 --@noindex
 --@description ImGui Template
 --@author gaspard
---@version 1.0.0
+--@version 1.0
 --@changelog
 --  - Updates to script
 --@about
@@ -26,7 +26,7 @@ end
 -- All initial variable for script and GUI
 function InitialVariables()
     GetGuiStylesFromFile()
-    version = "1.0.0"
+    version = "1.0"
     window_width = 250
     window_height = 235
     window_name = "TEMPLATE IMGUI"

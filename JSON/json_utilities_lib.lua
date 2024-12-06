@@ -25,7 +25,7 @@ end
 -- Load json from file
 function gson.LoadJSON(path, var)
   local filepath = path
-  local settings = var
+  local settings = var or {}
   local file = io.open(filepath, "rb")
   if not file then
     gson.SaveJSON(filepath, settings)
@@ -40,14 +40,14 @@ end
 
 return gson
 
--- TEMPLATE (remove the REMOVE_THIS text at line 50)
---[[ Init system variables
+--[[ TEMPLATE (remove the REMOVE_THIS text at line 50)
+-- Init system variables
 function InitSystemVariables()
   local json_file_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/JSON"
   package.path = package.path .. ";" .. json_file_path .. "/?.lua"
   gson = require("json_utilities_lib")
 
-  --settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]REMOVE_THIS]..'/gaspard_Set region render martrix to same named track_settings.json'
+  settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]REMOVE_THIS]..'/gaspard_Set region render martrix to same named track_settings.json'
   Settings = {
       region_naming_parent_casacde = false,
       look_for_patterns = false,

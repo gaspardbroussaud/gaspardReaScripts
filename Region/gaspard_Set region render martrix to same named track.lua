@@ -1,8 +1,8 @@
 -- @description Set region render martrix to same named track
 -- @author gaspard
--- @version 1.1.2
+-- @version 1.1.3
 -- @changelog
---  - Fix typo in variable name
+--  - Update settings system
 -- @about
 --  - Set region's render matrix track to track with same name.
 
@@ -12,7 +12,7 @@
 -- GET TOP PARENT TRACK
 function GetConcatenatedParentNames(track)
     local _, name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-    if Settings.region_naming_parent_casacde then
+    if Settings.region_naming_parent_casacde.value then
         while true do
             local parent = reaper.GetParentTrack(track)
             if parent then
@@ -101,9 +101,22 @@ function InitSystemVariables()
 
     settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/gaspard_Set region render martrix to same named track_settings.json'
     Settings = {
-        region_naming_parent_casacde = false,
-        look_for_patterns = false,
-        region_naming_pattern = ""
+        region_naming_parent_casacde = {
+            value = false,
+            name = "Region name from folder cascade",
+            description = "Use cascading track folders to name regions."
+        },
+        look_for_patterns = {
+            value = false,
+            name = "Look for pattern in names",
+            description = "Look for a specific pattern in region names to exclude region from linking."
+        },
+        region_naming_pattern = {
+            value = "",
+            char_type = nil,
+            name = "Text pattern",
+            description = "Pattern to look for in region names. Can be regex."
+        }
     }
     Settings = gson.LoadJSON(settings_path, Settings)
 end
@@ -217,7 +230,7 @@ function Gui_SettingsWindow()
         local one_changed = false
         reaper.ImGui_Text(ctx, "Name region using parent track cascade:")
         reaper.ImGui_SameLine(ctx)
-        changed, Settings.region_naming_parent_casacde = reaper.ImGui_Checkbox(ctx, "##setting_naming_cascade", Settings.region_naming_parent_casacde)
+        changed, Settings.region_naming_parent_casacde.value = reaper.ImGui_Checkbox(ctx, "##setting_naming_cascade", Settings.region_naming_parent_casacde.value)
         if changed then one_changed = true end
 
         reaper.ImGui_Text(ctx, "Look for pattern in name:")
