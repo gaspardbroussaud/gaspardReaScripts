@@ -1,8 +1,8 @@
 -- @description Set region render martrix to same named track
 -- @author gaspard
--- @version 1.1.3
+-- @version 1.1.4
 -- @changelog
---  - Update settings system
+--  - Fix typo in settings system
 -- @about
 --  - Set region's render matrix track to track with same name.
 
@@ -55,7 +55,7 @@ function SetRenderMatrixTracks()
                 local _, isrgn, _, _, name, index = reaper.EnumProjectMarkers2(0, i)
                 if isrgn then
                     local should_look = true
-                    if Settings.look_for_patterns and name:match(Settings.region_naming_pattern) and Settings.region_naming_pattern ~= "" then
+                    if Settings.look_for_patterns.value and name:match(Settings.region_naming_pattern.value) and Settings.region_naming_pattern.value ~= "" then
                         should_look = false
                     end
                     if should_look then
@@ -235,16 +235,16 @@ function Gui_SettingsWindow()
 
         reaper.ImGui_Text(ctx, "Look for pattern in name:")
         reaper.ImGui_SameLine(ctx)
-        changed, Settings.look_for_patterns = reaper.ImGui_Checkbox(ctx, "##setting_name_pattern", Settings.look_for_patterns)
+        changed, Settings.look_for_patterns.value = reaper.ImGui_Checkbox(ctx, "##setting_name_pattern", Settings.look_for_patterns.value)
         if changed then one_changed = true end
 
         reaper.ImGui_Text(ctx, "Pattern:")
         reaper.ImGui_SameLine(ctx)
-        if not Settings.look_for_patterns then reaper.ImGui_BeginDisabled(ctx) end
+        if not Settings.look_for_patterns.value then reaper.ImGui_BeginDisabled(ctx) end
         reaper.ImGui_PushItemWidth(ctx, -1)
-        changed, Settings.region_naming_pattern = reaper.ImGui_InputText(ctx, "##setting_text_pattern", Settings.region_naming_pattern)
+        changed, Settings.region_naming_pattern.value = reaper.ImGui_InputText(ctx, "##setting_text_pattern", Settings.region_naming_pattern.value)
         if reaper.ImGui_IsItemHovered(ctx) then reaper.ImGui_SetTooltip(ctx, 'CAREFUL: Do not set pattern to only "-".') end
-        if not Settings.look_for_patterns then reaper.ImGui_EndDisabled(ctx) end
+        if not Settings.look_for_patterns.value then reaper.ImGui_EndDisabled(ctx) end
         if changed then one_changed = true end
 
         if one_changed then gson.SaveJSON(settings_path, Settings) end
