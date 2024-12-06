@@ -45,7 +45,7 @@ return gson
 function InitSystemVariables()
   local json_file_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/JSON"
   package.path = package.path .. ";" .. json_file_path .. "/?.lua"
-  gson = require("gaspard_json_lib")
+  gson = require("json_utilities_lib")
 
   --settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]REMOVE_THIS]..'/gaspard_Set region render martrix to same named track_settings.json'
   Settings = {
