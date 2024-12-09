@@ -1,8 +1,8 @@
 --@description Random play point and time selection size
 --@author gaspard
---@version 1.0.2
+--@version 1.0.3
 --@changelog
---  - Fix font size
+--  - Fix typo in settings variable
 --@about
 --  ### How to:
 --  - Set a time selection in your project, start and end position will be used.
@@ -50,7 +50,7 @@ function InitSystemVariables()
             max = 10000,
             format = "%.2f",
             name = "Randomize frequency",
-            ddescription = "Randomize frequency by + or - this value around frequency's value."
+            description = "Randomize frequency by + or - this value around frequency's value."
         }
     }
     Settings = gson.LoadJSON(settings_path, Settings)
