@@ -1,4 +1,3 @@
---@noindex
 --@description Master settings
 --@author gaspard
 --@version 1.0
@@ -193,25 +192,11 @@ function Gui_Elements()
                 reaper.ImGui_Text(ctx, "SETTINGS")
                 reaper.ImGui_Dummy(ctx, 1, 5)
 
-                -- Parcourt les clés dans l'ordre spécifié
+                -- Go through in "order"
                 for _, key in ipairs(Settings.order) do
-                    --local sub_table = Settings[key] -- Accéder à chaque sous-table dans l'ordre
                     if Settings[key] then
-                        -- Local display variables
-                        local is_min_max = false
-
                         -- Display variable name
                         reaper.ImGui_Text(ctx, Settings[key]["name"]..":")
-
-                        --[[ Parcourt les données de la sous-table
-                        for sub_key, sub_value in pairs(Settings[key]) do
-                            -- Check for dependencies between settings variables
-                            if sub_key == "dependencies" then
-                                has_dependencies = true
-                                dep_table = Settings[key]["dependencies"]
-                            end
-                        end]]
-
                         reaper.ImGui_SameLine(ctx)
 
                         local type_var = type(Settings[key]["value"])
@@ -222,8 +207,9 @@ function Gui_Elements()
                                 local check_key = "dependencies"
                                 for i = 1, 2 do
                                     if Settings[key][check_key] then
-                                        local table = Settings[key]["dependencies"]
-                                        if check_key == "influences" then table = Settings[key]["influences"] end
+                                        if check_key == "dependencies" then table = Settings[key]["dependencies"]
+                                        elseif check_key == "influences" then table = Settings[key]["influences"]
+                                        else table = {} end
                                         for dep_key, _ in pairs(table) do
                                             local key_to_check = Settings[key][check_key][dep_key]["variable"]
                                             if Settings[key_to_check]["value"] ~= Settings[key][check_key][dep_key]["value"] then
@@ -235,26 +221,6 @@ function Gui_Elements()
                                     end
                                     check_key = "influences"
                                 end
-                                --[[if Settings[key]["dependencies"] then
-                                    for dep_key, _ in pairs(Settings[key]["dependencies"]) do
-                                        local key_to_check = Settings[key]["dependencies"][dep_key]["variable"]
-                                        if Settings[key_to_check]["value"] ~= Settings[key]["dependencies"][dep_key]["value"] then
-                                            if Settings[key]["dependencies"][dep_key]["self"] == Settings[key]["value"] then
-                                                Settings[key_to_check]["value"] = Settings[key]["dependencies"][dep_key]["value"]
-                                            end
-                                        end
-                                    end
-                                end
-                                if Settings[key]["influences"] then
-                                    for dep_key, _ in pairs(Settings[key]["influences"]) do
-                                        local key_to_check = Settings[key]["influences"][dep_key]["variable"]
-                                        if Settings[key_to_check]["value"] ~= Settings[key]["influences"][dep_key]["value"] then
-                                            if Settings[key]["influences"][dep_key]["self"] == Settings[key]["value"] then
-                                                Settings[key_to_check]["value"] = Settings[key]["influences"][dep_key]["value"]
-                                            end
-                                        end
-                                    end
-                                end]]
                                 one_changed = true
                             end
                             reaper.ImGui_SetItemTooltip(ctx, Settings[key]["description"])
