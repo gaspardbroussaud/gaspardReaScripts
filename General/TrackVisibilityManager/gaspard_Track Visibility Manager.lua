@@ -1,26 +1,20 @@
 -- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.3.3
+-- @version 1.3.4
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  - Updated GUI style fetch (internal)
---  - Increased font size
+--  - Updated settings system
+--  - !!!PLEASE GO TO "REAPER/Scripts/Gaspard ReaScripts/General/Track Visibility Manager/Utilities" AND DELETE "settings_file.txt".
 -- @about
 --  - GUI to hide and show tracks in TCP and mixer with mute and locking.
 --  - You can change settings for links between manager and TCP to control selection, mute, solo, and hide/show tracks.
 --  - Set an action ID in settings to use with F key while in manager window's focus.
 
 -- Global Variables
-ScriptVersion = "v1.3.3"
-ScriptName = 'TRACK VISIBILITY MANAGER'
-Settings = {
-    link_select = false,
-    link_collapse = false,
-    tracks = {}
-}
+version_text = "v1.3.4"
+window_name = 'TRACK VISIBILITY MANAGER'
 
-settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/Utilities/settings_file.txt'
 ------
 -- Load Utilities
 dofile(reaper.GetResourcePath() ..
@@ -31,10 +25,16 @@ package.path = package.path..';'..debug.getinfo(1, "S").source:match [[^@?(.*[\/
 require('Utilities/UserInterface')
 require('Utilities/System')
 
+local json_file_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/JSON"
+package.path = package.path .. ";" .. json_file_path .. "/?.lua"
+gson = require("json_utilities_lib")
+
 System_SetButtonState(1)
+settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/Utilities/gaspard_'..action_name..'_settings.json'
+
+System_InitSystemVariables()
 System_GetGuiStylesFromFile()
-System_SetVariables()
+System_ResetVariables()
 System_GetSelectedTracksTable()
-System_ReadSettingsFile()
 reaper.defer(Gui_Loop)
 reaper.atexit(System_SetButtonState)

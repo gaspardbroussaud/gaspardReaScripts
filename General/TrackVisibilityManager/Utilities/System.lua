@@ -4,7 +4,7 @@
 -- @about All functions used in gaspard_Track Visibility Manager.lua script
 
 -- SET GLOBAL VARIABLES
-function System_SetVariables()
+function System_ResetVariables()
     selected_tracks = {}
     track_count = 0
     selected_track_count = 0
@@ -168,7 +168,7 @@ function System_GetTracksTable()
 
         -- Track selection state in TCP
         local t_select = false
-        if link_tcp_select then t_select = reaper.IsTrackSelected(t_id) end
+        if Settings.link_tcp_select.value then t_select = reaper.IsTrackSelected(t_id) end
 
         -- Track folder depth with parent folders
         local t_depth = reaper.GetTrackDepth(t_id)
@@ -176,13 +176,13 @@ function System_GetTracksTable()
         -- Track collapsed state for folders (-1 if not a folder track)
         local t_collapse = -1
         if reaper.GetMediaTrackInfo_Value(t_id, "I_FOLDERDEPTH") == 1 then
-            if link_tcp_collapse then t_collapse = reaper.GetMediaTrackInfo_Value(t_id, "I_FOLDERCOMPACT")
+            if Settings.link_tcp_collapse.value then t_collapse = reaper.GetMediaTrackInfo_Value(t_id, "I_FOLDERCOMPACT")
             else t_collapse = 0 end
         end
 
         -- Track mute state if link tcp mute setting enabled
         local t_mute = 0
-        if link_tcp_mute then t_mute = reaper.GetMediaTrackInfo_Value(t_id, "B_MUTE") end
+        if Settings.link_tcp_mute.value then t_mute = reaper.GetMediaTrackInfo_Value(t_id, "B_MUTE") end
 
         local t_solo = reaper.GetMediaTrackInfo_Value(t_id, "I_SOLO")
 
@@ -192,7 +192,7 @@ function System_GetTracksTable()
         tracks[i] = { id = t_id, number = t_number, state = t_state, select = t_select, depth = t_depth, collapse = t_collapse, mute = t_mute, solo = t_solo, visible = t_visible }
     end
 
-    if track_count ~= 0 and link_tcp_collapse then
+    if track_count ~= 0 and Settings.link_tcp_collapse.value then
         for i = 0, #tracks do
             if tracks[i].collapse ~= -1 then
                 System_UpdateTrackCollapse(i, tracks[i].collapse)
@@ -275,15 +275,76 @@ end
 
 -- TOGGLE BUTTON STATE IN REAPER
 function System_SetButtonState(set)
-    local _, _, sec, cmd, _, _, _ = reaper.get_action_context()
+    local _, name, sec, cmd, _, _, _ = reaper.get_action_context()
+    action_name = string.match(name, "gaspard_(.-)%.lua")
     reaper.SetToggleCommandState(sec, cmd, set or 0)
     reaper.RefreshToolbar2(sec, cmd)
+end
+
+-- INIT SYSTEM VARIABLES
+function System_InitSystemVariables()
+    Settings = {
+        order = { "link_tcp_select", "link_tcp_collapse", "link_tcp_mute", "show_mute_buttons", "link_tcp_solo", "show_solo_buttons", "F_commandID" },
+        link_tcp_select = {
+            value = false,
+            name = "Link TCP selection",
+            description = "Links TCP tracks selection states with tool GUI and reverse."
+        },
+        link_tcp_collapse = {
+            value = false,
+            name = "Link TCP collapse",
+            description = "Links TCP tracks collapsed states with tool GUI and reverse."
+        },
+        link_tcp_mute = {
+            value = false,
+            name = "Link TCP Mute",
+            description = "Links TCP tracks mute states with tool GUI and reverse."
+        },
+        show_mute_buttons = {
+            value = false,
+            dependencies = {
+                link_tcp_mute = {
+                    variable = "link_tcp_mute",
+                    value = true
+                }
+            },
+            name = "Show Mute buttons",
+            description = 'Show mute buttons in GUI to interact.\nNeed "Link TCP mute" to work.'
+        },
+        link_tcp_solo = {
+            value = false,
+            name = "Link TCP Solo",
+            description = 'Links TCP tracks solo states with tool GUI and reverse.\nNeed "Link TCP mute" to work.'
+        },
+        show_solo_buttons = {
+            value = false,
+            dependencies = {
+                link_tcp_mute = {
+                    variable = "link_tcp_mute",
+                    value = true
+                },
+                link_tcp_solo = {
+                    variable = "link_tcp_solo",
+                    value = true
+                }
+            },
+            name = "Show Solo buttons",
+            description = 'Show mute buttons in GUI to interact.\nNeed "Link TCP solo" to work.'
+        },
+        F_commandID = {
+            value = "",
+            char_type = nil,
+            name = "F key Command ID",
+            description = 'Set a custom command ID for "F" key shortcut while in GUI focus.'
+        }
+    }
+    Settings = gson.LoadJSON(settings_path, Settings)
 end
 
 -- SET TRACK TO FALSE OR TRUE WITH INDEX
 function System_SetTrackVisibility(index, visibility)
     tracks[index].select = visibility
-    if link_tcp_select then
+    if Settings.link_tcp_select.value then
         reaper.SetTrackSelected(tracks[index].id, visibility)
     end
 end
@@ -361,43 +422,6 @@ function System_UpdateSoloState()
         if tracks[i].solo > 0 then return true end
     end
     return false
-end
-
--- WRITE SETTINGS IN FILE
-function System_WriteSettingsFile()
-    local file = io.open(settings_path, "w")
-    local w_settings = { link_tcp_select, link_tcp_collapse, link_tcp_mute, show_mute_buttons, link_tcp_solo, show_solo_buttons, F_commandID }
-    if file then
-        for i = 1, #w_settings do
-            file:write(tostring(w_settings[i]).."\n")
-        end
-        file:close()
-    end
-end
-
--- READ SETTINGS IN FILE AT LAUNCH
-function System_ReadSettingsFile()
-    link_tcp_select = false
-    link_tcp_collapse = false
-    link_tcp_mute = false
-    show_mute_buttons = false
-    link_tcp_solo = false
-    show_solo_buttons = false
-    F_commandID = ""
-
-    local file = io.open(settings_path, "r")
-    if file then
-        link_tcp_select = System_StringToBool(file:read("l"))
-        link_tcp_collapse = System_StringToBool(file:read("l"))
-        link_tcp_mute = System_StringToBool(file:read("l"))
-        show_mute_buttons = System_StringToBool(file:read("l"))
-        link_tcp_solo = System_StringToBool(file:read("l"))
-        show_solo_buttons = System_StringToBool(file:read("l"))
-        F_commandID = file:read("l")
-        file:close()
-    end
-
-    System_WriteSettingsFile()
 end
 
 function System_StringToBool(str)
