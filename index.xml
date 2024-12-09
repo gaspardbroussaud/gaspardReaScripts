@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="f47515739d8c16a6164e68559d634e8b18b2de93">
+<index version="1" name="Gaspard ReaScripts" commit="c3e7d9842e23aa1c6e4012323fdf79fa65897b6a">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -395,6 +395,9 @@
       <version name="1.0.1" author="gaspard" time="2024-12-06T15:30:53Z">
         <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b43882a31c7914fd4f8ebbaa670dba42fbe61828/JSON/json_utilities_lib.lua</source>
       </version>
+      <version name="1.0.2" author="gaspard" time="2024-12-09T09:51:56Z">
+        <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a3490ce751c3cff4a042ddfed4fe8671b61cf888/JSON/json_utilities_lib.lua</source>
+      </version>
     </reapack>
   </category>
   <category name="Region">
@@ -498,6 +501,10 @@
       <version name="1.1.4" author="gaspard" time="2024-12-06T15:50:12Z">
         <changelog><![CDATA[- Fix typo in settings system]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/f47515739d8c16a6164e68559d634e8b18b2de93/Region/gaspard_Set%20region%20render%20martrix%20to%20same%20named%20track.lua</source>
+      </version>
+      <version name="1.1.5" author="gaspard" time="2024-12-09T09:52:47Z">
+        <changelog><![CDATA[- Update settings system]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/c3e7d9842e23aa1c6e4012323fdf79fa65897b6a/Region/gaspard_Set%20region%20render%20martrix%20to%20same%20named%20track.lua</source>
       </version>
     </reapack>
   </category>
@@ -703,6 +710,10 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       <version name="1.0" author="gaspard" time="2024-12-06T15:28:54Z">
         <changelog><![CDATA[- Update settings system]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7c9b73225a7ffb7c8bb845956ff9eec9b980bad1/Timeline/gaspard_Random%20play%20point%20and%20time%20selection%20size.lua</source>
+      </version>
+      <version name="1.0.1" author="gaspard" time="2024-12-09T09:52:47Z">
+        <changelog><![CDATA[- Update settings system]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/c3e7d9842e23aa1c6e4012323fdf79fa65897b6a/Timeline/gaspard_Random%20play%20point%20and%20time%20selection%20size.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Remove selected even items in timeline order on multiple tracks.lua" type="script" desc="Remove selected even items in timeline order on multiple tracks">
