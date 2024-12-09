@@ -1,8 +1,8 @@
 --@description Random play point and time selection size
 --@author gaspard
---@version 1.0.1
+--@version 1.0.2
 --@changelog
---  - Update settings system
+--  - Fix font size
 --@about
 --  ### How to:
 --  - Set a time selection in your project, start and end position will be used.
@@ -63,6 +63,7 @@ function InitialVariables()
     version = "1.0.0"
     window_width = 250
     window_height = 235
+    font_size = 16
     playing = false
     timer = 1
     temp_length = 0
@@ -76,8 +77,8 @@ end
 -- GUI Initialize function
 function Gui_Init()
     ctx = reaper.ImGui_CreateContext('random_play_context')
-    font = reaper.ImGui_CreateFont('sans-serif', 16)
-    small_font = reaper.ImGui_CreateFont('sans-serif', font_size_version, reaper.ImGui_FontFlags_Italic())
+    font = reaper.ImGui_CreateFont('sans-serif', font_size)
+    small_font = reaper.ImGui_CreateFont('sans-serif', font_size * 0.75, reaper.ImGui_FontFlags_Italic())
     reaper.ImGui_Attach(ctx, font)
     reaper.ImGui_Attach(ctx, small_font)
     window_name = "Time Selection Randomizer"

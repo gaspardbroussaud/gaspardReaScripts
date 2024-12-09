@@ -1,8 +1,8 @@
 -- @description Set region render martrix to same named track
 -- @author gaspard
--- @version 1.1.5
+-- @version 1.1.6
 -- @changelog
---  - Update settings system
+--  - Fix font size
 -- @about
 --  - Set region's render matrix track to track with same name.
 
@@ -143,7 +143,7 @@ function Gui_Init()
     InitialVariables()
     ctx = reaper.ImGui_CreateContext('random_play_context')
     font = reaper.ImGui_CreateFont('sans-serif', font_size)
-    small_font = reaper.ImGui_CreateFont('sans-serif', font_size_version, reaper.ImGui_FontFlags_Italic())
+    small_font = reaper.ImGui_CreateFont('sans-serif', font_size * 0.75, reaper.ImGui_FontFlags_Italic())
     reaper.ImGui_Attach(ctx, font)
     reaper.ImGui_Attach(ctx, small_font)
 end
