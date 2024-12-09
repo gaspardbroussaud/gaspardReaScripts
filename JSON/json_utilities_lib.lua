@@ -1,6 +1,6 @@
 --@description Json functions for gaspard's scripts
 --@author gaspard
---@version 1.0.2
+--@version 1.0.3
 --@provides [nomain] .
 --@about Json functions for gaspard's scripts
 
@@ -91,8 +91,8 @@ key_name = {
 -- NUMBER:
 key_name = {
   value = 0 --(int or float)
-  min = 0, --(nil if none)
-  max = 100, --(nil if none) If both nil then inputText with reaper.ImGui_InputTextFlags_CharsDecimal() | reaper.ImGui_InputTextFlags_CharsNoBlank()
+  min = 0, --(-math.huge if none)
+  max = 100, --(math.huge if none) If both nil then inputText with reaper.ImGui_InputTextFlags_CharsDecimal() | reaper.ImGui_InputTextFlags_CharsNoBlank()
   format = "%.2f",
   name = "Name",
   description = "Tooltip description."
