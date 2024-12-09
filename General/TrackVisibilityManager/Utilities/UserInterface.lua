@@ -19,6 +19,7 @@ local project_path = ""
 local visible = false
 local open = false
 local is_one_track_solo = false
+local one_changed = false
 
 reaper.ImGui_Attach(ctx, font)
 reaper.ImGui_Attach(ctx, small_font)
@@ -112,6 +113,10 @@ function Gui_TopBar()
             end
             if reaper.ImGui_Button(ctx, 'Settings##settings_button') then
                 show_settings = not show_settings
+                if one_changed then
+                    gson.SaveJSON(settings_path, Settings)
+                    one_changed = false
+                end
             end
             if push_color then reaper.ImGui_PopStyleColor(ctx) end
 
@@ -461,13 +466,13 @@ end
 function Gui_SettingsWindow()
     -- Set Settings Window visibility and settings
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
-    reaper.ImGui_SetNextWindowSize(ctx, gui_W - 200, gui_H - 200, reaper.ImGui_Cond_Once())
-    reaper.ImGui_SetNextWindowPos(ctx, window_x + window_width / 2 - (gui_W - 200) / 2, window_y + 10, reaper.ImGui_Cond_Appearing())
+    local settings_width = gui_W - 180
+    reaper.ImGui_SetNextWindowSize(ctx, settings_width, gui_H - 170, reaper.ImGui_Cond_Once())
+    reaper.ImGui_SetNextWindowPos(ctx, window_x + window_width / 2 - settings_width / 2, window_y + 10, reaper.ImGui_Cond_Appearing())
 
     local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
     if settings_visible then
         local table_flags = reaper.ImGui_TableFlags_SizingFixedFit()
-        local one_changed = false
         if reaper.ImGui_BeginTable(ctx, "table_settings", 2, table_flags) then
             reaper.ImGui_TableNextRow(ctx)
             reaper.ImGui_TableNextColumn(ctx)
@@ -556,10 +561,20 @@ function Gui_SettingsWindow()
             changed, Settings.F_commandID.value = reaper.ImGui_InputText(ctx, "##input_F_commandID", Settings.F_commandID.value)
             if changed then one_changed = true end
 
-            if one_changed then gson.SaveJSON(settings_path, Settings) end
-
             reaper.ImGui_EndTable(ctx)
         end
+
+        local x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
+        local button_x = 100
+        if not one_changed then disable = true
+        else disable = false end
+        if disable then reaper.ImGui_BeginDisabled(ctx) end
+        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + x - button_x - 10)
+        if reaper.ImGui_Button(ctx, "APPLY##apply_button", button_x) then
+            gson.SaveJSON(settings_path, Settings)
+            one_changed = false
+        end
+        if disable then reaper.ImGui_EndDisabled(ctx) end
 
         reaper.ImGui_End(ctx)
     else
@@ -567,6 +582,10 @@ function Gui_SettingsWindow()
     end
 
     if not settings_open then
+        if one_changed then
+            gson.SaveJSON(settings_path, Settings)
+            one_changed = false
+        end
         show_settings = false
     end
 end

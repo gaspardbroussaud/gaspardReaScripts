@@ -278,12 +278,15 @@ function Gui_Elements()
 
             local x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
             local button_x = 100
-            if not one_changed then reaper.ImGui_BeginDisabled(ctx) end
+            if not one_changed then disable = true
+            else disable = false end
+            if disable then reaper.ImGui_BeginDisabled(ctx) end
             reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + x - button_x)
             if reaper.ImGui_Button(ctx, "APPLY##apply_button", button_x) then
                 gson.SaveJSON(script_path, Settings)
+                one_changed = false
             end
-            if not one_changed then reaper.ImGui_EndDisabled(ctx) end
+            if disable then reaper.ImGui_EndDisabled(ctx) end
         end
 
         reaper.ImGui_EndChild(ctx)
