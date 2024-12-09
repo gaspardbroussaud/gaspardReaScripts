@@ -297,6 +297,23 @@ function System_InitSystemVariables()
         },
         link_tcp_mute = {
             value = false,
+            influences = {
+                show_mute_buttons = {
+                    variable = "show_mute_buttons",
+                    self = false,
+                    value = false
+                },
+                link_tcp_solo = {
+                    variable = "link_tcp_solo",
+                    self = false,
+                    value = false
+                },
+                show_solo_buttons = {
+                    variable = "show_solo_buttons",
+                    self = false,
+                    value = false
+                }
+            },
             name = "Link TCP Mute",
             description = "Links TCP tracks mute states with tool GUI and reverse."
         },
@@ -305,6 +322,7 @@ function System_InitSystemVariables()
             dependencies = {
                 link_tcp_mute = {
                     variable = "link_tcp_mute",
+                    self = true,
                     value = true
                 }
             },
@@ -313,6 +331,20 @@ function System_InitSystemVariables()
         },
         link_tcp_solo = {
             value = false,
+            dependencies = {
+                link_tcp_mute = {
+                    variable = "link_tcp_mute",
+                    self = true,
+                    value = true
+                }
+            },
+            influences = {
+                show_solo_buttons = {
+                    variable = "show_solo_buttons",
+                    self = false,
+                    value = false
+                }
+            },
             name = "Link TCP Solo",
             description = 'Links TCP tracks solo states with tool GUI and reverse.\nNeed "Link TCP mute" to work.'
         },
@@ -321,10 +353,12 @@ function System_InitSystemVariables()
             dependencies = {
                 link_tcp_mute = {
                     variable = "link_tcp_mute",
+                    self = true,
                     value = true
                 },
                 link_tcp_solo = {
                     variable = "link_tcp_solo",
+                    self = true,
                     value = true
                 }
             },
