@@ -1,18 +1,17 @@
 -- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.3.4
+-- @version 1.3.5
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
 --  - Updated settings system
---  - !!!PLEASE GO TO "REAPER/Scripts/Gaspard ReaScripts/General/Track Visibility Manager/Utilities" AND DELETE "settings_file.txt".
 -- @about
 --  - GUI to hide and show tracks in TCP and mixer with mute and locking.
 --  - You can change settings for links between manager and TCP to control selection, mute, solo, and hide/show tracks.
 --  - Set an action ID in settings to use with F key while in manager window's focus.
 
 -- Global Variables
-version_text = "v1.3.4"
+version_text = "v1.3.5"
 window_name = 'TRACK VISIBILITY MANAGER'
 
 ------
