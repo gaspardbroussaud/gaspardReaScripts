@@ -1,6 +1,6 @@
 --@description Random play point and time selection size
 --@author gaspard
---@version 1.0
+--@version 1.0.1
 --@changelog
 --  - Update settings system
 --@about
@@ -13,7 +13,8 @@
 
 -- TOGGLE BUTTON STATE IN REAPER
 function SetButtonState(set)
-    local _, _, sec, cmd, _, _, _ = reaper.get_action_context()
+    local _, name, sec, cmd, _, _, _ = reaper.get_action_context()
+    action_name = string.match(name, "gaspard_(.-)%.lua")
     reaper.SetToggleCommandState(sec, cmd, set or 0)
     reaper.RefreshToolbar2(sec, cmd)
 end
@@ -26,22 +27,20 @@ function GetGuiStylesFromFile()
     style_colors = style.colors
 end
 
--- All initial variable for script and GUI
-function InitialVariables()
-    GetGuiStylesFromFile()
-    version = "1.0"
-    window_width = 250
-    window_height = 235
-    playing = false
-    timer = 1
-    temp_length = 0
-    min_rnd = 0
-    max_rnd = 1
+-- Init system variables
+function InitSystemVariables()
+    local json_file_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/JSON"
+    package.path = package.path .. ";" .. json_file_path .. "/?.lua"
+    gson = require("json_utilities_lib")
+
+    settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/gaspard_'..action_name..'_settings.json'
     Settings = {
+        order = { "frequency", "frequency_rnd" },
         frequency = {
             value = 4,
             min = 0,
             max = 10000,
+            format = "%.2f",
             name = "Frequency",
             description = "Frequency in frames per seconds."
         },
@@ -49,10 +48,26 @@ function InitialVariables()
             value = 0,
             min = 0,
             max = 10000,
+            format = "%.2f",
             name = "Randomize frequency",
             ddescription = "Randomize frequency by + or - this value around frequency's value."
         }
     }
+    Settings = gson.LoadJSON(settings_path, Settings)
+end
+
+-- All initial variable for script and GUI
+function InitialVariables()
+    InitSystemVariables()
+    GetGuiStylesFromFile()
+    version = "1.0.0"
+    window_width = 250
+    window_height = 235
+    playing = false
+    timer = 1
+    temp_length = 0
+    min_rnd = 0
+    max_rnd = 1
     project_name = reaper.GetProjectName(0)
     project_path = reaper.GetProjectPath()
     project_id, _ = reaper.EnumProjects(-1)
@@ -62,7 +77,9 @@ end
 function Gui_Init()
     ctx = reaper.ImGui_CreateContext('random_play_context')
     font = reaper.ImGui_CreateFont('sans-serif', 16)
+    small_font = reaper.ImGui_CreateFont('sans-serif', font_size_version, reaper.ImGui_FontFlags_Italic())
     reaper.ImGui_Attach(ctx, font)
+    reaper.ImGui_Attach(ctx, small_font)
     window_name = "Time Selection Randomizer"
 end
 
@@ -187,6 +204,16 @@ function Gui_Elements()
     if start_button_disable then reaper.ImGui_EndDisabled(ctx) end
 end
 
+-- Display version
+function Gui_Version()
+    reaper.ImGui_PushFont(ctx, small_font)
+    w, h = reaper.ImGui_CalcTextSize(ctx, "v"..version)
+    reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
+    reaper.ImGui_SetCursorPosY(ctx, window_height - h - 10)
+    reaper.ImGui_Text(ctx, "v"..version)
+    reaper.ImGui_PopFont(ctx)
+end
+
 -- GUI function for all elements
 function Gui_Loop()
     Gui_PushTheme()
@@ -252,10 +279,7 @@ function Gui_Loop()
             end
         end
 
-        w, h = reaper.ImGui_CalcTextSize(ctx, "v"..version)
-        reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
-        reaper.ImGui_SetCursorPosY(ctx, window_height - h - 10)
-        reaper.ImGui_Text(ctx, "v"..version)
+        Gui_Version()
 
         reaper.ImGui_End(ctx)
     end

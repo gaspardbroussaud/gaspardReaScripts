@@ -1,8 +1,8 @@
 -- @description Set region render martrix to same named track
 -- @author gaspard
--- @version 1.1.4
+-- @version 1.1.5
 -- @changelog
---  - Fix typo in settings system
+--  - Update settings system
 -- @about
 --  - Set region's render matrix track to track with same name.
 
@@ -76,15 +76,6 @@ function SetRenderMatrixTracks()
             else
                 reaper.ShowMessageBox("All regions have been set.", "Message box", 0)
             end
-            --[[
-            if #missing > 0 then
-                local error_message = ""
-                for i = 1, #missing do
-                    error_message = error_message.." - "..tostring(missing[i].name).."; index: "..tostring(missing[i].index).."\n"
-                end
-                reaper.ShowConsoleMsg("\nThere are errors in region/track links.\nRegions affected:\n"..error_message)
-            end
-            ]]
         else
             reaper.ShowMessageBox("There are no tracks in current project.", "MESSAGE", 0)
         end
@@ -98,9 +89,12 @@ function InitSystemVariables()
     local json_file_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/JSON"
     package.path = package.path .. ";" .. json_file_path .. "/?.lua"
     gson = require("json_utilities_lib")
+    local _, name, sec, cmd, _, _, _ = reaper.get_action_context()
+    action_name = string.match(name, "gaspard_(.-)%.lua")
 
-    settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/gaspard_Set region render martrix to same named track_settings.json'
+    settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/gaspard_'..action_name..'_settings.json'
     Settings = {
+        order = { "region_naming_parent_casacde", "look_for_patterns", "region_naming_pattern" },
         region_naming_parent_casacde = {
             value = false,
             name = "Region name from folder cascade",
@@ -149,7 +143,9 @@ function Gui_Init()
     InitialVariables()
     ctx = reaper.ImGui_CreateContext('random_play_context')
     font = reaper.ImGui_CreateFont('sans-serif', font_size)
+    small_font = reaper.ImGui_CreateFont('sans-serif', font_size_version, reaper.ImGui_FontFlags_Italic())
     reaper.ImGui_Attach(ctx, font)
+    reaper.ImGui_Attach(ctx, small_font)
 end
 
 -- GUI Top Bar
@@ -210,10 +206,12 @@ end
 
 -- Gui Version on bottom right
 function Gui_Version()
+    reaper.ImGui_PushFont(ctx, small_font)
     local w, h = reaper.ImGui_CalcTextSize(ctx, "v"..version)
     reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
     reaper.ImGui_SetCursorPosY(ctx, window_height - h - 10)
     reaper.ImGui_Text(ctx, "v"..version)
+    reaper.ImGui_PopFont(ctx)
 end
 
 -- GUI ELEMENTS FOR SETTINGS WINDOW
