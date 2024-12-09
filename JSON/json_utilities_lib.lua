@@ -1,6 +1,6 @@
 --@description Json functions for gaspard's scripts
 --@author gaspard
---@version 1.0.1
+--@version 1.0.2
 --@provides [nomain] .
 --@about Json functions for gaspard's scripts
 
@@ -47,19 +47,22 @@ function InitSystemVariables()
   package.path = package.path .. ";" .. json_file_path .. "/?.lua"
   gson = require("json_utilities_lib")
 
-  settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]REMOVE_THIS]..'/gaspard_Set region render martrix to same named track_settings.json'
+  settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]REMOVE_THIS]..'/gaspard_'..action_name..'_settings.json'
   Settings = {
-    region_naming_parent_casacde = {
+    order = { "test1", "test2", "test3" },
+    test1 = {
       value = false,
       name = "Region name from folder cascade",
       description = "Use cascading track folders to name regions."
     },
-    look_for_patterns = {
-      value = false,
-      name = "Look for pattern in names",
-      description = "Look for a specific pattern in region names to exclude region from linking."
+    test2 = {
+      value = 4,
+      min = 0,
+      max = 1000,
+      name = "Displayed name",
+      description = "Tooltip description."
     },
-    region_naming_pattern = {
+    test3 = {
       value = "",
       char_type = nil,
       name = "Text pattern",
@@ -80,16 +83,17 @@ key_name = {
 -- STRING:
 key_name = {
   value = "Text",
-  char_type = nil or flags list => reaper.ImGui_InputTextFlags_AllowTabInput() | reaper.ImGui_InputTextFlags_AutoSelectAll(),
+  char_type = nil --or flags list => reaper.ImGui_InputTextFlags_AllowTabInput() | reaper.ImGui_InputTextFlags_AutoSelectAll(),
   name = "Name",
   description = "Tooltip description."
 }
 
 -- NUMBER:
 key_name = {
-  value = 0 (int or float)
-  min = 0, (nil if none)
-  max = 100, (nil if none) If both nil then inputText with reaper.ImGui_InputTextFlags_CharsDecimal() | reaper.ImGui_InputTextFlags_CharsNoBlank()
+  value = 0 --(int or float)
+  min = 0, --(nil if none)
+  max = 100, --(nil if none) If both nil then inputText with reaper.ImGui_InputTextFlags_CharsDecimal() | reaper.ImGui_InputTextFlags_CharsNoBlank()
+  format = "%.2f",
   name = "Name",
   description = "Tooltip description."
 }

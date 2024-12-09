@@ -10,7 +10,8 @@
 
 -- Toggle button state in Reaper
 function SetButtonState(set)
-    local _, _, sec, cmd, _, _, _ = reaper.get_action_context()
+    local _, name, sec, cmd, _, _, _ = reaper.get_action_context()
+    action_name = string.match(name, "gaspard_(.-)%.lua")
     reaper.SetToggleCommandState(sec, cmd, set or 0)
     reaper.RefreshToolbar2(sec, cmd)
 end
@@ -40,7 +41,9 @@ function Gui_Init()
     InitialVariables()
     ctx = reaper.ImGui_CreateContext('random_play_context')
     font = reaper.ImGui_CreateFont('sans-serif', 16)
+    small_font = reaper.ImGui_CreateFont('sans-serif', font_size_version, reaper.ImGui_FontFlags_Italic())
     reaper.ImGui_Attach(ctx, font)
+    reaper.ImGui_Attach(ctx, small_font)
 end
 
 -- GUI Top Bar
@@ -98,10 +101,12 @@ end
 
 -- Gui Version on bottom right
 function Gui_Version()
+    reaper.ImGui_PushFont(ctx, small_font)
     local w, h = reaper.ImGui_CalcTextSize(ctx, "v"..version)
     reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
     reaper.ImGui_SetCursorPosY(ctx, window_height - h - 10)
     reaper.ImGui_Text(ctx, "v"..version)
+    reaper.ImGui_PopFont(ctx)
 end
 
 -- GUI function for all elements
