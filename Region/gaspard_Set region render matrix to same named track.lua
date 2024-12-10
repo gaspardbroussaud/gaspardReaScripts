@@ -1,8 +1,9 @@
--- @description Set region render martrix to same named track
+-- @noindex
+-- @description Set region render matrix to same named track
 -- @author gaspard
--- @version 1.1.6
+-- @version 1.0
 -- @changelog
---  - Fix font size
+--  - Fix file name (return to v1.0)
 -- @about
 --  - Set region's render matrix track to track with same name.
 
