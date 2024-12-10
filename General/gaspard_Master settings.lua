@@ -1,8 +1,8 @@
 --@description Master settings
 --@author gaspard
---@version 1.0.2
+--@version 1.0.3
 --@changelog
---  - Added input text multiline support
+--  - Update input text multiline
 --@about
 --  ### Master settings
 --  All settings for all gaspard's scripts
@@ -97,6 +97,7 @@ function InitialVariables()
     script_name = ""
     was_opened = false
     input_active = false
+    no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
 end
 
 -- Split input text in multiple words (space between in orginial text)
@@ -116,6 +117,15 @@ function MatchesAllWords(words, text)
         end
     end
     return true
+end
+
+-- Remove empty lines from a string
+function RemoveMultilineEmptyLines(text)
+    local result = {}
+    for line in text:gmatch("([^\n]*)\n?") do
+        if line:match("%S") then table.insert(result, line) end
+    end
+    return table.concat(result, "\n")
 end
 
 -- Close input popup and reset script name
@@ -141,7 +151,7 @@ end
 -- GUI Top Bar
 function Gui_TopBar()
     -- GUI Menu Bar
-    if reaper.ImGui_BeginChild(ctx, "child_top_bar", window_width, topbar_height) then
+    if reaper.ImGui_BeginChild(ctx, "child_top_bar", window_width, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
         -- Close input popup if clic focus on topbar 
         if reaper.ImGui_IsWindowFocused(ctx) and open_popup then
             CloseInputPopup()
@@ -156,7 +166,7 @@ function Gui_TopBar()
         local w, _ = reaper.ImGui_CalcTextSize(ctx, "X")
         reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 30, 0)
 
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 30, 22) then
+        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 30, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
             reaper.ImGui_Dummy(ctx, 3, 1)
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'X##quit_button') then
@@ -175,7 +185,7 @@ function Gui_Elements()
     local child_main_x = window_width - 20
     local child_main_y = window_height - topbar_height - (font_size * 0.75) - 30
     reaper.ImGui_SetCursorPosX(ctx, 10)
-    if reaper.ImGui_BeginChild(ctx, "child_main_elements", child_main_x, child_main_y, reaper.ImGui_ChildFlags_Border()) then
+    if reaper.ImGui_BeginChild(ctx, "child_main_elements", child_main_x, child_main_y, reaper.ImGui_ChildFlags_Border(), no_scrollbar_flags) then
         reaper.ImGui_PushItemWidth(ctx, -1)
         -- Input search text
         if was_opened then
@@ -287,6 +297,9 @@ function Gui_Elements()
                         elseif type_var == "string" then
                             reaper.ImGui_PushItemWidth(ctx, -1)
                             if Settings[key]["multiline"] then
+                                if Settings[key]["multiline"]["remove_empty_lines"] then
+                                    Settings[key]["value"] = RemoveMultilineEmptyLines(Settings[key]["value"])
+                                end
                                 changed, Settings[key]["value"] = reaper.ImGui_InputTextMultiline(ctx, "##inputtext_"..key.."_value", Settings[key]["value"], nil, nil, Settings[key]["char_type"])
                             else
                                 changed, Settings[key]["value"] = reaper.ImGui_InputText(ctx, "##inputtext_"..key.."_value", Settings[key]["value"], Settings[key]["char_type"])

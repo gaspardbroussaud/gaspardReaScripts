@@ -1,8 +1,9 @@
 -- @description Set region render matrix to same named track
 -- @author gaspard
--- @version 1.0
+-- @version 1.0.1
 -- @changelog
---  - Fix file name (return to v1.0)
+--  - Update input text multiline
+--  - Update GUI size and title
 -- @about
 --  - Set region's render matrix track to track with same name.
 
@@ -41,6 +42,15 @@ function GetTracks()
         return tracks
     end
     return nil
+end
+
+-- Remove empty lines from a string
+function RemoveEmptyLines(text)
+    local result = {}
+    for line in text:gmatch("([^\n]*)\n?") do
+        if line:match("%S") then table.insert(result, line) end
+    end
+    return table.concat(result, "\n")
 end
 
 -- Split a text string into lines
@@ -125,7 +135,10 @@ function InitSystemVariables()
         },
         region_naming_pattern = {
             value = "",
-            multiline = true,
+            multiline = {
+                is_multiline = true,
+                remove_empty_lines = true
+            },
             char_type = nil,
             name = "Text pattern",
             description = 'Pattern to look for in region names. Can be regex.\nInput multiple patterns, one each line.\nCAREFUL: Do not set pattern to only "-".'
@@ -146,11 +159,11 @@ end
 -- All initial variable for script and GUI
 function InitialVariables()
     GetGuiStylesFromFile()
-    version = "1.1"
-    window_width = 350
-    window_height = 200
+    version = "1.0.1"
+    window_width = 400
+    window_height = 300
     font_size = 16
-    window_name = "Region render matrix linker"
+    window_name = "REGION RENDER MATRIX LINKER"
     project_name = reaper.GetProjectName(0)
     project_path = reaper.GetProjectPath()
     project_id, _ = reaper.EnumProjects(-1)
@@ -259,6 +272,7 @@ function Gui_SettingsWindow()
         reaper.ImGui_SameLine(ctx)
         if not Settings.look_for_patterns.value then reaper.ImGui_BeginDisabled(ctx) end
         reaper.ImGui_PushItemWidth(ctx, -1)
+        Settings.region_naming_pattern.value = RemoveEmptyLines(Settings.region_naming_pattern.value)
         changed, Settings.region_naming_pattern.value = reaper.ImGui_InputTextMultiline(ctx, "##setting_text_pattern", Settings.region_naming_pattern.value)
         reaper.ImGui_PopItemWidth(ctx)
         if reaper.ImGui_IsItemHovered(ctx) then reaper.ImGui_SetTooltip(ctx, 'CAREFUL: Do not set pattern to only "-".\nInput multiple patterns, one each line.') end
