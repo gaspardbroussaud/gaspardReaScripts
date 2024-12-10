@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="da160391ec57802c20698028ae5f9f99c27e0191">
+<index version="1" name="Gaspard ReaScripts" commit="be10636650faf233516b837ec2b33ff4dadfab53">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -93,6 +93,12 @@
       <version name="1.0" author="gaspard" time="2024-12-09T16:53:36Z">
         <changelog><![CDATA[- Add global settings for all scripts]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/da160391ec57802c20698028ae5f9f99c27e0191/General/gaspard_Master%20settings.lua</source>
+      </version>
+      <version name="1.0.1" author="gaspard" time="2024-12-10T13:20:22Z">
+        <changelog><![CDATA[- GUI: Update input text focus behavior
+- Bugfix: Error on loading settings with dependencies/influences
+- Cleanup comments]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/be10636650faf233516b837ec2b33ff4dadfab53/General/gaspard_Master%20settings.lua</source>
       </version>
     </reapack>
   </category>
