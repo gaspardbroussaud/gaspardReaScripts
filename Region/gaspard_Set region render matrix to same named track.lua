@@ -1,4 +1,3 @@
--- @noindex
 -- @description Set region render matrix to same named track
 -- @author gaspard
 -- @version 1.0
@@ -44,6 +43,17 @@ function GetTracks()
     return nil
 end
 
+-- Split a text string into lines
+function SplitIntoLines(text)
+    local lines = {}
+    for line in text:gmatch("([^\n]*)\n?") do
+        if line ~= "" then
+            table.insert(lines, line)
+        end
+    end
+    return lines
+end
+
 -- SET RENDER REGION MATRIX WITH TRACKS INFOS
 function SetRenderMatrixTracks()
     local _, _, num_regions = reaper.CountProjectMarkers(0)
@@ -56,8 +66,15 @@ function SetRenderMatrixTracks()
                 local _, isrgn, _, _, name, index = reaper.EnumProjectMarkers2(0, i)
                 if isrgn then
                     local should_look = true
-                    if Settings.look_for_patterns.value and name:match(Settings.region_naming_pattern.value) and Settings.region_naming_pattern.value ~= "" then
-                        should_look = false
+                    local patterns = SplitIntoLines(Settings.region_naming_pattern.value)
+                    if Settings.look_for_patterns.value and Settings.region_naming_pattern.value then
+                        -- Go through splited lines of patterns
+                        for _, pattern in ipairs(patterns) do
+                            if name:lower():match(pattern:lower(), 1, true) then
+                                should_look = false
+                                break
+                            end
+                        end
                     end
                     if should_look then
                         table.insert(missing, { name = name, index = index })
@@ -108,9 +125,10 @@ function InitSystemVariables()
         },
         region_naming_pattern = {
             value = "",
+            multiline = true,
             char_type = nil,
             name = "Text pattern",
-            description = "Pattern to look for in region names. Can be regex."
+            description = 'Pattern to look for in region names. Can be regex.\nInput multiple patterns, one each line.\nCAREFUL: Do not set pattern to only "-".'
         }
     }
     Settings = gson.LoadJSON(settings_path, Settings)
@@ -241,8 +259,9 @@ function Gui_SettingsWindow()
         reaper.ImGui_SameLine(ctx)
         if not Settings.look_for_patterns.value then reaper.ImGui_BeginDisabled(ctx) end
         reaper.ImGui_PushItemWidth(ctx, -1)
-        changed, Settings.region_naming_pattern.value = reaper.ImGui_InputText(ctx, "##setting_text_pattern", Settings.region_naming_pattern.value)
-        if reaper.ImGui_IsItemHovered(ctx) then reaper.ImGui_SetTooltip(ctx, 'CAREFUL: Do not set pattern to only "-".') end
+        changed, Settings.region_naming_pattern.value = reaper.ImGui_InputTextMultiline(ctx, "##setting_text_pattern", Settings.region_naming_pattern.value)
+        reaper.ImGui_PopItemWidth(ctx)
+        if reaper.ImGui_IsItemHovered(ctx) then reaper.ImGui_SetTooltip(ctx, 'CAREFUL: Do not set pattern to only "-".\nInput multiple patterns, one each line.') end
         if not Settings.look_for_patterns.value then reaper.ImGui_EndDisabled(ctx) end
         if changed then one_changed = true end
 
@@ -324,5 +343,5 @@ reaper.PreventUIRefresh(-1)
 SetRenderMatrixTracks()
 
 reaper.PreventUIRefresh(1)
-reaper.Undo_EndBlock("Set region render martrix to same name track", -1)
+reaper.Undo_EndBlock("Set region render matrix to same named track", -1)
 reaper.UpdateArrange()

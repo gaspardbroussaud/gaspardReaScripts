@@ -1,10 +1,8 @@
 --@description Master settings
 --@author gaspard
---@version 1.0.1
+--@version 1.0.2
 --@changelog
---  - GUI: Update input text focus behavior
---  - Bugfix: Error on loading settings with dependencies/influences
---  - Cleanup comments
+--  - Added input text multiline support
 --@about
 --  ### Master settings
 --  All settings for all gaspard's scripts
@@ -288,10 +286,14 @@ function Gui_Elements()
                         -- String display
                         elseif type_var == "string" then
                             reaper.ImGui_PushItemWidth(ctx, -1)
-                            changed, Settings[key]["value"] = reaper.ImGui_InputText(ctx, "##inputtext_"..key.."_value", Settings[key]["value"], Settings[key]["char_type"])
-                            if changed then one_changed = true end
+                            if Settings[key]["multiline"] then
+                                changed, Settings[key]["value"] = reaper.ImGui_InputTextMultiline(ctx, "##inputtext_"..key.."_value", Settings[key]["value"], nil, nil, Settings[key]["char_type"])
+                            else
+                                changed, Settings[key]["value"] = reaper.ImGui_InputText(ctx, "##inputtext_"..key.."_value", Settings[key]["value"], Settings[key]["char_type"])
+                            end
                             reaper.ImGui_SetItemTooltip(ctx, Settings[key]["description"])
                             reaper.ImGui_PopItemWidth(ctx)
+                            if changed then one_changed = true end
                         -- Number display
                         elseif type_var == "number" then
                             changed, Settings[key]["value"] = reaper.ImGui_DragDouble(ctx, "##drag_"..key.."_value", Settings[key]["value"], 0.1, Settings[key]["min"], Settings[key]["max"], Settings[key]["format"])
