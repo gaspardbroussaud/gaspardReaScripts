@@ -1,8 +1,10 @@
 --@description Master settings
 --@author gaspard
---@version 1.0
+--@version 1.0.1
 --@changelog
---  - Add global settings for all scripts
+--  - GUI: Update input text focus behavior
+--  - Bugfix: Error on loading settings with dependencies/influences
+--  - Cleanup comments
 --@about
 --  ### Master settings
 --  All settings for all gaspard's scripts
@@ -50,8 +52,6 @@ function ListLuaFilesRecursive(directory, files, files_path)
         if file:match("%_settings.json$") and file:match("^gaspard_") then
             table.insert(files_path, directory .. "/" .. file)
             file = string.gsub(file, "%_settings.json$", ".lua")
-            --file = string.gsub(file, "%_presets.json$", ".lua")
-            --file = string.gsub(file, "%.json$", ".lua")
             table.insert(files, file)
         end
         file_index = file_index + 1
@@ -96,6 +96,38 @@ function InitialVariables()
     project_id, _ = reaper.EnumProjects(-1)
     Settings = {}
     scripts = GetScriptFiles()
+    script_name = ""
+    was_opened = false
+    input_active = false
+end
+
+-- Split input text in multiple words (space between in orginial text)
+function SplitIntoWords(text)
+    local words = {}
+    for word in text:gmatch("%S+") do
+        table.insert(words, word)
+    end
+    return words
+end
+
+-- Check for word matches in script names with input text
+function MatchesAllWords(words, text)
+    for _, word in ipairs(words) do
+        if not text:lower():find(word:lower(), 1, true) then
+            return false
+        end
+    end
+    return true
+end
+
+-- Close input popup and reset script name
+function CloseInputPopup()
+    open_popup = false
+    if script_name == "" then
+        for i = 1, #scripts do
+            if scripts[i].selected then script_name = scripts[i].name end
+        end
+    end
 end
 
 -- GUI Initialize function
@@ -112,6 +144,11 @@ end
 function Gui_TopBar()
     -- GUI Menu Bar
     if reaper.ImGui_BeginChild(ctx, "child_top_bar", window_width, topbar_height) then
+        -- Close input popup if clic focus on topbar 
+        if reaper.ImGui_IsWindowFocused(ctx) and open_popup then
+            CloseInputPopup()
+        end
+
         reaper.ImGui_Text(ctx, window_name)
 
         reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing(), 5, 0)
@@ -137,15 +174,29 @@ end
 
 -- Gui Elements
 function Gui_Elements()
-    -- Set child section size (can use PushItemWidth for items without this setting) and center in window_width
     local child_main_x = window_width - 20
     local child_main_y = window_height - topbar_height - (font_size * 0.75) - 30
     reaper.ImGui_SetCursorPosX(ctx, 10)
     if reaper.ImGui_BeginChild(ctx, "child_main_elements", child_main_x, child_main_y, reaper.ImGui_ChildFlags_Border()) then
         reaper.ImGui_PushItemWidth(ctx, -1)
-        changed, script_name = reaper.ImGui_InputText(ctx, "##input_script_name", script_name, reaper.ImGui_InputTextFlags_AutoSelectAll())
-        if reaper.ImGui_IsItemActivated(ctx) and #scripts > 0 then open_popup = true end
-        if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Escape()) then open_popup = false end
+        -- Input search text
+        if was_opened then
+            script_name = ""
+            reaper.ImGui_SetKeyboardFocusHere(ctx)
+            was_opened = false
+            open_popup = true
+        end
+        changed, script_name = reaper.ImGui_InputText(ctx, "##input_script_name", script_name)
+        input_active = reaper.ImGui_IsItemActive(ctx)
+
+        if reaper.ImGui_IsItemActivated(ctx) and #scripts > 0 and not open_popup then
+            was_opened = true
+            reaper.ImGui_SetKeyboardFocusHere(ctx)
+        end
+
+        if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Escape()) then
+            CloseInputPopup()
+        end
         local pos_x, pos_y = reaper.ImGui_GetWindowPos(ctx)
         pos_x = pos_x + reaper.ImGui_GetCursorPosX(ctx)
         pos_y = pos_y + reaper.ImGui_GetCursorPosY(ctx)
@@ -159,10 +210,13 @@ function Gui_Elements()
             reaper.ImGui_SetNextWindowSize(ctx, rect_w, rect_h)
             if reaper.ImGui_Begin(ctx, "##popup_search_script", true, reaper.ImGui_WindowFlags_NoFocusOnAppearing() | reaper.ImGui_WindowFlags_NoDecoration()) then
                 if reaper.ImGui_BeginListBox(ctx, "##listbox_scripts", rect_w - 15, rect_h - 16) then
-                    --script_selected = false
+                    -- Split text input into words
+                    local input_words = SplitIntoWords(script_name)
+
                     for i = 1, #scripts do
                         -- Filter scripts with name input (not starts with)
-                        if string.find(scripts[i].name, script_name, 1) or script_name == "" then
+                        if script_name == "" or MatchesAllWords(input_words, scripts[i].name) then --string.find(scripts[i].name, script_name, 1) then
+                            -- Selectable in listbox for scripts
                             changed, scripts[i].selected = reaper.ImGui_Selectable(ctx, scripts[i].name.."##script_selectable_"..tostring(i), scripts[i].selected)
                             if changed then
                                 scripts[i].selected = true
@@ -184,11 +238,15 @@ function Gui_Elements()
             end
         end
 
-        if script_selected then
-            reaper.ImGui_Dummy(ctx, 1, 10)
-            local _, y = reaper.ImGui_GetContentRegionAvail(ctx)
+        local _, y = reaper.ImGui_GetContentRegionAvail(ctx)
+        if reaper.ImGui_BeginChild(ctx, "child_script_settings", -1, y - 35) then
+            -- Close input popup if clic focus on topbar 
+            if reaper.ImGui_IsWindowFocused(ctx) and open_popup then
+                CloseInputPopup()
+            end
+            if script_selected then
+                reaper.ImGui_Dummy(ctx, 1, 10)
 
-            if reaper.ImGui_BeginChild(ctx, "child_script_settings", -1, y - 35) then
                 reaper.ImGui_Text(ctx, "SETTINGS")
                 reaper.ImGui_Dummy(ctx, 1, 5)
 
@@ -204,22 +262,25 @@ function Gui_Elements()
                         if type_var == "boolean" then
                             changed, Settings[key]["value"] = reaper.ImGui_Checkbox(ctx, "##checkbox_"..key.."_value", Settings[key]["value"])
                             if changed then
-                                local check_key = "dependencies"
-                                for i = 1, 2 do
-                                    if Settings[key][check_key] then
-                                        if check_key == "dependencies" then table = Settings[key]["dependencies"]
-                                        elseif check_key == "influences" then table = Settings[key]["influences"]
-                                        else table = {} end
-                                        for dep_key, _ in pairs(table) do
-                                            local key_to_check = Settings[key][check_key][dep_key]["variable"]
-                                            if Settings[key_to_check]["value"] ~= Settings[key][check_key][dep_key]["value"] then
-                                                if Settings[key][check_key][dep_key]["self"] == Settings[key]["value"] then
-                                                    Settings[key_to_check]["value"] = Settings[key][check_key][dep_key]["value"]
-                                                end
+                                if Settings[key]["dependencies"] then
+                                    for dep_key, _ in pairs(Settings[key]["dependencies"]) do
+                                        local key_to_check = Settings[key]["dependencies"][dep_key]["variable"]
+                                        if Settings[key_to_check]["value"] ~= Settings[key]["dependencies"][dep_key]["value"] then
+                                            if Settings[key]["dependencies"][dep_key]["self"] == Settings[key]["value"] then
+                                                Settings[key_to_check]["value"] = Settings[key]["dependencies"][dep_key]["value"]
                                             end
                                         end
                                     end
-                                    check_key = "influences"
+                                end
+                                if Settings[key]["influences"] then
+                                    for dep_key, _ in pairs(Settings[key]["influences"]) do
+                                        local key_to_check = Settings[key]["influences"][dep_key]["variable"]
+                                        if Settings[key_to_check]["value"] ~= Settings[key]["influences"][dep_key]["value"] then
+                                            if Settings[key]["influences"][dep_key]["self"] == Settings[key]["value"] then
+                                                Settings[key_to_check]["value"] = Settings[key]["influences"][dep_key]["value"]
+                                            end
+                                        end
+                                    end
                                 end
                                 one_changed = true
                             end
@@ -239,21 +300,21 @@ function Gui_Elements()
                         end
                     end
                 end
-                reaper.ImGui_EndChild(ctx)
             end
-
-            local x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
-            local button_x = 100
-            if not one_changed then disable = true
-            else disable = false end
-            if disable then reaper.ImGui_BeginDisabled(ctx) end
-            reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + x - button_x)
-            if reaper.ImGui_Button(ctx, "APPLY##apply_button", button_x) then
-                gson.SaveJSON(script_path, Settings)
-                one_changed = false
-            end
-            if disable then reaper.ImGui_EndDisabled(ctx) end
+            reaper.ImGui_EndChild(ctx)
         end
+
+        local x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
+        local button_x = 100
+        if not one_changed then disable = true
+        else disable = false end
+        if disable then reaper.ImGui_BeginDisabled(ctx) end
+        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + x - button_x)
+        if reaper.ImGui_Button(ctx, "APPLY##apply_button", button_x) then
+            gson.SaveJSON(script_path, Settings)
+            one_changed = false
+        end
+        if disable then reaper.ImGui_EndDisabled(ctx) end
 
         reaper.ImGui_EndChild(ctx)
     end
