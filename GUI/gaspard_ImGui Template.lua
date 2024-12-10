@@ -30,18 +30,22 @@ function InitialVariables()
     version = "1.0"
     window_width = 250
     window_height = 235
+    topbar_height = 30
+    font_size = 16
+    small_font_size = font_size * 0.75
     window_name = "TEMPLATE IMGUI"
     project_name = reaper.GetProjectName(0)
     project_path = reaper.GetProjectPath()
     project_id, _ = reaper.EnumProjects(-1)
+    no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
 end
 
 -- GUI Initialize function
 function Gui_Init()
     InitialVariables()
     ctx = reaper.ImGui_CreateContext('random_play_context')
-    font = reaper.ImGui_CreateFont('sans-serif', 16)
-    small_font = reaper.ImGui_CreateFont('sans-serif', font_size_version, reaper.ImGui_FontFlags_Italic())
+    font = reaper.ImGui_CreateFont('sans-serif', font_size)
+    small_font = reaper.ImGui_CreateFont('sans-serif', small_font_size, reaper.ImGui_FontFlags_Italic())
     reaper.ImGui_Attach(ctx, font)
     reaper.ImGui_Attach(ctx, small_font)
 end
@@ -49,7 +53,7 @@ end
 -- GUI Top Bar
 function Gui_TopBar()
     -- GUI Menu Bar
-    if reaper.ImGui_BeginChild(ctx, "child_top_bar", window_width, 30) then
+    if reaper.ImGui_BeginChild(ctx, "child_top_bar", window_width, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
         reaper.ImGui_Text(ctx, window_name)
 
         reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing(), 5, 0)
@@ -59,7 +63,7 @@ function Gui_TopBar()
         local w, _ = reaper.ImGui_CalcTextSize(ctx, "X")
         reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 30, 0)
 
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 30, 22) then
+        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 30, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
             reaper.ImGui_Dummy(ctx, 3, 1)
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'X##quit_button') then
@@ -75,10 +79,10 @@ end
 
 -- Gui Elements
 function Gui_Elements()
-    -- Set child section size (can use PushItemWidth for items without this setting) and center in window_width
-    local item_size = 120
-    reaper.ImGui_SetCursorPosX(ctx, (window_width - item_size) * 0.5)
-    if reaper.ImGui_BeginChild(ctx, "child_example_elements", item_size, 100) then
+    local child_main_x = window_width - 20
+    local child_main_y = window_height - topbar_height - small_font_size - 30
+    reaper.ImGui_SetCursorPosX(ctx, 10)
+    if reaper.ImGui_BeginChild(ctx, "child_example_elements", child_main_x, child_main_y) then
         reaper.ImGui_Text(ctx, "Text example")
 
         reaper.ImGui_SameLine(ctx)

@@ -1,8 +1,8 @@
 --@description Master settings
 --@author gaspard
---@version 1.0.3
+--@version 1.0.4
 --@changelog
---  - Update input text multiline
+--  - Bugfix
 --@about
 --  ### Master settings
 --  All settings for all gaspard's scripts
@@ -356,7 +356,11 @@ function Gui_Loop()
     -- Begin
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
+    temp_win_width, temp_win_height = window_width, window_height
     window_width, window_height = reaper.ImGui_GetWindowSize(ctx)
+    if window_width ~= temp_win_width or window_height ~= temp_win_height then
+        CloseInputPopup()
+    end
 
     current_time = reaper.ImGui_GetTime(ctx)
 
