@@ -1,8 +1,9 @@
 --@description Complete renamer
 --@author gaspard
---@version 0.0.2b
+--@version 0.0.3b
 --@changelog
---  - Fix settings window size glitch
+--  - Add only show replaced
+--  - !!! ATTENTION !!! -> Please delete the .json file at script path before launching for the first time the 0.0.3b
 --@about
 --  ### Complete renamer
 --  - A simple and quick renamer for tracks, regions, markers, items (may add others later).
@@ -233,7 +234,8 @@ function Gui_Elements()
 
         local x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
         local button_x = 100
-        local disable = false
+        if not one_changed then disable = true
+        else disable = false end
         if disable then reaper.ImGui_BeginDisabled(ctx) end
         reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + x - button_x)
         if reaper.ImGui_Button(ctx, "APPLY##apply_button", button_x) then
@@ -249,7 +251,7 @@ function Gui_Settings()
     -- Set Settings Window visibility and settings
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
     local settings_width = og_window_width - 350
-    local settings_height = og_window_height * 0.3
+    local settings_height = og_window_height * 0.35
     reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
 
@@ -264,6 +266,11 @@ function Gui_Settings()
             reaper.ImGui_Text(ctx, Settings.tree_start_open.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, Settings.tree_start_open.value = reaper.ImGui_Checkbox(ctx, "##checkbox_tree_start_open", Settings.tree_start_open.value)
+            if changed then settings_one_changed = true end
+
+            reaper.ImGui_Text(ctx, Settings.only_show_replace.name..":")
+            reaper.ImGui_SameLine(ctx)
+            changed, Settings.only_show_replace.value = reaper.ImGui_Checkbox(ctx, "##checkbox_only_show_replace", Settings.only_show_replace.value)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_EndChild(ctx)
@@ -452,7 +459,7 @@ function ApplyReplacedNames()
             if global_datas[key]["data"] then
                 for _, userdata in pairs(global_datas[key]["data"]) do
                     local can_apply = true
-                    if selection_based and not userdata.selected then can_apply = false end
+                    if Settings.selection_based.value and not userdata.selected then can_apply = false end
                     if IsInputFindInName(userdata.name, input_find) and can_apply then
                         userdata.name = GetReplacedName(userdata.name, input_find, input_replace)
                         if key == "items" then
@@ -485,22 +492,27 @@ function DisplayUserdata()
                 if reaper.ImGui_TreeNode(ctx, global_datas[key]["display"].."##index"..tostring(index), tree_flags) then
                     if reaper.ImGui_BeginTable(ctx, "table_"..key, 2, reaper.ImGui_TableFlags_BordersInnerV()) then
                         for _, userdata in pairs(global_datas[key]["data"]) do
-                            reaper.ImGui_TableNextRow(ctx)
-                            reaper.ImGui_TableNextColumn(ctx)
-                            local label = "##selectable"..key..tostring(userdata.id)..userdata.name
-                            changed, userdata.selected = reaper.ImGui_Selectable(ctx, userdata.name..label, userdata.selected, reaper.ImGui_SelectableFlags_SpanAllColumns())
-                            if changed then
-                                if key == "items" then reaper.SetMediaItemSelected(userdata.id, userdata.selected)
-                                elseif key == "tracks" then reaper.SetTrackSelected(userdata.id, userdata.selected) end
-                                reaper.UpdateArrange()
-                            end
+                            local input_found = IsInputFindInName(userdata.name, input_find)
+                            local show_userdata = true
+                            if Settings.only_show_replace.value and not input_found and input_find ~= "" then show_userdata = false end
+                            if show_userdata then
+                                reaper.ImGui_TableNextRow(ctx)
+                                reaper.ImGui_TableNextColumn(ctx)
+                                local label = "##selectable"..key..tostring(userdata.id)..userdata.name
+                                changed, userdata.selected = reaper.ImGui_Selectable(ctx, userdata.name..label, userdata.selected, reaper.ImGui_SelectableFlags_SpanAllColumns())
+                                if changed then
+                                    if key == "items" then reaper.SetMediaItemSelected(userdata.id, userdata.selected)
+                                    elseif key == "tracks" then reaper.SetTrackSelected(userdata.id, userdata.selected) end
+                                    reaper.UpdateArrange()
+                                end
 
-                            reaper.ImGui_TableNextColumn(ctx)
-                            local can_apply = true
-                            if selection_based and not userdata.selected then can_apply = false end
-                            if IsInputFindInName(userdata.name, input_find) and can_apply then
-                                local replaced_text = GetReplacedName(userdata.name, input_find, input_replace)
-                                reaper.ImGui_Text(ctx, replaced_text)
+                                reaper.ImGui_TableNextColumn(ctx)
+                                local can_apply = true
+                                if Settings.selection_based.value and not userdata.selected then can_apply = false end
+                                if input_found and can_apply then
+                                    local replaced_text = GetReplacedName(userdata.name, input_find, input_replace)
+                                    reaper.ImGui_Text(ctx, replaced_text)
+                                end
                             end
                         end
 
