@@ -8,7 +8,8 @@
     ],
     "Lua.diagnostics.disable": [
         "undefined-field",
-        "undefined-global"
+        "undefined-global",
+        "lowercase-global"
     ],
     "Lua.diagnostics.globals": [
     ]
