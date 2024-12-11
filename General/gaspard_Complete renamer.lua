@@ -1,8 +1,8 @@
 --@description Complete renamer
 --@author gaspard
---@version 0.0.1b
+--@version 0.0.2b
 --@changelog
---  - Open beta
+--  - Fix settings window size glitch
 --@about
 --  ### Complete renamer
 --  - A simple and quick renamer for tracks, regions, markers, items (may add others later).
@@ -61,6 +61,11 @@ function InitSystemVariables()
             value = false,
             name = "Trees start open",
             description = "Trees for userdata types start opened on script launch."
+        },
+        only_show_replace = {
+            value = false,
+            name = "Show only matches",
+            description = "Only show matches in userdata names of text input."
         }
     }
     Settings = gson.LoadJSON(settings_path, Settings)
@@ -71,8 +76,10 @@ function InitialVariables()
     InitSystemVariables()
     GetGuiStylesFromFile()
     version = "0.0.1"
-    window_width = 600
-    window_height = 500
+    og_window_width = 600
+    og_window_height = 500
+    window_width = og_window_width
+    window_height = og_window_height
     topbar_height = 30
     font_size = 16
     small_font_size = font_size * 0.75
@@ -199,7 +206,7 @@ function Gui_Elements()
         end
 
         if reaper.ImGui_BeginChild(ctx, "child_replace_texts", inner_child_width, 50, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
-            reaper.ImGui_Text(ctx, "Find:")
+            reaper.ImGui_Text(ctx, "Search:")
             reaper.ImGui_SameLine(ctx)
             reaper.ImGui_PushItemWidth(ctx, -1)
             changed, input_find = reaper.ImGui_InputText(ctx, "##inputtext_find", input_find)
@@ -241,20 +248,20 @@ end
 function Gui_Settings()
     -- Set Settings Window visibility and settings
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
-    local settings_width = window_width - 350
-    local settings_height = window_height - 350
+    local settings_width = og_window_width - 350
+    local settings_height = og_window_height * 0.3
     reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
-    reaper.ImGui_SetNextWindowPos(ctx, window_x + window_width / 2 - settings_width / 2, window_y + 30, reaper.ImGui_Cond_Appearing())
+    reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
 
     local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
     if settings_visible then
         if reaper.ImGui_BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, reaper.ImGui_ChildFlags_Border()) then
-            reaper.ImGui_Text(ctx, "Selection based:")
+            reaper.ImGui_Text(ctx, Settings.selection_based.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, Settings.selection_based.value = reaper.ImGui_Checkbox(ctx, "##checkbox_selection_based", Settings.selection_based.value)
             if changed then settings_one_changed = true end
 
-            reaper.ImGui_Text(ctx, "Trees start open:")
+            reaper.ImGui_Text(ctx, Settings.tree_start_open.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, Settings.tree_start_open.value = reaper.ImGui_Checkbox(ctx, "##checkbox_tree_start_open", Settings.tree_start_open.value)
             if changed then settings_one_changed = true end

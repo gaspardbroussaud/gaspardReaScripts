@@ -28,8 +28,10 @@ end
 function InitialVariables()
     GetGuiStylesFromFile()
     version = "1.0"
-    window_width = 250
-    window_height = 235
+    og_window_width = 250
+    og_window_height = 235
+    window_width = og_window_width
+    window_height = og_window_height
     topbar_height = 30
     font_size = 16
     small_font_size = font_size * 0.75
@@ -38,6 +40,7 @@ function InitialVariables()
     project_path = reaper.GetProjectPath()
     project_id, _ = reaper.EnumProjects(-1)
     no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
+    settings_one_changed = false
 end
 
 -- GUI Initialize function
@@ -60,11 +63,19 @@ function Gui_TopBar()
 
         reaper.ImGui_SameLine(ctx)
 
-        local w, _ = reaper.ImGui_CalcTextSize(ctx, "X")
-        reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 30, 0)
+        local w, _ = reaper.ImGui_CalcTextSize(ctx, "Settings X")
+        reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 40, 0)
 
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 30, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
+        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 40, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
             reaper.ImGui_Dummy(ctx, 3, 1)
+            reaper.ImGui_SameLine(ctx)
+            if reaper.ImGui_Button(ctx, 'Settings##settings_button') then
+                show_settings = not show_settings
+                if settings_one_changed then
+                    --gson.SaveJSON(settings_path, Settings)
+                    settings_one_changed = false
+                end
+            end
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'X##quit_button') then
                 open = false
@@ -101,6 +112,46 @@ function Gui_Elements()
     end
 
     reaper.ImGui_Dummy(ctx, 1, 1)
+end
+
+function Gui_Settings()
+    -- Set Settings Window visibility and settings
+    local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
+    local settings_width = og_window_width - 350
+    local settings_height = og_window_height * 0.3
+    reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
+    reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
+
+    local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
+    if settings_visible then
+        if reaper.ImGui_BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, reaper.ImGui_ChildFlags_Border()) then
+
+            reaper.ImGui_EndChild(ctx)
+        end
+
+        reaper.ImGui_SetCursorPosX(ctx, settings_width - 80)
+        reaper.ImGui_SetCursorPosY(ctx, settings_height - 35)
+        if not settings_one_changed then disable = true
+        else disable = false end
+        if disable then reaper.ImGui_BeginDisabled(ctx) end
+        if reaper.ImGui_Button(ctx, "Apply##settings_apply", 70) then
+            gson.SaveJSON(settings_path, Settings)
+            settings_one_changed = false
+        end
+        if disable then reaper.ImGui_EndDisabled(ctx) end
+
+        reaper.ImGui_End(ctx)
+    else
+        show_settings = false
+    end
+
+    if not settings_open then
+        if settings_one_changed then
+            --gson.SaveJSON(settings_path, Settings)
+            settings_one_changed = false
+        end
+        show_settings = false
+    end
 end
 
 -- Gui Version on bottom right

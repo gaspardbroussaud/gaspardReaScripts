@@ -1,9 +1,8 @@
 -- @description Set region render matrix to same named track
 -- @author gaspard
--- @version 1.0.1
+-- @version 1.0.2
 -- @changelog
---  - Update input text multiline
---  - Update GUI size and title
+--  - Fix Settings window width and height glitch
 -- @about
 --  - Set region's render matrix track to track with same name.
 
@@ -160,8 +159,10 @@ end
 function InitialVariables()
     GetGuiStylesFromFile()
     version = "1.0.1"
-    window_width = 400
-    window_height = 300
+    og_window_width = 400
+    og_window_height = 300
+    window_width = og_window_width
+    window_height = og_window_height
     font_size = 16
     window_name = "REGION RENDER MATRIX LINKER"
     project_name = reaper.GetProjectName(0)
@@ -250,8 +251,8 @@ end
 function Gui_SettingsWindow()
     -- Set Settings Window visibility and settings
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
-    local settings_width = window_width - 20
-    local settings_height = window_height * 0.6
+    local settings_width = og_window_width - 20
+    local settings_height = og_window_height * 0.6
     reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
 
