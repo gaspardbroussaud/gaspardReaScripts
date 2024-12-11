@@ -1,12 +1,11 @@
---@noindex
 --@description Complete renamer
 --@author gaspard
---@version 0.0.1
+--@version 0.0.1b
 --@changelog
---  - Initial release
+--  - Open beta
 --@about
 --  ### Complete renamer
---  - A simple and quick renamer for tracks, regions, markers, items, etc
+--  - A simple and quick renamer for tracks, regions, markers, items (may add others later).
 
 -- Toggle button state in Reaper
 function SetButtonState(set)
@@ -24,12 +23,56 @@ function GetGuiStylesFromFile()
     style_colors = style.colors
 end
 
+-- Init system variables
+function InitSystemVariables()
+    local json_file_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/JSON"
+    package.path = package.path .. ";" .. json_file_path .. "/?.lua"
+    gson = require("json_utilities_lib")
+
+    settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/gaspard_'..action_name..'_settings.json'
+    Settings = {
+        order = {"replace_items", "replace_tracks", "replace_markers", "replace_regions"},
+        replace_items = {
+            value = false,
+            name = "Replace items",
+            description = "Find and replace in item names."
+        },
+        replace_tracks = {
+            value = false,
+            name = "Replace tracks",
+            description = "Find and replace in track names."
+        },
+        replace_markers = {
+            value = false,
+            name = "Replace markers",
+            description = "Find and replace in marker names."
+        },
+        replace_regions = {
+            value = false,
+            name = "Replace regions",
+            description = "Find and replace in region names."
+        },
+        selection_based = {
+            value = false,
+            name = "Selection based",
+            description = "Apply name replacement to selected userdata only."
+        },
+        tree_start_open = {
+            value = false,
+            name = "Trees start open",
+            description = "Trees for userdata types start opened on script launch."
+        }
+    }
+    Settings = gson.LoadJSON(settings_path, Settings)
+end
+
 -- All initial variable for script and GUI
 function InitialVariables()
+    InitSystemVariables()
     GetGuiStylesFromFile()
     version = "0.0.1"
-    window_width = 500
-    window_height = 400
+    window_width = 600
+    window_height = 500
     topbar_height = 30
     font_size = 16
     small_font_size = font_size * 0.75
@@ -38,6 +81,13 @@ function InitialVariables()
     project_path = reaper.GetProjectPath()
     project_id, _ = reaper.EnumProjects(-1)
     no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
+    global_datas = {}
+    if Settings.replace_items.value or Settings.replace_tracks.value or Settings.replace_markers.value or Settings.replace_regions.value then
+        one_changed = true
+    else
+        one_changed = false
+    end
+    settings_one_changed = false
 end
 
 -- GUI Initialize function
@@ -60,11 +110,19 @@ function Gui_TopBar()
 
         reaper.ImGui_SameLine(ctx)
 
-        local w, _ = reaper.ImGui_CalcTextSize(ctx, "X")
-        reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 30, 0)
+        local w, _ = reaper.ImGui_CalcTextSize(ctx, "Settings X")
+        reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 40, 0)
 
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 30, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
+        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 40, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
             reaper.ImGui_Dummy(ctx, 3, 1)
+            reaper.ImGui_SameLine(ctx)
+            if reaper.ImGui_Button(ctx, 'Settings##settings_button') then
+                show_settings = not show_settings
+                if settings_one_changed then
+                    gson.SaveJSON(settings_path, Settings)
+                    settings_one_changed = false
+                end
+            end
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'X##quit_button') then
                 open = false
@@ -92,7 +150,8 @@ function Gui_Elements()
 
             reaper.ImGui_Text(ctx, "Items:")
             reaper.ImGui_SameLine(ctx)
-            changed, replace_items = reaper.ImGui_Checkbox(ctx, "##checkbox_replace_items", replace_items)
+            changed, Settings.replace_items.value = reaper.ImGui_Checkbox(ctx, "##checkbox_replace_items", Settings.replace_items.value)
+            if changed then one_changed = true end
 
             reaper.ImGui_SameLine(ctx)
             reaper.ImGui_Dummy(ctx, 1, 1)
@@ -100,7 +159,8 @@ function Gui_Elements()
 
             reaper.ImGui_Text(ctx, "Tracks:")
             reaper.ImGui_SameLine(ctx)
-            changed, replace_tracks = reaper.ImGui_Checkbox(ctx, "##checkbox_replace_tracks", replace_tracks)
+            changed, Settings.replace_tracks.value = reaper.ImGui_Checkbox(ctx, "##checkbox_replace_tracks", Settings.replace_tracks.value)
+            if changed then one_changed = true end
 
             reaper.ImGui_SameLine(ctx)
             reaper.ImGui_Dummy(ctx, 1, 1)
@@ -108,7 +168,8 @@ function Gui_Elements()
 
             reaper.ImGui_Text(ctx, "Markers:")
             reaper.ImGui_SameLine(ctx)
-            changed, replace_markers = reaper.ImGui_Checkbox(ctx, "##checkbox_replace_markers", replace_markers)
+            changed, Settings.replace_markers.value = reaper.ImGui_Checkbox(ctx, "##checkbox_replace_markers", Settings.replace_markers.value)
+            if changed then one_changed = true end
 
             reaper.ImGui_SameLine(ctx)
             reaper.ImGui_Dummy(ctx, 1, 1)
@@ -116,7 +177,23 @@ function Gui_Elements()
 
             reaper.ImGui_Text(ctx, "Regions:")
             reaper.ImGui_SameLine(ctx)
-            changed, replace_regions = reaper.ImGui_Checkbox(ctx, "##checkbox_replace_regions", replace_regions)
+            changed, Settings.replace_regions.value = reaper.ImGui_Checkbox(ctx, "##checkbox_replace_regions", Settings.replace_regions.value)
+            if changed then one_changed = true end
+
+            reaper.ImGui_SameLine(ctx)
+            reaper.ImGui_Dummy(ctx, 1, 1)
+            reaper.ImGui_SameLine(ctx)
+
+            reaper.ImGui_SetCursorPosX(ctx, window_width - 110)
+            if reaper.ImGui_Button(ctx, "Refresh", 70) then
+                one_changed = true
+            end
+
+            if one_changed then
+                GetUserdatas()
+                gson.SaveJSON(settings_path, Settings)
+                one_changed = false
+            end
 
             reaper.ImGui_EndChild(ctx)
         end
@@ -137,8 +214,12 @@ function Gui_Elements()
             reaper.ImGui_EndChild(ctx)
         end
 
-        if reaper.ImGui_BeginChild(ctx, "child_preview_replace", inner_child_width, child_height - 24 - 50 - 50) then
-            reaper.ImGui_Text(ctx, "[WIP rename preview]\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n[WIP]")
+        reaper.ImGui_Dummy(ctx, 1, 1)
+        reaper.ImGui_Separator(ctx)
+        reaper.ImGui_Dummy(ctx, 1, 1)
+
+        if reaper.ImGui_BeginChild(ctx, "child_preview_replace", inner_child_width, child_height - 24 - 50 - 50 - 15) then
+            DisplayUserdata()
 
             reaper.ImGui_EndChild(ctx)
         end
@@ -149,12 +230,60 @@ function Gui_Elements()
         if disable then reaper.ImGui_BeginDisabled(ctx) end
         reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + x - button_x)
         if reaper.ImGui_Button(ctx, "APPLY##apply_button", button_x) then
-            reaper.ShowConsoleMsg("Apply rename\n")
-            FindAndReplace("", "")
+            ApplyReplacedNames()
         end
         if disable then reaper.ImGui_EndDisabled(ctx) end
 
         reaper.ImGui_EndChild(ctx)
+    end
+end
+
+function Gui_Settings()
+    -- Set Settings Window visibility and settings
+    local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
+    local settings_width = window_width - 350
+    local settings_height = window_height - 350
+    reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
+    reaper.ImGui_SetNextWindowPos(ctx, window_x + window_width / 2 - settings_width / 2, window_y + 30, reaper.ImGui_Cond_Appearing())
+
+    local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
+    if settings_visible then
+        if reaper.ImGui_BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, reaper.ImGui_ChildFlags_Border()) then
+            reaper.ImGui_Text(ctx, "Selection based:")
+            reaper.ImGui_SameLine(ctx)
+            changed, Settings.selection_based.value = reaper.ImGui_Checkbox(ctx, "##checkbox_selection_based", Settings.selection_based.value)
+            if changed then settings_one_changed = true end
+
+            reaper.ImGui_Text(ctx, "Trees start open:")
+            reaper.ImGui_SameLine(ctx)
+            changed, Settings.tree_start_open.value = reaper.ImGui_Checkbox(ctx, "##checkbox_tree_start_open", Settings.tree_start_open.value)
+            if changed then settings_one_changed = true end
+
+            reaper.ImGui_EndChild(ctx)
+        end
+
+        reaper.ImGui_SetCursorPosX(ctx, settings_width - 80)
+        reaper.ImGui_SetCursorPosY(ctx, settings_height - 35)
+        if not settings_one_changed then disable = true
+        else disable = false end
+        if disable then reaper.ImGui_BeginDisabled(ctx) end
+        if reaper.ImGui_Button(ctx, "Apply##settings_apply", 70) then
+            gson.SaveJSON(settings_path, Settings)
+            settings_one_changed = false
+        end
+        if disable then reaper.ImGui_EndDisabled(ctx) end
+
+        reaper.ImGui_End(ctx)
+    else
+        show_settings = false
+    end
+
+    if not settings_open then
+        if settings_one_changed then
+            gson.SaveJSON(settings_path, Settings)
+            settings_one_changed = false
+        end
+        show_settings = false
     end
 end
 
@@ -186,6 +315,9 @@ function Gui_Loop()
     if visible then
         -- Top bar elements
         Gui_TopBar()
+
+        -- Settings window
+        if show_settings then Gui_Settings() end
 
         -- All Gui Elements
         Gui_Elements()
@@ -227,13 +359,16 @@ end
 -- Get all items from project in table
 function GetItemsFromProject()
     local items = {}
-    if replace_items then
+    if Settings.replace_items.value then
         local item_count = reaper.CountMediaItems(0)
         for i = 0, item_count - 1 do
             local item_id = reaper.GetMediaItem(0, i)
             local _, item_name = reaper.GetSetMediaItemTakeInfo_String(reaper.GetTake(item_id, 0), "P_NAME", "", false)
-            table.insert(items, { id = item_id, name = item_name })
+            local selected = reaper.IsMediaItemSelected(item_id)
+            table.insert(items, { id = item_id, name = item_name, selected = selected })
         end
+    else
+        return nil
     end
     return items
 end
@@ -241,13 +376,17 @@ end
 -- Get all tracks from project in table
 function GetTracksFromProject()
     local tracks = {}
-    if replace_tracks then
+    if Settings.replace_tracks.value then
         local track_count = reaper.CountTracks(0)
         for i = 0, track_count - 1 do
             local track_id = reaper.GetTrack(0, i)
             local _, track_name = reaper.GetTrackName(track_id)
-            table.insert(tracks, { id = track_id, name = track_name })
+            if tostring(track_name):match("^Track %d+$") then track_name = "" end
+            local selected = reaper.IsTrackSelected(track_id)
+            table.insert(tracks, { id = track_id, name = track_name, selected = selected })
         end
+    else
+        return nil
     end
     return tracks
 end
@@ -256,34 +395,115 @@ end
 function GetMarkersRegionsFromProject()
     local markers = {}
     local regions = {}
-    if replace_markers or replace_regions then
+    if Settings.replace_markers.value or Settings.replace_regions.value then
         local _, marker_count, region_count = reaper.CountProjectMarkers(0)
         for i = 0, marker_count + region_count - 1 do
-            local _, isrgn, _, _, enum_name, index = reaper.EnumProjectMarkers2(0, i)
+            local _, isrgn, pos, rgnend, name, idx = reaper.EnumProjectMarkers2(0, i)
             if isrgn then
-                if replace_regions then table.insert(regions, { id = index, name = enum_name }) end
+                if Settings.replace_regions.value then table.insert(regions, { pos = pos, rgnend = rgnend, id = idx, name = name, selected = false }) end
             else
-                if replace_markers then table.insert(markers, { id = index, name = enum_name }) end
+                if Settings.replace_markers.value then table.insert(markers, {  pos = pos, rgnend = rgnend, id = idx, name = name, selected = false }) end
             end
         end
     end
+    if #markers <= 0 then markers = nil end
+    if #regions <= 0 then regions = nil end
     return markers, regions
 end
 
--- Check all selected data to find and replace
-function FindAndReplace(find_text, replace_text)
-    local items = GetItemsFromProject()
-    local tracks = GetTracksFromProject()
-    local markers, regions = GetMarkersRegionsFromProject()
-    local tables = {items, tracks, markers, regions}
-    reaper.ShowConsoleMsg(tostring(#tables).."\n")
+function GetUserdatas()
+    local items = {display = "Items", show = Settings.replace_items.value, data = GetItemsFromProject()}
+    local tracks = {display = "Tracks", show = Settings.replace_tracks.value, data = GetTracksFromProject()}
+    local table_markers, table_regions = GetMarkersRegionsFromProject()
+    local markers = {display = "Markers", show = Settings.replace_markers.value, data = table_markers}
+    local regions = {display = "Regions", show = Settings.replace_regions.value, data = table_regions}
+    local order = {"items", "tracks", "markers", "regions"}
+    global_datas = {order = order, items = items, tracks = tracks, markers = markers, regions = regions}
+end
 
-    for _, table in ipairs(tables) do
-        for _, userdata in ipairs(table) do
-            reaper.ShowConsoleMsg(tostring(userdata.name).."\n")
+-- Check data to find input
+function IsInputFindInName(name, search)
+    search = search:gsub("([%(%)%.%%%+%-%*%?%[%^%$])", "%%%1")
+    if name:match(search, 1, true) and search ~= "" then
+        return true
+    end
+    return false
+end
+
+function GetReplacedName(name, pattern, replacement)
+    pattern = pattern:gsub("([%(%)%.%%%+%-%*%?%[%^%$])", "%%%1")
+    name = name:gsub(pattern, replacement)
+    return name
+end
+
+function ApplyReplacedNames()
+    reaper.PreventUIRefresh(-1)
+    reaper.Undo_BeginBlock()
+
+    if global_datas.order then
+        for _, key in ipairs(global_datas.order) do
+            if global_datas[key]["data"] then
+                for _, userdata in pairs(global_datas[key]["data"]) do
+                    local can_apply = true
+                    if selection_based and not userdata.selected then can_apply = false end
+                    if IsInputFindInName(userdata.name, input_find) and can_apply then
+                        userdata.name = GetReplacedName(userdata.name, input_find, input_replace)
+                        if key == "items" then
+                            reaper.GetSetMediaItemTakeInfo_String(reaper.GetTake(userdata.id, 0), "P_NAME", userdata.name, true)
+                        elseif key == "tracks" then
+                            reaper.GetSetMediaTrackInfo_String(userdata.id, "P_NAME", userdata.name, true)
+                        elseif key == "markers" then
+                            reaper.SetProjectMarker(userdata.id, false, userdata.pos, userdata.rgnend, userdata.name)
+                        elseif key == "regions" then
+                            reaper.SetProjectMarker(userdata.id, true, userdata.pos, userdata.rgnend, userdata.name)
+                        end
+                    end
+                end
+            end
         end
     end
-    reaper.ShowConsoleMsg("\n")
+
+    reaper.Undo_EndBlock("Complete renamer: name replaced.", -1)
+    reaper.PreventUIRefresh(1)
+    reaper.UpdateArrange()
+end
+
+-- Display found and renamed Reaper userdata
+function DisplayUserdata()
+    if global_datas.order then
+        local tree_flags = reaper.ImGui_TreeNodeFlags_SpanAllColumns() | reaper.ImGui_TreeNodeFlags_Framed()
+        if Settings.tree_start_open.value then tree_flags = tree_flags | reaper.ImGui_TreeNodeFlags_DefaultOpen() end
+        for index, key in ipairs(global_datas.order) do
+            if global_datas[key]["data"] then
+                if reaper.ImGui_TreeNode(ctx, global_datas[key]["display"].."##index"..tostring(index), tree_flags) then
+                    if reaper.ImGui_BeginTable(ctx, "table_"..key, 2, reaper.ImGui_TableFlags_BordersInnerV()) then
+                        for _, userdata in pairs(global_datas[key]["data"]) do
+                            reaper.ImGui_TableNextRow(ctx)
+                            reaper.ImGui_TableNextColumn(ctx)
+                            local label = "##selectable"..key..tostring(userdata.id)..userdata.name
+                            changed, userdata.selected = reaper.ImGui_Selectable(ctx, userdata.name..label, userdata.selected, reaper.ImGui_SelectableFlags_SpanAllColumns())
+                            if changed then
+                                if key == "items" then reaper.SetMediaItemSelected(userdata.id, userdata.selected)
+                                elseif key == "tracks" then reaper.SetTrackSelected(userdata.id, userdata.selected) end
+                                reaper.UpdateArrange()
+                            end
+
+                            reaper.ImGui_TableNextColumn(ctx)
+                            local can_apply = true
+                            if selection_based and not userdata.selected then can_apply = false end
+                            if IsInputFindInName(userdata.name, input_find) and can_apply then
+                                local replaced_text = GetReplacedName(userdata.name, input_find, input_replace)
+                                reaper.ImGui_Text(ctx, replaced_text)
+                            end
+                        end
+
+                        reaper.ImGui_EndTable(ctx)
+                    end
+                    reaper.ImGui_TreePop(ctx)
+                end
+            end
+        end
+    end
 end
 
 -- Main script execution
