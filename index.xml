@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="dbc6d92337f8196ff9e4c6ccc11b2fed82ef8245">
+<index version="1" name="Gaspard ReaScripts" commit="b6e2740e386749bf4708a3c66a38fea883c3a259">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -78,6 +78,10 @@
       <version name="0.0.1b" author="gaspard" time="2024-12-11T15:31:39Z">
         <changelog><![CDATA[- Open beta]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/dbc6d92337f8196ff9e4c6ccc11b2fed82ef8245/General/gaspard_Complete%20renamer.lua</source>
+      </version>
+      <version name="0.0.2b" author="gaspard" time="2024-12-11T16:31:19Z">
+        <changelog><![CDATA[- Fix settings window size glitch]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b6e2740e386749bf4708a3c66a38fea883c3a259/General/gaspard_Complete%20renamer.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Detect keyboard input to VKB and set state to on.lua" type="script" desc="Detect keyboard input to VKB and set state to on">
@@ -553,6 +557,10 @@
         <changelog><![CDATA[- Update input text multiline
 - Update GUI size and title]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/688e632b3129ec394fd62c5c5acb08bf5afbd56f/Region/gaspard_Set%20region%20render%20matrix%20to%20same%20named%20track.lua</source>
+      </version>
+      <version name="1.0.2" author="gaspard" time="2024-12-11T16:31:19Z">
+        <changelog><![CDATA[- Fix Settings window width and height glitch]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b6e2740e386749bf4708a3c66a38fea883c3a259/Region/gaspard_Set%20region%20render%20matrix%20to%20same%20named%20track.lua</source>
       </version>
     </reapack>
   </category>
