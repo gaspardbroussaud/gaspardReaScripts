@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="267cddab839a9c99d1b257a0566a66f2d26c1d75">
+<index version="1" name="Gaspard ReaScripts" commit="8ec8d7d1a974fb4c13329de9ee8982a2f6206173">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -87,6 +87,18 @@
         <changelog><![CDATA[- Add only show replaced
 - !!! ATTENTION !!! -> Please delete the .json file at script path before launching for the first time the 0.0.3b]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/267cddab839a9c99d1b257a0566a66f2d26c1d75/General/gaspard_Complete%20renamer.lua</source>
+      </version>
+      <version name="0.1b" author="gaspard" time="2024-12-12T10:21:31Z">
+        <changelog><![CDATA[- !!! ATTENTION !!!
+- Please delete the .json file at script path before launching for the first time the 0.0.4b
+- Path: ".../REAPER/Scripts/Gaspard ReaScripts/General/gasprd_Complete renamer_settings.json"
+- Feature: Auto refresh on project change and input edits
+- Feature: Tooltip on userdatas in GUI
+- Feature: Clear selection on escape key
+- Feature: Don't show changes when Find text equals Replace text
+- Feature: Prevent Apply changes when Find text equals Replace text
+- Feature: Add Shift+Clic multi selection]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8ec8d7d1a974fb4c13329de9ee8982a2f6206173/General/gaspard_Complete%20renamer.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Detect keyboard input to VKB and set state to on.lua" type="script" desc="Detect keyboard input to VKB and set state to on">
