@@ -75,7 +75,7 @@ end
 function InitialVariables()
     InitSystemVariables()
     GetGuiStylesFromFile()
-    version = "0.1b"
+    version = "0.1.1b"
     og_window_width = 600
     og_window_height = 500
     window_width = og_window_width
@@ -261,7 +261,7 @@ function Gui_Settings()
     -- Set Settings Window visibility and settings
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
     local settings_width = og_window_width - 350
-    local settings_height = og_window_height * 0.35
+    local settings_height = og_window_height * 0.55
     reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
 
@@ -340,11 +340,12 @@ end
 
 -- Gui Version on bottom right
 function Gui_Version()
+    local text = "gaspard v"..version
     reaper.ImGui_PushFont(ctx, small_font)
-    local w, h = reaper.ImGui_CalcTextSize(ctx, "v"..version)
+    local w, h = reaper.ImGui_CalcTextSize(ctx, text)
     reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
     reaper.ImGui_SetCursorPosY(ctx, window_height - h - 10)
-    reaper.ImGui_Text(ctx, "v"..version)
+    reaper.ImGui_Text(ctx, text)
     reaper.ImGui_PopFont(ctx)
 end
 

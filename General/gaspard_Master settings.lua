@@ -1,8 +1,8 @@
 --@description Master settings
 --@author gaspard
---@version 1.0.4
+--@version 1.1
 --@changelog
---  - Bugfix
+--  - Added delete scripts
 --@about
 --  ### Master settings
 --  All settings for all gaspard's scripts
@@ -24,8 +24,6 @@ function InitSystemVariables()
     local json_file_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/JSON"
     package.path = package.path .. ";" .. json_file_path .. "/?.lua"
     gson = require("json_utilities_lib")
-
-    --Settings = gson.LoadJSON(scripts[i].path)
 end
 
 -- Get GUI style from file
@@ -83,9 +81,11 @@ end
 function InitialVariables()
     InitSystemVariables()
     GetGuiStylesFromFile()
-    version = "1.0"
-    window_width = 500
-    window_height = 400
+    version = "1.1"
+    og_window_width = 500
+    og_window_height = 400
+    window_width = og_window_width
+    window_height = og_window_height
     topbar_height = 30
     font_size = 16
     window_name = "MASTER SETTINGS"
@@ -98,6 +98,7 @@ function InitialVariables()
     was_opened = false
     input_active = false
     no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
+    show_more = false
 end
 
 -- Split input text in multiple words (space between in orginial text)
@@ -163,11 +164,15 @@ function Gui_TopBar()
 
         reaper.ImGui_SameLine(ctx)
 
-        local w, _ = reaper.ImGui_CalcTextSize(ctx, "X")
-        reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 30, 0)
+        local w, _ = reaper.ImGui_CalcTextSize(ctx, "More X")
+        reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 45, 0)
 
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 30, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
+        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 45, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
             reaper.ImGui_Dummy(ctx, 3, 1)
+            reaper.ImGui_SameLine(ctx)
+            if reaper.ImGui_Button(ctx, 'More##more_button') then
+                show_more = not show_more
+            end
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'X##quit_button') then
                 open = false
@@ -212,7 +217,7 @@ function Gui_Elements()
         if open_popup then
             local rect_w, _ = reaper.ImGui_GetItemRectSize(ctx)
             local rect_h = #scripts * 24 + 22 * 0.35
-            if rect_h < 1 * 24 + 22 * 0.35 then rect_h = 1 * 24 + 22 * 0.35 end
+            if rect_h < 3 * 24 + 22 * 0.35 then rect_h = 3 * 24 + 22 * 0.35 end
             if rect_h > 6 * 24 + 22 * 0.35 then rect_h = 6 * 24 + 22 * 0.35 end
             reaper.ImGui_SetNextWindowPos(ctx, pos_x, pos_y)
             reaper.ImGui_SetNextWindowSize(ctx, rect_w, rect_h)
@@ -319,12 +324,27 @@ function Gui_Elements()
             reaper.ImGui_EndChild(ctx)
         end
 
-        local x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
         local button_x = 100
+        if not script_selected then disable = true
+        else disable = false end
+        if disable then reaper.ImGui_BeginDisabled(ctx) end
+        local button_pos_y = child_main_y - 30
+        reaper.ImGui_SetCursorPosY(ctx, button_pos_y)
+        if reaper.ImGui_Button(ctx, "DELETE##delete_button", button_x) then
+            os.remove(script_path)
+            scripts = GetScriptFiles()
+            script_name = ""
+            script_selected = false
+            one_changed = false
+        end
+        if disable then reaper.ImGui_EndDisabled(ctx) end
+
+        local x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
         if not one_changed then disable = true
         else disable = false end
         if disable then reaper.ImGui_BeginDisabled(ctx) end
         reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + x - button_x)
+        reaper.ImGui_SetCursorPosY(ctx, button_pos_y)
         if reaper.ImGui_Button(ctx, "APPLY##apply_button", button_x) then
             gson.SaveJSON(script_path, Settings)
             one_changed = false
@@ -335,13 +355,47 @@ function Gui_Elements()
     end
 end
 
+-- Gui settings
+function Gui_More()
+    -- Set Settings Window visibility and settings
+    local more_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
+    local more_width = og_window_width - 350
+    local more_height = og_window_height * 0.2
+    reaper.ImGui_SetNextWindowSize(ctx, more_width, more_height, reaper.ImGui_Cond_Once())
+    reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - more_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
+
+    local more_visible, more_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, more_flags)
+    if more_visible then
+        reaper.ImGui_SetCursorPosX(ctx, (more_width - 100) * 0.5)
+        if reaper.ImGui_Button(ctx, "DELETE ALL##more_delete_all_button", 100) then
+            scripts = GetScriptFiles()
+            for i = 1, #scripts do
+                os.remove(scripts[i].path)
+            end
+            scripts = GetScriptFiles()
+            script_name = ""
+            script_selected = false
+            one_changed = false
+        end
+
+        reaper.ImGui_End(ctx)
+    else
+        show_more = false
+    end
+
+    if not more_open then
+        show_more = false
+    end
+end
+
 -- Gui Version on bottom right
 function Gui_Version()
+    local text = "gaspard v"..version
     reaper.ImGui_PushFont(ctx, small_font)
-    local w, h = reaper.ImGui_CalcTextSize(ctx, "v"..version)
+    local w, h = reaper.ImGui_CalcTextSize(ctx, text)
     reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
     reaper.ImGui_SetCursorPosY(ctx, window_height - h - 10)
-    reaper.ImGui_Text(ctx, "v"..version)
+    reaper.ImGui_Text(ctx, text)
     reaper.ImGui_PopFont(ctx)
 end
 
@@ -367,6 +421,11 @@ function Gui_Loop()
     if visible then
         -- Top bar elements
         Gui_TopBar()
+
+        -- Gui more elements
+        if show_more then
+            Gui_More()
+        end
 
         -- All Gui Elements
         Gui_Elements()
