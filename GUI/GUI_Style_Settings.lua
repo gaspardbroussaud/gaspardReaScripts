@@ -37,7 +37,7 @@ local style_colors = {
     {col = reaper.ImGui_Col_CheckMark(), value = 0xFFFFFFFF},
 
     -- Popups
-    {col = reaper.ImGui_Col_PopupBg(), value = 0x14141B99},
+    {col = reaper.ImGui_Col_PopupBg(), value = 0x14141BFF},
 
     -- Sliders
     {col = reaper.ImGui_Col_SliderGrab(), value = 0x796BB6FF},
