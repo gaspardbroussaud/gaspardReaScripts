@@ -1,6 +1,6 @@
 --@description Complete renamer
 --@author gaspard
---@version 0.1.1b
+--@version 0.1.2b
 --@changelog
 --  - Change settings system to forced to apply
 --@about
@@ -75,7 +75,7 @@ end
 function InitialVariables()
     InitSystemVariables()
     GetGuiStylesFromFile()
-    version = "0.1.1b"
+    version = "0.1.2b"
     og_window_width = 600
     og_window_height = 500
     window_width = og_window_width

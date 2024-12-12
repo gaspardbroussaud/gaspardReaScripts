@@ -1,6 +1,6 @@
 --@description Complete selection
 --@author gaspard
---@version 0.0.2b
+--@version 0.1.2b
 --@changelog
 --  - New settings forced to apply
 --  - Fix name matches errors
@@ -66,7 +66,7 @@ end
 function InitialVariables()
     InitSystemVariables()
     GetGuiStylesFromFile()
-    version = "0.0.2b"
+    version = "0.1.2b"
     og_window_width = 600
     og_window_height = 500
     window_width = og_window_width
