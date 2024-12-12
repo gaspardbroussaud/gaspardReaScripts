@@ -1,9 +1,16 @@
 --@description Complete renamer
 --@author gaspard
---@version 0.0.3b
+--@version 0.1b
 --@changelog
---  - Add only show replaced
---  - !!! ATTENTION !!! -> Please delete the .json file at script path before launching for the first time the 0.0.3b
+--  - !!! ATTENTION !!!
+--  - Please delete the .json file at script path before launching for the first time the 0.0.4b
+--  - Path: ".../REAPER/Scripts/Gaspard ReaScripts/General/gasprd_Complete renamer_settings.json"
+--  - Feature: Auto refresh on project change and input edits
+--  - Feature: Tooltip on userdatas in GUI
+--  - Feature: Clear selection on escape key
+--  - Feature: Don't show changes when Find text equals Replace text
+--  - Feature: Prevent Apply changes when Find text equals Replace text
+--  - Feature: Add Shift+Clic multi selection
 --@about
 --  ### Complete renamer
 --  - A simple and quick renamer for tracks, regions, markers, items (may add others later).
@@ -76,7 +83,7 @@ end
 function InitialVariables()
     InitSystemVariables()
     GetGuiStylesFromFile()
-    version = "0.0.1"
+    version = "0.1b"
     og_window_width = 600
     og_window_height = 500
     window_width = og_window_width
@@ -96,6 +103,7 @@ function InitialVariables()
         one_changed = false
     end
     settings_one_changed = false
+    last_changed = nil
 end
 
 -- GUI Initialize function
@@ -193,9 +201,7 @@ function Gui_Elements()
             reaper.ImGui_SameLine(ctx)
 
             reaper.ImGui_SetCursorPosX(ctx, window_width - 110)
-            if reaper.ImGui_Button(ctx, "Refresh", 70) then
-                one_changed = true
-            end
+            if reaper.ImGui_Button(ctx, "Refresh", 70) then GetUserdatas() end
 
             if one_changed then
                 GetUserdatas()
@@ -212,12 +218,22 @@ function Gui_Elements()
             reaper.ImGui_PushItemWidth(ctx, -1)
             changed, input_find = reaper.ImGui_InputText(ctx, "##inputtext_find", input_find)
             reaper.ImGui_PopItemWidth(ctx)
+            if changed then
+                GetUserdatas()
+                input_one_changed = true
+            end
 
             reaper.ImGui_Text(ctx, "Replace:")
             reaper.ImGui_SameLine(ctx)
             reaper.ImGui_PushItemWidth(ctx, -1)
             changed, input_replace = reaper.ImGui_InputText(ctx, "##inputtext_replace", input_replace)
             reaper.ImGui_PopItemWidth(ctx)
+            if changed then
+                GetUserdatas()
+                input_one_changed = true
+            end
+
+            if input_find == input_replace then input_one_changed = false end
 
             reaper.ImGui_EndChild(ctx)
         end
@@ -234,12 +250,13 @@ function Gui_Elements()
 
         local x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
         local button_x = 100
-        if not one_changed then disable = true
+        if not input_one_changed then disable = true
         else disable = false end
         if disable then reaper.ImGui_BeginDisabled(ctx) end
         reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + x - button_x)
         if reaper.ImGui_Button(ctx, "APPLY##apply_button", button_x) then
             ApplyReplacedNames()
+            input_one_changed = false
         end
         if disable then reaper.ImGui_EndDisabled(ctx) end
 
@@ -247,6 +264,7 @@ function Gui_Elements()
     end
 end
 
+-- Gui settings
 function Gui_Settings()
     -- Set Settings Window visibility and settings
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
@@ -325,6 +343,10 @@ function Gui_Loop()
     window_width, window_height = reaper.ImGui_GetWindowSize(ctx)
 
     current_time = reaper.ImGui_GetTime(ctx)
+    if ProjectChange() then GetUserdatas() end
+    if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Escape()) then
+        ClearUserdataSelection()
+    end
 
     if visible then
         -- Top bar elements
@@ -369,6 +391,17 @@ function Gui_PopTheme()
 end
 
 ---------------------------------------------------
+
+-- Check current focused project
+function ProjectChange()
+    if project_name ~= reaper.GetProjectName(0) or project_path ~= reaper.GetProjectPath() then
+        project_name = reaper.GetProjectName(0)
+        project_path = reaper.GetProjectPath()
+        return true
+    else
+        return false
+    end
+end
 
 -- Get all items from project in table
 function GetItemsFromProject()
@@ -425,6 +458,7 @@ function GetMarkersRegionsFromProject()
     return markers, regions
 end
 
+-- Get all userdatas for all types
 function GetUserdatas()
     local items = {display = "Items", show = Settings.replace_items.value, data = GetItemsFromProject()}
     local tracks = {display = "Tracks", show = Settings.replace_tracks.value, data = GetTracksFromProject()}
@@ -444,12 +478,14 @@ function IsInputFindInName(name, search)
     return false
 end
 
+-- Get name with replaced parts
 function GetReplacedName(name, pattern, replacement)
     pattern = pattern:gsub("([%(%)%.%%%+%-%*%?%[%^%$])", "%%%1")
     name = name:gsub(pattern, replacement)
     return name
 end
 
+-- Apply name replacement
 function ApplyReplacedNames()
     reaper.PreventUIRefresh(-1)
     reaper.Undo_BeginBlock()
@@ -487,6 +523,7 @@ function DisplayUserdata()
     if global_datas.order then
         local tree_flags = reaper.ImGui_TreeNodeFlags_SpanAllColumns() | reaper.ImGui_TreeNodeFlags_Framed()
         if Settings.tree_start_open.value then tree_flags = tree_flags | reaper.ImGui_TreeNodeFlags_DefaultOpen() end
+        local selection_index = 0
         for index, key in ipairs(global_datas.order) do
             if global_datas[key]["data"] then
                 if reaper.ImGui_TreeNode(ctx, global_datas[key]["display"].."##index"..tostring(index), tree_flags) then
@@ -501,19 +538,42 @@ function DisplayUserdata()
                                 local label = "##selectable"..key..tostring(userdata.id)..userdata.name
                                 changed, userdata.selected = reaper.ImGui_Selectable(ctx, userdata.name..label, userdata.selected, reaper.ImGui_SelectableFlags_SpanAllColumns())
                                 if changed then
+                                    -- Get key press Shift
+                                    local shift = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Mod_Shift())
+                                    if shift and last_changed and userdata.selected and last_changed.userdata ~= userdata then
+                                        local current_changed = { userdata = userdata, index = selection_index }
+                                        SelectFromOneToTheOther(last_changed, current_changed)
+                                    end
+
                                     if key == "items" then reaper.SetMediaItemSelected(userdata.id, userdata.selected)
                                     elseif key == "tracks" then reaper.SetTrackSelected(userdata.id, userdata.selected) end
                                     reaper.UpdateArrange()
+                                    if userdata.selected then
+                                        last_changed = { userdata = userdata, index = selection_index }
+                                    else
+                                        last_changed = nil
+                                    end
                                 end
 
                                 reaper.ImGui_TableNextColumn(ctx)
                                 local can_apply = true
+                                local replaced_text = ""
                                 if Settings.selection_based.value and not userdata.selected then can_apply = false end
                                 if input_found and can_apply then
-                                    local replaced_text = GetReplacedName(userdata.name, input_find, input_replace)
+                                    replaced_text = GetReplacedName(userdata.name, input_find, input_replace)
+                                end
+
+                                if reaper.ImGui_IsItemHovered(ctx, reaper.ImGui_HoveredFlags_Stationary()) then
+                                    local text = userdata.name.."\n"
+                                    if replaced_text ~= "" and input_find ~= input_replace then text = text..replaced_text end
+                                    reaper.ImGui_SetTooltip(ctx, text)
+                                end
+
+                                if input_find ~= input_replace then
                                     reaper.ImGui_Text(ctx, replaced_text)
                                 end
                             end
+                            selection_index = selection_index + 1
                         end
 
                         reaper.ImGui_EndTable(ctx)
@@ -522,6 +582,59 @@ function DisplayUserdata()
                 end
             end
         end
+    end
+end
+
+function SelectFromOneToTheOther(one, other)
+    if global_datas.order then
+        local first = one
+        local last = other
+        if one.index > other.index then
+            first = other
+            last = one
+        end
+        local can_select = false
+        for _, key in ipairs(global_datas.order) do
+            if global_datas[key]["data"] then
+                for _, userdata in pairs(global_datas[key]["data"]) do
+                    local input_found = IsInputFindInName(userdata.name, input_find)
+                    local show_userdata = true
+                    if Settings.only_show_replace.value and not input_found and input_find ~= "" then show_userdata = false end
+                    if show_userdata then
+                        if userdata == first.userdata then
+                            can_select = true
+                        end
+
+                        if can_select then
+                            userdata.selected = true
+                            if key == "items" then reaper.SetMediaItemSelected(userdata.id, userdata.selected)
+                            elseif key == "tracks" then reaper.SetTrackSelected(userdata.id, userdata.selected) end
+                        end
+
+                        if userdata == last.userdata then
+                            can_select = false
+                        end
+                    end
+                end
+            end
+        end
+        reaper.UpdateArrange()
+    end
+end
+
+-- Clear data selection in GUI and project
+function ClearUserdataSelection()
+    if global_datas.order then
+        for _, key in ipairs(global_datas.order) do
+            if global_datas[key]["data"] then
+                for _, userdata in pairs(global_datas[key]["data"]) do
+                    userdata.selected = false
+                    if key == "items" then reaper.SetMediaItemSelected(userdata.id, userdata.selected)
+                    elseif key == "tracks" then reaper.SetTrackSelected(userdata.id, userdata.selected) end
+                end
+            end
+        end
+        reaper.UpdateArrange()
     end
 end
 
