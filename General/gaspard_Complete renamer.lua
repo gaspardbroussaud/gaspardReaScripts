@@ -1,16 +1,8 @@
 --@description Complete renamer
 --@author gaspard
---@version 0.1b
+--@version 0.1.1b
 --@changelog
---  - !!! ATTENTION !!!
---  - Please delete the .json file at script path before launching for the first time the 0.0.4b
---  - Path: ".../REAPER/Scripts/Gaspard ReaScripts/General/gasprd_Complete renamer_settings.json"
---  - Feature: Auto refresh on project change and input edits
---  - Feature: Tooltip on userdatas in GUI
---  - Feature: Clear selection on escape key
---  - Feature: Don't show changes when Find text equals Replace text
---  - Feature: Prevent Apply changes when Find text equals Replace text
---  - Feature: Add Shift+Clic multi selection
+--  - Change settings system to forced to apply
 --@about
 --  ### Complete renamer
 --  - A simple and quick renamer for tracks, regions, markers, items (may add others later).
@@ -39,7 +31,7 @@ function InitSystemVariables()
 
     settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/gaspard_'..action_name..'_settings.json'
     Settings = {
-        order = {"replace_items", "replace_tracks", "replace_markers", "replace_regions"},
+        order = {"replace_items", "replace_tracks", "replace_markers", "replace_regions", "selection_based", "tree_start_open", "only_show_replace"},
         replace_items = {
             value = false,
             name = "Replace items",
@@ -97,11 +89,11 @@ function InitialVariables()
     project_id, _ = reaper.EnumProjects(-1)
     no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
     global_datas = {}
-    if Settings.replace_items.value or Settings.replace_tracks.value or Settings.replace_markers.value or Settings.replace_regions.value then
-        one_changed = true
-    else
-        one_changed = false
-    end
+    replace_items = Settings.replace_items.value
+    replace_tracks = Settings.replace_tracks.value
+    replace_markers = Settings.replace_markers.value
+    replace_regions = Settings.replace_regions.value
+    selection_based = Settings.selection_based.value
     settings_one_changed = false
     last_changed = nil
 end
@@ -133,9 +125,10 @@ function Gui_TopBar()
             reaper.ImGui_Dummy(ctx, 3, 1)
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'Settings##settings_button') then
+                if not show_settings then ResetUnappliedSettings() end
                 show_settings = not show_settings
                 if settings_one_changed then
-                    gson.SaveJSON(settings_path, Settings)
+                    ResetUnappliedSettings()
                     settings_one_changed = false
                 end
             end
@@ -166,7 +159,7 @@ function Gui_Elements()
 
             reaper.ImGui_Text(ctx, "Items:")
             reaper.ImGui_SameLine(ctx)
-            changed, Settings.replace_items.value = reaper.ImGui_Checkbox(ctx, "##checkbox_replace_items", Settings.replace_items.value)
+            changed, replace_items = reaper.ImGui_Checkbox(ctx, "##checkbox_replace_items", replace_items)
             if changed then one_changed = true end
 
             reaper.ImGui_SameLine(ctx)
@@ -175,7 +168,7 @@ function Gui_Elements()
 
             reaper.ImGui_Text(ctx, "Tracks:")
             reaper.ImGui_SameLine(ctx)
-            changed, Settings.replace_tracks.value = reaper.ImGui_Checkbox(ctx, "##checkbox_replace_tracks", Settings.replace_tracks.value)
+            changed, replace_tracks = reaper.ImGui_Checkbox(ctx, "##checkbox_replace_tracks", replace_tracks)
             if changed then one_changed = true end
 
             reaper.ImGui_SameLine(ctx)
@@ -184,7 +177,7 @@ function Gui_Elements()
 
             reaper.ImGui_Text(ctx, "Markers:")
             reaper.ImGui_SameLine(ctx)
-            changed, Settings.replace_markers.value = reaper.ImGui_Checkbox(ctx, "##checkbox_replace_markers", Settings.replace_markers.value)
+            changed, replace_markers = reaper.ImGui_Checkbox(ctx, "##checkbox_replace_markers", replace_markers)
             if changed then one_changed = true end
 
             reaper.ImGui_SameLine(ctx)
@@ -193,7 +186,7 @@ function Gui_Elements()
 
             reaper.ImGui_Text(ctx, "Regions:")
             reaper.ImGui_SameLine(ctx)
-            changed, Settings.replace_regions.value = reaper.ImGui_Checkbox(ctx, "##checkbox_replace_regions", Settings.replace_regions.value)
+            changed, replace_regions = reaper.ImGui_Checkbox(ctx, "##checkbox_replace_regions", replace_regions)
             if changed then one_changed = true end
 
             reaper.ImGui_SameLine(ctx)
@@ -205,7 +198,6 @@ function Gui_Elements()
 
             if one_changed then
                 GetUserdatas()
-                gson.SaveJSON(settings_path, Settings)
                 one_changed = false
             end
 
@@ -276,19 +268,39 @@ function Gui_Settings()
     local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
     if settings_visible then
         if reaper.ImGui_BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, reaper.ImGui_ChildFlags_Border()) then
+            reaper.ImGui_Text(ctx, Settings.replace_items.name..":")
+            reaper.ImGui_SameLine(ctx)
+            changed, settings_replace_items = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_replace_items", settings_replace_items)
+            if changed then settings_one_changed = true end
+
+            reaper.ImGui_Text(ctx, Settings.replace_tracks.name..":")
+            reaper.ImGui_SameLine(ctx)
+            changed, settings_replace_tracks = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_replace_tracks", settings_replace_tracks)
+            if changed then settings_one_changed = true end
+
+            reaper.ImGui_Text(ctx, Settings.replace_markers.name..":")
+            reaper.ImGui_SameLine(ctx)
+            changed, settings_replace_markers = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_replace_markers", settings_replace_markers)
+            if changed then settings_one_changed = true end
+
+            reaper.ImGui_Text(ctx, Settings.replace_regions.name..":")
+            reaper.ImGui_SameLine(ctx)
+            changed, settings_replace_regions = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_replace_regions", settings_replace_regions)
+            if changed then settings_one_changed = true end
+
             reaper.ImGui_Text(ctx, Settings.selection_based.name..":")
             reaper.ImGui_SameLine(ctx)
-            changed, Settings.selection_based.value = reaper.ImGui_Checkbox(ctx, "##checkbox_selection_based", Settings.selection_based.value)
+            changed, settings_selection_based = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_selection_based", settings_selection_based)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.tree_start_open.name..":")
             reaper.ImGui_SameLine(ctx)
-            changed, Settings.tree_start_open.value = reaper.ImGui_Checkbox(ctx, "##checkbox_tree_start_open", Settings.tree_start_open.value)
+            changed, settings_tree_start_open = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_tree_start_open", settings_tree_start_open)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.only_show_replace.name..":")
             reaper.ImGui_SameLine(ctx)
-            changed, Settings.only_show_replace.value = reaper.ImGui_Checkbox(ctx, "##checkbox_only_show_replace", Settings.only_show_replace.value)
+            changed, settings_only_show_replace = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_only_show_replace", settings_only_show_replace)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_EndChild(ctx)
@@ -300,6 +312,13 @@ function Gui_Settings()
         else disable = false end
         if disable then reaper.ImGui_BeginDisabled(ctx) end
         if reaper.ImGui_Button(ctx, "Apply##settings_apply", 70) then
+            Settings.replace_items.value = settings_replace_items
+            Settings.replace_tracks.value = settings_replace_tracks
+            Settings.replace_markers.value = settings_replace_markers
+            Settings.replace_regions.value = settings_replace_regions
+            Settings.selection_based.value = settings_selection_based
+            Settings.tree_start_open.value = settings_tree_start_open
+            Settings.only_show_replace.value = settings_only_show_replace
             gson.SaveJSON(settings_path, Settings)
             settings_one_changed = false
         end
@@ -312,7 +331,7 @@ function Gui_Settings()
 
     if not settings_open then
         if settings_one_changed then
-            gson.SaveJSON(settings_path, Settings)
+            ResetUnappliedSettings()
             settings_one_changed = false
         end
         show_settings = false
@@ -403,10 +422,21 @@ function ProjectChange()
     end
 end
 
+-- Reset unapplied settings on settings window close
+function ResetUnappliedSettings()
+    settings_replace_items = Settings.replace_items.value
+    settings_replace_tracks = Settings.replace_tracks.value
+    settings_replace_markers = Settings.replace_markers.value
+    settings_replace_regions = Settings.replace_regions.value
+    settings_selection_based = Settings.selection_based.value
+    settings_tree_start_open = Settings.tree_start_open.value
+    settings_only_show_replace = Settings.only_show_replace.value
+end
+
 -- Get all items from project in table
 function GetItemsFromProject()
     local items = {}
-    if Settings.replace_items.value then
+    if replace_items then
         local item_count = reaper.CountMediaItems(0)
         for i = 0, item_count - 1 do
             local item_id = reaper.GetMediaItem(0, i)
@@ -423,7 +453,7 @@ end
 -- Get all tracks from project in table
 function GetTracksFromProject()
     local tracks = {}
-    if Settings.replace_tracks.value then
+    if replace_tracks then
         local track_count = reaper.CountTracks(0)
         for i = 0, track_count - 1 do
             local track_id = reaper.GetTrack(0, i)
@@ -442,14 +472,14 @@ end
 function GetMarkersRegionsFromProject()
     local markers = {}
     local regions = {}
-    if Settings.replace_markers.value or Settings.replace_regions.value then
+    if replace_markers or replace_regions then
         local _, marker_count, region_count = reaper.CountProjectMarkers(0)
         for i = 0, marker_count + region_count - 1 do
             local _, isrgn, pos, rgnend, name, idx = reaper.EnumProjectMarkers2(0, i)
             if isrgn then
-                if Settings.replace_regions.value then table.insert(regions, { pos = pos, rgnend = rgnend, id = idx, name = name, selected = false }) end
+                if replace_regions then table.insert(regions, { pos = pos, rgnend = rgnend, id = idx, name = name, selected = false }) end
             else
-                if Settings.replace_markers.value then table.insert(markers, {  pos = pos, rgnend = rgnend, id = idx, name = name, selected = false }) end
+                if replace_markers then table.insert(markers, {  pos = pos, rgnend = rgnend, id = idx, name = name, selected = false }) end
             end
         end
     end
@@ -460,11 +490,11 @@ end
 
 -- Get all userdatas for all types
 function GetUserdatas()
-    local items = {display = "Items", show = Settings.replace_items.value, data = GetItemsFromProject()}
-    local tracks = {display = "Tracks", show = Settings.replace_tracks.value, data = GetTracksFromProject()}
+    local items = {display = "Items", show = replace_items, data = GetItemsFromProject()}
+    local tracks = {display = "Tracks", show = replace_tracks, data = GetTracksFromProject()}
     local table_markers, table_regions = GetMarkersRegionsFromProject()
-    local markers = {display = "Markers", show = Settings.replace_markers.value, data = table_markers}
-    local regions = {display = "Regions", show = Settings.replace_regions.value, data = table_regions}
+    local markers = {display = "Markers", show = replace_markers, data = table_markers}
+    local regions = {display = "Regions", show = replace_regions, data = table_regions}
     local order = {"items", "tracks", "markers", "regions"}
     global_datas = {order = order, items = items, tracks = tracks, markers = markers, regions = regions}
 end
@@ -495,7 +525,7 @@ function ApplyReplacedNames()
             if global_datas[key]["data"] then
                 for _, userdata in pairs(global_datas[key]["data"]) do
                     local can_apply = true
-                    if Settings.selection_based.value and not userdata.selected then can_apply = false end
+                    if selection_based and not userdata.selected then can_apply = false end
                     if IsInputFindInName(userdata.name, input_find) and can_apply then
                         userdata.name = GetReplacedName(userdata.name, input_find, input_replace)
                         if key == "items" then
@@ -558,7 +588,7 @@ function DisplayUserdata()
                                 reaper.ImGui_TableNextColumn(ctx)
                                 local can_apply = true
                                 local replaced_text = ""
-                                if Settings.selection_based.value and not userdata.selected then can_apply = false end
+                                if selection_based and not userdata.selected then can_apply = false end
                                 if input_found and can_apply then
                                     replaced_text = GetReplacedName(userdata.name, input_find, input_replace)
                                 end

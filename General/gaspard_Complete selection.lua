@@ -1,8 +1,9 @@
 --@description Complete selection
 --@author gaspard
---@version 0.0.1b
+--@version 0.0.2b
 --@changelog
---  - New complete selection GUI based tool
+--  - New settings forced to apply
+--  - Fix name matches errors
 --@about
 --  ### Complete selection
 --  - A simple and quick selction tool for tracks, regions, markers, items (may add others later).
@@ -83,6 +84,7 @@ function InitialVariables()
     show_tracks = Settings.show_tracks.value
     show_markers = Settings.show_markers.value
     show_regions = Settings.show_regions.value
+    if show_items or show_tracks or show_markers or show_regions then GetUserdatas() end
     settings_one_changed = false
     last_changed = nil
 end
@@ -114,6 +116,7 @@ function Gui_TopBar()
             reaper.ImGui_Dummy(ctx, 3, 1)
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'Settings##settings_button') then
+                if not show_settings then ResetUnappliedSettings() end
                 show_settings = not show_settings
                 if settings_one_changed then
                     ResetUnappliedSettings()
@@ -210,23 +213,11 @@ function Gui_Elements()
         reaper.ImGui_Separator(ctx)
         reaper.ImGui_Dummy(ctx, 1, 1)
 
-        if reaper.ImGui_BeginChild(ctx, "child_preview_replace", inner_child_width, child_height - 24 - 50 - 50 - 15) then
+        if reaper.ImGui_BeginChild(ctx, "child_preview_replace", inner_child_width, child_height - 24 - 124 - 15) then
             DisplayUserdata()
 
             reaper.ImGui_EndChild(ctx)
         end
-
-        local x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
-        local button_x = 100
-        if not input_one_changed then disable = true
-        else disable = false end
-        if disable then reaper.ImGui_BeginDisabled(ctx) end
-        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + x - button_x)
-        if reaper.ImGui_Button(ctx, "APPLY##apply_button", button_x) then
-            ApplyReplacedNames()
-            input_one_changed = false
-        end
-        if disable then reaper.ImGui_EndDisabled(ctx) end
 
         reaper.ImGui_EndChild(ctx)
     end
@@ -246,27 +237,27 @@ function Gui_Settings()
         if reaper.ImGui_BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, reaper.ImGui_ChildFlags_Border()) then
             reaper.ImGui_Text(ctx, Settings.show_items.name..":")
             reaper.ImGui_SameLine(ctx)
-            changed, Settings.show_items.value = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_show_items", Settings.show_items.value)
+            changed, settings_show_items = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_show_items", settings_show_items)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.show_tracks.name..":")
             reaper.ImGui_SameLine(ctx)
-            changed, Settings.show_tracks.value = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_show_tracks", Settings.show_tracks.value)
+            changed, settings_show_tracks = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_show_tracks", settings_show_tracks)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.show_markers.name..":")
             reaper.ImGui_SameLine(ctx)
-            changed, Settings.show_markers.value = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_show_markers", Settings.show_markers.value)
+            changed, settings_show_markers = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_show_markers", settings_show_markers)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.show_regions.name..":")
             reaper.ImGui_SameLine(ctx)
-            changed, Settings.show_regions.value = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_show_regions", Settings.show_regions.value)
+            changed, settings_show_regions = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_show_regions", settings_show_regions)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.tree_start_open.name..":")
             reaper.ImGui_SameLine(ctx)
-            changed, Settings.tree_start_open.value = reaper.ImGui_Checkbox(ctx, "##checkbox_tree_start_open", Settings.tree_start_open.value)
+            changed, settings_tree_start_open = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_tree_start_open", settings_tree_start_open)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_EndChild(ctx)
@@ -278,6 +269,12 @@ function Gui_Settings()
         else disable = false end
         if disable then reaper.ImGui_BeginDisabled(ctx) end
         if reaper.ImGui_Button(ctx, "Apply##settings_apply", 70) then
+            Settings.show_items.value = settings_show_items
+            Settings.show_tracks.value = settings_show_tracks
+            Settings.show_markers.value = settings_show_markers
+            Settings.show_regions.value = settings_show_regions
+            Settings.tree_start_open.value = settings_tree_start_open
+
             gson.SaveJSON(settings_path, Settings)
             settings_one_changed = false
         end
@@ -289,10 +286,9 @@ function Gui_Settings()
     end
 
     if not settings_open then
-        if settings_one_changed then
-            gson.SaveJSON(settings_path, Settings)
-            settings_one_changed = false
-        end
+        ResetUnappliedSettings()
+
+        settings_one_changed = false
         show_settings = false
     end
 end
@@ -383,7 +379,11 @@ end
 
 -- Reset unapplied settings on settings window close
 function ResetUnappliedSettings()
-
+    settings_show_items = Settings.show_items.value
+    settings_show_tracks = Settings.show_tracks.value
+    settings_show_markers = Settings.show_markers.value
+    settings_show_regions = Settings.show_regions.value
+    settings_tree_start_open = Settings.tree_start_open.value
 end
 
 -- Get all items from project in table
@@ -454,10 +454,10 @@ end
 
 -- Check data to find input
 function IsInputFindInName(name, search)
+    name = name:gsub("([%(%)%.%%%+%-%*%?%[%^%$])", "%%%1")
     for line in search:gmatch("([^\n]+)") do
         line = line:gsub("([%(%)%.%%%+%-%*%?%[%^%$])", "%%%1")
-        name = name:gsub("([%(%)%.%%%+%-%*%?%[%^%$])", "%%%1")
-        if name:find(line, 1, true) and line ~= "" then
+        if name:find(line, 1, true) then
             return true
         end
     end
