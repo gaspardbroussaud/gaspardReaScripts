@@ -1,8 +1,8 @@
 --@description Complete renamer
 --@author gaspard
---@version 0.1.3b
+--@version 0.1.4b
 --@changelog
---  - Optimisation and small updates
+--  - Tooltip in settings bugfix
 --@about
 --  ### Complete renamer
 --  - A simple and quick renamer for tracks, regions, markers, items (may add others later).
@@ -76,7 +76,7 @@ end
 function InitialVariables()
     InitSystemVariables()
     GetGuiStylesFromFile()
-    version = "0.1.3b"
+    version = "0.1.4b"
     og_window_width = 600
     og_window_height = 500
     window_width = og_window_width
@@ -272,43 +272,43 @@ function Gui_Settings()
             reaper.ImGui_Text(ctx, Settings.replace_items.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_replace_items = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_replace_items", settings_replace_items)
-            reaper.ImGui_SetTooltip(ctx, Settings.replace_items.description)
+            reaper.ImGui_SetItemTooltip(ctx, Settings.replace_items.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.replace_tracks.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_replace_tracks = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_replace_tracks", settings_replace_tracks)
-            reaper.ImGui_SetTooltip(ctx, Settings.replace_tracks.description)
+            reaper.ImGui_SetItemTooltip(ctx, Settings.replace_tracks.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.replace_markers.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_replace_markers = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_replace_markers", settings_replace_markers)
-            reaper.ImGui_SetTooltip(ctx, Settings.replace_markers.description)
+            reaper.ImGui_SetItemTooltip(ctx, Settings.replace_markers.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.replace_regions.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_replace_regions = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_replace_regions", settings_replace_regions)
-            reaper.ImGui_SetTooltip(ctx, Settings.replace_regions.description)
+            reaper.ImGui_SetItemTooltip(ctx, Settings.replace_regions.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.selection_based.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_selection_based = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_selection_based", settings_selection_based)
-            reaper.ImGui_SetTooltip(ctx, Settings.selection_based.description)
+            reaper.ImGui_SetItemTooltip(ctx, Settings.selection_based.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.tree_start_open.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_tree_start_open = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_tree_start_open", settings_tree_start_open)
-            reaper.ImGui_SetTooltip(ctx, Settings.tree_start_open.description)
+            reaper.ImGui_SetItemTooltip(ctx, Settings.tree_start_open.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.only_show_replace.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_only_show_replace = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_only_show_replace", settings_only_show_replace)
-            reaper.ImGui_SetTooltip(ctx, Settings.only_show_replace.description)
+            reaper.ImGui_SetItemTooltip(ctx, Settings.only_show_replace.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_EndChild(ctx)
