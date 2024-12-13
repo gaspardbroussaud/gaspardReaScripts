@@ -1,8 +1,8 @@
 --@description Master settings
 --@author gaspard
---@version 1.1
+--@version 1.1.1
 --@changelog
---  - Added delete scripts
+--  - Update delete scripts settings
 --@about
 --  ### Master settings
 --  All settings for all gaspard's scripts
@@ -81,7 +81,7 @@ end
 function InitialVariables()
     InitSystemVariables()
     GetGuiStylesFromFile()
-    version = "1.1"
+    version = "1.1.1"
     og_window_width = 500
     og_window_height = 400
     window_width = og_window_width
@@ -164,19 +164,41 @@ function Gui_TopBar()
 
         reaper.ImGui_SameLine(ctx)
 
-        local w, _ = reaper.ImGui_CalcTextSize(ctx, "More X")
-        reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 45, 0)
+        local w, _ = reaper.ImGui_CalcTextSize(ctx, "Refresh More X")
+        reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 55, 0)
 
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 45, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
+        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 55, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
             reaper.ImGui_Dummy(ctx, 3, 1)
+
+            reaper.ImGui_SameLine(ctx)
+            if reaper.ImGui_Button(ctx, 'Refresh##refresh_button') then
+                local current_script_path = script_path
+                scripts = GetScriptFiles()
+                local script_found = false
+                for i, script in ipairs(scripts) do
+                    if script.path == current_script_path then
+                        script_found = true
+                    end
+                end
+                if not script_found then
+                    script_name = ""
+                    script_path = nil
+                    script_selected = false
+                    one_changed = false
+                    open_popup = false
+                end
+            end
+
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'More##more_button') then
                 show_more = not show_more
             end
+
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'X##quit_button') then
                 open = false
             end
+
             reaper.ImGui_EndChild(ctx)
         end
 
@@ -325,20 +347,7 @@ function Gui_Elements()
         end
 
         local button_x = 100
-        if not script_selected then disable = true
-        else disable = false end
-        if disable then reaper.ImGui_BeginDisabled(ctx) end
         local button_pos_y = child_main_y - 30
-        reaper.ImGui_SetCursorPosY(ctx, button_pos_y)
-        if reaper.ImGui_Button(ctx, "DELETE##delete_button", button_x) then
-            os.remove(script_path)
-            scripts = GetScriptFiles()
-            script_name = ""
-            script_selected = false
-            one_changed = false
-        end
-        if disable then reaper.ImGui_EndDisabled(ctx) end
-
         local x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
         if not one_changed then disable = true
         else disable = false end
@@ -358,24 +367,87 @@ end
 -- Gui settings
 function Gui_More()
     -- Set Settings Window visibility and settings
-    local more_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
-    local more_width = og_window_width - 350
-    local more_height = og_window_height * 0.2
+    local more_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoResize()
+    local more_width = og_window_width - 80
+    local more_height = og_window_height * 0.7
     reaper.ImGui_SetNextWindowSize(ctx, more_width, more_height, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - more_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
 
-    local more_visible, more_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, more_flags)
+    local more_visible, more_open  = reaper.ImGui_Begin(ctx, 'MORE', true, more_flags)
     if more_visible then
-        reaper.ImGui_SetCursorPosX(ctx, (more_width - 100) * 0.5)
-        if reaper.ImGui_Button(ctx, "DELETE ALL##more_delete_all_button", 100) then
+        local scripts_more = scripts
+        reaper.ImGui_PushItemWidth(ctx, -1 - 65)
+        changed, script_name_more = reaper.ImGui_InputText(ctx, "##input_script_name_more", script_name_more)
+        local rect_w, _ = reaper.ImGui_GetItemRectSize(ctx)
+        rect_w = rect_w + 65
+        local rect_h = 7 * 24 + 22 * 0.35
+
+        reaper.ImGui_SameLine(ctx)
+        if reaper.ImGui_Button(ctx, 'Refresh##refresh_button') then
+            local current_script_path = script_path
             scripts = GetScriptFiles()
+            local script_found = false
+            for i, script in ipairs(scripts) do
+                if script.path == current_script_path then
+                    script_found = true
+                end
+            end
+            if not script_found then
+                script_name = ""
+                script_path = nil
+                script_selected = false
+                one_changed = false
+            end
+        end
+
+        if reaper.ImGui_BeginChild(ctx, "##child_scripts_delete", rect_w, rect_h, reaper.ImGui_ChildFlags_Border()) then
+            -- Split text input into words
+            local input_words = SplitIntoWords(script_name_more)
+
+            for i = 1, #scripts_more do
+                -- Filter scripts with name input (not starts with)
+                if script_name_more == "" or MatchesAllWords(input_words, scripts_more[i].name) then
+                    -- Selectable for scripts in more window
+                    local last_state = scripts_more[i].selected
+                    changed, scripts_more[i].selected = reaper.ImGui_Selectable(ctx, scripts_more[i].name.."##script_more_selectable_"..tostring(i), scripts_more[i].selected)
+                    if changed then
+                        if not reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftCtrl()) then
+                            for j = 1, #scripts_more do
+                                if scripts_more[j].selected and j ~= i then scripts_more[j].selected = false end
+                            end
+                        else
+                            if last_state and not scripts_more[i].selected then scripts_more[i].selected = true end
+                        end
+                    end
+                end
+            end
+            reaper.ImGui_EndChild(ctx)
+        end
+
+        reaper.ImGui_Dummy(ctx, 1, 4)
+
+        reaper.ImGui_SetCursorPosX(ctx, more_width - 110)
+        if reaper.ImGui_Button(ctx, "DELETE##more_delete_button", 100) then
+            for i, script in ipairs(scripts_more) do
+                if script.selected then
+                    if script.path == script_path then
+                        script_name = ""
+                        script_selected = false
+                        one_changed = false
+                        open_popup = false
+                    end
+                    os.remove(script.path)
+                    scripts = GetScriptFiles()
+                end
+            end
+            --[[scripts = GetScriptFiles()
             for i = 1, #scripts do
                 os.remove(scripts[i].path)
             end
             scripts = GetScriptFiles()
             script_name = ""
             script_selected = false
-            one_changed = false
+            one_changed = false]]
         end
 
         reaper.ImGui_End(ctx)

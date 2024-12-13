@@ -1,8 +1,8 @@
 --@description Complete renamer
 --@author gaspard
---@version 0.1.2b
+--@version 0.1.3b
 --@changelog
---  - Change settings system to forced to apply
+--  - Optimisation and small updates
 --@about
 --  ### Complete renamer
 --  - A simple and quick renamer for tracks, regions, markers, items (may add others later).
@@ -34,22 +34,22 @@ function InitSystemVariables()
         order = {"replace_items", "replace_tracks", "replace_markers", "replace_regions", "selection_based", "tree_start_open", "only_show_replace"},
         replace_items = {
             value = false,
-            name = "Replace items",
+            name = "Replace items in GUI",
             description = "Find and replace in item names."
         },
         replace_tracks = {
             value = false,
-            name = "Replace tracks",
+            name = "Replace tracks in GUI",
             description = "Find and replace in track names."
         },
         replace_markers = {
             value = false,
-            name = "Replace markers",
+            name = "Replace markers in GUI",
             description = "Find and replace in marker names."
         },
         replace_regions = {
             value = false,
-            name = "Replace regions",
+            name = "Replace regions in GUI",
             description = "Find and replace in region names."
         },
         selection_based = {
@@ -59,7 +59,7 @@ function InitSystemVariables()
         },
         tree_start_open = {
             value = false,
-            name = "Trees start open",
+            name = "Trees open on start",
             description = "Trees for userdata types start opened on script launch."
         },
         only_show_replace = {
@@ -68,6 +68,7 @@ function InitSystemVariables()
             description = "Only show matches in userdata names of text input."
         }
     }
+    settings_amount_height = 0.6
     Settings = gson.LoadJSON(settings_path, Settings)
 end
 
@@ -75,7 +76,7 @@ end
 function InitialVariables()
     InitSystemVariables()
     GetGuiStylesFromFile()
-    version = "0.1.2b"
+    version = "0.1.3b"
     og_window_width = 600
     og_window_height = 500
     window_width = og_window_width
@@ -259,9 +260,9 @@ end
 -- Gui settings
 function Gui_Settings()
     -- Set Settings Window visibility and settings
-    local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
+    local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoResize()
     local settings_width = og_window_width - 350
-    local settings_height = og_window_height * 0.55
+    local settings_height = og_window_height * settings_amount_height
     reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
 
@@ -271,36 +272,43 @@ function Gui_Settings()
             reaper.ImGui_Text(ctx, Settings.replace_items.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_replace_items = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_replace_items", settings_replace_items)
+            reaper.ImGui_SetTooltip(ctx, Settings.replace_items.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.replace_tracks.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_replace_tracks = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_replace_tracks", settings_replace_tracks)
+            reaper.ImGui_SetTooltip(ctx, Settings.replace_tracks.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.replace_markers.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_replace_markers = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_replace_markers", settings_replace_markers)
+            reaper.ImGui_SetTooltip(ctx, Settings.replace_markers.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.replace_regions.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_replace_regions = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_replace_regions", settings_replace_regions)
+            reaper.ImGui_SetTooltip(ctx, Settings.replace_regions.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.selection_based.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_selection_based = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_selection_based", settings_selection_based)
+            reaper.ImGui_SetTooltip(ctx, Settings.selection_based.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.tree_start_open.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_tree_start_open = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_tree_start_open", settings_tree_start_open)
+            reaper.ImGui_SetTooltip(ctx, Settings.tree_start_open.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.only_show_replace.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_only_show_replace = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_only_show_replace", settings_only_show_replace)
+            reaper.ImGui_SetTooltip(ctx, Settings.only_show_replace.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_EndChild(ctx)
@@ -312,13 +320,7 @@ function Gui_Settings()
         else disable = false end
         if disable then reaper.ImGui_BeginDisabled(ctx) end
         if reaper.ImGui_Button(ctx, "Apply##settings_apply", 70) then
-            Settings.replace_items.value = settings_replace_items
-            Settings.replace_tracks.value = settings_replace_tracks
-            Settings.replace_markers.value = settings_replace_markers
-            Settings.replace_regions.value = settings_replace_regions
-            Settings.selection_based.value = settings_selection_based
-            Settings.tree_start_open.value = settings_tree_start_open
-            Settings.only_show_replace.value = settings_only_show_replace
+            ApplySettings()
             gson.SaveJSON(settings_path, Settings)
             settings_one_changed = false
         end
@@ -432,6 +434,17 @@ function ResetUnappliedSettings()
     settings_selection_based = Settings.selection_based.value
     settings_tree_start_open = Settings.tree_start_open.value
     settings_only_show_replace = Settings.only_show_replace.value
+end
+
+-- Apply all settings in file
+function ApplySettings()
+    Settings.replace_items.value = settings_replace_items
+    Settings.replace_tracks.value = settings_replace_tracks
+    Settings.replace_markers.value = settings_replace_markers
+    Settings.replace_regions.value = settings_replace_regions
+    Settings.selection_based.value = settings_selection_based
+    Settings.tree_start_open.value = settings_tree_start_open
+    Settings.only_show_replace.value = settings_only_show_replace
 end
 
 -- Get all items from project in table

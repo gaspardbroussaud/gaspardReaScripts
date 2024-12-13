@@ -1,9 +1,9 @@
 --@description Complete selection
 --@author gaspard
---@version 0.1.2b
+--@version 0.1.3b
 --@changelog
---  - New settings forced to apply
---  - Fix name matches errors
+--  - Optimisation and small updates
+--  - Added Ctrl + A shortcut
 --@about
 --  ### Complete selection
 --  - A simple and quick selction tool for tracks, regions, markers, items (may add others later).
@@ -36,29 +36,30 @@ function InitSystemVariables()
         show_items = {
             value = false,
             name = "Show items",
-            description = "Toggle show items."
+            description = "Toggle show items in GUI."
         },
         show_tracks = {
             value = false,
             name = "Show tracks",
-            description = "Toggle show tracks."
+            description = "Toggle show tracks in GUI."
         },
         show_markers = {
             value = false,
             name = "Show markers",
-            description = "Toggle show markers."
+            description = "Toggle show markers in GUI."
         },
         show_regions = {
             value = false,
             name = "Show regions",
-            description = "Toggle show regions."
+            description = "Toggle show regions in GUI."
         },
         tree_start_open = {
             value = false,
-            name = "Trees start open",
+            name = "Trees open on start",
             description = "Trees for userdata types start opened on script launch."
         }
     }
+    settings_amount_height = 0.5
     Settings = gson.LoadJSON(settings_path, Settings)
 end
 
@@ -66,7 +67,7 @@ end
 function InitialVariables()
     InitSystemVariables()
     GetGuiStylesFromFile()
-    version = "0.1.2b"
+    version = "0.1.3b"
     og_window_width = 600
     og_window_height = 500
     window_width = og_window_width
@@ -226,9 +227,9 @@ end
 -- Gui settings
 function Gui_Settings()
     -- Set Settings Window visibility and settings
-    local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
+    local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoResize()
     local settings_width = og_window_width - 350
-    local settings_height = og_window_height * 0.45
+    local settings_height = og_window_height * settings_amount_height
     reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
 
@@ -238,26 +239,31 @@ function Gui_Settings()
             reaper.ImGui_Text(ctx, Settings.show_items.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_show_items = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_show_items", settings_show_items)
+            reaper.ImGui_SetItemTooltip(ctx, Settings.show_items.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.show_tracks.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_show_tracks = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_show_tracks", settings_show_tracks)
+            reaper.ImGui_SetItemTooltip(ctx, Settings.show_tracks.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.show_markers.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_show_markers = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_show_markers", settings_show_markers)
+            reaper.ImGui_SetItemTooltip(ctx, Settings.show_markers.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.show_regions.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_show_regions = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_show_regions", settings_show_regions)
+            reaper.ImGui_SetItemTooltip(ctx, Settings.show_regions.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_Text(ctx, Settings.tree_start_open.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_tree_start_open = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_tree_start_open", settings_tree_start_open)
+            reaper.ImGui_SetItemTooltip(ctx, Settings.tree_start_open.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_EndChild(ctx)
@@ -269,11 +275,7 @@ function Gui_Settings()
         else disable = false end
         if disable then reaper.ImGui_BeginDisabled(ctx) end
         if reaper.ImGui_Button(ctx, "Apply##settings_apply", 70) then
-            Settings.show_items.value = settings_show_items
-            Settings.show_tracks.value = settings_show_tracks
-            Settings.show_markers.value = settings_show_markers
-            Settings.show_regions.value = settings_show_regions
-            Settings.tree_start_open.value = settings_tree_start_open
+            ApplySettings()
 
             gson.SaveJSON(settings_path, Settings)
             settings_one_changed = false
@@ -319,8 +321,11 @@ function Gui_Loop()
 
     current_time = reaper.ImGui_GetTime(ctx)
     if ProjectChange() then GetUserdatas() end
+    ctrl_a_key = false
     if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Escape()) then
         ClearUserdataSelection()
+    elseif reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftCtrl()) and reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_A()) then
+        ctrl_a_key = true
     end
 
     if visible then
@@ -385,6 +390,15 @@ function ResetUnappliedSettings()
     settings_show_markers = Settings.show_markers.value
     settings_show_regions = Settings.show_regions.value
     settings_tree_start_open = Settings.tree_start_open.value
+end
+
+-- Apply settings in file
+function ApplySettings()
+    Settings.show_items.value = settings_show_items
+    Settings.show_tracks.value = settings_show_tracks
+    Settings.show_markers.value = settings_show_markers
+    Settings.show_regions.value = settings_show_regions
+    Settings.tree_start_open.value = settings_tree_start_open
 end
 
 -- Get all items from project in table
@@ -480,6 +494,7 @@ function DisplayUserdata()
                         if not input_found and input_search ~= "" then show_userdata = false end
                         if show_userdata then
                             local label = "##selectable"..key..tostring(userdata.id)..userdata.name
+                            if ctrl_a_key then userdata.selected = true end
                             changed, userdata.selected = reaper.ImGui_Selectable(ctx, userdata.name..label, userdata.selected, reaper.ImGui_SelectableFlags_SpanAllColumns())
                             if changed then
                                 -- Get key press Shift
