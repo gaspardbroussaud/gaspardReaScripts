@@ -1,8 +1,8 @@
 --@description Master settings
 --@author gaspard
---@version 1.1.1
+--@version 1.1.2
 --@changelog
---  - Update delete scripts settings
+--  - Close search popup on More window open
 --@about
 --  ### Master settings
 --  All settings for all gaspard's scripts
@@ -81,7 +81,7 @@ end
 function InitialVariables()
     InitSystemVariables()
     GetGuiStylesFromFile()
-    version = "1.1.1"
+    version = "1.1.2"
     og_window_width = 500
     og_window_height = 400
     window_width = og_window_width
@@ -191,6 +191,7 @@ function Gui_TopBar()
 
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'More##more_button') then
+                open_popup = false
                 show_more = not show_more
             end
 
