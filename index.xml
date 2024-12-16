@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="ad31cc5b074a0a0e0e7e52913cd53e41bc8988fa">
+<index version="1" name="Gaspard ReaScripts" commit="e986cf3b9dbcb70460d78217aed3fa886000416f">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -486,6 +486,10 @@
         <changelog><![CDATA[- Update settings system]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/ad31cc5b074a0a0e0e7e52913cd53e41bc8988fa/Item/gaspard_Scan%20for%20missing%20source%20files%20in%20Sources%20folder.lua</source>
       </version>
+      <version name="1.0.3" author="gaspard" time="2024-12-16T14:04:46Z">
+        <changelog><![CDATA[- Bugfix settings]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/e986cf3b9dbcb70460d78217aed3fa886000416f/Item/gaspard_Scan%20for%20missing%20source%20files%20in%20Sources%20folder.lua</source>
+      </version>
     </reapack>
     <reapack name="gaspard_Set marker to first transient in selected items.lua" type="script" desc="Set marker to first transient in selected items">
       <metadata>
@@ -515,6 +519,10 @@
       <version name="1.0" author="gaspard" time="2024-12-16T13:51:01Z">
         <changelog><![CDATA[- Update settings system]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/ad31cc5b074a0a0e0e7e52913cd53e41bc8988fa/Item/gaspard_Set%20selected%20items%20fade%20in%20and%20out%20to%20value%20in%20script.lua</source>
+      </version>
+      <version name="1.0.1" author="gaspard" time="2024-12-16T14:04:46Z">
+        <changelog><![CDATA[- Bugfix settings]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/e986cf3b9dbcb70460d78217aed3fa886000416f/Item/gaspard_Set%20selected%20items%20fade%20in%20and%20out%20to%20value%20in%20script.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Set selected items length to X seconds.lua" type="script" desc="Set selected items length to X seconds">
