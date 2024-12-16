@@ -1,8 +1,8 @@
 --@description Random play point and time selection size
 --@author gaspard
---@version 1.0.4
+--@version 1.0.5
 --@changelog
---  - Update settings variables
+--  - Fix variables miss-assign
 --@about
 --  ### How to:
 --  - Set a time selection in your project, start and end position will be used.
@@ -56,7 +56,7 @@ end
 function InitialVariables()
     InitSystemVariables()
     GetGuiStylesFromFile()
-    version = "1.0.0"
+    version = "1.0.5"
     window_width = 250
     window_height = 235
     font_size = 16
@@ -77,7 +77,7 @@ function Gui_Init()
     small_font = reaper.ImGui_CreateFont('sans-serif', font_size * 0.75, reaper.ImGui_FontFlags_Italic())
     reaper.ImGui_Attach(ctx, font)
     reaper.ImGui_Attach(ctx, small_font)
-    window_name = "Time Selection Randomizer"
+    window_name = "RANDOMIZED LOOPING"
 end
 
 -- GUI Top Bar
@@ -171,7 +171,7 @@ function Gui_Elements()
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (window_width - item_size - 13) * 0.5)
     reaper.ImGui_PushItemWidth(ctx, item_size)
     reaper.ImGui_BeginDisabled(ctx, optional_disabledIn)
-    _, _ = reaper.ImGui_DragDouble(ctx, "##drag_frequency_rnd_visual", Settings.frequency_rnd.value, speed, Settings.frequency_rnd.min, Settings.frequency_rnd.max, "")
+    _, _ = reaper.ImGui_DragDouble(ctx, "##drag_frequency_rnd_visual", Settings.frequency_rnd.value, speed, Settings.frequency_rnd.min, math.huge, "")
     reaper.ImGui_EndDisabled(ctx)
 
     SetSliderSpeed(0.05)
@@ -179,13 +179,12 @@ function Gui_Elements()
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (window_width - item_size - 13) * 0.5)
     reaper.ImGui_SetCursorPosY(ctx, y+1)
     reaper.ImGui_PushItemWidth(ctx, item_size)
-    changed, Settings.frequency.value = reaper.ImGui_DragDouble(ctx, "##drag_frequency", Settings.frequency.value, speed, Settings.frequency.min, Settings.frequency.max, "%.2f")
-    if Settings.frequency.value > Settings.frequency.max then Settings.frequency.value = Settings.frequency.max end
+    changed, Settings.frequency.value = reaper.ImGui_DragDouble(ctx, "##drag_frequency", Settings.frequency.value, speed, Settings.frequency.min, math.huge, "%.2f")
     if changed then timer = current_time end
 
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (window_width - item_size - 13) * 0.5)
     reaper.ImGui_PushItemWidth(ctx, item_size)
-    changed, Settings.frequency_rnd.value = reaper.ImGui_DragDouble(ctx, "##drag_frequency_rnd", Settings.frequency_rnd.value, speed, Settings.frequency_rnd.max, Settings.frequency_rnd.max, "%.2f")
+    changed, Settings.frequency_rnd.value = reaper.ImGui_DragDouble(ctx, "##drag_frequency_rnd", Settings.frequency_rnd.value, speed, Settings.frequency_rnd.min, math.huge, "%.2f")
     if changed then timer = current_time end
 
     reaper.ImGui_Dummy(ctx, 10, 10)
