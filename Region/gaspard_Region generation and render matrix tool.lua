@@ -1,24 +1,43 @@
 -- @description Region generation and render matrix Tool
 -- @author gaspard
--- @version 1.0.7
+-- @version 1.0.8
 -- @changelog
---  - Add user setting to name regions with parent cascade (top-Parent_parent_..._selected-Track)
+--  - Update settings system
 -- @about
 --  - Retrives clusters of selected items depending on selected tracks.
 --  - How to use:
 --    1. Select all items to render (script will auto detect clusters: overlaping on same track or tracks in same track folder, depending on track selection).
 --    2. Select tracks to use as render matrix (will be used for region's names too).
 
--- USER SETTINGS ----------
-local color_regions_with_track_color = true
-local region_naming_parent_casacde = false
----------------------------
-
-----------------------------------------------------------------
 -- INIT VARIABLES
 local render_tracks = {}
 local render_tracks_name = {}
 local render_folders = {}
+
+-- Get Settings -------------------
+local json_file_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/JSON"
+package.path = package.path .. ";" .. json_file_path .. "/?.lua"
+local gson = require("json_utilities_lib")
+local _, name, sec, cmd, _, _, _ = reaper.get_action_context()
+local action_name = string.match(name, "gaspard_(.-)%.lua")
+
+local settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/gaspard_'..action_name..'_settings.json'
+local Settings = {
+    version = "1.0.8",
+    order = {"color_regions_with_track_color", "region_naming_parent_casacde"},
+    color_regions_with_track_color = {
+        value = true,
+        name = "Track color for region",
+        description = " Color generated regions with corresponding region render track color."
+    },
+    region_naming_parent_casacde = {
+        value = false,
+            name = "Region name from folder cascade",
+            description = "Use cascading track folders to name regions."
+    }
+}
+Settings = gson.LoadJSON(settings_path, Settings)
+-----------------------------------
 
 -- UTILITY FUNCTIONS
 -- MESSAGE BOX ON ERROR
@@ -79,7 +98,7 @@ end
 -- GET REGION NAME WITH TWO METHODS
 function GetRegionNaming(track)
     local track_name = ""
-    if region_naming_parent_casacde then
+    if Settings.region_naming_parent_casacde.value then
         track_name = GetConcatenatedParentNames(track)
     else
         _, track_name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
@@ -171,7 +190,7 @@ function FindClusters(folder, region_name, render_track)
             index = index + 1
 
             local track_color = 0
-            if color_regions_with_track_color then track_color = reaper.GetMediaTrackInfo_Value(render_track, "I_CUSTOMCOLOR") end
+            if Settings.color_regions_with_track_color.value then track_color = reaper.GetMediaTrackInfo_Value(render_track, "I_CUSTOMCOLOR") end
             local region_index = reaper.AddProjectMarker2(0, true, first_start, prev_end, region_name..suffix..tostring(index), -1, track_color)
             reaper.SetRegionRenderMatrix(0, region_index, render_track, 1)
             first_start = cur_start
@@ -192,7 +211,7 @@ function FindClusters(folder, region_name, render_track)
             end
 
             local track_color = 0
-            if color_regions_with_track_color then track_color = reaper.GetMediaTrackInfo_Value(render_track, "I_CUSTOMCOLOR") end
+            if Settings.color_regions_with_track_color.value then track_color = reaper.GetMediaTrackInfo_Value(render_track, "I_CUSTOMCOLOR") end
             local region_index = reaper.AddProjectMarker2(0, true, first_start, last_end, display, -1, track_color)
             reaper.SetRegionRenderMatrix(0, region_index, render_track, 1)
         end
