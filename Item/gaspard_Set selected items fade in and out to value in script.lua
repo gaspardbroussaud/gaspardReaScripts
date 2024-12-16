@@ -1,8 +1,8 @@
 --@description Set selected items fade in and out to value in script
 --@author gaspard
---@version 1.0.2
+--@version 1.0.3
 --@changelog
---  - Fix typo in variable name
+--  - Fix typo in settings variables
 --@about
 --  - Sets fade in and out to specified values in script for each selected items
 
@@ -20,14 +20,14 @@ function InitSystemVariables()
         fade_in_len = {
             value = 100,
             min = 0,
-            name = "Sources folder name",
-            description = 'Set name for audio sources folder in project folder.\nDefault if empty is "Audio".'
+            name = "Fade in length",
+            description = 'Fade in length for selected items in milliseconds.'
         },
         fade_out_len = {
             value = 100,
             min = 0,
-            name = "Sources folder name",
-            description = 'Set name for audio sources folder in project folder.\nDefault if empty is "Audio".'
+            name = "Fade out length",
+            description = 'Fade out length for selected items in milliseconds.'
         }
     }
     Settings = gson.LoadJSON(settings_path, Settings)
