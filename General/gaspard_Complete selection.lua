@@ -1,9 +1,8 @@
 --@description Complete selection
 --@author gaspard
---@version 0.1.3b
+--@version 0.1.4b
 --@changelog
---  - Optimisation and small updates
---  - Added Ctrl + A shortcut
+--  - Bugfix on empty project
 --@about
 --  ### Complete selection
 --  - A simple and quick selction tool for tracks, regions, markers, items (may add others later).
@@ -406,11 +405,15 @@ function GetItemsFromProject()
     local items = {}
     if show_items then
         local item_count = reaper.CountMediaItems(0)
-        for i = 0, item_count - 1 do
-            local item_id = reaper.GetMediaItem(0, i)
-            local _, item_name = reaper.GetSetMediaItemTakeInfo_String(reaper.GetTake(item_id, 0), "P_NAME", "", false)
-            local selected = reaper.IsMediaItemSelected(item_id)
-            table.insert(items, { id = item_id, name = item_name, selected = selected })
+        if item_count > 0 then
+            for i = 0, item_count - 1 do
+                local item_id = reaper.GetMediaItem(0, i)
+                local _, item_name = reaper.GetSetMediaItemTakeInfo_String(reaper.GetTake(item_id, 0), "P_NAME", "", false)
+                local selected = reaper.IsMediaItemSelected(item_id)
+                table.insert(items, { id = item_id, name = item_name, selected = selected })
+            end
+        else
+            return nil
         end
     else
         return nil
@@ -423,12 +426,16 @@ function GetTracksFromProject()
     local tracks = {}
     if show_tracks then
         local track_count = reaper.CountTracks(0)
-        for i = 0, track_count - 1 do
-            local track_id = reaper.GetTrack(0, i)
-            local _, track_name = reaper.GetTrackName(track_id)
-            if tostring(track_name):match("^Track %d+$") then track_name = "" end
-            local selected = reaper.IsTrackSelected(track_id)
-            table.insert(tracks, { id = track_id, name = track_name, selected = selected })
+        if track_count > 0 then
+            for i = 0, track_count - 1 do
+                local track_id = reaper.GetTrack(0, i)
+                local _, track_name = reaper.GetTrackName(track_id)
+                if tostring(track_name):match("^Track %d+$") then track_name = "" end
+                local selected = reaper.IsTrackSelected(track_id)
+                table.insert(tracks, { id = track_id, name = track_name, selected = selected })
+            end
+        else
+            return nil
         end
     else
         return nil
