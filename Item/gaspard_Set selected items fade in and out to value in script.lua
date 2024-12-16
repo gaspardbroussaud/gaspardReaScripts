@@ -1,8 +1,8 @@
 --@description Set selected items fade in and out to value in script
 --@author gaspard
---@version 1.0.1
+--@version 1.0.2
 --@changelog
---  - Bugfix settings
+--  - Fix typo in variable name
 --@about
 --  - Sets fade in and out to specified values in script for each selected items
 
@@ -45,7 +45,7 @@ function Main()
             reaper.SetMediaItemInfo_Value(item, "C_FADEINSHAPE", 1) -- Set selected item fade in to type 2
             reaper.SetMediaItemInfo_Value(item, "D_FADEINLEN", Settings.fade_in_len.value/1000)
             reaper.SetMediaItemInfo_Value(item, "C_FADEOUTSHAPE", 1) -- Set selected item fade out to type 2
-            reaper.SetMediaItemInfo_Value(item, "D_FADEOUTLEN", Setings.fade_out_len.value/1000)
+            reaper.SetMediaItemInfo_Value(item, "D_FADEOUTLEN", Settings.fade_out_len.value/1000)
         end
     end
 end
