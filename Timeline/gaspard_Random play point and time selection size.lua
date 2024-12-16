@@ -1,8 +1,8 @@
 --@description Random play point and time selection size
 --@author gaspard
---@version 1.0.3
+--@version 1.0.4
 --@changelog
---  - Fix typo in settings variable
+--  - Update settings variables
 --@about
 --  ### How to:
 --  - Set a time selection in your project, start and end position will be used.
@@ -39,16 +39,12 @@ function InitSystemVariables()
         frequency = {
             value = 4,
             min = 0,
-            max = 10000,
-            format = "%.2f",
             name = "Frequency",
             description = "Frequency in frames per seconds."
         },
         frequency_rnd = {
             value = 0,
             min = 0,
-            max = 10000,
-            format = "%.2f",
             name = "Randomize frequency",
             description = "Randomize frequency by + or - this value around frequency's value."
         }

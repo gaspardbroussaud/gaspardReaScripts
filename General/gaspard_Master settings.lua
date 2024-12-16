@@ -1,8 +1,8 @@
 --@description Master settings
 --@author gaspard
---@version 1.1.2
+--@version 1.1.3
 --@changelog
---  - Close search popup on More window open
+--  - Update required settings for all variable types
 --@about
 --  ### Master settings
 --  All settings for all gaspard's scripts
@@ -324,20 +324,28 @@ function Gui_Elements()
                         -- String display
                         elseif type_var == "string" then
                             reaper.ImGui_PushItemWidth(ctx, -1)
+                            local char_type = reaper.ImGui_InputTextFlags_None()
+                            if Settings[key]["char_type"] then char_type = Settings[key]["char_type"] end
                             if Settings[key]["multiline"] then
                                 if Settings[key]["multiline"]["remove_empty_lines"] then
                                     Settings[key]["value"] = RemoveMultilineEmptyLines(Settings[key]["value"])
                                 end
-                                changed, Settings[key]["value"] = reaper.ImGui_InputTextMultiline(ctx, "##inputtext_"..key.."_value", Settings[key]["value"], nil, nil, Settings[key]["char_type"])
+                                changed, Settings[key]["value"] = reaper.ImGui_InputTextMultiline(ctx, "##inputtext_"..key, Settings[key]["value"], nil, nil, char_type)
                             else
-                                changed, Settings[key]["value"] = reaper.ImGui_InputText(ctx, "##inputtext_"..key.."_value", Settings[key]["value"], Settings[key]["char_type"])
+                                changed, Settings[key]["value"] = reaper.ImGui_InputText(ctx, "##inputtext_"..key, Settings[key]["value"], char_type)
                             end
                             reaper.ImGui_SetItemTooltip(ctx, Settings[key]["description"])
                             reaper.ImGui_PopItemWidth(ctx)
                             if changed then one_changed = true end
                         -- Number display
                         elseif type_var == "number" then
-                            changed, Settings[key]["value"] = reaper.ImGui_DragDouble(ctx, "##drag_"..key.."_value", Settings[key]["value"], 0.1, Settings[key]["min"], Settings[key]["max"], Settings[key]["format"])
+                            local drag_min = -math.huge
+                            local drag_max = math.huge
+                            local drag_format = "%.2f"
+                            if Settings[key]["min"] then drag_min = Settings[key]["min"] end
+                            if Settings[key]["max"] then drag_max = Settings[key]["max"] end
+                            if Settings[key]["format"] then drag_format = Settings[key]["format"] end
+                            changed, Settings[key]["value"] = reaper.ImGui_DragDouble(ctx, "##drag_"..key, Settings[key]["value"], 0.1, drag_min, drag_max, drag_format)
                             if changed then one_changed = true end
                             reaper.ImGui_SetItemTooltip(ctx, Settings[key]["description"])
                         end

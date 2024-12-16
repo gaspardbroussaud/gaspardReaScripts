@@ -1,14 +1,29 @@
 -- @description Scan for missing source files in Sources folder
 -- @author gaspard
--- @version 1.0.1
+-- @version 1.0.2
 -- @changelog
---  • Show message if files not found at script end
---  • Cleanup of debug lines
+--  - Update settings system
 -- @about Scan all items in current project and copy missing source file in Audio folder (can be edited to user Audio folder path and name)
 
--- USER SOURCE FOLDER NAME ---------------------------------------------------------------------------------------------------------------------------------------------------------
-local source_folder_name = "Audio"
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Init system variables
+function InitSystemVariables()
+    local json_file_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/JSON"
+    package.path = package.path .. ";" .. json_file_path .. "/?.lua"
+    gson = require("json_utilities_lib")
+    local _, name, sec, cmd, _, _, _ = reaper.get_action_context()
+    local action_name = string.match(name, "gaspard_(.-)%.lua")
+
+    settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/gaspard_'..action_name..'_settings.json'
+    Settings = {
+        order = {"source_folder_name"},
+        source_folder_name = {
+            value = "Media",
+            name = "Sources folder name",
+            description = 'Set name for audio sources folder in project folder.\nDefault if empty is "Audio".'
+        }
+    }
+    Settings = gson.LoadJSON(settings_path, Settings)
+end
 
 -- Save all selected items to restore after execution
 function SaveSelectedItems(item_count)
@@ -69,7 +84,7 @@ function GetSourceDirectory(separator, source_folder)
     local project_sources_dir = ""
     if project_path ~= "" then
         local dir = project_path:match("(.*"..separator..")")
-        project_sources_dir = dir..source_folder_name
+        project_sources_dir = dir..Settings.source_folder_name.value
     end
     return project_sources_dir
 end
@@ -146,7 +161,7 @@ function Main()
     if item_count ~= 0 then
         local item_selection = SaveSelectedItems(item_count)
         local separator = GetSeperator()
-        local project_sources_dir = GetSourceDirectory(separator, source_folder_name)
+        local project_sources_dir = GetSourceDirectory(separator, Settings.source_folder_name.value)
         if project_sources_dir ~= "" then
             ScanAllMediaItems(project_sources_dir, separator, item_count, item_selection)
             reaper.Main_OnCommand(40441, 0) -- Rebuild peaks for selected items
