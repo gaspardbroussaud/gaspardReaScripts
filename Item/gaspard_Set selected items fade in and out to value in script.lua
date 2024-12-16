@@ -1,8 +1,8 @@
 --@description Set selected items fade in and out to value in script
 --@author gaspard
---@version 1.0
+--@version 1.0.1
 --@changelog
---  - Update settings system
+--  - Bugfix settings
 --@about
 --  - Sets fade in and out to specified values in script for each selected items
 
@@ -38,8 +38,8 @@ function Main()
     -- Check for selected items in project --
     local sel_item_count = reaper.CountSelectedMediaItems(0)
     if sel_item_count ~= 0 then
-
-    -- Apply to all selected items --
+        InitSystemVariables()
+        -- Apply to all selected items --
         for i = 0, sel_item_count - 1 do
             item = reaper.GetSelectedMediaItem(0, i)
             reaper.SetMediaItemInfo_Value(item, "C_FADEINSHAPE", 1) -- Set selected item fade in to type 2

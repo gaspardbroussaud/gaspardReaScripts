@@ -1,8 +1,8 @@
 -- @description Scan for missing source files in Sources folder
 -- @author gaspard
--- @version 1.0.2
+-- @version 1.0.3
 -- @changelog
---  - Update settings system
+--  - Bugfix settings
 -- @about Scan all items in current project and copy missing source file in Audio folder (can be edited to user Audio folder path and name)
 
 -- Init system variables
@@ -159,6 +159,7 @@ end
 function Main()
     local item_count = reaper.CountMediaItems(0) -- Current project = 0
     if item_count ~= 0 then
+        InitSystemVariables()
         local item_selection = SaveSelectedItems(item_count)
         local separator = GetSeperator()
         local project_sources_dir = GetSourceDirectory(separator, Settings.source_folder_name.value)
