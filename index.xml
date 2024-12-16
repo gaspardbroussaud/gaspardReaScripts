@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="4dee797896dea2ae238d3a774b2f01089876dfd0">
+<index version="1" name="Gaspard ReaScripts" commit="dad46882099c329123e8e9e4c9228a8a338b6a7b">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -116,6 +116,10 @@
         <changelog><![CDATA[- Tooltip in settings bugfix]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/ff349da58defafd8b689b91ba4aeac5071c08402/General/gaspard_Complete%20renamer.lua</source>
       </version>
+      <version name="0.1.5b" author="gaspard" time="2024-12-16T09:46:38Z">
+        <changelog><![CDATA[- Bugfix on empty project]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/dad46882099c329123e8e9e4c9228a8a338b6a7b/General/gaspard_Complete%20renamer.lua</source>
+      </version>
     </reapack>
     <reapack name="gaspard_Complete selection.lua" type="script" desc="Complete selection">
       <metadata>
@@ -146,6 +150,10 @@
         <changelog><![CDATA[- Optimisation and small updates
 - Added Ctrl + A shortcut]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/fd169950739298daa24aed8de73abab4d9fcb8da/General/gaspard_Complete%20selection.lua</source>
+      </version>
+      <version name="0.1.4b" author="gaspard" time="2024-12-16T09:46:38Z">
+        <changelog><![CDATA[- Bugfix on empty project]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/dad46882099c329123e8e9e4c9228a8a338b6a7b/General/gaspard_Complete%20selection.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Detect keyboard input to VKB and set state to on.lua" type="script" desc="Detect keyboard input to VKB and set state to on">
