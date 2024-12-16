@@ -1,8 +1,8 @@
 -- @description Region generation and render matrix Tool
 -- @author gaspard
--- @version 1.0.8
+-- @version 1.0.9
 -- @changelog
---  - Update settings system
+--  - Update settings system base file
 -- @about
 --  - Retrives clusters of selected items depending on selected tracks.
 --  - How to use:
@@ -23,7 +23,6 @@ local action_name = string.match(name, "gaspard_(.-)%.lua")
 
 local settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/gaspard_'..action_name..'_settings.json'
 local Settings = {
-    version = "1.0.8",
     order = {"color_regions_with_track_color", "region_naming_parent_casacde"},
     color_regions_with_track_color = {
         value = true,
