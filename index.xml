@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="fda2b21ca0d0a04267c5c8d83befeb93895c4891">
+<index version="1" name="Gaspard ReaScripts" commit="20a330d3be92b921fcbf473cedf02af4363feb53">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -617,6 +617,10 @@
       <version name="1.0.7" author="gaspard" time="2024-11-28T12:49:40Z">
         <changelog><![CDATA[- Add user setting to name regions with parent cascade (top-Parent_parent_..._selected-Track)]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7265e3d3d0fc387c520e2f2f58b9987699d9820b/Region/gaspard_Region%20generation%20and%20render%20matrix%20tool.lua</source>
+      </version>
+      <version name="1.0.8" author="gaspard" time="2024-12-16T10:40:08Z">
+        <changelog><![CDATA[- Update settings system]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/20a330d3be92b921fcbf473cedf02af4363feb53/Region/gaspard_Region%20generation%20and%20render%20matrix%20tool.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Set all regions numbering with name aware.lua" type="script" desc="Set all regions numbering with name aware">
