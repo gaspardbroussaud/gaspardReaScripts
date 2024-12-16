@@ -1,6 +1,6 @@
 --@description Complete renamer
 --@author gaspard
---@version 0.1.5b
+--@version 0.1.6b
 --@changelog
 --  - Bugfix on empty project
 --@about
@@ -76,7 +76,7 @@ end
 function InitialVariables()
     InitSystemVariables()
     GetGuiStylesFromFile()
-    version = "0.1.4b"
+    version = "0.1.6b"
     og_window_width = 600
     og_window_height = 500
     window_width = og_window_width
@@ -95,6 +95,7 @@ function InitialVariables()
     replace_markers = Settings.replace_markers.value
     replace_regions = Settings.replace_regions.value
     selection_based = Settings.selection_based.value
+    if replace_items or replace_tracks or replace_markers or replace_regions then GetUserdatas() end
     settings_one_changed = false
     last_changed = nil
 end
