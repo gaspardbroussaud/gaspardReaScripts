@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="d1288669fb625d435a78b85c0da046fb9809c537">
+<index version="1" name="Gaspard ReaScripts" commit="2dfc72781196fadf8116579b7eb9bc490136a99b">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -162,6 +162,22 @@
       <version name="1.1.3" author="gaspard" time="2024-12-16T13:51:01Z">
         <changelog><![CDATA[- Update required settings for all variable types]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/ad31cc5b074a0a0e0e7e52913cd53e41bc8988fa/General/gaspard_Master%20settings.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Simple renamer.lua" type="script" desc="Simple renamer">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs28 Simple renamer\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab A simple and quick renamer via text replace for tracks, regions, markers, items (may add others later).\sa180\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2024-12-17T16:51:07Z">
+        <changelog><![CDATA[- Adding script]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/2dfc72781196fadf8116579b7eb9bc490136a99b/General/gaspard_Simple%20renamer.lua</source>
       </version>
     </reapack>
   </category>
