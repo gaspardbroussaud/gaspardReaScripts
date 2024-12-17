@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="38fd3bc6f580e2061ef6d714456e362eb47c9a40">
+<index version="1" name="Gaspard ReaScripts" commit="d1288669fb625d435a78b85c0da046fb9809c537">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -64,67 +64,6 @@
     </reapack>
   </category>
   <category name="General">
-    <reapack name="gaspard_Complete renamer.lua" type="script" desc="Complete renamer">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs28 Complete renamer\par}
-{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab A simple and quick renamer for tracks, regions, markers, items (may add others later).\sa180\par}
-}
-]]></description>
-      </metadata>
-      <version name="0.0.1b" author="gaspard" time="2024-12-11T15:31:39Z">
-        <changelog><![CDATA[- Open beta]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/dbc6d92337f8196ff9e4c6ccc11b2fed82ef8245/General/gaspard_Complete%20renamer.lua</source>
-      </version>
-      <version name="0.0.2b" author="gaspard" time="2024-12-11T16:31:19Z">
-        <changelog><![CDATA[- Fix settings window size glitch]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b6e2740e386749bf4708a3c66a38fea883c3a259/General/gaspard_Complete%20renamer.lua</source>
-      </version>
-      <version name="0.0.3b" author="gaspard" time="2024-12-11T16:45:41Z">
-        <changelog><![CDATA[- Add only show replaced
-- !!! ATTENTION !!! -> Please delete the .json file at script path before launching for the first time the 0.0.3b]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/267cddab839a9c99d1b257a0566a66f2d26c1d75/General/gaspard_Complete%20renamer.lua</source>
-      </version>
-      <version name="0.1b" author="gaspard" time="2024-12-12T10:21:31Z">
-        <changelog><![CDATA[- !!! ATTENTION !!!
-- Please delete the .json file at script path before launching for the first time the 0.0.4b
-- Path: ".../REAPER/Scripts/Gaspard ReaScripts/General/gasprd_Complete renamer_settings.json"
-- Feature: Auto refresh on project change and input edits
-- Feature: Tooltip on userdatas in GUI
-- Feature: Clear selection on escape key
-- Feature: Don't show changes when Find text equals Replace text
-- Feature: Prevent Apply changes when Find text equals Replace text
-- Feature: Add Shift+Clic multi selection]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8ec8d7d1a974fb4c13329de9ee8982a2f6206173/General/gaspard_Complete%20renamer.lua</source>
-      </version>
-      <version name="0.1.1b" author="gaspard" time="2024-12-12T15:35:58Z">
-        <changelog><![CDATA[- Change settings system to forced to apply]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a98229b1a5ce9dae9a2e852c25219ecd58a9727b/General/gaspard_Complete%20renamer.lua</source>
-      </version>
-      <version name="0.1.2b" author="gaspard" time="2024-12-12T16:53:18Z">
-        <changelog><![CDATA[- Change settings system to forced to apply]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/66763bde857b7ee5ad4aed87dc7f770b4de9b258/General/gaspard_Complete%20renamer.lua</source>
-      </version>
-      <version name="0.1.3b" author="gaspard" time="2024-12-13T16:26:39Z">
-        <changelog><![CDATA[- Optimisation and small updates]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/fd169950739298daa24aed8de73abab4d9fcb8da/General/gaspard_Complete%20renamer.lua</source>
-      </version>
-      <version name="0.1.4b" author="gaspard" time="2024-12-13T16:33:59Z">
-        <changelog><![CDATA[- Tooltip in settings bugfix]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/ff349da58defafd8b689b91ba4aeac5071c08402/General/gaspard_Complete%20renamer.lua</source>
-      </version>
-      <version name="0.1.5b" author="gaspard" time="2024-12-16T09:46:38Z">
-        <changelog><![CDATA[- Bugfix on empty project]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/dad46882099c329123e8e9e4c9228a8a338b6a7b/General/gaspard_Complete%20renamer.lua</source>
-      </version>
-      <version name="0.1.6b" author="gaspard" time="2024-12-16T10:22:44Z">
-        <changelog><![CDATA[- Bugfix on empty project]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/fda2b21ca0d0a04267c5c8d83befeb93895c4891/General/gaspard_Complete%20renamer.lua</source>
-      </version>
-    </reapack>
     <reapack name="gaspard_Complete selection.lua" type="script" desc="Complete selection">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
