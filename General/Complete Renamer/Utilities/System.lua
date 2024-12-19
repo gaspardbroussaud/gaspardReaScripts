@@ -9,19 +9,10 @@ local project_name = reaper.GetProjectName(0)
 local project_path = reaper.GetProjectPath()
 local project_id, _ = reaper.EnumProjects(-1)
 
+-- Init Settings from file
 function System.InitSettings()
     Settings = {}
     Settings = gson.LoadJSON(settings_path, Settings)
-end
-
-function System.RepositionInTable(table_update, from_index, to_index)
-    if from_index == to_index then return table_update end
-
-    local item = table_update[from_index]
-    table.remove(table_update, from_index)
-    table.insert(table_update, to_index, item)
-
-    return table_update
 end
 
 -- Check current focused project
@@ -97,6 +88,49 @@ local function GetMarkersRegionsFromProject()
     if #markers <= 0 then markers = nil end
     if #regions <= 0 then regions = nil end
     return markers, regions
+end
+
+-- Reposition an item to another index in a given table
+function System.RepositionInTable(table_update, from_index, to_index)
+    if from_index == to_index then return table_update end
+
+    local item = table_update[from_index]
+    table.remove(table_update, from_index)
+    table.insert(table_update, to_index, item)
+
+    return table_update
+end
+
+-- Select from one item index to another regardless of direction
+function System.SelectFromOneToTheOther(tab, one, other)
+    local first = tab[one]
+    local last = tab[other]
+    if one > other then
+        first = other
+        last = one
+    end
+    local can_select = false
+
+    for i, element in ipairs(tab) do
+        if element == first then
+            can_select = true
+        end
+
+        if can_select then
+            element.selected = true
+        end
+
+        if element == last then
+            can_select = false
+        end
+    end
+end
+
+-- Clear element.selected from a given table
+function System.ClearTableSelection(tab)
+    for _, element in ipairs(tab) do
+        element.selected = false
+    end
 end
 
 -- Get all userdatas for all types

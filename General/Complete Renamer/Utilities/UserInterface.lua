@@ -5,12 +5,14 @@
 
 local Gui = {}
 
+local rules_popup = require('Utilities/GUI_Elements/Gui_Rules_Popup')
+
 --#region Initial Variables
 local version = "0.0.1b"
 local og_window_width = 800
 local og_window_height = 650
-local window_width = og_window_width
-local window_height = og_window_height
+window_width = og_window_width
+window_height = og_window_height
 local topbar_height = 30
 local settings_amount_height = 0.6
 local font_size = 16
@@ -19,9 +21,6 @@ local window_name = "COMPLETE RENAMER"
 local no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
 local top_height_ratio = 0.3
 local is_resizing = false
-local ruleset = {{state = true, type = "insert", selected = false, config = {}}, {state = true, type = "replace", selected = false, config = {}}, {state = true, type = "case", selected = false, config = {}}}
-local rule_popup_state = false
-local rule_popup = {}
 --#endregion
 
 -- Get GUI style from file
@@ -32,6 +31,7 @@ local function GetGuiStylesFromFile()
     style_colors = style.colors
 end
 
+-- Init ImGui
 local function WindowInit()
     ctx = reaper.ImGui_CreateContext('random_play_context')
     font = reaper.ImGui_CreateFont('sans-serif', font_size)
@@ -74,71 +74,7 @@ local function VisualTopBar()
     end
 end
 
-local function VisualRulesTable()
-    if reaper.ImGui_Button(ctx, "Add##button_add_rule", 100) then
-    end
-
-    reaper.ImGui_SameLine(ctx)
-
-    if reaper.ImGui_Button(ctx, "Remove##button_remove_rule", 100) then
-        for i, rule in ipairs(ruleset) do
-            if rule.selected then table.remove(ruleset, i) end
-        end
-    end
-end
-
-local function VisualRulesDrag()
-    if reaper.ImGui_BeginTable(ctx, "table_rules", 3, reaper.ImGui_TableFlags_SizingFixedFit()) then
-        for i, rule in ipairs(ruleset) do
-            reaper.ImGui_TableNextRow(ctx)
-
-            reaper.ImGui_TableNextColumn(ctx)
-            reaper.ImGui_PushID(ctx, i)
-            _, rule.state = reaper.ImGui_Checkbox(ctx, "##checkbox"..tostring(rule.config), rule.state)
-            reaper.ImGui_SameLine(ctx)
-            changed, rule.selected = reaper.ImGui_Selectable(ctx, tostring(i).."##selectable"..tostring(rule.config), rule.selected, reaper.ImGui_SelectableFlags_SpanAllColumns())
-            if changed then
-                for j, sub_rule in ipairs(ruleset) do
-                    if sub_rule.selected and i~= j then ruleset[j].selected = false end
-                end
-            end
-            if reaper.ImGui_BeginDragDropSource(ctx) then
-                reaper.ImGui_SetDragDropPayload(ctx, "rule_payload", i)
-                payload_i = i
-                reaper.ImGui_EndDragDropSource(ctx)
-            end
-            if reaper.ImGui_BeginDragDropTarget(ctx) then
-                local retval, payload = reaper.ImGui_AcceptDragDropPayload(ctx, "rule_payload")
-                if retval and payload then
-                    System.RepositionInTable(ruleset, payload_i, i)
-                end
-                reaper.ImGui_EndDragDropTarget(ctx)
-            end
-            reaper.ImGui_PopID(ctx)
-
-            reaper.ImGui_TableNextColumn(ctx)
-            reaper.ImGui_Text(ctx, rule.type)
-
-            reaper.ImGui_TableNextColumn(ctx)
-            reaper.ImGui_Text(ctx, tostring(rule.config))
-        end
-        reaper.ImGui_EndTable(ctx)
-    end
-end
-
-local function VisualRulePopup()
-    reaper.ImGui_Text(ctx, "Rule popup opened for "..rule_popup.type)
-    if reaper.ImGui_Button(ctx, "Close popup") then rule_popup_state = false end
-end
-
--- GUI Rules
-local function VisualRules()
-    VisualRulesTable()
-    VisualRulesDrag()
-    if rule_popup_state then VisualRulePopup() end
-end
-
--- GUI Rules
+-- GUI Userdatas
 local function VisualUserdata()
     reaper.ImGui_Text(ctx, "USERDATA")
 end
@@ -153,7 +89,7 @@ local function VisualElements()
     local bottom_height = child_height - top_height - splitter_size - 40
 
     if reaper.ImGui_BeginChild(ctx, "child_top_ruleset", child_width, top_height, reaper.ImGui_ChildFlags_Border()) then
-        VisualRules()
+        rules_popup.ShowVisuals()
         reaper.ImGui_EndChild(ctx)
     end
 
@@ -256,10 +192,12 @@ local function ImGuiPopTheme()
     reaper.ImGui_PopStyleColor(ctx, #style_colors)
 end
 
+-- At every frame
 local function OnTick()
     System.ProjectUpdates()
     if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Escape()) then
-        System.ClearUserdataSelection()
+        --System.ClearUserdataSelection()
+        System.ClearTableSelection(ruleset)
     end
 end
 
