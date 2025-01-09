@@ -2,7 +2,12 @@
 --@author gaspard
 --@version 1.0.1
 --@changelog Script creation
---@about Crops left and right edges of selected item with next selected item's length (using timeline position to set length).
+--@about
+--  - Crops left and right edges of selected item with next selected item's length (using timeline position to set length).
+--  - How to use:
+--      - Select a model item
+--      - Launch script
+--      - Select item to crop to already selected item length (using its position to calculate) 
 
 local function SetButtonState(set)
     local _, _, sec, cmd, _, _, _ = reaper.get_action_context()
