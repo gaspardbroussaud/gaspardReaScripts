@@ -1,6 +1,6 @@
 --@description Crop item left and right edges with next selected item length (using timeline position)
 --@author gaspard
---@version 1.0
+--@version 1.0.1
 --@changelog Script creation
 --@about Crops left and right edges of selected item with next selected item's length (using timeline position to set length).
 
@@ -38,7 +38,7 @@ end
 
 local function Loop()
     done, item, previous_item = CheckSelectedItem(item)
-    if reaper.CountSelectedMediaItems(0) > 1 then return end
+    if reaper.CountSelectedMediaItems(0) ~= 1 then return end
     if not done then reaper.defer(Loop)
     else CropItem(previous_item, item) end
 end
