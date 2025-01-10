@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="52433b74b5a6d120ef32ddf346fb214d11cf9cbf">
+<index version="1" name="Gaspard ReaScripts" commit="7c252b1bae9774e64371272fb4cdaa4026a3e4ce">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -570,6 +570,21 @@
     </reapack>
   </category>
   <category name="Region">
+    <reapack name="gaspard_Create region from selected items (name with first item).lua" type="script" desc="Create region from selected items (name with first item)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab Create region from selected items (name with first item)\sa180\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2025-01-10T14:34:46Z">
+        <changelog><![CDATA[- Script added]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7c252b1bae9774e64371272fb4cdaa4026a3e4ce/Region/gaspard_Create%20region%20from%20selected%20items%20(name%20with%20first%20item).lua</source>
+      </version>
+    </reapack>
     <reapack name="gaspard_Region generation and render matrix tool.lua" type="script" desc="Region generation and render matrix Tool">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
