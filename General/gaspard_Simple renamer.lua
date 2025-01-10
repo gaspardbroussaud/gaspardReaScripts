@@ -1,8 +1,8 @@
 --@description Simple renamer
 --@author gaspard
---@version 1.0
+--@version 1.0.1
 --@changelog
---  - Adding script
+--  - Fix crash on userdata selection
 --@about
 --  ### Simple renamer
 --  - A simple and quick renamer via text replace for tracks, regions, markers, items (may add others later).
@@ -75,7 +75,12 @@ end
 function InitialVariables()
     InitSystemVariables()
     GetGuiStylesFromFile()
-    version = "1.0"
+    -- Get version from ReaPack
+    local script_path = select(2, reaper.get_action_context())
+    local pkg = reaper.ReaPack_GetOwner(script_path)
+    version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
+    reaper.ReaPack_FreeEntry(pkg)
+    -- All variables
     og_window_width = 600
     og_window_height = 500
     window_width = og_window_width
@@ -621,6 +626,7 @@ function DisplayUserdata()
                                     if replaced_text ~= "" and input_find ~= input_replace then text = text..replaced_text end
                                     reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Border(), 0xFFFFFFFF)
                                     reaper.ImGui_SetTooltip(ctx, text)
+                                    reaper.ImGui_PopStyleColor(ctx)
                                 end
 
                                 if input_find ~= input_replace then
