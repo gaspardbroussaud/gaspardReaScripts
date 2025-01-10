@@ -11,6 +11,7 @@
 -- Toggle button state in Reaper
 function SetButtonState(set)
     local _, name, sec, cmd, _, _, _ = reaper.get_action_context()
+    reaper.ShowConsoleMsg(tostring(sec).."\n")
     action_name = string.match(name, "gaspard_(.-)%.lua")
     reaper.SetToggleCommandState(sec, cmd, set or 0)
     reaper.RefreshToolbar2(sec, cmd)
@@ -27,7 +28,12 @@ end
 -- All initial variable for script and GUI
 function InitialVariables()
     GetGuiStylesFromFile()
-    version = "1.0"
+    -- Get script version with Reapack
+    local script_path = select(2, reaper.get_action_context())
+    local pkg = reaper.ReaPack_GetOwner(script_path)
+    version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
+    reaper.ReaPack_FreeEntry(pkg)
+    -- All script variables
     og_window_width = 250
     og_window_height = 235
     window_width = og_window_width
