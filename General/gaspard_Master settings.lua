@@ -1,8 +1,8 @@
 --@description Master settings
 --@author gaspard
---@version 1.1.3
+--@version 1.1.4
 --@changelog
---  - Update required settings for all variable types
+--  - Add script version display
 --@about
 --  ### Master settings
 --  All settings for all gaspard's scripts
@@ -81,7 +81,13 @@ end
 function InitialVariables()
     InitSystemVariables()
     GetGuiStylesFromFile()
-    version = "1.1.2"
+    -- Get script version with Reapack
+    local script_path = select(2, reaper.get_action_context())
+    local pkg = reaper.ReaPack_GetOwner(script_path)
+    version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
+    reaper.ReaPack_FreeEntry(pkg)
+    -- All script variables
+    script_version = ""
     og_window_width = 500
     og_window_height = 400
     window_width = og_window_width
@@ -137,6 +143,19 @@ function CloseInputPopup()
             if scripts[i].selected then script_name = scripts[i].name end
         end
     end
+end
+
+-- Get selected script installed version
+function GetScriptVersion(script_path)
+    script_path = script_path:gsub("\\", "/")
+    script_path = script_path:gsub(".json", ".lua")
+    script_path = script_path:gsub("_settings", "")
+    script_path = script_path:gsub("Utilities/", "")
+    local pkg = reaper.ReaPack_GetOwner(script_path)
+    script_version = select(7, reaper.ReaPack_GetEntryInfo(pkg))
+    reaper.ReaPack_FreeEntry(pkg)
+    if script_version ~= "" then script_version = "v"..script_version end
+    return tostring(script_version)
 end
 
 -- GUI Initialize function
@@ -264,6 +283,7 @@ function Gui_Elements()
                                 script_path = scripts[i].path
                                 script_selected = true
                                 one_changed = false
+                                script_version = GetScriptVersion(script_path)
                                 Settings = gson.LoadJSON(script_path)
                             end
                         end
@@ -283,7 +303,7 @@ function Gui_Elements()
             if script_selected then
                 reaper.ImGui_Dummy(ctx, 1, 10)
 
-                reaper.ImGui_Text(ctx, "SETTINGS")
+                reaper.ImGui_Text(ctx, "SETTINGS "..script_version)
                 reaper.ImGui_Dummy(ctx, 1, 5)
 
                 -- Go through in "order"
