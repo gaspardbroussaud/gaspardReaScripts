@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="7c252b1bae9774e64371272fb4cdaa4026a3e4ce">
+<index version="1" name="Gaspard ReaScripts" commit="ee9acd5e4d2bb8cad05997053208507adb0bd884">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -566,6 +566,27 @@
       </version>
       <version name="1.0.3" author="gaspard" time="2024-12-09T16:36:17Z">
         <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b605304fa3848b9bee9ad4e19d6bdb9e485a373f/JSON/json_utilities_lib.lua</source>
+      </version>
+    </reapack>
+  </category>
+  <category name="Marker">
+    <reapack name="gaspard_Set marker to first transient in selected items using name pattern.lua" type="script" desc="Set marker to first transient in selected items using name pattern">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab Set marker to first transient in selected items using name pattern\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab How to use:\par}
+{\pard \ql \f0 \sa0 \li720 \fi-360 \endash \tx360\tab Select items to insert markers\par}
+{\pard \ql \f0 \sa0 \li720 \fi-360 \endash \tx360\tab Enter names in GUI\par}
+{\pard \ql \f0 \sa0 \li720 \fi-360 \endash \tx360\tab Create markers with button\sa180\sa180\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2025-01-10T16:27:18Z">
+        <changelog><![CDATA[- Add script]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/ee9acd5e4d2bb8cad05997053208507adb0bd884/Marker/gaspard_Set%20marker%20to%20first%20transient%20in%20selected%20items%20using%20name%20pattern.lua</source>
       </version>
     </reapack>
   </category>
