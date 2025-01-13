@@ -13,9 +13,9 @@ if item_count ~= 0 then
     for i = 0, item_count do
         items[i] = reaper.GetSelectedMediaItem(0, i)
     end
-    
+
     local edit_cursor_origin = reaper.GetCursorPosition()
-    
+
     for i = 0, #items do
         local item = items[i]
         local position = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
@@ -26,7 +26,7 @@ if item_count ~= 0 then
         local cursor_position = reaper.GetCursorPosition()
         reaper.AddProjectMarker(0, false, cursor_position, 0, name, -1)
     end
-    
+
     reaper.SetEditCurPos(edit_cursor_origin, false, false)
 else
     reaper.MB("No item(s) selected", "Message", 0)
