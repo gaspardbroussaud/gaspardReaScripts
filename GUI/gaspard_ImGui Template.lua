@@ -229,3 +229,33 @@ SetButtonState(1)
 Gui_Init()
 Gui_Loop()
 reaper.atexit(SetButtonState)
+
+-- TEMPLATE CODE FOR IMPORT
+--[[
+-- Get GUI style from file
+function GetGuiStylesFromFile()
+    local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
+    local style = dofile(gui_style_settings_path)
+    style_vars = style.vars
+    style_colors = style.colors
+end
+
+-- Push all GUI style settings
+function Gui_PushTheme()
+    -- Style Vars
+    for i = 1, #style_vars do
+        reaper.ImGui_PushStyleVar(ctx, style_vars[i].var, style_vars[i].value)
+    end
+
+    -- Style Colors
+    for i = 1, #style_colors do
+        reaper.ImGui_PushStyleColor(ctx, style_colors[i].col, style_colors[i].value)
+    end
+end
+
+-- Pop all GUI style settings
+function Gui_PopTheme()
+    reaper.ImGui_PopStyleVar(ctx, #style_vars)
+    reaper.ImGui_PopStyleColor(ctx, #style_colors)
+end
+]]
