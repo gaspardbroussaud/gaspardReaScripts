@@ -11,7 +11,9 @@ local project_id, _ = reaper.EnumProjects(-1)
 
 -- Init Settings from file
 function System.InitSettings()
-    Settings = {}
+    Settings = {
+        order = {}
+    }
     Settings = gson.LoadJSON(settings_path, Settings)
 end
 
@@ -162,6 +164,38 @@ function System.ClearUserdataSelection()
         end
         reaper.UpdateArrange()
     end
+end
+
+-- Add rule using default config
+function System.LoadEmptyRule(default_rule, rule_path)
+    empty_rule = gson.LoadJSON(rule_path, default_rule)
+    if empty_rule.version and empty_rule.version ~= default_rule.version then
+        os.remove(rule_path)
+        gson.SaveJSON(rule_path, default_rule)
+        empty_rule = default_rule
+    end
+    return empty_rule
+end
+
+-- Copy table
+function System.TableCopy(origin)
+    local origin_type = type(origin)
+    local copy
+    if origin_type == 'table' then
+        copy = {}
+        for key, value in next, origin, nil do
+            copy[System.TableCopy(key)] = System.TableCopy(value)
+        end
+        setmetatable(copy, System.TableCopy(getmetatable(origin)))
+    else
+        copy = origin
+    end
+    return copy
+end
+
+-- Debug
+function System.Debug(message)
+    reaper.ShowConsoleMsg(tostring(message))
 end
 
 return System

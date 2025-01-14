@@ -13,7 +13,13 @@
 -- Toggle button state in Reaper
 function SetButtonState(set)
     local _, name, sec, cmd, _, _, _ = reaper.get_action_context()
-    action_name = string.match(name, "gaspard_(.-)%.lua")
+    if set == 1 then
+      action_name = string.match(name, "gaspard_(.-)%.lua")
+      -- Get version from ReaPack
+      local pkg = reaper.ReaPack_GetOwner(name)
+      version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
+      reaper.ReaPack_FreeEntry(pkg)
+    end
     reaper.SetToggleCommandState(sec, cmd, set or 0)
     reaper.RefreshToolbar2(sec, cmd)
 end
@@ -33,6 +39,7 @@ package.path = package.path .. ";" .. json_file_path .. "/?.lua"
 gson = require("json_utilities_lib")
 
 settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/Utilities/gaspard_'..action_name..'_settings.json'
+rule_default_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/Utilities/rule_default.json'
 presets_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/Presets'
 
 System.InitSettings()

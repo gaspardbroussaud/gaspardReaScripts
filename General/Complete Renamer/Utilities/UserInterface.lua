@@ -5,10 +5,10 @@
 
 local Gui = {}
 
-local rules_popup = require('Utilities/GUI_Elements/Gui_Rules_Popup')
+local rules_window = require('Utilities/GUI_Elements/Gui_Rules')
+local userdata_window = require('Utilities/GUI_Elements/Gui_Userdata')
 
 --#region Initial Variables
-local version = "0.0.1b"
 local og_window_width = 800
 local og_window_height = 650
 window_width = og_window_width
@@ -74,50 +74,6 @@ local function VisualTopBar()
     end
 end
 
--- GUI Userdatas
-local function VisualUserdata()
-    reaper.ImGui_Text(ctx, "USERDATA")
-end
-
--- GUI Global Elements
-local function VisualElements()
-    local child_width = window_width - 16
-    local child_height = window_height - topbar_height
-    local splitter_size = 5
-
-    local top_height = math.floor(child_height * top_height_ratio)
-    local bottom_height = child_height - top_height - splitter_size - 40
-
-    if reaper.ImGui_BeginChild(ctx, "child_top_ruleset", child_width, top_height, reaper.ImGui_ChildFlags_Border()) then
-        rules_popup.ShowVisuals()
-        reaper.ImGui_EndChild(ctx)
-    end
-
-    reaper.ImGui_SetCursorPosY(ctx, top_height + topbar_height + 11 + (splitter_size * 0.5))
-    reaper.ImGui_Separator(ctx)
-
-    reaper.ImGui_SetCursorPosX(ctx, 12)
-    reaper.ImGui_SetCursorPosY(ctx, top_height + topbar_height + 10)
-    reaper.ImGui_InvisibleButton(ctx, "button_splitter", child_width - 8, splitter_size)
-
-    if reaper.ImGui_IsItemHovered(ctx) or is_resizing then
-        reaper.ImGui_SetMouseCursor(ctx, reaper.ImGui_MouseCursor_ResizeNS())
-    end
-    if reaper.ImGui_IsItemActive(ctx) then
-        is_resizing = true
-        local _, mouse_delta_y = reaper.ImGui_GetMouseDelta(ctx)
-        top_height_ratio = math.max(0.1, math.min(0.8, top_height_ratio + mouse_delta_y / child_height))
-    elseif is_resizing then
-        is_resizing = false
-    end
-
-    reaper.ImGui_SetCursorPosY(ctx, top_height + topbar_height + 10 + splitter_size)
-    if reaper.ImGui_BeginChild(ctx, "child_bottom_userdata", child_width, bottom_height, reaper.ImGui_ChildFlags_Border()) then
-        VisualUserdata()
-        reaper.ImGui_EndChild(ctx)
-    end
-end
-
 -- Gui Settings
 local function VisualSettings()
     -- Set Settings Window visibility and settings
@@ -159,6 +115,46 @@ local function VisualSettings()
             settings_one_changed = false
         end
         show_settings = false
+    end
+end
+
+-- GUI Global Elements
+local function VisualElements()
+    local child_width = window_width - 16
+    local child_height = window_height - topbar_height
+    local splitter_size = 5
+
+    local top_height = math.floor(child_height * top_height_ratio)
+    local bottom_height = child_height - top_height - splitter_size - 40
+
+    if reaper.ImGui_BeginChild(ctx, "child_top_ruleset", child_width, top_height, reaper.ImGui_ChildFlags_Border()) then
+        --rules_popup.ShowVisuals()
+        rules_window.Show()
+        reaper.ImGui_EndChild(ctx)
+    end
+
+    reaper.ImGui_SetCursorPosY(ctx, top_height + topbar_height + 11 + (splitter_size * 0.5))
+    reaper.ImGui_Separator(ctx)
+
+    reaper.ImGui_SetCursorPosX(ctx, 12)
+    reaper.ImGui_SetCursorPosY(ctx, top_height + topbar_height + 10)
+    reaper.ImGui_InvisibleButton(ctx, "button_splitter", child_width - 8, splitter_size)
+
+    if reaper.ImGui_IsItemHovered(ctx) or is_resizing then
+        reaper.ImGui_SetMouseCursor(ctx, reaper.ImGui_MouseCursor_ResizeNS())
+    end
+    if reaper.ImGui_IsItemActive(ctx) then
+        is_resizing = true
+        local _, mouse_delta_y = reaper.ImGui_GetMouseDelta(ctx)
+        top_height_ratio = math.max(0.1, math.min(0.8, top_height_ratio + mouse_delta_y / child_height))
+    elseif is_resizing then
+        is_resizing = false
+    end
+
+    reaper.ImGui_SetCursorPosY(ctx, top_height + topbar_height + 10 + splitter_size)
+    if reaper.ImGui_BeginChild(ctx, "child_bottom_userdata", child_width, bottom_height, reaper.ImGui_ChildFlags_Border()) then
+        userdata_window.ShowVisuals()
+        reaper.ImGui_EndChild(ctx)
     end
 end
 
