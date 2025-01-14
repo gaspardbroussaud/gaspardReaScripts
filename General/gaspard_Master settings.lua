@@ -1,8 +1,8 @@
 --@description Master settings
 --@author gaspard
---@version 1.1.4
+--@version 1.1.5
 --@changelog
---  - Add script version display
+--  - Add ignore setting
 --@about
 --  ### Master settings
 --  All settings for all gaspard's scripts
@@ -308,7 +308,7 @@ function Gui_Elements()
 
                 -- Go through in "order"
                 for _, key in ipairs(Settings.order) do
-                    if Settings[key] then
+                    if Settings[key] and not Settings[key]["ignore"] then
                         -- Display variable name
                         reaper.ImGui_Text(ctx, Settings[key]["name"]..":")
                         reaper.ImGui_SameLine(ctx)
