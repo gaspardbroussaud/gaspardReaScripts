@@ -160,11 +160,13 @@ local function VisualElements(child_width, child_height)
 
     local x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
     local button_x = 100
-    local disable = #System.ruleset <= 0
+    --local disable = #System.ruleset <= 0
+    local disable = not System.one_renamed
     if disable then reaper.ImGui_BeginDisabled(ctx) end
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + x - button_x)
     if reaper.ImGui_Button(ctx, "APPLY##apply_button", button_x) then
-        --ApplyReplacedNames()
+        System.ApplyReplacedNames()
+        System.one_renamed = false
     end
     if disable then reaper.ImGui_EndDisabled(ctx) end
 end

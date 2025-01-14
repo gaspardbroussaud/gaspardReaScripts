@@ -62,7 +62,10 @@ local function RulesButtons()
 
     if reaper.ImGui_Button(ctx, "Remove##button_remove_rule", 100) then
         for i, rule in ipairs(System.ruleset) do
-            if rule.selected then table.remove(System.ruleset, i) end
+            if rule.selected then
+                table.remove(System.ruleset, i)
+                System.one_renamed = false
+            end
             if selected_rule == rule then
                 selected_rule = nil
                 rule_popup_open = false
@@ -81,7 +84,8 @@ local function RulesDrag()
 
             reaper.ImGui_TableNextColumn(ctx)
             reaper.ImGui_PushID(ctx, i)
-            _, rule.state = reaper.ImGui_Checkbox(ctx, "##checkbox"..rule_id, rule.state)
+            changed, rule.state = reaper.ImGui_Checkbox(ctx, "##checkbox"..rule_id, rule.state)
+            if changed then System.one_renamed = false end
             reaper.ImGui_SameLine(ctx)
             local selectable_label = tostring(i).."##selectable"..rule_id
             changed, rule.selected = reaper.ImGui_Selectable(ctx, selectable_label, rule.selected, reaper.ImGui_SelectableFlags_SpanAllColumns())

@@ -13,6 +13,7 @@ System.Ctrl = false
 
 System.global_datas = {}
 System.ruleset = {}
+System.one_renamed = false
 
 -- Init Settings from file
 function System.InitSettings()
@@ -193,40 +194,77 @@ end
 function System.GetReplacedName(name)
     local should_apply = false
     for _, rule in ipairs(System.ruleset) do
-        if rule.type_selected == "insert" then
-            if rule.config.insert.from_start then
-                name = rule.config.insert.text..name
+        if rule.state then
+            if rule.type_selected == "insert" then
+                if rule.config.insert.from_start then
+                    name = rule.config.insert.text..name
+                    should_apply = true
+                end
+                if rule.config.insert.from_end then
+                    name = name..rule.config.insert.text
+                    should_apply = true
+                end
+            end
+            if rule.type_selected == "replace" then
+                if string.find(name, rule.config.replace.search_text) then
+                    name = string.gsub(name, rule.config.replace.search_text, rule.config.replace.replace_text)
+                    should_apply = true
+                end
+            end
+            if rule.type_selected == "case" then
+                if rule.config.case.selected == 0 then
+                    name = CapitalizeWords(name)
+                elseif rule.config.case.selected == 1 then
+                    name = string.lower(name)
+                elseif rule.config.case.selected == 2 then
+                    name = string.upper(name)
+                elseif rule.config.case.selected == 3 then
+                    name = name:gsub("^(%l)", string.upper)
+                end
                 should_apply = true
             end
-            if rule.config.insert.from_end then
-                name = name..rule.config.insert.text
-                should_apply = true
-            end
-        end
-        if rule.type_selected == "replace" then
-            if string.find(name, rule.config.replace.search_text) then
-                name = string.gsub(name, rule.config.replace.search_text, rule.config.replace.replace_text)
-                should_apply = true
-            end
-        end
-        if rule.type_selected == "case" then
-            if rule.config.case.selected == 0 then
-                name = CapitalizeWords(name)
-            elseif rule.config.case.selected == 1 then
-                name = string.lower(name)
-            elseif rule.config.case.selected == 2 then
-                name = string.upper(name)
-            elseif rule.config.case.selected == 3 then
-                name = name:gsub("^(%l)", string.upper)
-            end
-            should_apply = true
         end
     end
     if should_apply then
         return name
     else
-        return ""
+        return nil
     end
+end
+
+-- Apply name replacement
+function System.ApplyReplacedNames()
+    reaper.PreventUIRefresh(-1)
+    reaper.Undo_BeginBlock()
+
+    if System.global_datas.order then
+        for _, key in ipairs(System.global_datas.order) do
+            if System.global_datas[key]["data"] then
+                for _, userdata in pairs(System.global_datas[key]["data"]) do
+                    local can_apply = true
+                    if can_apply then
+                        local replaced_name = System.GetReplacedName(userdata.name)
+                        if replaced_name and replaced_name ~= userdata.name then
+                            userdata.name = replaced_name
+                            if key == "items" then
+                                reaper.GetSetMediaItemTakeInfo_String(reaper.GetTake(userdata.id, 0), "P_NAME", userdata.name, true)
+                            elseif key == "tracks" then
+                                reaper.GetSetMediaTrackInfo_String(userdata.id, "P_NAME", userdata.name, true)
+                            elseif key == "markers" then
+                                reaper.SetProjectMarker(userdata.id, false, userdata.pos, userdata.rgnend, userdata.name)
+                            elseif key == "regions" then
+                                reaper.SetProjectMarker(userdata.id, true, userdata.pos, userdata.rgnend, userdata.name)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    reaper.Undo_EndBlock("Complete renamer: name replaced.", -1)
+    reaper.PreventUIRefresh(1)
+    reaper.UpdateArrange()
 end
 
 -- Copy table

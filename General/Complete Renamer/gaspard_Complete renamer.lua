@@ -1,4 +1,3 @@
---@noindex
 --@description Complete renamer
 --@author gaspard
 --@version 0.0.1b

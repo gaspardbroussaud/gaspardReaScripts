@@ -102,6 +102,7 @@ local function VisualRulePopupElements(width, height)
         else
             ruleset[selected_index] = System.TableCopy(popup_rule)
         end
+        System.one_renamed = false
     end
 
     reaper.ImGui_SetCursorPosX(ctx, width - 110)

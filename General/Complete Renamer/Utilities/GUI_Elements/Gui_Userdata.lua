@@ -62,21 +62,22 @@ local function DisplayUserdata()
 
                                 reaper.ImGui_TableNextColumn(ctx)
                                 local can_apply = true
-                                local replaced_text = ""
+                                local replaced_text = nil
                                 if selection_based and not userdata.selected then can_apply = false end
                                 if can_apply then
                                     replaced_text = System.GetReplacedName(userdata.name)
+                                    if replaced_text and replaced_text ~= userdata.name then System.one_renamed = true end
                                 end
 
                                 if reaper.ImGui_IsItemHovered(ctx, reaper.ImGui_HoveredFlags_Stationary()) then
                                     local text = userdata.name.." -> "
-                                    if replaced_text ~= "" and replaced_text ~= userdata.name then text = text..replaced_text end
+                                    if replaced_text and replaced_text ~= userdata.name then text = text..replaced_text end
                                     reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Border(), 0xFFFFFFFF)
                                     reaper.ImGui_SetTooltip(ctx, text)
                                     reaper.ImGui_PopStyleColor(ctx)
                                 end
 
-                                if userdata.name ~= replaced_text then
+                                if replaced_text and userdata.name ~= replaced_text then
                                     reaper.ImGui_Text(ctx, replaced_text)
                                 end
                             end
