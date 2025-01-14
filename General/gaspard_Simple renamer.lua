@@ -1,8 +1,8 @@
 --@description Simple renamer
 --@author gaspard
---@version 1.0.1
+--@version 1.0.2
 --@changelog
---  - Fix crash on userdata selection
+--  - Fix typo in undo message
 --@about
 --  ### Simple renamer
 --  - A simple and quick renamer via text replace for tracks, regions, markers, items (may add others later).
@@ -571,7 +571,7 @@ function ApplyReplacedNames()
         end
     end
 
-    reaper.Undo_EndBlock("Complete renamer: name replaced.", -1)
+    reaper.Undo_EndBlock("Simple renamer: name replaced.", -1)
     reaper.PreventUIRefresh(1)
     reaper.UpdateArrange()
 end
