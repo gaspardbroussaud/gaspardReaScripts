@@ -1,13 +1,13 @@
 --@description Complete renamer
 --@author gaspard
 --@version 0.0.1b
--- @provides
+--@provides
 --    [nomain] Utilities/*.lua
 --@changelog
 --  - Adding script
 --@about
 --  ### Complete renamer
---  - A complete renamer with selectable and editable rule blocks for tracks, regions, markers, items (may add others later).
+--  - A complete renamer with selectable and editable rule blocks for items, tracks, markers and regions (may evolve).
 
 -- Toggle button state in Reaper
 function SetButtonState(set)
