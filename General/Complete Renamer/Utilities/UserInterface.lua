@@ -119,25 +119,25 @@ local function VisualSettings()
 end
 
 -- GUI Global Elements
-local function VisualElements()
-    local child_width = window_width - 16
-    local child_height = window_height - topbar_height
+local function VisualElements(child_width, child_height)
+    child_height = child_height - 35
     local splitter_size = 5
 
     local top_height = math.floor(child_height * top_height_ratio)
-    local bottom_height = child_height - top_height - splitter_size - 40
+    local bottom_height = child_height - top_height - splitter_size
 
+    reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) - 8)
+    reaper.ImGui_SetCursorPosY(ctx, reaper.ImGui_GetCursorPosY(ctx) - 8)
     if reaper.ImGui_BeginChild(ctx, "child_top_ruleset", child_width, top_height, reaper.ImGui_ChildFlags_Border()) then
-        --rules_popup.ShowVisuals()
         rules_window.Show()
         reaper.ImGui_EndChild(ctx)
     end
 
-    reaper.ImGui_SetCursorPosY(ctx, top_height + topbar_height + 11 + (splitter_size * 0.5))
+    reaper.ImGui_SetCursorPosY(ctx, top_height + (splitter_size * 0.5))
     reaper.ImGui_Separator(ctx)
 
     reaper.ImGui_SetCursorPosX(ctx, 12)
-    reaper.ImGui_SetCursorPosY(ctx, top_height + topbar_height + 10)
+    reaper.ImGui_SetCursorPosY(ctx, top_height)
     reaper.ImGui_InvisibleButton(ctx, "button_splitter", child_width - 8, splitter_size)
 
     if reaper.ImGui_IsItemHovered(ctx) or is_resizing then
@@ -151,11 +151,22 @@ local function VisualElements()
         is_resizing = false
     end
 
-    reaper.ImGui_SetCursorPosY(ctx, top_height + topbar_height + 10 + splitter_size)
+    reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) - 8)
+    reaper.ImGui_SetCursorPosY(ctx, top_height + splitter_size)
     if reaper.ImGui_BeginChild(ctx, "child_bottom_userdata", child_width, bottom_height, reaper.ImGui_ChildFlags_Border()) then
         userdata_window.ShowVisuals()
         reaper.ImGui_EndChild(ctx)
     end
+
+    local x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
+    local button_x = 100
+    local disable = #System.ruleset <= 0
+    if disable then reaper.ImGui_BeginDisabled(ctx) end
+    reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + x - button_x)
+    if reaper.ImGui_Button(ctx, "APPLY##apply_button", button_x) then
+        --ApplyReplacedNames()
+    end
+    if disable then reaper.ImGui_EndDisabled(ctx) end
 end
 
 -- Gui Version on bottom right
@@ -192,9 +203,10 @@ end
 local function OnTick()
     System.ProjectUpdates()
     if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Escape()) then
-        --System.ClearUserdataSelection()
+        System.ClearUserdataSelection()
         System.ClearTableSelection(ruleset)
     end
+    System.KeyboardHold()
 end
 
 function Gui.Init()
@@ -227,7 +239,12 @@ function Gui.Loop()
         if show_settings then VisualSettings() end
 
         -- Script GUI Elements
-        VisualElements()
+        local child_width = window_width - 16
+        local child_height = window_height - topbar_height - 40
+        if reaper.ImGui_BeginChild(ctx, "child_global", child_width, child_height, reaper.ImGui_ChildFlags_Border()) then
+            VisualElements(child_width, child_height)
+            reaper.ImGui_EndChild(ctx)
+        end
 
         -- Show script version on  bottom right
         VisualVersion()

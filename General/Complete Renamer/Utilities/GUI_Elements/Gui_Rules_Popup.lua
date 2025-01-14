@@ -26,20 +26,38 @@ local function Gui_PopupRulesConfig()
         reaper.ImGui_PushItemWidth(ctx, -1)
         _, popup_rule.config.insert.text = reaper.ImGui_InputText(ctx, "##input_text_rule_insert", popup_rule.config.insert.text)
         reaper.ImGui_Dummy(ctx, 1, 5)
-        reaper.ImGui_Text(ctx, "Position:")
+        reaper.ImGui_Text(ctx, "From start:")
+        reaper.ImGui_SameLine(ctx)
         changed, popup_rule.config.insert.from_start = reaper.ImGui_Checkbox(ctx, "##checkbox_from_start", popup_rule.config.insert.from_start)
+        reaper.ImGui_Text(ctx, "From end:")
+        reaper.ImGui_SameLine(ctx)
         changed, popup_rule.config.insert.from_end = reaper.ImGui_Checkbox(ctx, "##checkbox_from_end", popup_rule.config.insert.from_end)
     end
     local function PopupRuleReplace()
         reaper.ImGui_Text(ctx, "REPLACE")
-        reaper.ImGui_Text(ctx, popup_rule.config.replace.search_text)
-        reaper.ImGui_Text(ctx, popup_rule.config.replace.replace_text)
+        reaper.ImGui_Text(ctx, "Search:")
+        reaper.ImGui_SameLine(ctx)
+        reaper.ImGui_PushItemWidth(ctx, -1)
+        _, popup_rule.config.replace.search_text = reaper.ImGui_InputText(ctx, "##replace_search_text", popup_rule.config.replace.search_text)
+        reaper.ImGui_Text(ctx, "Replace:")
+        reaper.ImGui_SameLine(ctx)
+        reaper.ImGui_PushItemWidth(ctx, -1)
+        _, popup_rule.config.replace.replace_text = reaper.ImGui_InputText(ctx, "##replace_replace_text", popup_rule.config.replace.replace_text)
     end
     local function PopupRuleRemove()
         reaper.ImGui_Text(ctx, "CASE")
-        reaper.ImGui_Text(ctx, tostring(popup_rule.config.case.capitalize_every_word))
-        reaper.ImGui_Text(ctx, tostring(popup_rule.config.case.all_lower_case))
-        reaper.ImGui_Text(ctx, tostring(popup_rule.config.case.all_upper_case))
+        if reaper.ImGui_RadioButton(ctx, "Capitalize Every Words", popup_rule.config.case.selected == popup_rule.config.case.capitalize_every_word) then
+            popup_rule.config.case.selected = 0
+        end
+        if reaper.ImGui_RadioButton(ctx, "all lower case", popup_rule.config.case.selected == popup_rule.config.case.all_lower_case) then
+            popup_rule.config.case.selected = 1
+        end
+        if reaper.ImGui_RadioButton(ctx, "ALL UPPER CASE", popup_rule.config.case.selected == popup_rule.config.case.all_upper_case) then
+            popup_rule.config.case.selected = 2
+        end
+        if reaper.ImGui_RadioButton(ctx, "First letter capital", popup_rule.config.case.selected == popup_rule.config.case.first_letter_capital) then
+            popup_rule.config.case.selected = 3
+        end
     end
     if popup_rule.type_selected == "insert" then  PopupRuleInsert()
     elseif popup_rule.type_selected == "replace" then PopupRuleReplace()
@@ -51,10 +69,11 @@ local function VisualRulePopupElements(width, height)
     local child_width = width - 10
     local child_height = height - 75
     if reaper.ImGui_BeginChild(ctx, "child_rule_popup", child_width, child_height, reaper.ImGui_ChildFlags_Border()) then
-        if reaper.ImGui_BeginListBox(ctx, "##listbox_rule_popup_types", 100, child_height - 30) then
+        if reaper.ImGui_BeginListBox(ctx, "##listbox_rule_popup_types", 100, child_height - 16) then
             for i, rule_type in ipairs(rule_types) do
                 rule_type.selected = popup_rule.type_selected == rule_type.type
-                changed, rule_type.selected = reaper.ImGui_Selectable(ctx, rule_type.type.."##sel_rule_type"..tostring(rule_type), rule_type.selected)
+                local type_display = rule_type.type:gsub("^(%l)", string.upper)
+                changed, rule_type.selected = reaper.ImGui_Selectable(ctx, type_display.."##sel_rule_type"..tostring(rule_type), rule_type.selected)
                 if changed then
                     rule_type.selected = true
                     for j = 1, #rule_types do
