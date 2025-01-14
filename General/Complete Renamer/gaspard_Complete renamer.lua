@@ -1,8 +1,9 @@
 --@description Complete renamer
 --@author gaspard
---@version 0.0.1b
+--@version 0.0.2b
 --@provides
 --    [nomain] Utilities/*.lua
+--    [nomain] Utilities/GUI_Elements/*.lua
 --@changelog
 --  - Adding script
 --@about
