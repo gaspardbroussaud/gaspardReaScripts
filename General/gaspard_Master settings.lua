@@ -1,8 +1,8 @@
 --@description Master settings
 --@author gaspard
---@version 1.1.5
+--@version 1.1.6
 --@changelog
---  - Add ignore setting
+--  - Add tooltip for script names
 --@about
 --  ### Master settings
 --  All settings for all gaspard's scripts
@@ -72,7 +72,12 @@ function GetScriptFiles()
 
     for i = 1, #json_files do
         table.insert(scripts_list, { name = json_files[i], path = json_path[i], selected = false })
+        table.insert(hover_start_time, 0)
     end
+
+    table.sort(scripts_list, function(a, b)
+        return a.name < b.name
+    end)
 
     return scripts_list
 end
@@ -99,6 +104,7 @@ function InitialVariables()
     project_path = reaper.GetProjectPath()
     project_id, _ = reaper.EnumProjects(-1)
     Settings = {}
+    hover_start_time = {}
     scripts = GetScriptFiles()
     script_name = ""
     was_opened = false
@@ -156,6 +162,21 @@ function GetScriptVersion(script_path)
     reaper.ReaPack_FreeEntry(pkg)
     if script_version ~= "" then script_version = "v"..script_version end
     return tostring(script_version)
+end
+
+-- Tooltip with stationary delay
+function ShowTooltipWithDelay(i, text, delay)
+    if hover_start_time[i] == 0 and reaper.ImGui_IsItemHovered(ctx, reaper.ImGui_HoveredFlags_Stationary()) then
+        hover_start_time[i] = current_time
+    elseif reaper.ImGui_IsItemHovered(ctx, reaper.ImGui_HoveredFlags_Stationary()) then
+        if (current_time - hover_start_time[i]) >= delay then
+            reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Border(), 0xCCFFFFFF)
+            reaper.ImGui_SetTooltip(ctx, text)
+            reaper.ImGui_PopStyleColor(ctx)
+        end
+    else
+        hover_start_time[i] = 0
+    end
 end
 
 -- GUI Initialize function
@@ -286,6 +307,8 @@ function Gui_Elements()
                                 script_version = GetScriptVersion(script_path)
                                 Settings = gson.LoadJSON(script_path)
                             end
+
+                            ShowTooltipWithDelay(i, scripts[i].name, 0.75)
                         end
                     end
                     reaper.ImGui_EndListBox(ctx)
