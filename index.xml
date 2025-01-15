@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="78ac7cc825a3e4c69315273186238654fd9cccd5">
+<index version="1" name="Gaspard ReaScripts" commit="a4371d366bf17bb58b75ed6ca95dfd5708ca9610">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -174,6 +174,10 @@
       <version name="1.1.5" author="gaspard" time="2025-01-14T09:01:13Z">
         <changelog><![CDATA[- Add ignore setting]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/50b64ebdbfeb0c68928fa10c87a1a7c24b9e617b/General/gaspard_Master%20settings.lua</source>
+      </version>
+      <version name="1.1.6" author="gaspard" time="2025-01-15T14:43:04Z">
+        <changelog><![CDATA[- Add tooltip for script names]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a4371d366bf17bb58b75ed6ca95dfd5708ca9610/General/gaspard_Master%20settings.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Simple renamer.lua" type="script" desc="Simple renamer">
