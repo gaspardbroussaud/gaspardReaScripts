@@ -1,8 +1,8 @@
 --@description Complete selection
 --@author gaspard
---@version 0.1.4b
+--@version 0.1.5b
 --@changelog
---  - Bugfix on empty project
+--  - Fix crash on empty items (only notes) in project
 --@about
 --  ### Complete selection
 --  - A simple and quick selction tool for tracks, regions, markers, items (may add others later).
@@ -408,7 +408,13 @@ function GetItemsFromProject()
         if item_count > 0 then
             for i = 0, item_count - 1 do
                 local item_id = reaper.GetMediaItem(0, i)
-                local _, item_name = reaper.GetSetMediaItemTakeInfo_String(reaper.GetTake(item_id, 0), "P_NAME", "", false)
+                local take = reaper.GetTake(item_id, 0)
+                local item_name = ""
+                if take then
+                    _, item_name = reaper.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                else
+                    _, item_name = reaper.GetSetMediaItemInfo_String(item_id, "P_NOTES", "", false)
+                end
                 local selected = reaper.IsMediaItemSelected(item_id)
                 table.insert(items, { id = item_id, name = item_name, selected = selected })
             end

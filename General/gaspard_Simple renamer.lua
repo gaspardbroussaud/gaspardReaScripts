@@ -1,8 +1,8 @@
 --@description Simple renamer
 --@author gaspard
---@version 1.0.2
+--@version 1.0.3
 --@changelog
---  - Fix typo in undo message
+--  - Fix crash on empty items (only notes) in project
 --@about
 --  ### Simple renamer
 --  - A simple and quick renamer via text replace for tracks, regions, markers, items (may add others later).
@@ -461,7 +461,13 @@ function GetItemsFromProject()
         if item_count > 0 then
             for i = 0, item_count - 1 do
                 local item_id = reaper.GetMediaItem(0, i)
-                local _, item_name = reaper.GetSetMediaItemTakeInfo_String(reaper.GetTake(item_id, 0), "P_NAME", "", false)
+                local take = reaper.GetTake(item_id, 0)
+                local item_name = ""
+                if take then
+                    _, item_name = reaper.GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
+                else
+                    _, item_name = reaper.GetSetMediaItemInfo_String(item_id, "P_NOTES", "", false)
+                end
                 local selected = reaper.IsMediaItemSelected(item_id)
                 table.insert(items, { id = item_id, name = item_name, selected = selected })
             end
@@ -557,7 +563,12 @@ function ApplyReplacedNames()
                     if IsInputFindInName(userdata.name, input_find) and can_apply then
                         userdata.name = GetReplacedName(userdata.name, input_find, input_replace)
                         if key == "items" then
-                            reaper.GetSetMediaItemTakeInfo_String(reaper.GetTake(userdata.id, 0), "P_NAME", userdata.name, true)
+                            local take = reaper.GetTake(userdata.id, 0)
+                            if take then
+                                reaper.GetSetMediaItemTakeInfo_String(take, "P_NAME", userdata.name, true)
+                            else
+                                reaper.GetSetMediaItemInfo_String(userdata.id, "P_NOTES", userdata.name, true)
+                            end
                         elseif key == "tracks" then
                             reaper.GetSetMediaTrackInfo_String(userdata.id, "P_NAME", userdata.name, true)
                         elseif key == "markers" then
