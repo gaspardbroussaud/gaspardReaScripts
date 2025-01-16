@@ -6,7 +6,7 @@
 --    [nomain] Utilities/GUI_Elements/*.lua
 --@changelog
 --  - Fix replace text when using "-"
---  - Fix userdata selection in GUI
+--  - Fix userdata individual selection in GUI
 --@about
 --  ### Complete renamer
 --  - A complete renamer with selectable and editable rule blocks for items, tracks, markers and regions (may evolve).
