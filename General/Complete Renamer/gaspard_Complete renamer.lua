@@ -1,11 +1,12 @@
 --@description Complete renamer
 --@author gaspard
---@version 0.0.3b
+--@version 0.0.4b
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/GUI_Elements/*.lua
 --@changelog
---  - Fix crash on empty items (only notes) in project
+--  - Fix replace text when using "-"
+--  - Fix userdata selection in GUI
 --@about
 --  ### Complete renamer
 --  - A complete renamer with selectable and editable rule blocks for items, tracks, markers and regions (may evolve).
