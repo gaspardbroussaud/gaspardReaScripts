@@ -7,6 +7,7 @@ local Gui = {}
 
 local rules_window = require('Utilities/GUI_Elements/Gui_Rules')
 local userdata_window = require('Utilities/GUI_Elements/Gui_Userdata')
+local settings_window = require('Utilities/GUI_Elements/Gui_Settings')
 
 --#region Initial Variables
 local og_window_width = 800
@@ -58,9 +59,7 @@ local function VisualTopBar()
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'Settings##settings_button') then
                 show_settings = not show_settings
-                if settings_one_changed then
-                    settings_one_changed = false
-                end
+                if show_settings then settings_window.GetSettings() end
             end
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'X##quit_button') then
@@ -71,50 +70,6 @@ local function VisualTopBar()
 
         reaper.ImGui_PopStyleVar(ctx, 1)
         reaper.ImGui_EndChild(ctx)
-    end
-end
-
--- Gui Settings
-local function VisualSettings()
-    -- Set Settings Window visibility and settings
-    local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoResize()
-    local settings_width = og_window_width - 350
-    local settings_height = og_window_height * settings_amount_height
-    reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
-    reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
-
-    local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
-    if settings_visible then
-        if reaper.ImGui_BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, reaper.ImGui_ChildFlags_Border()) then
-            local changed = false
-            if changed then settings_one_changed = true end
-
-            reaper.ImGui_EndChild(ctx)
-        end
-
-        reaper.ImGui_SetCursorPosX(ctx, settings_width - 80)
-        reaper.ImGui_SetCursorPosY(ctx, settings_height - 35)
-        if not settings_one_changed then disable = true
-        else disable = false end
-        if disable then reaper.ImGui_BeginDisabled(ctx) end
-        if reaper.ImGui_Button(ctx, "Apply##settings_apply", 70) then
-            --ApplySettings()
-            --gson.SaveJSON(settings_path, Settings)
-            settings_one_changed = false
-        end
-        if disable then reaper.ImGui_EndDisabled(ctx) end
-
-        reaper.ImGui_End(ctx)
-    else
-        show_settings = false
-    end
-
-    if not settings_open then
-        if settings_one_changed then
-            ResetUnappliedSettings()
-            settings_one_changed = false
-        end
-        show_settings = false
     end
 end
 
@@ -238,7 +193,7 @@ function Gui.Loop()
         VisualTopBar()
 
         -- Settings window
-        if show_settings then VisualSettings() end
+        if show_settings then settings_window.Show() end
 
         -- Script GUI Elements
         local child_width = window_width - 16

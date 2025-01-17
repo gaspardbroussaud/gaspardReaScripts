@@ -9,9 +9,6 @@ local project_name = reaper.GetProjectName(0)
 local project_path = reaper.GetProjectPath()
 local project_id, _ = reaper.EnumProjects(-1)
 
-local prev_item_count = reaper.CountMediaItems(0)
-local prev_track_count = reaper.CountTracks(0)
-
 System.Shift = false
 System.Ctrl = false
 
@@ -211,8 +208,6 @@ function System.GetUserdatas()
     local regions = {display = "Regions", data = table_regions}
     local order = {"items", "tracks", "markers", "regions"}
     System.global_datas = {order = order, items = items, tracks = tracks, markers = markers, regions = regions}
-    prev_item_count = reaper.CountMediaItems(0)
-    prev_track_count = reaper.CountTracks(0)
 end
 
 -- Reposition an item to another index in a given table
@@ -296,7 +291,7 @@ function System.LoadEmptyRule(default_rule, rule_path)
 end
 
 local function CapitalizeWords(str)
-    return str:gsub("(%a)([%w_]*)", function(first, rest)
+    return str:gsub("(%w)(%w*)"--[["(%a)([%w_]*)"]], function(first, rest)
         return first:upper() .. rest:lower()
     end)
 end
@@ -323,7 +318,6 @@ function System.GetReplacedName(name)
             if rule.type_selected == "replace" then
                 local search = EscapePattern(rule.config.replace.search_text)
                 if string.find(name, search) then
-                    reaper.ShowConsoleMsg(name.."\n")
                     name = string.gsub(name, search, rule.config.replace.replace_text)
                     should_apply = true
                 end
@@ -336,6 +330,7 @@ function System.GetReplacedName(name)
                 elseif rule.config.case.selected == 2 then
                     name = string.upper(name)
                 elseif rule.config.case.selected == 3 then
+                    name = string.lower(name)
                     name = name:gsub("^(%l)", string.upper)
                 end
                 should_apply = true
@@ -403,11 +398,6 @@ function System.TableCopy(origin)
         copy = origin
     end
     return copy
-end
-
--- Debug
-function System.Debug(message)
-    reaper.ShowConsoleMsg(tostring(message))
 end
 
 return System
