@@ -15,7 +15,6 @@ local og_window_height = 650
 window_width = og_window_width
 window_height = og_window_height
 local topbar_height = 30
-local settings_amount_height = 0.6
 local font_size = 16
 local small_font_size = font_size * 0.75
 local window_name = "COMPLETE RENAMER"
@@ -59,7 +58,8 @@ local function VisualTopBar()
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'Settings##settings_button') then
                 show_settings = not show_settings
-                if show_settings then settings_window.GetSettings() end
+                if show_settings then settings_window.GetSettings()
+                else System.focus_main_window = false end
             end
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'X##quit_button') then
@@ -180,6 +180,14 @@ function Gui.Loop()
 
     -- Window Settings
     local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
+
+    if System.focus_main_window then
+        reaper.ImGui_SetNextWindowFocus(ctx)
+        local hwnd = reaper.JS_Window_Find(window_name, true)
+        if hwnd then reaper.JS_Window_SetFocus(hwnd) end
+        System.focus_main_window = false
+    end
+
     reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
 
     -- Font

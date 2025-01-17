@@ -27,7 +27,7 @@ local function SelectFromOneToTheOther(one, other)
         for _, key in ipairs(System.global_datas.order) do
             if System.global_datas[key]["data"] then
                 for _, userdata in pairs(System.global_datas[key]["data"]) do
-                    if System.global_datas[key]["state"] then
+                    if System.global_datas[key]["show"] then
                         if userdata.id == first.userdata.id then
                             can_select = true
                         end
@@ -57,7 +57,7 @@ local function DisplayUserdata()
         for index, key in ipairs(System.global_datas.order) do
             if System.global_datas[key]["data"] then
                 if reaper.ImGui_TreeNode(ctx, System.global_datas[key]["display"].."##index"..tostring(index), tree_flags) then
-                    System.global_datas[key]["state"] = true
+                    System.global_datas[key]["show"] = true
                     if reaper.ImGui_BeginTable(ctx, "table_"..key, 2, reaper.ImGui_TableFlags_BordersInnerV()) then
                         for i, userdata in pairs(System.global_datas[key]["data"]) do
                             local show_userdata = true
@@ -95,6 +95,7 @@ local function DisplayUserdata()
                                     else
                                         last_userdata_selected = nil
                                     end
+                                    System.last_selected_area = "userdata"
                                 end
 
                                 reaper.ImGui_TableNextColumn(ctx)

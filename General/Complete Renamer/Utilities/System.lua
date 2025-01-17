@@ -9,12 +9,14 @@ local project_name = reaper.GetProjectName(0)
 local project_path = reaper.GetProjectPath()
 local project_id, _ = reaper.EnumProjects(-1)
 
+System.focus_main_window = false
 System.Shift = false
 System.Ctrl = false
 
 System.global_datas = {}
 System.ruleset = {}
 System.one_renamed = false
+System.last_selected_area = "userdata"
 
 -- Init Settings from file
 function System.InitSettings()
@@ -201,11 +203,11 @@ end
 
 -- Get all userdatas for all types
 function System.GetUserdatas()
-    local items = {display = "Items", state = false, data = GetItemsFromProject()}
-    local tracks = {display = "Tracks", state = false,  data = GetTracksFromProject()}
+    local items = {display = "Items", show = false, state = true, data = GetItemsFromProject()}
+    local tracks = {display = "Tracks", state = true,  data = GetTracksFromProject()}
     local table_markers, table_regions = GetMarkersRegionsFromProject()
-    local markers = {display = "Markers", state = false, data = table_markers}
-    local regions = {display = "Regions", state = false, data = table_regions}
+    local markers = {display = "Markers", show = false, state = true, data = table_markers}
+    local regions = {display = "Regions", show = false, state = true, data = table_regions}
     local order = {"items", "tracks", "markers", "regions"}
     System.global_datas = {order = order, items = items, tracks = tracks, markers = markers, regions = regions}
 end
@@ -264,6 +266,28 @@ end
 function System.KeyboardHold()
     System.Shift = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftShift())
     System.Ctrl = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftCtrl())
+    if System.Ctrl and reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_A()) then
+        if #System.ruleset < 1 then System.last_selected_area = "userdata" end
+        if #System.global_datas.items.data < 1 and #System.global_datas.tracks.data < 1 and #System.global_datas.markers.data < 1 and #System.global_datas.regions.data < 1 then
+            System.last_selected_area = "rule"
+        end
+        if System.last_selected_area == "rule" then
+            for _, rule in ipairs(System.ruleset) do
+                rule.selected = true
+            end
+        end
+        if System.last_selected_area == "userdata" then
+            for _, key in ipairs(System.global_datas.order) do
+                if System.global_datas[key]["data"] then
+                    for _, userdata in pairs(System.global_datas[key]["data"]) do
+                        if System.global_datas[key]["show"] then
+                            userdata.selected = true
+                        end
+                    end
+                end
+            end
+        end
+    end
 end
 
 -- Clear data selection in GUI and project

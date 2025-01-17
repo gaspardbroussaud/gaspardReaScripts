@@ -1,16 +1,12 @@
 --@description Complete renamer
 --@author gaspard
---@version 0.0.6b
+--@version 0.0.7b
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/GUI_Elements/*.lua
 --@changelog
---  - Added Ctrl+A shortcut
---  - Update button RENAME name and size
---  - Updsate rule popup button size
---  - Update shift select only for shown userdata trees
---  - Fix rule not removed on remove
---  - Fix selection overall
+--  - Fix Ctrl+A shortcut
+--  - Fix focused window on rule popup close
 --@about
 --  ### Complete renamer
 --  - A complete renamer with selectable and editable rule blocks for items, tracks, markers and regions (may evolve).

@@ -103,6 +103,8 @@ local function VisualRulePopupElements(width, height)
             ruleset[selected_index] = System.TableCopy(popup_rule)
         end
         System.one_renamed = false
+        System.last_selected_area = "rule"
+        System.focus_main_window = true
     end
 
     reaper.ImGui_SetCursorPosX(ctx, width - 118)
@@ -110,6 +112,7 @@ local function VisualRulePopupElements(width, height)
     if reaper.ImGui_Button(ctx, "CLOSE##button_rule_popup_close", 110) then
         popup_open = false
         popup_rule = selected_rule
+        System.focus_main_window = true
     end
 end
 
@@ -140,6 +143,7 @@ local function VisualRulePopup()
 
     if not rule_open then
         popup_open = false
+        System.focus_main_window = true
     end
     reaper.ImGui_PopStyleColor(ctx, 2)
 end

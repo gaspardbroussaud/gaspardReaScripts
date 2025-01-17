@@ -124,6 +124,7 @@ local function RulesDrag()
                     end
                 end
                 last_selected_rule = i
+                System.last_selected_area = "rule"
             end
 
             -- On Double clic

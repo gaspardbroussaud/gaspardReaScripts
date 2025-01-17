@@ -62,6 +62,7 @@ function settings_window.Show()
     if not settings_open then
         settings_one_changed = false
         show_settings = false
+        System.focus_main_window = true
     end
 end
 
