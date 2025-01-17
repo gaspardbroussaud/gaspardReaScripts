@@ -95,7 +95,7 @@ local function VisualRulePopupElements(width, height)
 
     local button_text = popup_type and "ADD" or "SAVE"
     reaper.ImGui_SetCursorPosY(ctx, height - 35)
-    if reaper.ImGui_Button(ctx, button_text.."##button_rule_popup_add_save", 100) then
+    if reaper.ImGui_Button(ctx, button_text.."##button_rule_popup_add_save", 310) then
         popup_open = false
         if popup_type then
             table.insert(ruleset, System.TableCopy(popup_rule))
@@ -105,9 +105,9 @@ local function VisualRulePopupElements(width, height)
         System.one_renamed = false
     end
 
-    reaper.ImGui_SetCursorPosX(ctx, width - 110)
+    reaper.ImGui_SetCursorPosX(ctx, width - 118)
     reaper.ImGui_SetCursorPosY(ctx, height - 35)
-    if reaper.ImGui_Button(ctx, "CLOSE##button_rule_popup_close", 100) then
+    if reaper.ImGui_Button(ctx, "CLOSE##button_rule_popup_close", 110) then
         popup_open = false
         popup_rule = selected_rule
     end

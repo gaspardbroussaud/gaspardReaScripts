@@ -60,19 +60,40 @@ local function RulesButtons()
 
     reaper.ImGui_SameLine(ctx)
 
+    local disable = true
+    for _, rule in ipairs(System.ruleset) do
+        if rule.selected then
+            disable = false
+            break
+        end
+    end
+    if disable then reaper.ImGui_BeginDisabled(ctx) end
     if reaper.ImGui_Button(ctx, "Remove##button_remove_rule", 100) then
-        for i, rule in ipairs(System.ruleset) do
-            if rule.selected then
-                table.remove(System.ruleset, i)
-                System.one_renamed = false
+        if System.ruleset then
+            local remove_table = {}
+            for i, rule in ipairs(System.ruleset) do
+                if rule.selected then
+                    --table.remove(System.ruleset, i)
+                    remove_table[rule] = true
+                    System.one_renamed = false
+                end
+                if selected_rule == rule then
+                    selected_rule = nil
+                    rule_popup_open = false
+                    last_selected_rule = nil
+                end
             end
-            if selected_rule == rule then
-                selected_rule = nil
-                rule_popup_open = false
-                last_selected_rule = nil
+            local i = 1
+            while i <= #System.ruleset do
+                if remove_table[System.ruleset[i]] then
+                    table.remove(System.ruleset, i)
+                else
+                    i = i + 1
+                end
             end
         end
     end
+    if disable then reaper.ImGui_EndDisabled(ctx) end
 end
 
 -- GUI drag rules
@@ -90,19 +111,17 @@ local function RulesDrag()
             local selectable_label = tostring(i).."##selectable"..rule_id
             changed, rule.selected = reaper.ImGui_Selectable(ctx, selectable_label, rule.selected, reaper.ImGui_SelectableFlags_SpanAllColumns())
             if changed then
-                rule.selected = true
                 if not System.Ctrl then
                     if System.Shift then
-                        if last_selected_rule then
+                        if last_selected_rule and last_selected_rule ~= i then
                             System.SelectFromOneToTheOther(System.ruleset, last_selected_rule, i)
                         end
                     else
+                        rule.selected = true
                         for j, sub_rule in ipairs(System.ruleset) do
                             if sub_rule.selected and i ~= j then sub_rule.selected = false end
                         end
                     end
-                else
-                    rule.selected = false
                 end
                 last_selected_rule = i
             end

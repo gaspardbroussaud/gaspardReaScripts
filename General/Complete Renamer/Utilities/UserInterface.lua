@@ -109,17 +109,19 @@ local function VisualElements(child_width, child_height)
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) - 8)
     reaper.ImGui_SetCursorPosY(ctx, top_height + splitter_size)
     if reaper.ImGui_BeginChild(ctx, "child_bottom_userdata", child_width, bottom_height, reaper.ImGui_ChildFlags_Border()) then
+        -- Set childs for checkbox and userdata visuals
+        userdata_window.ShowCheckboxes()
         userdata_window.ShowVisuals()
         reaper.ImGui_EndChild(ctx)
     end
 
     local x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
-    local button_x = 100
-    --local disable = #System.ruleset <= 0
+    local button_x = 200
+    if child_width < 217 then button_x = child_width - 17 end
     local disable = not System.one_renamed
     if disable then reaper.ImGui_BeginDisabled(ctx) end
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + x - button_x)
-    if reaper.ImGui_Button(ctx, "APPLY##apply_button", button_x) then
+    if reaper.ImGui_Button(ctx, "RENAME##apply_button", button_x) then
         System.ApplyReplacedNames()
         System.one_renamed = false
     end

@@ -201,11 +201,11 @@ end
 
 -- Get all userdatas for all types
 function System.GetUserdatas()
-    local items = {display = "Items", data = GetItemsFromProject()}
-    local tracks = {display = "Tracks", data = GetTracksFromProject()}
+    local items = {display = "Items", state = false, data = GetItemsFromProject()}
+    local tracks = {display = "Tracks", state = false,  data = GetTracksFromProject()}
     local table_markers, table_regions = GetMarkersRegionsFromProject()
-    local markers = {display = "Markers", data = table_markers}
-    local regions = {display = "Regions", data = table_regions}
+    local markers = {display = "Markers", state = false, data = table_markers}
+    local regions = {display = "Regions", state = false, data = table_regions}
     local order = {"items", "tracks", "markers", "regions"}
     System.global_datas = {order = order, items = items, tracks = tracks, markers = markers, regions = regions}
 end
@@ -222,12 +222,15 @@ function System.RepositionInTable(table_update, from_index, to_index)
 end
 
 -- Select from one item index to another regardless of direction
+---@param tab table Table to go through
+---@param one number Index of first object
+---@param other number Index of last object 
 function System.SelectFromOneToTheOther(tab, one, other)
     local first = tab[one]
     local last = tab[other]
     if one > other then
-        first = other
-        last = one
+        first = tab[other]
+        last = tab[one]
     end
     local can_select = false
 
@@ -291,7 +294,7 @@ function System.LoadEmptyRule(default_rule, rule_path)
 end
 
 local function CapitalizeWords(str)
-    return str:gsub("(%w)(%w*)"--[["(%a)([%w_]*)"]], function(first, rest)
+    return str:gsub("(%w)(%w*)", function(first, rest)
         return first:upper() .. rest:lower()
     end)
 end
