@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="5dc9168f83e2d26dfc9e61b457ca6c73cc552a63">
+<index version="1" name="Gaspard ReaScripts" commit="29a4b15d8ea5d89e5cdebef7301b5f5f64f8ed05">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -212,11 +212,11 @@
   <category name="General/Complete Renamer">
     <reapack name="gaspard_Complete renamer.lua" type="script" desc="Complete renamer">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs28 Complete renamer\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \outlinelevel2 \b \fs28 Complete renamer\par}
 {\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab A complete renamer with selectable and editable rule blocks for items, tracks, markers and regions (may evolve).\sa180\par}
 }
 ]]></description>
@@ -292,6 +292,17 @@
         <source file="Utilities/GUI_Elements/Gui_Rules_Popup.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/5dc9168f83e2d26dfc9e61b457ca6c73cc552a63/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Rules_Popup.lua</source>
         <source file="Utilities/GUI_Elements/Gui_Settings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/5dc9168f83e2d26dfc9e61b457ca6c73cc552a63/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Settings.lua</source>
         <source file="Utilities/GUI_Elements/Gui_Userdata.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/5dc9168f83e2d26dfc9e61b457ca6c73cc552a63/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Userdata.lua</source>
+      </version>
+      <version name="0.0.8b" author="gaspard" time="2025-01-20T16:58:57Z">
+        <changelog><![CDATA[- Change selection system (WIP)
+- Various fixes]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/29a4b15d8ea5d89e5cdebef7301b5f5f64f8ed05/General/Complete%20Renamer/gaspard_Complete%20renamer.lua</source>
+        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/29a4b15d8ea5d89e5cdebef7301b5f5f64f8ed05/General/Complete%20Renamer/Utilities/System.lua</source>
+        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/29a4b15d8ea5d89e5cdebef7301b5f5f64f8ed05/General/Complete%20Renamer/Utilities/UserInterface.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Rules.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/29a4b15d8ea5d89e5cdebef7301b5f5f64f8ed05/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Rules.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Rules_Popup.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/29a4b15d8ea5d89e5cdebef7301b5f5f64f8ed05/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Rules_Popup.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Settings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/29a4b15d8ea5d89e5cdebef7301b5f5f64f8ed05/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Settings.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Userdata.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/29a4b15d8ea5d89e5cdebef7301b5f5f64f8ed05/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Userdata.lua</source>
       </version>
     </reapack>
   </category>
@@ -1241,11 +1252,11 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
     </reapack>
   </category>
   <metadata>
-    <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+    <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs36 Gaspard's ReaPack Repository\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \outlinelevel0 \b \fs36 Gaspard's ReaPack Repository\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 ReaPack link : https://github.com/gaspardbroussaud/gaspardReaScripts/raw/master/index.xml\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 These scripts are primarily designed for sound production, with a specific focus on video game development.\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 If you have any questions or requests, please contact me at gaspard.broussaud@gmail.com and include '[ReaScript]' in the email subject.\par}
