@@ -15,6 +15,20 @@ local function SelectUserdataInProject(userdata, key)
     end
 end
 
+local function SetUserdataSelectedExtState(userdata, key, index)
+    local extname = 'gaspard_CompleteRenamer'
+    if key == "items" then
+        reaper.GetSetMediaItemInfo_String(userdata.id, "P_EXT:"..extname..":Selected", tostring(userdata.selected), true)
+    elseif key == "tracks" then
+        reaper.GetSetMediaTrackInfo_String(userdata.id, "P_EXT:"..extname..":Selected", tostring(userdata.selected), true)
+    elseif key == "markers" then
+        local extkey = 'Marker_'..userdata.name..'_'..tostring(userdata.id)
+        --reaper.SetProjExtState(0, extname, extkey, tostring(index).."_gm_"..tostring(userdata.selected))
+    elseif key == "regions" then
+        
+    end
+end
+
 local function SelectFromOneToTheOther(one, other)
     if System.global_datas.order then
         local first = one
@@ -26,7 +40,7 @@ local function SelectFromOneToTheOther(one, other)
         local can_select = false
         for _, key in ipairs(System.global_datas.order) do
             if System.global_datas[key]["data"] then
-                for _, userdata in pairs(System.global_datas[key]["data"]) do
+                for i, userdata in pairs(System.global_datas[key]["data"]) do
                     if System.global_datas[key]["show"] then
                         if userdata.id == first.userdata.id then
                             can_select = true
@@ -34,6 +48,7 @@ local function SelectFromOneToTheOther(one, other)
 
                         if can_select then
                             userdata.selected = true
+                            SetUserdataSelectedExtState(userdata, key, i)
                             if Settings.link_selection.value then SelectUserdataInProject(userdata, key) end
                         end
 
@@ -70,8 +85,9 @@ local function DisplayUserdata()
                                     if not System.Ctrl and not System.Shift then
                                         for _, sub_key in ipairs(System.global_datas.order) do
                                             if System.global_datas[sub_key]["data"] then
-                                                for _, sub_data in pairs(System.global_datas[sub_key]["data"]) do
+                                                for j, sub_data in pairs(System.global_datas[sub_key]["data"]) do
                                                     sub_data.selected = sub_data == userdata
+                                                    SetUserdataSelectedExtState(sub_data, sub_key, j)
                                                     if Settings.link_selection.value then
                                                         SelectUserdataInProject(sub_data, sub_key)
                                                     end
@@ -96,6 +112,7 @@ local function DisplayUserdata()
                                         last_userdata_selected = nil
                                     end
                                     System.last_selected_area = "userdata"
+                                    SetUserdataSelectedExtState(userdata, key, i)
                                 end
 
                                 reaper.ImGui_TableNextColumn(ctx)
@@ -133,12 +150,11 @@ end
 
 -- GUI Userdatas
 function userdata_window.ShowVisuals()
-    --reaper.ImGui_Text(ctx, "USERDATA")
     System.GetUserdatas()
     DisplayUserdata()
 end
 
--- Gui checkboxes
+-- Gui Checkboxes
 function userdata_window.ShowCheckboxes()
 end
 

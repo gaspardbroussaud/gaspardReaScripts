@@ -196,7 +196,7 @@ function Gui.Loop()
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
     window_width, window_height = reaper.ImGui_GetWindowSize(ctx)
-    current_time = reaper.ImGui_GetTime(ctx)
+    --current_time = reaper.ImGui_GetTime(ctx)
 
     if visible then
         -- Top bar elements

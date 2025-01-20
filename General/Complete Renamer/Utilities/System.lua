@@ -6,8 +6,8 @@
 local System = {}
 
 local project_name = reaper.GetProjectName(0)
-local project_path = reaper.GetProjectPath()
-local project_id, _ = reaper.EnumProjects(-1)
+local project_id, project_path = reaper.EnumProjects(-1)
+local extname = 'gaspard_CompleteRenamer'
 
 System.focus_main_window = false
 System.Shift = false
@@ -20,10 +20,15 @@ System.last_selected_area = "userdata"
 
 -- Init Settings from file
 function System.InitSettings()
-    local settings_version = "0.0.1b"
+    local settings_version = "0.0.2b"
     default_settings = {
         version = settings_version,
         order = {"link_selection", "tree_start_open"},
+        alphabetical_order = {
+            value = false,
+            name = "Alphabetical order",
+            description = "Sort userdata alphabetically."
+        },
         link_selection = {
             value = false,
             name = "Link selection",
@@ -43,22 +48,10 @@ function System.InitSettings()
     end
 end
 
--- Check current focused project
-local function ProjectChange()
-    if project_name ~= reaper.GetProjectName(0) or project_path ~= reaper.GetProjectPath() then
-        project_name = reaper.GetProjectName(0)
-        project_path = reaper.GetProjectPath()
-        project_id, _ = reaper.EnumProjects(-1)
-        return true
-    else
-        return false
-    end
-end
-
 -- Get all items from project in table
 local function GetItemsFromProject()
     local items = {}
-    local changed_items = {}
+    --local changed_items = {}
     local item_count = reaper.CountMediaItems(0)
     if item_count > 0 then
         for i = 1, item_count do
@@ -70,23 +63,44 @@ local function GetItemsFromProject()
             else
                 _, item_name = reaper.GetSetMediaItemInfo_String(item_id, "P_NOTES", "", false)
             end
-            local selected = Settings.link_selection.value and reaper.IsMediaItemSelected(item_id) or false
+            local selected = false
+            if Settings.link_selection.value then
+                selected = reaper.IsMediaItemSelected(item_id)
+            else
+                _, selected = reaper.GetSetMediaItemInfo_String(item_id, "P_EXT:"..extname..":Selected", "", false)
+                if selected == nil or selected == '' then
+                    reaper.GetSetMediaItemInfo_String(item_id, "P_EXT:".."gaspard_CompleteRenamer:".."Selected", "false", true)
+                end
+                selected = selected == "true"
+            end
+            local state = true
+            _, state = reaper.GetSetMediaItemInfo_String(item_id, "P_EXT:"..extname..":State", "", false)
+            if state == nil or state == '' then
+                reaper.GetSetMediaItemInfo_String(item_id, "P_EXT:"..extname..":State", "true", true)
+            end
+            state = state == "true"
 
-            if not Settings.link_selection.value and System.global_datas.items then
+            --[[if not Settings.link_selection.value and System.global_datas.items and System.global_datas.items.data then
                 if System.global_datas.items.data[i] and item_id == System.global_datas.items.data[i].id then
                     selected = System.global_datas.items.data[i].selected
                 else
                     table.insert(changed_items, {index = i, id = item_id})
                 end
-            end
+            end]]
 
-            table.insert(items, {id = item_id, name = item_name, selected = selected})
+            table.insert(items, {id = item_id, name = item_name, selected = selected, state = state})
+        end
+
+        if Settings.alphabetical_order.value then
+            table.sort(items, function(a, b)
+                return a.name < b.name
+            end)
         end
     else
         return nil
     end
 
-    if not Settings.link_selection.value and items and changed_items and System.global_datas.items then
+    --[[if not Settings.link_selection.value and items and changed_items and System.global_datas.items then
         for _, changed_item in ipairs(changed_items) do
             for _, data in ipairs(System.global_datas.items.data) do
                 if data.id == changed_item.id then
@@ -95,7 +109,7 @@ local function GetItemsFromProject()
                 end
             end
         end
-    end
+    end]]
 
     return items
 end
@@ -103,30 +117,53 @@ end
 -- Get all tracks from project in table
 local function GetTracksFromProject()
     local tracks = {}
-    local changed_tracks = {}
+    --local changed_tracks = {}
     local track_count = reaper.CountTracks(0)
     if track_count > 0 then
         for i = 1, track_count do
             local track_id = reaper.GetTrack(0, i - 1)
             local _, track_name = reaper.GetTrackName(track_id)
             if tostring(track_name):match("^Track %d+$") then track_name = "" end
-            local selected = Settings.link_selection.value and reaper.IsTrackSelected(track_id) or false
+            local selected = false
+            if Settings.link_selection.value then
+                selected = reaper.IsTrackSelected(track_id)
+            else
+                _, selected = reaper.GetSetMediaTrackInfo_String(track_id, "P_EXT:".."gaspard_CompleteRenamer:".."Selected", "", false)
+                if selected == nil or selected == '' then
+                    reaper.GetSetMediaTrackInfo_String(track_id, "P_EXT:".."gaspard_CompleteRenamer:".."Selected", "false", true)
+                end
+                selected = selected == "true"
+            end
+            local state = true
+            _, state = reaper.GetSetMediaTrackInfo_String(track_id, "P_EXT:"..extname..":State", "", false)
+            if state == nil or state == '' then
+                reaper.GetSetMediaTrackInfo_String(track_id, "P_EXT:"..extname..":State", "true", true)
+            end
+            state = state == "true"
 
-            if not Settings.link_selection.value and System.global_datas.tracks then
+            --[[local selected = Settings.link_selection.value and reaper.IsTrackSelected(track_id) or false
+
+            if not Settings.link_selection.value and System.global_datas.tracks and System.global_datas.tracks.data then
                 if System.global_datas.tracks.data[i] and track_id == System.global_datas.tracks.data[i].id then
                     selected = System.global_datas.tracks.data[i].selected
                 else
                     table.insert(changed_tracks, {index = i, id = track_id})
                 end
-            end
+            end]]
 
             table.insert(tracks, {id = track_id, name = track_name, selected = selected})
+        end
+
+        if Settings.alphabetical_order.value then
+            table.sort(tracks, function(a, b)
+                return a.name < b.name
+            end)
         end
     else
         return nil
     end
 
-    if not Settings.link_selection.value and tracks and changed_tracks and System.global_datas.tracks then
+    --[[if not Settings.link_selection.value and tracks and changed_tracks and System.global_datas.tracks then
         for _, changed_track in ipairs(changed_tracks) do
             for _, data in ipairs(System.global_datas.tracks.data) do
                 if data.id == changed_track.id then
@@ -135,7 +172,7 @@ local function GetTracksFromProject()
                 end
             end
         end
-    end
+    end]]
 
     return tracks
 end
@@ -144,40 +181,72 @@ end
 local function GetMarkersRegionsFromProject()
     local markers = {}
     local changed_markers = {}
+    local marker_extname = extname.."_Marker"
+    local marker_index = 0
     local regions = {}
     local changed_regions = {}
-    local _, marker_count, region_count = reaper.CountProjectMarkers(0)
-    local marker_index = 0
     local region_index = 0
+    local _, marker_count, region_count = reaper.CountProjectMarkers(0)
     for i = 1, marker_count + region_count do
         local _, isrgn, pos, rgnend, name, markrgnid = reaper.EnumProjectMarkers2(0, i - 1)
         local selected = false
         if isrgn then
             region_index = region_index + 1
-            if System.global_datas.regions then
+            --[[if System.global_datas.regions and System.global_datas.regions.data then
                 if System.global_datas.regions.data[region_index] and markrgnid == System.global_datas.regions.data[region_index].id then
                     selected = System.global_datas.regions.data[region_index].selected
                 else
                     table.insert(changed_regions, {index = region_index, id = markrgnid})
                 end
-            end
+            end]]
+
             table.insert(regions, {pos = pos, rgnend = rgnend, id = markrgnid, name = name, selected = selected})
         else
-            marker_index = marker_index + 1
-            if System.global_datas.markers then
+            local extkey = name..'_'..tostring(marker_index)
+
+            local retval, optional_key, optional_val = reaper.EnumProjExtState(project_id, marker_extname, marker_index)
+            if retval then
+                if optional_key == extkey then
+                    reaper.ShowConsoleMsg(name..": "..tostring(ext_mark_selected).."\n")
+                    selected = ext_mark_selected == "true"
+                else
+                    table.insert(changed_markers, {key = extkey, index = marker_index, id = markrgnid})
+                end
+            end
+
+            --[[if System.global_datas.markers and System.global_datas.markers.data then
                 if System.global_datas.markers.data[marker_index] and markrgnid == System.global_datas.markers.data[marker_index].id then
                     selected = System.global_datas.markers.data[marker_index].selected
                 else
                     table.insert(changed_markers, {index = marker_index, id = markrgnid})
                 end
-            end
+            end]]
+
             table.insert(markers, {pos = pos, rgnend = rgnend, id = markrgnid, name = name, selected = selected})
+
+            marker_index = marker_index + 1
         end
     end
     if #markers <= 0 then markers = nil end
     if #regions <= 0 then regions = nil end
 
-    if markers and changed_markers and System.global_datas.markers then
+    if markers and changed_markers then
+        for _, changed_marker in ipairs(changed_markers) do
+            while true do
+                local retval, optional_key, optional_val = reaper.EnumProjExtState(0, marker_extname, marker_index)
+                if not retval then break end
+                if retval then
+                    if optional_key == changed_marker.key then
+                        local ext_mark_idx, ext_mark_selected = string.match(optional_val, "^(.-)_gm_(.-)$")
+                        markers[changed_marker.index].selected = ext_mark_selected == "true"
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    --[[if markers and changed_markers and System.global_datas.markers then
         for _, changed_marker in ipairs(changed_markers) do
             for _, data in ipairs(System.global_datas.markers.data) do
                 if data.id == changed_marker.id then
@@ -186,7 +255,7 @@ local function GetMarkersRegionsFromProject()
                 end
             end
         end
-    end
+    end]]
     if regions and changed_regions and System.global_datas.regions then
         for i, changed_region in ipairs(changed_regions) do
             for _, data in ipairs(System.global_datas.regions.data) do
@@ -195,6 +264,20 @@ local function GetMarkersRegionsFromProject()
                     break
                 end
             end
+        end
+    end
+
+    if Settings.alphabetical_order.value then
+        if markers and #markers > 0 then
+            table.sort(markers, function(a, b)
+                return a.name < b.name
+            end)
+        end
+
+        if regions and #regions > 0 then
+            table.sort(regions, function(a, b)
+                return a.name < b.name
+            end)
         end
     end
 
@@ -258,9 +341,22 @@ function System.ClearTableSelection(tab)
     end
 end
 
+-- Check current focused project
+local function ProjectChange()
+    local temp_project_id, temp_project_path = reaper.EnumProjects(-1)
+    if project_path ~= temp_project_path or project_id ~= temp_project_id or project_name ~= reaper.GetProjectName(0) then
+        return true
+    else
+        return false
+    end
+end
+
 -- Update userdatas when changing Reaper project
 function System.ProjectUpdates()
-    if ProjectChange() then System.GetUserdatas() end
+    if ProjectChange() then
+        project_name = reaper.GetProjectName(0)
+        project_id, project_path = reaper.EnumProjects(-1)
+    end
 end
 
 function System.KeyboardHold()

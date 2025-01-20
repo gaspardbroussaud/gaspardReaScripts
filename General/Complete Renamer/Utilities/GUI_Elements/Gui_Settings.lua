@@ -6,6 +6,7 @@
 local settings_window = {}
 
 local function SetSettings()
+    Settings.alphabetical_order.value = alphabetical_order
     Settings.link_selection.value = link_selection
     Settings.tree_start_open.value = tree_start_open
 end
@@ -13,6 +14,7 @@ end
 -- Get Settings on show settings window
 function settings_window.GetSettings()
     settings_one_changed = false
+    alphabetical_order = Settings.alphabetical_order.value
     link_selection = Settings.link_selection.value
     tree_start_open = Settings.tree_start_open.value
 end
@@ -29,12 +31,17 @@ function settings_window.Show()
     local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
     if settings_visible then
         if reaper.ImGui_BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, reaper.ImGui_ChildFlags_Border()) then
-            reaper.ImGui_Text(ctx, "Link selection:")
+            reaper.ImGui_Text(ctx, Settings.alphabetical_order.name..":")
+            reaper.ImGui_SameLine(ctx)
+            changed, alphabetical_order = reaper.ImGui_Checkbox(ctx, "##settings_alphabetical_order", alphabetical_order)
+            reaper.ImGui_SetItemTooltip(ctx, Settings.alphabetical_order.description)
+            if changed then settings_one_changed = true end
+            reaper.ImGui_Text(ctx, Settings.link_selection.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, link_selection = reaper.ImGui_Checkbox(ctx, "##settings_link_selection", link_selection)
             reaper.ImGui_SetItemTooltip(ctx, Settings.link_selection.description)
             if changed then settings_one_changed = true end
-            reaper.ImGui_Text(ctx, "Trees start open:")
+            reaper.ImGui_Text(ctx, Settings.tree_start_open.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, tree_start_open = reaper.ImGui_Checkbox(ctx, "##settings_tree_start_open", tree_start_open)
             reaper.ImGui_SetItemTooltip(ctx, Settings.tree_start_open.description)

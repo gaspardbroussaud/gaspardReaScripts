@@ -1,12 +1,12 @@
 --@description Complete renamer
 --@author gaspard
---@version 0.0.7b
+--@version 0.0.8b
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/GUI_Elements/*.lua
 --@changelog
---  - Fix Ctrl+A shortcut
---  - Fix focused window on rule popup close
+--  - Change selection system (WIP)
+--  - Various fixes
 --@about
 --  ### Complete renamer
 --  - A complete renamer with selectable and editable rule blocks for items, tracks, markers and regions (may evolve).
