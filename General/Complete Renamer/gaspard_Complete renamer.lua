@@ -1,14 +1,11 @@
 --@description Complete renamer
 --@author gaspard
---@version 0.0.10b
+--@version 0.0.11b
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/GUI_Elements/*.lua
 --@changelog
---  - Added selection system
---  - Added cleanup of .rpp file on close tool
---  - Fix Settings and Quit button
---  - Various fixes
+--  - Fix crash on exit
 --@about
 --  ### Complete renamer
 --  - A complete renamer with selectable and editable rule blocks for items, tracks, markers and regions (may evolve).

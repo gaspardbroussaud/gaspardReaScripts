@@ -208,6 +208,7 @@ end
 
 -- Clean extstate from project .rpp file
 function System.CleanExtState()
+    local index = 0
     while true do
         local id_project, optional_projfn = reaper.EnumProjects(index)
         if not id_project then return end
@@ -228,6 +229,7 @@ function System.CleanExtState()
             reaper.SetProjExtState(id_project, tostring(markrgn_id), script_ext.."_Selected", "")
             reaper.SetProjExtState(id_project, tostring(markrgn_id), script_ext.."_State", "")
         end
+        index = index + 1
     end
 end
 
