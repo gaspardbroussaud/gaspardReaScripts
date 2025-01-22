@@ -1,11 +1,13 @@
 --@description Complete renamer
 --@author gaspard
---@version 0.0.9b
+--@version 0.0.10b
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/GUI_Elements/*.lua
 --@changelog
---  - Update selection system (WIP)
+--  - Added selection system
+--  - Added cleanup of .rpp file on close tool
+--  - Fix Settings and Quit button
 --  - Various fixes
 --@about
 --  ### Complete renamer
@@ -21,7 +23,7 @@ function SetButtonState(set)
       version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
       reaper.ReaPack_FreeEntry(pkg)
     else
-      --System.CleanExtState()
+      if Settings.clean_rpp.value then System.CleanExtState() end
     end
     reaper.SetToggleCommandState(sec, cmd, set or 0)
     reaper.RefreshToolbar2(sec, cmd)

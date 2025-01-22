@@ -20,7 +20,7 @@ System.last_selected_area = "userdata"
 
 -- Init Settings from file
 function System.InitSettings()
-    local settings_version = "0.0.2b"
+    local settings_version = "0.0.3b"
     default_settings = {
         version = settings_version,
         order = {"link_selection", "tree_start_open"},
@@ -38,6 +38,11 @@ function System.InitSettings()
             value = false,
             name = "Trees open on start",
             description = "Trees for userdata types start opened on script launch."
+        },
+        clean_rpp = {
+            value = false,
+            name = "Clean project file",
+            description = "Clean project file (.rpp) on exit tool.\nSelection data between session is lost."
         }
     }
     Settings = gson.LoadJSON(settings_path, default_settings)
@@ -165,42 +170,8 @@ local function GetMarkersRegionsFromProject()
 
         if isrgn then
             table.insert(regions, {id = markrgn_id, name = name, selected = selected, state = state})
-            --[[local _, region_id = reaper.GetSetProjectInfo_String(project_id, "MARKER_GUID:"..i, "", false)
-
-            local extstate, val = reaper.GetProjExtState(project_id, script_ext.."_"..tostring(region_id), "selected")
-            if extstate then
-                selected = val == "true"
-            else
-                reaper.SetProjExtState(project_id, script_ext.."_"..tostring(region_id), "selected", "false")
-            end
-
-            extstate, val = reaper.GetProjExtState(project_id, script_ext.."_"..tostring(region_id), "state")
-            if extstate then
-                state = val == "true"
-            else
-                reaper.SetProjExtState(project_id, script_ext.."_"..tostring(region_id), "state", "true")
-            end
-
-            table.insert(regions, {id = region_id, name = name, selected = selected, state = state})]]
         else
             table.insert(markers, {id = markrgn_id, name = name, selected = selected, state = state})
-            --[[local _, marker_id = reaper.GetSetProjectInfo_String(project_id, "MARKER_GUID:"..i, "", false)
-
-            local extstate, val = reaper.GetProjExtState(project_id, script_ext.."_"..tostring(marker_id), "selected")
-            if extstate then
-                selected = val == "true"
-            else
-                reaper.SetProjExtState(project_id, script_ext.."_"..tostring(marker_id), "selected", "false")
-            end
-
-            extstate, val = reaper.GetProjExtState(project_id, script_ext.."_"..tostring(marker_id), "state")
-            if extstate then
-                state = val == "true"
-            else
-                reaper.SetProjExtState(project_id, script_ext.."_"..tostring(marker_id), "state", "true")
-            end
-
-            table.insert(markers, {id = marker_id, name = name, selected = selected, state = state})]]
         end
     end
 
@@ -237,21 +208,26 @@ end
 
 -- Clean extstate from project .rpp file
 function System.CleanExtState()
-    local item_count = reaper.CountMediaItems(project_id)
-    for i = 0, item_count - 1 do
-        reaper.GetSetMediaItemInfo_String(reaper.GetMediaItem(project_id, i), "P_EXT:"..script_ext..":Selected", "", true)
-        reaper.GetSetMediaItemInfo_String(reaper.GetMediaItem(project_id, i), "P_EXT:"..script_ext..":State", "", true)
-    end
-    local track_count = reaper.CountTracks(project_id)
-    for i = 0, track_count - 1 do
-        reaper.GetSetMediaTrackInfo_String(reaper.GetTrack(project_id, i), "P_EXT:"..script_ext..":Selected", "", true)
-        reaper.GetSetMediaTrackInfo_String(reaper.GetTrack(project_id, i), "P_EXT:"..script_ext..":State", "", true)
-    end
-    local _, marker_count, region_count = reaper.CountProjectMarkers(project_id)
-    for i = 0, marker_count + region_count - 1 do
-        local _, markrgn_id = reaper.GetSetProjectInfo_String(project_id, "MARKER_GUID:"..i, "", false)
-        reaper.SetProjExtState(project_id, tostring(markrgn_id), script_ext.."_Selected", "")
-        reaper.SetProjExtState(project_id, tostring(markrgn_id), script_ext.."_State", "")
+    while true do
+        local id_project, optional_projfn = reaper.EnumProjects(index)
+        if not id_project then return end
+        reaper.ShowConsoleMsg("Proj: "..tostring(optional_projfn).."\n")
+        local item_count = reaper.CountMediaItems(id_project)
+        for i = 0, item_count - 1 do
+            reaper.GetSetMediaItemInfo_String(reaper.GetMediaItem(id_project, i), "P_EXT:"..script_ext..":Selected", "", true)
+            reaper.GetSetMediaItemInfo_String(reaper.GetMediaItem(id_project, i), "P_EXT:"..script_ext..":State", "", true)
+        end
+        local track_count = reaper.CountTracks(id_project)
+        for i = 0, track_count - 1 do
+            reaper.GetSetMediaTrackInfo_String(reaper.GetTrack(id_project, i), "P_EXT:"..script_ext..":Selected", "", true)
+            reaper.GetSetMediaTrackInfo_String(reaper.GetTrack(id_project, i), "P_EXT:"..script_ext..":State", "", true)
+        end
+        local _, marker_count, region_count = reaper.CountProjectMarkers(id_project)
+        for i = 0, marker_count + region_count - 1 do
+            local _, markrgn_id = reaper.GetSetProjectInfo_String(id_project, "MARKER_GUID:"..i, "", false)
+            reaper.SetProjExtState(id_project, tostring(markrgn_id), script_ext.."_Selected", "")
+            reaper.SetProjExtState(id_project, tostring(markrgn_id), script_ext.."_State", "")
+        end
     end
 end
 

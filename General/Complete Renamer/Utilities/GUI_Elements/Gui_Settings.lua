@@ -9,6 +9,7 @@ local function SetSettings()
     Settings.alphabetical_order.value = alphabetical_order
     Settings.link_selection.value = link_selection
     Settings.tree_start_open.value = tree_start_open
+    Settings.clean_rpp.value = clean_rpp
 end
 
 -- Get Settings on show settings window
@@ -17,6 +18,7 @@ function settings_window.GetSettings()
     alphabetical_order = Settings.alphabetical_order.value
     link_selection = Settings.link_selection.value
     tree_start_open = Settings.tree_start_open.value
+    clean_rpp = Settings.clean_rpp.value
 end
 
 -- Gui Settings Elements
@@ -24,7 +26,7 @@ function settings_window.Show()
     -- Set Settings Window visibility and settings
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoResize()
     local settings_width = 200
-    local settings_height = 150
+    local settings_height = 190
     reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
 
@@ -36,15 +38,23 @@ function settings_window.Show()
             changed, alphabetical_order = reaper.ImGui_Checkbox(ctx, "##settings_alphabetical_order", alphabetical_order)
             reaper.ImGui_SetItemTooltip(ctx, Settings.alphabetical_order.description)
             if changed then settings_one_changed = true end
+
             reaper.ImGui_Text(ctx, Settings.link_selection.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, link_selection = reaper.ImGui_Checkbox(ctx, "##settings_link_selection", link_selection)
             reaper.ImGui_SetItemTooltip(ctx, Settings.link_selection.description)
             if changed then settings_one_changed = true end
+
             reaper.ImGui_Text(ctx, Settings.tree_start_open.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, tree_start_open = reaper.ImGui_Checkbox(ctx, "##settings_tree_start_open", tree_start_open)
             reaper.ImGui_SetItemTooltip(ctx, Settings.tree_start_open.description)
+            if changed then settings_one_changed = true end
+
+            reaper.ImGui_Text(ctx, Settings.clean_rpp.name..":")
+            reaper.ImGui_SameLine(ctx)
+            changed, clean_rpp = reaper.ImGui_Checkbox(ctx, "##settings_clean_rpp", clean_rpp)
+            reaper.ImGui_SetItemTooltip(ctx, Settings.clean_rpp.description)
             if changed then settings_one_changed = true end
 
             reaper.ImGui_EndChild(ctx)
