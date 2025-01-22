@@ -106,7 +106,10 @@ local function RulesDrag()
             reaper.ImGui_TableNextColumn(ctx)
             reaper.ImGui_PushID(ctx, i)
             changed, rule.state = reaper.ImGui_Checkbox(ctx, "##checkbox"..rule_id, rule.state)
-            if changed then System.one_renamed = false end
+            if changed then
+                System.one_renamed = false
+                System.last_selected_area = "rule"
+            end
             reaper.ImGui_SameLine(ctx)
             local selectable_label = tostring(i).."##selectable"..rule_id
             changed, rule.selected = reaper.ImGui_Selectable(ctx, selectable_label, rule.selected, reaper.ImGui_SelectableFlags_SpanAllColumns())

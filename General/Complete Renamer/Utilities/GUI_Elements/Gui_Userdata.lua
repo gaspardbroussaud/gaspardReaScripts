@@ -7,24 +7,36 @@ local userdata_window = {}
 
 local last_userdata_selected = nil
 
-local function SelectUserdataInProject(userdata, key)
-    if key == "items" then
-        reaper.SetMediaItemSelected(userdata.id, userdata.selected)
-    elseif key == "tracks" then
-        reaper.SetTrackSelected(userdata.id, userdata.selected)
-    end
-end
-
-local function SetUserdataSelectedExtState(userdata, key, index)
+local function SetUserdataStateExtState(userdata, key)
     local script_ext = 'gaspard_CompleteRenamer'
-    if key == "items" then
-        reaper.GetSetMediaItemInfo_String(userdata.id, "P_EXT:"..script_ext..":Selected", tostring(userdata.selected), true)
-    elseif key == "tracks" then
-        reaper.GetSetMediaTrackInfo_String(userdata.id, "P_EXT:"..script_ext..":Selected", tostring(userdata.selected), true)
-    elseif key == "markers" then
-        reaper.SetProjExtState(project_id, tostring(userdata.id), script_ext.."_Selected", tostring(userdata.selected))
-    elseif key == "regions" then
-        reaper.SetProjExtState(project_id, tostring(userdata.id), script_ext.."_Selected", tostring(userdata.selected))
+    if userdata.selected then
+        for _, tree_key in ipairs(System.global_datas.order) do
+            if System.global_datas[tree_key]["data"] then
+                for _, data in pairs(System.global_datas[tree_key]["data"]) do
+                    if data.selected then
+                        if tree_key == "items" then
+                            reaper.GetSetMediaItemInfo_String(data.id, "P_EXT:"..script_ext..":State", tostring(userdata.state), true)
+                        elseif tree_key == "tracks" then
+                            reaper.GetSetMediaTrackInfo_String(data.id, "P_EXT:"..script_ext..":State", tostring(userdata.state), true)
+                        elseif tree_key == "markers" then
+                            reaper.SetProjExtState(project_id, tostring(data.id), script_ext.."_State", tostring(userdata.state))
+                        elseif tree_key == "regions" then
+                            reaper.SetProjExtState(project_id, tostring(data.id), script_ext.."_State", tostring(userdata.state))
+                        end
+                    end
+                end
+            end
+        end
+    else
+        if key == "items" then
+            reaper.GetSetMediaItemInfo_String(userdata.id, "P_EXT:"..script_ext..":State", tostring(userdata.state), true)
+        elseif key == "tracks" then
+            reaper.GetSetMediaTrackInfo_String(userdata.id, "P_EXT:"..script_ext..":State", tostring(userdata.state), true)
+        elseif key == "markers" then
+            reaper.SetProjExtState(project_id, tostring(userdata.id), script_ext.."_State", tostring(userdata.state))
+        elseif key == "regions" then
+            reaper.SetProjExtState(project_id, tostring(userdata.id), script_ext.."_State", tostring(userdata.state))
+        end
     end
 end
 
@@ -39,7 +51,7 @@ local function SelectFromOneToTheOther(one, other)
         local can_select = false
         for _, key in ipairs(System.global_datas.order) do
             if System.global_datas[key]["data"] then
-                for i, userdata in pairs(System.global_datas[key]["data"]) do
+                for _, userdata in pairs(System.global_datas[key]["data"]) do
                     if System.global_datas[key]["show"] then
                         if userdata.id == first.userdata.id then
                             can_select = true
@@ -47,8 +59,8 @@ local function SelectFromOneToTheOther(one, other)
 
                         if can_select then
                             userdata.selected = true
-                            SetUserdataSelectedExtState(userdata, key, i)
-                            if Settings.link_selection.value then SelectUserdataInProject(userdata, key) end
+                            System.SetUserdataSelectedExtState(userdata, key)
+                            if Settings.link_selection.value then System.SelectUserdataInProject(userdata, key) end
                         end
 
                         if userdata.id == last.userdata.id then
@@ -62,6 +74,13 @@ local function SelectFromOneToTheOther(one, other)
     end
 end
 
+local function SetAllKeyUserdataState(key, state)
+    for _, userdata in pairs(System.global_datas[key]["data"]) do
+        userdata.state = state
+        SetUserdataStateExtState(userdata, key)
+    end
+end
+
 -- Display found and renamed Reaper userdata
 local function DisplayUserdata()
     local selection_index = 0
@@ -70,13 +89,38 @@ local function DisplayUserdata()
         if Settings.tree_start_open.value then tree_flags = tree_flags | reaper.ImGui_TreeNodeFlags_DefaultOpen() end
         for index, key in ipairs(System.global_datas.order) do
             if System.global_datas[key]["data"] then
+                changed, System.global_datas[key].state = reaper.ImGui_Checkbox(ctx, "##checkbox_tree_"..tostring(key), System.global_datas[key].state)
+                if changed then
+                    reaper.SetProjExtState(project_id, 'gaspard_CompleteRenamer', key.."_State", tostring(System.global_datas[key].state))
+                    System.one_renamed = false
+                    System.last_selected_area = "userdata"
+                    --[[if System.global_datas[key].state then
+                        SetAllKeyUserdataState(key, true)
+                    else
+                        SetAllKeyUserdataState(key, false)
+                    end]]
+                end
+                reaper.ImGui_SameLine(ctx)
                 if reaper.ImGui_TreeNode(ctx, System.global_datas[key]["display"].."##index"..tostring(index), tree_flags) then
-                    System.global_datas[key]["show"] = true
-                    if reaper.ImGui_BeginTable(ctx, "table_"..key, 2, reaper.ImGui_TableFlags_BordersInnerV()) then
+                    local table_flags = reaper.ImGui_TableFlags_BordersInnerV() | reaper.ImGui_TableColumnFlags_WidthFixed()
+                    if reaper.ImGui_BeginTable(ctx, "table_"..key, 3, table_flags) then
+                        reaper.ImGui_TableSetupColumn(ctx, "col_checkbox", reaper.ImGui_TableColumnFlags_WidthFixed() | reaper.ImGui_TableFlags_SizingFixedFit(), 30)
+                        reaper.ImGui_TableSetupColumn(ctx, "col_original_name")
+                        reaper.ImGui_TableSetupColumn(ctx, "col_replaced_name")
                         for i, userdata in pairs(System.global_datas[key]["data"]) do
-                            local show_userdata = true
+                            local show_userdata = System.global_datas[key].show
                             if show_userdata then
                                 reaper.ImGui_TableNextRow(ctx)
+                                reaper.ImGui_TableNextColumn(ctx)
+                                local disabled = not System.global_datas[key].state
+                                if disabled then reaper.ImGui_BeginDisabled(ctx) end
+                                changed, userdata.state = reaper.ImGui_Checkbox(ctx, "##checkbox_state"..tostring(i), userdata.state) --State checkbox
+                                if changed and System.global_datas[key].state then
+                                    SetUserdataStateExtState(userdata, key)
+                                    System.one_renamed = false
+                                    System.last_selected_area = "userdata"
+                                end
+                                if disabled then reaper.ImGui_EndDisabled(ctx) end
                                 reaper.ImGui_TableNextColumn(ctx)
                                 local label = "##selectable"..key..tostring(userdata.id)..userdata.name
                                 changed, userdata.selected = reaper.ImGui_Selectable(ctx, userdata.name..label, userdata.selected, reaper.ImGui_SelectableFlags_SpanAllColumns())
@@ -84,11 +128,11 @@ local function DisplayUserdata()
                                     if not System.Ctrl and not System.Shift then
                                         for _, sub_key in ipairs(System.global_datas.order) do
                                             if System.global_datas[sub_key]["data"] then
-                                                for j, sub_data in pairs(System.global_datas[sub_key]["data"]) do
+                                                for _, sub_data in pairs(System.global_datas[sub_key]["data"]) do
                                                     sub_data.selected = sub_data == userdata
-                                                    SetUserdataSelectedExtState(sub_data, sub_key, j)
+                                                    System.SetUserdataSelectedExtState(sub_data, sub_key)
                                                     if Settings.link_selection.value then
-                                                        SelectUserdataInProject(sub_data, sub_key)
+                                                        System.SelectUserdataInProject(sub_data, sub_key)
                                                     end
                                                 end
                                             end
@@ -102,7 +146,7 @@ local function DisplayUserdata()
                                     end
 
                                     if Settings.link_selection.value then
-                                        SelectUserdataInProject(userdata, key)
+                                        System.SelectUserdataInProject(userdata, key)
                                         reaper.UpdateArrange()
                                     end
                                     if userdata.selected then
@@ -111,11 +155,11 @@ local function DisplayUserdata()
                                         last_userdata_selected = nil
                                     end
                                     System.last_selected_area = "userdata"
-                                    SetUserdataSelectedExtState(userdata, key, i)
+                                    System.SetUserdataSelectedExtState(userdata, key)
                                 end
 
                                 reaper.ImGui_TableNextColumn(ctx)
-                                local can_apply = true
+                                local can_apply = System.global_datas[key].state and userdata.state
                                 local replaced_text = nil
                                 if selection_based and not userdata.selected then can_apply = false end
                                 if can_apply then

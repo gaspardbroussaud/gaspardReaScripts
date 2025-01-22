@@ -195,24 +195,35 @@ local function GetMarkersRegionsFromProject()
     return markers, regions
 end
 
+local function GetKeyState(key)
+    local state = true
+    local extstate, val = reaper.GetProjExtState(project_id, script_ext, key.."_State")
+    if extstate == 1 then
+        state = val == "true"
+    else
+        reaper.SetProjExtState(project_id, script_ext, key.."_State", "true")
+    end
+    return state
+end
+
 -- Get all userdatas for all types
 function System.GetUserdatas()
-    local items = {display = "Items", show = false, state = true, data = GetItemsFromProject()}
-    local tracks = {display = "Tracks", state = true,  data = GetTracksFromProject()}
+    local items = {display = "Items", show = true, state = GetKeyState("items"), data = GetItemsFromProject()}
+    local tracks = {display = "Tracks", show = true, state = GetKeyState("tracks"),  data = GetTracksFromProject()}
     local table_markers, table_regions = GetMarkersRegionsFromProject()
-    local markers = {display = "Markers", show = false, state = true, data = table_markers}
-    local regions = {display = "Regions", show = false, state = true, data = table_regions}
+    local markers = {display = "Markers", show = true, state = GetKeyState("markers"), data = table_markers}
+    local regions = {display = "Regions", show = true, state = GetKeyState("regions"), data = table_regions}
     local order = {"items", "tracks", "markers", "regions"}
     System.global_datas = {order = order, items = items, tracks = tracks, markers = markers, regions = regions}
 end
 
 -- Clean extstate from project .rpp file
-function System.CleanExtState()
+function System.CleanExtState(current)
     local index = 0
     while true do
         local id_project, optional_projfn = reaper.EnumProjects(index)
+        if current then id_project = project_id end
         if not id_project then return end
-        reaper.ShowConsoleMsg("Proj: "..tostring(optional_projfn).."\n")
         local item_count = reaper.CountMediaItems(id_project)
         for i = 0, item_count - 1 do
             reaper.GetSetMediaItemInfo_String(reaper.GetMediaItem(id_project, i), "P_EXT:"..script_ext..":Selected", "", true)
@@ -229,6 +240,7 @@ function System.CleanExtState()
             reaper.SetProjExtState(id_project, tostring(markrgn_id), script_ext.."_Selected", "")
             reaper.SetProjExtState(id_project, tostring(markrgn_id), script_ext.."_State", "")
         end
+        if current then return end
         index = index + 1
     end
 end
@@ -272,13 +284,6 @@ function System.SelectFromOneToTheOther(tab, one, other)
     end
 end
 
--- Clear element.selected from a given table
-function System.ClearTableSelection(tab)
-    for _, element in ipairs(tab) do
-        element.selected = false
-    end
-end
-
 -- Check current focused project
 local function ProjectChange()
     local temp_project_id, temp_project_path = reaper.EnumProjects(-1)
@@ -294,6 +299,26 @@ function System.ProjectUpdates()
     if ProjectChange() then
         project_name = reaper.GetProjectName(0)
         project_id, project_path = reaper.EnumProjects(-1)
+    end
+end
+
+function System.SetUserdataSelectedExtState(userdata, key)
+    if key == "items" then
+        reaper.GetSetMediaItemInfo_String(userdata.id, "P_EXT:"..script_ext..":Selected", tostring(userdata.selected), true)
+    elseif key == "tracks" then
+        reaper.GetSetMediaTrackInfo_String(userdata.id, "P_EXT:"..script_ext..":Selected", tostring(userdata.selected), true)
+    elseif key == "markers" then
+        reaper.SetProjExtState(project_id, tostring(userdata.id), script_ext.."_Selected", tostring(userdata.selected))
+    elseif key == "regions" then
+        reaper.SetProjExtState(project_id, tostring(userdata.id), script_ext.."_Selected", tostring(userdata.selected))
+    end
+end
+
+function System.SelectUserdataInProject(userdata, key)
+    if key == "items" then
+        reaper.SetMediaItemSelected(userdata.id, userdata.selected)
+    elseif key == "tracks" then
+        reaper.SetTrackSelected(userdata.id, userdata.selected)
     end
 end
 
@@ -316,6 +341,8 @@ function System.KeyboardHold()
                     for _, userdata in pairs(System.global_datas[key]["data"]) do
                         if System.global_datas[key]["show"] then
                             userdata.selected = true
+                            System.SetUserdataSelectedExtState(userdata, key)
+                            if Settings.link_selection.value then System.SelectUserdataInProject(userdata, key) end
                         end
                     end
                 end
@@ -326,17 +353,30 @@ end
 
 -- Clear data selection in GUI and project
 function System.ClearUserdataSelection()
-    if global_datas.order then
-        for _, key in ipairs(global_datas.order) do
-            if global_datas[key]["data"] then
-                for _, userdata in pairs(global_datas[key]["data"]) do
+    if System.global_datas.order then
+        for _, key in ipairs(System.global_datas.order) do
+            if System.global_datas[key]["data"] then
+                for _, userdata in pairs(System.global_datas[key]["data"]) do
                     userdata.selected = false
-                    if key == "items" then reaper.SetMediaItemSelected(userdata.id, userdata.selected)
-                    elseif key == "tracks" then reaper.SetTrackSelected(userdata.id, userdata.selected) end
+                    System.SetUserdataSelectedExtState(userdata, key)
+                    if Settings.link_selection.value then
+                        if key == "items" then
+                            reaper.SetMediaItemSelected(userdata.id, userdata.selected)
+                        elseif key == "tracks" then
+                            reaper.SetTrackSelected(userdata.id, userdata.selected)
+                        end
+                    end
                 end
             end
         end
         reaper.UpdateArrange()
+    end
+end
+
+-- Clear element.selected from a given table
+function System.ClearTableSelection(tab)
+    for _, element in ipairs(tab) do
+        element.selected = false
     end
 end
 
@@ -414,7 +454,7 @@ function System.ApplyReplacedNames()
         for _, key in ipairs(System.global_datas.order) do
             if System.global_datas[key]["data"] then
                 for _, userdata in pairs(System.global_datas[key]["data"]) do
-                    local can_apply = true
+                    local can_apply = System.global_datas[key].state and userdata.state
                     if can_apply then
                         local replaced_name = System.GetReplacedName(userdata.name)
                         if replaced_name and replaced_name ~= userdata.name then
