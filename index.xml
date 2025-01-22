@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="d3c7a0602833c89cc1d46740ec4d789d89611bc1">
+<index version="1" name="Gaspard ReaScripts" commit="4b57b716f0e5f69ef3be74096c2d08e17aeeb802">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -327,6 +327,16 @@
         <source file="Utilities/GUI_Elements/Gui_Rules_Popup.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d3c7a0602833c89cc1d46740ec4d789d89611bc1/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Rules_Popup.lua</source>
         <source file="Utilities/GUI_Elements/Gui_Settings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d3c7a0602833c89cc1d46740ec4d789d89611bc1/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Settings.lua</source>
         <source file="Utilities/GUI_Elements/Gui_Userdata.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d3c7a0602833c89cc1d46740ec4d789d89611bc1/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Userdata.lua</source>
+      </version>
+      <version name="0.0.11b" author="gaspard" time="2025-01-22T10:04:22Z">
+        <changelog><![CDATA[- Fix crash on exit]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4b57b716f0e5f69ef3be74096c2d08e17aeeb802/General/Complete%20Renamer/gaspard_Complete%20renamer.lua</source>
+        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4b57b716f0e5f69ef3be74096c2d08e17aeeb802/General/Complete%20Renamer/Utilities/System.lua</source>
+        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4b57b716f0e5f69ef3be74096c2d08e17aeeb802/General/Complete%20Renamer/Utilities/UserInterface.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Rules.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4b57b716f0e5f69ef3be74096c2d08e17aeeb802/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Rules.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Rules_Popup.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4b57b716f0e5f69ef3be74096c2d08e17aeeb802/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Rules_Popup.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Settings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4b57b716f0e5f69ef3be74096c2d08e17aeeb802/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Settings.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Userdata.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4b57b716f0e5f69ef3be74096c2d08e17aeeb802/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Userdata.lua</source>
       </version>
     </reapack>
   </category>
