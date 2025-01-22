@@ -1,11 +1,11 @@
 --@description Complete renamer
 --@author gaspard
---@version 0.0.8b
+--@version 0.0.9b
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/GUI_Elements/*.lua
 --@changelog
---  - Change selection system (WIP)
+--  - Update selection system (WIP)
 --  - Various fixes
 --@about
 --  ### Complete renamer
@@ -20,6 +20,8 @@ function SetButtonState(set)
       local pkg = reaper.ReaPack_GetOwner(name)
       version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
       reaper.ReaPack_FreeEntry(pkg)
+    else
+      --System.CleanExtState()
     end
     reaper.SetToggleCommandState(sec, cmd, set or 0)
     reaper.RefreshToolbar2(sec, cmd)

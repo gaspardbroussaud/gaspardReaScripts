@@ -56,6 +56,8 @@ local function VisualTopBar()
         if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 40, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
             reaper.ImGui_Dummy(ctx, 3, 1)
             reaper.ImGui_SameLine(ctx)
+            reaper.ImGui_Text(ctx, tostring(reaper.ImGui_GetFramerate(ctx)))
+            reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'Settings##settings_button') then
                 show_settings = not show_settings
                 if show_settings then settings_window.GetSettings()

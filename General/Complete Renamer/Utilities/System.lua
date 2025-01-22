@@ -7,7 +7,7 @@ local System = {}
 
 local project_name = reaper.GetProjectName(0)
 local project_id, project_path = reaper.EnumProjects(-1)
-local extname = 'gaspard_CompleteRenamer'
+local script_ext = 'gaspard_CompleteRenamer'
 
 System.focus_main_window = false
 System.Shift = false
@@ -67,26 +67,18 @@ local function GetItemsFromProject()
             if Settings.link_selection.value then
                 selected = reaper.IsMediaItemSelected(item_id)
             else
-                _, selected = reaper.GetSetMediaItemInfo_String(item_id, "P_EXT:"..extname..":Selected", "", false)
+                _, selected = reaper.GetSetMediaItemInfo_String(item_id, "P_EXT:"..script_ext..":Selected", "", false)
                 if selected == nil or selected == '' then
-                    reaper.GetSetMediaItemInfo_String(item_id, "P_EXT:".."gaspard_CompleteRenamer:".."Selected", "false", true)
+                    reaper.GetSetMediaItemInfo_String(item_id, "P_EXT:"..script_ext..":Selected", "false", true)
                 end
                 selected = selected == "true"
             end
             local state = true
-            _, state = reaper.GetSetMediaItemInfo_String(item_id, "P_EXT:"..extname..":State", "", false)
+            _, state = reaper.GetSetMediaItemInfo_String(item_id, "P_EXT:"..script_ext..":State", "", false)
             if state == nil or state == '' then
-                reaper.GetSetMediaItemInfo_String(item_id, "P_EXT:"..extname..":State", "true", true)
+                reaper.GetSetMediaItemInfo_String(item_id, "P_EXT:"..script_ext..":State", "true", true)
             end
             state = state == "true"
-
-            --[[if not Settings.link_selection.value and System.global_datas.items and System.global_datas.items.data then
-                if System.global_datas.items.data[i] and item_id == System.global_datas.items.data[i].id then
-                    selected = System.global_datas.items.data[i].selected
-                else
-                    table.insert(changed_items, {index = i, id = item_id})
-                end
-            end]]
 
             table.insert(items, {id = item_id, name = item_name, selected = selected, state = state})
         end
@@ -99,17 +91,6 @@ local function GetItemsFromProject()
     else
         return nil
     end
-
-    --[[if not Settings.link_selection.value and items and changed_items and System.global_datas.items then
-        for _, changed_item in ipairs(changed_items) do
-            for _, data in ipairs(System.global_datas.items.data) do
-                if data.id == changed_item.id then
-                    items[changed_item.index].selected = data.selected
-                    break
-                end
-            end
-        end
-    end]]
 
     return items
 end
@@ -128,30 +109,20 @@ local function GetTracksFromProject()
             if Settings.link_selection.value then
                 selected = reaper.IsTrackSelected(track_id)
             else
-                _, selected = reaper.GetSetMediaTrackInfo_String(track_id, "P_EXT:".."gaspard_CompleteRenamer:".."Selected", "", false)
+                _, selected = reaper.GetSetMediaTrackInfo_String(track_id, "P_EXT:"..script_ext..":Selected", "", false)
                 if selected == nil or selected == '' then
-                    reaper.GetSetMediaTrackInfo_String(track_id, "P_EXT:".."gaspard_CompleteRenamer:".."Selected", "false", true)
+                    reaper.GetSetMediaTrackInfo_String(track_id, "P_EXT:"..script_ext..":Selected", "false", true)
                 end
                 selected = selected == "true"
             end
             local state = true
-            _, state = reaper.GetSetMediaTrackInfo_String(track_id, "P_EXT:"..extname..":State", "", false)
+            _, state = reaper.GetSetMediaTrackInfo_String(track_id, "P_EXT:"..script_ext..":State", "", false)
             if state == nil or state == '' then
-                reaper.GetSetMediaTrackInfo_String(track_id, "P_EXT:"..extname..":State", "true", true)
+                reaper.GetSetMediaTrackInfo_String(track_id, "P_EXT:"..script_ext..":State", "true", true)
             end
             state = state == "true"
 
-            --[[local selected = Settings.link_selection.value and reaper.IsTrackSelected(track_id) or false
-
-            if not Settings.link_selection.value and System.global_datas.tracks and System.global_datas.tracks.data then
-                if System.global_datas.tracks.data[i] and track_id == System.global_datas.tracks.data[i].id then
-                    selected = System.global_datas.tracks.data[i].selected
-                else
-                    table.insert(changed_tracks, {index = i, id = track_id})
-                end
-            end]]
-
-            table.insert(tracks, {id = track_id, name = track_name, selected = selected})
+            table.insert(tracks, {id = track_id, name = track_name, selected = selected, state = state})
         end
 
         if Settings.alphabetical_order.value then
@@ -163,109 +134,78 @@ local function GetTracksFromProject()
         return nil
     end
 
-    --[[if not Settings.link_selection.value and tracks and changed_tracks and System.global_datas.tracks then
-        for _, changed_track in ipairs(changed_tracks) do
-            for _, data in ipairs(System.global_datas.tracks.data) do
-                if data.id == changed_track.id then
-                    tracks[changed_track.index].selected = data.selected
-                    break
-                end
-            end
-        end
-    end]]
-
     return tracks
 end
 
 -- Get all markers from project in table
 local function GetMarkersRegionsFromProject()
     local markers = {}
-    local changed_markers = {}
-    local marker_extname = extname.."_Marker"
-    local marker_index = 0
     local regions = {}
-    local changed_regions = {}
-    local region_index = 0
-    local _, marker_count, region_count = reaper.CountProjectMarkers(0)
-    for i = 1, marker_count + region_count do
-        local _, isrgn, pos, rgnend, name, markrgnid = reaper.EnumProjectMarkers2(0, i - 1)
+    local _, marker_count, region_count = reaper.CountProjectMarkers(project_id)
+    for i = 0, marker_count + region_count - 1 do
+        local _, markrgn_id = reaper.GetSetProjectInfo_String(project_id, "MARKER_GUID:"..i, "", false)
+
+        local _, isrgn, _, _, name, _ = reaper.EnumProjectMarkers2(0, i)
+
         local selected = false
-        if isrgn then
-            region_index = region_index + 1
-            --[[if System.global_datas.regions and System.global_datas.regions.data then
-                if System.global_datas.regions.data[region_index] and markrgnid == System.global_datas.regions.data[region_index].id then
-                    selected = System.global_datas.regions.data[region_index].selected
-                else
-                    table.insert(changed_regions, {index = region_index, id = markrgnid})
-                end
-            end]]
-
-            table.insert(regions, {pos = pos, rgnend = rgnend, id = markrgnid, name = name, selected = selected})
+        local extstate, val = reaper.GetProjExtState(project_id, tostring(markrgn_id), script_ext.."_Selected")
+        if extstate == 1 then
+            selected = val == "true"
         else
-            local extkey = name..'_'..tostring(marker_index)
+            reaper.SetProjExtState(project_id, tostring(markrgn_id), script_ext.."_Selected", "false")
+        end
 
-            local retval, optional_key, optional_val = reaper.EnumProjExtState(project_id, marker_extname, marker_index)
-            if retval then
-                if optional_key == extkey then
-                    reaper.ShowConsoleMsg(name..": "..tostring(ext_mark_selected).."\n")
-                    selected = ext_mark_selected == "true"
-                else
-                    table.insert(changed_markers, {key = extkey, index = marker_index, id = markrgnid})
-                end
+        local state = true
+        extstate, val = reaper.GetProjExtState(project_id, tostring(markrgn_id), script_ext.."_State")
+        if extstate == 1 then
+            state = val == "true"
+        else
+            reaper.SetProjExtState(project_id, tostring(markrgn_id), script_ext.."_State", "true")
+        end
+
+        if isrgn then
+            table.insert(regions, {id = markrgn_id, name = name, selected = selected, state = state})
+            --[[local _, region_id = reaper.GetSetProjectInfo_String(project_id, "MARKER_GUID:"..i, "", false)
+
+            local extstate, val = reaper.GetProjExtState(project_id, script_ext.."_"..tostring(region_id), "selected")
+            if extstate then
+                selected = val == "true"
+            else
+                reaper.SetProjExtState(project_id, script_ext.."_"..tostring(region_id), "selected", "false")
             end
 
-            --[[if System.global_datas.markers and System.global_datas.markers.data then
-                if System.global_datas.markers.data[marker_index] and markrgnid == System.global_datas.markers.data[marker_index].id then
-                    selected = System.global_datas.markers.data[marker_index].selected
-                else
-                    table.insert(changed_markers, {index = marker_index, id = markrgnid})
-                end
-            end]]
+            extstate, val = reaper.GetProjExtState(project_id, script_ext.."_"..tostring(region_id), "state")
+            if extstate then
+                state = val == "true"
+            else
+                reaper.SetProjExtState(project_id, script_ext.."_"..tostring(region_id), "state", "true")
+            end
 
-            table.insert(markers, {pos = pos, rgnend = rgnend, id = markrgnid, name = name, selected = selected})
+            table.insert(regions, {id = region_id, name = name, selected = selected, state = state})]]
+        else
+            table.insert(markers, {id = markrgn_id, name = name, selected = selected, state = state})
+            --[[local _, marker_id = reaper.GetSetProjectInfo_String(project_id, "MARKER_GUID:"..i, "", false)
 
-            marker_index = marker_index + 1
+            local extstate, val = reaper.GetProjExtState(project_id, script_ext.."_"..tostring(marker_id), "selected")
+            if extstate then
+                selected = val == "true"
+            else
+                reaper.SetProjExtState(project_id, script_ext.."_"..tostring(marker_id), "selected", "false")
+            end
+
+            extstate, val = reaper.GetProjExtState(project_id, script_ext.."_"..tostring(marker_id), "state")
+            if extstate then
+                state = val == "true"
+            else
+                reaper.SetProjExtState(project_id, script_ext.."_"..tostring(marker_id), "state", "true")
+            end
+
+            table.insert(markers, {id = marker_id, name = name, selected = selected, state = state})]]
         end
     end
+
     if #markers <= 0 then markers = nil end
     if #regions <= 0 then regions = nil end
-
-    if markers and changed_markers then
-        for _, changed_marker in ipairs(changed_markers) do
-            while true do
-                local retval, optional_key, optional_val = reaper.EnumProjExtState(0, marker_extname, marker_index)
-                if not retval then break end
-                if retval then
-                    if optional_key == changed_marker.key then
-                        local ext_mark_idx, ext_mark_selected = string.match(optional_val, "^(.-)_gm_(.-)$")
-                        markers[changed_marker.index].selected = ext_mark_selected == "true"
-                        break
-                    end
-                end
-            end
-        end
-    end
-
-    --[[if markers and changed_markers and System.global_datas.markers then
-        for _, changed_marker in ipairs(changed_markers) do
-            for _, data in ipairs(System.global_datas.markers.data) do
-                if data.id == changed_marker.id then
-                    markers[changed_marker.index].selected = data.selected
-                    break
-                end
-            end
-        end
-    end]]
-    if regions and changed_regions and System.global_datas.regions then
-        for i, changed_region in ipairs(changed_regions) do
-            for _, data in ipairs(System.global_datas.regions.data) do
-                if data.id == changed_region.id then
-                    regions[changed_region.index].selected = data.selected
-                    break
-                end
-            end
-        end
-    end
 
     if Settings.alphabetical_order.value then
         if markers and #markers > 0 then
@@ -293,6 +233,26 @@ function System.GetUserdatas()
     local regions = {display = "Regions", show = false, state = true, data = table_regions}
     local order = {"items", "tracks", "markers", "regions"}
     System.global_datas = {order = order, items = items, tracks = tracks, markers = markers, regions = regions}
+end
+
+-- Clean extstate from project .rpp file
+function System.CleanExtState()
+    local item_count = reaper.CountMediaItems(project_id)
+    for i = 0, item_count - 1 do
+        reaper.GetSetMediaItemInfo_String(reaper.GetMediaItem(project_id, i), "P_EXT:"..script_ext..":Selected", "", true)
+        reaper.GetSetMediaItemInfo_String(reaper.GetMediaItem(project_id, i), "P_EXT:"..script_ext..":State", "", true)
+    end
+    local track_count = reaper.CountTracks(project_id)
+    for i = 0, track_count - 1 do
+        reaper.GetSetMediaTrackInfo_String(reaper.GetTrack(project_id, i), "P_EXT:"..script_ext..":Selected", "", true)
+        reaper.GetSetMediaTrackInfo_String(reaper.GetTrack(project_id, i), "P_EXT:"..script_ext..":State", "", true)
+    end
+    local _, marker_count, region_count = reaper.CountProjectMarkers(project_id)
+    for i = 0, marker_count + region_count - 1 do
+        local _, markrgn_id = reaper.GetSetProjectInfo_String(project_id, "MARKER_GUID:"..i, "", false)
+        reaper.SetProjExtState(project_id, tostring(markrgn_id), script_ext.."_Selected", "")
+        reaper.SetProjExtState(project_id, tostring(markrgn_id), script_ext.."_State", "")
+    end
 end
 
 -- Reposition an item to another index in a given table
@@ -491,9 +451,11 @@ function System.ApplyReplacedNames()
                             elseif key == "tracks" then
                                 reaper.GetSetMediaTrackInfo_String(userdata.id, "P_NAME", userdata.name, true)
                             elseif key == "markers" then
-                                reaper.SetProjectMarker(userdata.id, false, userdata.pos, userdata.rgnend, userdata.name)
+                                local _, index = reaper.GetSetProjectInfo_String(project_id, "MARKER_INDEX_FROM_GUID:"..tostring(userdata.id), "", false)
+                                reaper.SetProjectMarker(index, false, userdata.pos, userdata.rgnend, userdata.name)
                             elseif key == "regions" then
-                                reaper.SetProjectMarker(userdata.id, true, userdata.pos, userdata.rgnend, userdata.name)
+                                local _, index = reaper.GetSetProjectInfo_String(project_id, "MARKER_INDEX_FROM_GUID:"..tostring(userdata.id), "", false)
+                                reaper.SetProjectMarker(index, true, userdata.pos, userdata.rgnend, userdata.name)
                             end
                         end
                     end

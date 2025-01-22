@@ -16,16 +16,15 @@ local function SelectUserdataInProject(userdata, key)
 end
 
 local function SetUserdataSelectedExtState(userdata, key, index)
-    local extname = 'gaspard_CompleteRenamer'
+    local script_ext = 'gaspard_CompleteRenamer'
     if key == "items" then
-        reaper.GetSetMediaItemInfo_String(userdata.id, "P_EXT:"..extname..":Selected", tostring(userdata.selected), true)
+        reaper.GetSetMediaItemInfo_String(userdata.id, "P_EXT:"..script_ext..":Selected", tostring(userdata.selected), true)
     elseif key == "tracks" then
-        reaper.GetSetMediaTrackInfo_String(userdata.id, "P_EXT:"..extname..":Selected", tostring(userdata.selected), true)
+        reaper.GetSetMediaTrackInfo_String(userdata.id, "P_EXT:"..script_ext..":Selected", tostring(userdata.selected), true)
     elseif key == "markers" then
-        local extkey = 'Marker_'..userdata.name..'_'..tostring(userdata.id)
-        --reaper.SetProjExtState(0, extname, extkey, tostring(index).."_gm_"..tostring(userdata.selected))
+        reaper.SetProjExtState(project_id, tostring(userdata.id), script_ext.."_Selected", tostring(userdata.selected))
     elseif key == "regions" then
-        
+        reaper.SetProjExtState(project_id, tostring(userdata.id), script_ext.."_Selected", tostring(userdata.selected))
     end
 end
 
