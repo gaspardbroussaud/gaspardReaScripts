@@ -1,7 +1,7 @@
--- @noindex
--- @description Complete renamer user interface gui rule popup
--- @author gaspard
--- @about User interface rule popup used in gaspard_Complete renamer.lua script
+--@noindex
+--@description Complete renamer user interface gui rule popup
+--@author gaspard
+--@about User interface rule popup used in gaspard_Complete renamer.lua script
 
 local rules_popup = {}
 

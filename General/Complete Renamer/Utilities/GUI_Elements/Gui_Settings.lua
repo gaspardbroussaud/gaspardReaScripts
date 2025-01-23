@@ -1,7 +1,7 @@
--- @noindex
--- @description Complete renamer user interface gui settings
--- @author gaspard
--- @about User interface settings used in gaspard_Complete renamer.lua script
+--@noindex
+--@description Complete renamer user interface gui settings
+--@author gaspard
+--@about User interface settings used in gaspard_Complete renamer.lua script
 
 local settings_window = {}
 

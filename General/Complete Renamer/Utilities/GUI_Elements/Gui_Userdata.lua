@@ -1,7 +1,7 @@
--- @noindex
--- @description Complete renamer user interface gui userdata
--- @author gaspard
--- @about User interface userdata window used in gaspard_Complete renamer.lua script
+--@noindex
+--@description Complete renamer user interface gui userdata
+--@author gaspard
+--@about User interface userdata window used in gaspard_Complete renamer.lua script
 
 local userdata_window = {}
 
@@ -74,13 +74,6 @@ local function SelectFromOneToTheOther(one, other)
     end
 end
 
-local function SetAllKeyUserdataState(key, state)
-    for _, userdata in pairs(System.global_datas[key]["data"]) do
-        userdata.state = state
-        SetUserdataStateExtState(userdata, key)
-    end
-end
-
 -- Display found and renamed Reaper userdata
 local function DisplayUserdata()
     local selection_index = 0
@@ -94,17 +87,13 @@ local function DisplayUserdata()
                     reaper.SetProjExtState(project_id, 'gaspard_CompleteRenamer', key.."_State", tostring(System.global_datas[key].state))
                     System.one_renamed = false
                     System.last_selected_area = "userdata"
-                    --[[if System.global_datas[key].state then
-                        SetAllKeyUserdataState(key, true)
-                    else
-                        SetAllKeyUserdataState(key, false)
-                    end]]
                 end
                 reaper.ImGui_SameLine(ctx)
                 if reaper.ImGui_TreeNode(ctx, System.global_datas[key]["display"].."##index"..tostring(index), tree_flags) then
-                    local table_flags = reaper.ImGui_TableFlags_BordersInnerV() | reaper.ImGui_TableColumnFlags_WidthFixed()
+                    local table_flags = reaper.ImGui_TableFlags_BordersInnerV() | reaper.ImGui_TableColumnFlags_WidthFixed() | reaper.ImGui_TableFlags_Resizable()
                     if reaper.ImGui_BeginTable(ctx, "table_"..key, 3, table_flags) then
-                        reaper.ImGui_TableSetupColumn(ctx, "col_checkbox", reaper.ImGui_TableColumnFlags_WidthFixed() | reaper.ImGui_TableFlags_SizingFixedFit(), 30)
+                        local column_flags = reaper.ImGui_TableColumnFlags_WidthFixed() | reaper.ImGui_TableFlags_SizingFixedFit() | reaper.ImGui_TableColumnFlags_NoResize()
+                        reaper.ImGui_TableSetupColumn(ctx, "col_checkbox", column_flags, 30)
                         reaper.ImGui_TableSetupColumn(ctx, "col_original_name")
                         reaper.ImGui_TableSetupColumn(ctx, "col_replaced_name")
                         for i, userdata in pairs(System.global_datas[key]["data"]) do
@@ -195,10 +184,6 @@ end
 function userdata_window.ShowVisuals()
     System.GetUserdatas()
     DisplayUserdata()
-end
-
--- Gui Checkboxes
-function userdata_window.ShowCheckboxes()
 end
 
 return userdata_window

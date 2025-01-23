@@ -1,7 +1,7 @@
--- @noindex
--- @description Complete renamer functions
--- @author gaspard
--- @about All functions used in gaspard_Complete renamer.lua script
+--@noindex
+--@description Complete renamer functions
+--@author gaspard
+--@about All functions used in gaspard_Complete renamer.lua script
 
 local System = {}
 
@@ -15,19 +15,20 @@ System.Ctrl = false
 
 System.global_datas = {}
 System.ruleset = {}
+System.presets = {}
 System.one_renamed = false
 System.last_selected_area = "userdata"
 
 -- Init Settings from file
 function System.InitSettings()
-    local settings_version = "0.0.3b"
+    local settings_version = "1.0"
     default_settings = {
         version = settings_version,
         order = {"link_selection", "tree_start_open"},
         alphabetical_order = {
             value = false,
             name = "Alphabetical order",
-            description = "Sort userdata alphabetically."
+            description = "Sort userdata alphabetically.\nEach data type separated."
         },
         link_selection = {
             value = false,
@@ -51,6 +52,38 @@ function System.InitSettings()
         Settings = gson.SaveJSON(settings_path, default_settings)
         Settings = gson.LoadJSON(settings_path, Settings)
     end
+end
+
+function System.SavePreset(name, preset)
+    gson.SaveJSON(presets_path.."/"..name:gsub("%.json$", "")..".json", preset)
+end
+
+function System.ImportPresetReplaceRuleset(preset)
+    System.ruleset = {}
+    System.ruleset = gson.LoadJSON(preset.path)
+end
+
+function System.AddPresetToRuleset(preset)
+    local preset_set = gson.LoadJSON(preset.path)
+    for _, rule in ipairs(preset_set) do
+        table.insert(System.ruleset, rule)
+    end
+end
+
+function System.ScanPresetFiles()
+    local files = {}
+    local index = 0
+    local file = reaper.EnumerateFiles(presets_path, index)
+
+    while file do
+        if file:match("%.json$") then
+            table.insert(files, {path = presets_path.."/"..file, name = file:gsub("%.json$", ""), selected = false})
+        end
+        index = index + 1
+        file = reaper.EnumerateFiles(presets_path, index)
+    end
+
+    System.presets = files
 end
 
 -- Get all items from project in table

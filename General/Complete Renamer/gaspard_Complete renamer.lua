@@ -1,13 +1,13 @@
 --@description Complete renamer
 --@author gaspard
---@version 0.0.12b
+--@version 1.0
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/GUI_Elements/*.lua
 --@changelog
---  - Remove console messages on exit
---  - Add userdata state
---  - Updated area focus detection
+--  - Script release
+--  - Resizable userdata table
+--  - Added rules preset system
 --@about
 --  ### Complete renamer
 --  - A complete renamer with selectable and editable rule blocks for items, tracks, markers and regions (may evolve).

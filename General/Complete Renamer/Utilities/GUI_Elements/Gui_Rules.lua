@@ -1,7 +1,7 @@
--- @noindex
--- @description Complete renamer user interface gui rules
--- @author gaspard
--- @about User interface rules used in gaspard_Complete renamer.lua script
+--@noindex
+--@description Complete renamer user interface gui rules
+--@author gaspard
+--@about User interface rules used in gaspard_Complete renamer.lua script
 
 local rules = {}
 
@@ -11,7 +11,7 @@ local rule_types = {}
 rule_types.insert = {text = "", from_start = true, from_end = false}
 rule_types.replace = {search_text = "", replace_text = ""}
 rule_types.case = {selected = 0, capitalize_every_word = 0, all_lower_case = 1, all_upper_case = 2, first_letter_capital = 3}
-local empty_rule = {version = "1.0.0", state = true, type_selected = "insert", config = rule_types, selected = false}
+local empty_rule = {version = "1.0", state = true, type_selected = "insert", config = rule_types, selected = false}
 
 local selected_rule = nil
 local selected_index = -1
@@ -73,7 +73,6 @@ local function RulesButtons()
             local remove_table = {}
             for i, rule in ipairs(System.ruleset) do
                 if rule.selected then
-                    --table.remove(System.ruleset, i)
                     remove_table[rule] = true
                     System.one_renamed = false
                 end

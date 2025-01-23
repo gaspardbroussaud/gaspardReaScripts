@@ -1,12 +1,13 @@
--- @noindex
--- @description Complete renamer user interface
--- @author gaspard
--- @about All user interface used in gaspard_Complete renamer.lua script
+--@noindex
+--@description Complete renamer user interface
+--@author gaspard
+--@about All user interface used in gaspard_Complete renamer.lua script
 
 local Gui = {}
 
 local rules_window = require('Utilities/GUI_Elements/Gui_Rules')
 local userdata_window = require('Utilities/GUI_Elements/Gui_Userdata')
+local presets_window = require('Utilities/GUI_Elements/GUI_Presets')
 local settings_window = require('Utilities/GUI_Elements/Gui_Settings')
 
 --#region Initial Variables
@@ -46,23 +47,36 @@ local function VisualTopBar()
     if reaper.ImGui_BeginChild(ctx, "child_top_bar", window_width, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
         reaper.ImGui_Text(ctx, window_name)
 
-        reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing(), 5, 0)
+        local spacing = 5
+        reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing(), spacing, 0)
 
         reaper.ImGui_SameLine(ctx)
 
-        local w, _ = reaper.ImGui_CalcTextSize(ctx, "Settings X")
-        reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 40, 0)
+        local presets_width = window_width > 327 and 60 or 18
+        local settings_width = window_width > 286 and 60 or 18
+        local quit_width = 18
+        local padding, _ = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_WindowPadding())
+        local buttons_width = presets_width + settings_width + quit_width + 3 * padding + 2 * spacing
+        reaper.ImGui_SetCursorPos(ctx, window_width - buttons_width, 0)
 
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 40, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
+        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", buttons_width, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
             reaper.ImGui_Dummy(ctx, 3, 1)
             reaper.ImGui_SameLine(ctx)
-            if reaper.ImGui_Button(ctx, 'Settings##settings_button') then
+            local text = presets_width == 60 and 'Presets' or 'P'
+            if reaper.ImGui_Button(ctx, text..'##presets_button', presets_width) then
+                show_presets = not show_presets
+                if show_presets then System.ScanPresetFiles()
+                else System.focus_main_window = false end
+            end
+            reaper.ImGui_SameLine(ctx)
+            text = settings_width == 60 and 'Settings' or 'S'
+            if reaper.ImGui_Button(ctx, text..'##settings_button', settings_width) then
                 show_settings = not show_settings
                 if show_settings then settings_window.GetSettings()
                 else System.focus_main_window = false end
             end
             reaper.ImGui_SameLine(ctx)
-            if reaper.ImGui_Button(ctx, 'X##quit_button') then
+            if reaper.ImGui_Button(ctx, 'X##quit_button', quit_width) then
                 open = false
             end
             reaper.ImGui_EndChild(ctx)
@@ -109,15 +123,13 @@ local function VisualElements(child_width, child_height)
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) - 8)
     reaper.ImGui_SetCursorPosY(ctx, top_height + splitter_size)
     if reaper.ImGui_BeginChild(ctx, "child_bottom_userdata", child_width, bottom_height, reaper.ImGui_ChildFlags_Border()) then
-        -- Set childs for checkbox and userdata visuals
-        userdata_window.ShowCheckboxes()
         userdata_window.ShowVisuals()
         reaper.ImGui_EndChild(ctx)
     end
 
     local x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
     local button_x = 200
-    if child_width < 217 then button_x = child_width - 17 end
+    if window_width < 245 then button_x = child_width - 17 end
     local disable = not System.one_renamed
     if disable then reaper.ImGui_BeginDisabled(ctx) end
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + x - button_x)
@@ -163,7 +175,7 @@ local function OnTick()
     System.ProjectUpdates()
     if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Escape()) then
         if System.last_selected_area == "rule" then
-            System.ClearTableSelection(ruleset)
+            System.ClearTableSelection(System.ruleset)
         elseif System.last_selected_area == "userdata" then
             System.ClearUserdataSelection()
         end
@@ -192,6 +204,7 @@ function Gui.Loop()
     end
 
     reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
+    reaper.ImGui_SetNextWindowSizeConstraints(ctx, 244, 400, math.huge, math.huge)
 
     -- Font
     reaper.ImGui_PushFont(ctx, font)
@@ -204,6 +217,9 @@ function Gui.Loop()
     if visible then
         -- Top bar elements
         VisualTopBar()
+
+        -- Presets window
+        if show_presets then presets_window.Show() end
 
         -- Settings window
         if show_settings then settings_window.Show() end
