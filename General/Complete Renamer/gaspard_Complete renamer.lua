@@ -1,13 +1,12 @@
 --@description Complete renamer
 --@author gaspard
---@version 1.0
+--@version 1.0.1
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/GUI_Elements/*.lua
 --@changelog
---  - Script release
---  - Resizable userdata table
---  - Added rules preset system
+--  - Fix crash on save preset
+--  - Uniform buttons
 --@about
 --  ### Complete renamer
 --  - A complete renamer with selectable and editable rule blocks for items, tracks, markers and regions (may evolve).
@@ -42,9 +41,9 @@ local json_file_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/JS
 package.path = package.path .. ";" .. json_file_path .. "/?.lua"
 gson = require("json_utilities_lib")
 
-settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/Utilities/gaspard_'..action_name..'_settings.json'
-rule_default_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/Utilities/rule_default.json'
-presets_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/Presets'
+settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'Utilities/gaspard_'..action_name..'_settings.json'
+rule_default_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'Utilities/rule_default.json'
+presets_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'Presets'
 
 System.InitSettings()
 Gui.Init()

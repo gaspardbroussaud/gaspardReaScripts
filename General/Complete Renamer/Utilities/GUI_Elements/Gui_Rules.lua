@@ -50,7 +50,7 @@ end
 
 -- GUI rules top bar
 local function RulesButtons()
-    if reaper.ImGui_Button(ctx, "Add##button_add_rule", 100) then
+    if reaper.ImGui_Button(ctx, "ADD##button_add_rule", 100) then
         selected_rule = System.LoadEmptyRule(empty_rule, rule_default_path)
         rule_popup_open = true
         popup_type = true
@@ -68,7 +68,7 @@ local function RulesButtons()
         end
     end
     if disable then reaper.ImGui_BeginDisabled(ctx) end
-    if reaper.ImGui_Button(ctx, "Remove##button_remove_rule", 100) then
+    if reaper.ImGui_Button(ctx, "REMOVE##button_remove_rule", 100) then
         if System.ruleset then
             local remove_table = {}
             for i, rule in ipairs(System.ruleset) do

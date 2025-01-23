@@ -64,7 +64,7 @@ function settings_window.Show()
         reaper.ImGui_SetCursorPosY(ctx, settings_height - 35)
         local disable = not settings_one_changed
         if disable then reaper.ImGui_BeginDisabled(ctx) end
-        if reaper.ImGui_Button(ctx, "Apply##settings_apply", 70) then
+        if reaper.ImGui_Button(ctx, "APPLY##settings_apply", 70) then
             SetSettings()
             gson.SaveJSON(settings_path, Settings)
             settings_one_changed = false

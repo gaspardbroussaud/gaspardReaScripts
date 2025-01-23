@@ -52,9 +52,11 @@ local function VisualTopBar()
 
         reaper.ImGui_SameLine(ctx)
 
-        local presets_width = window_width > 327 and 60 or 18
-        local settings_width = window_width > 286 and 60 or 18
-        local quit_width = 18
+        local button_w = 80
+        local small_button_w = 18
+        local presets_width = window_width > 369 and button_w or small_button_w
+        local settings_width = window_width > 305 and button_w or small_button_w
+        local quit_width = small_button_w
         local padding, _ = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_WindowPadding())
         local buttons_width = presets_width + settings_width + quit_width + 3 * padding + 2 * spacing
         reaper.ImGui_SetCursorPos(ctx, window_width - buttons_width, 0)
@@ -62,14 +64,14 @@ local function VisualTopBar()
         if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", buttons_width, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
             reaper.ImGui_Dummy(ctx, 3, 1)
             reaper.ImGui_SameLine(ctx)
-            local text = presets_width == 60 and 'Presets' or 'P'
+            local text = presets_width == button_w and 'PRESETS' or 'P'
             if reaper.ImGui_Button(ctx, text..'##presets_button', presets_width) then
                 show_presets = not show_presets
                 if show_presets then System.ScanPresetFiles()
                 else System.focus_main_window = false end
             end
             reaper.ImGui_SameLine(ctx)
-            text = settings_width == 60 and 'Settings' or 'S'
+            text = settings_width == button_w and 'SETTINGS' or 'S'
             if reaper.ImGui_Button(ctx, text..'##settings_button', settings_width) then
                 show_settings = not show_settings
                 if show_settings then settings_window.GetSettings()
