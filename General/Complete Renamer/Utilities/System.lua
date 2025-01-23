@@ -61,7 +61,14 @@ local function CreateDirectoryIfNotExists(path)
     end
 end
 
+local function SanitizeFileName(filename)
+    local forbidden_chars = '[<>:"/\\|?*]'
+    local sanitized = string.gsub(filename, forbidden_chars, "")
+    return sanitized
+end
+
 function System.SavePreset(name, preset)
+    name = SanitizeFileName(name)
     local path = presets_path.."/"..name:gsub("%.json$", "")..".json"
     CreateDirectoryIfNotExists(presets_path)
     gson.SaveJSON(path, preset)
