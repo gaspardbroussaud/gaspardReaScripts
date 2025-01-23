@@ -54,8 +54,17 @@ function System.InitSettings()
     end
 end
 
+local function CreateDirectoryIfNotExists(path)
+    local attr = reaper.EnumerateFiles(path, 0)
+    if not attr then
+        reaper.RecursiveCreateDirectory(path, 0)
+    end
+end
+
 function System.SavePreset(name, preset)
-    gson.SaveJSON(presets_path.."/"..name:gsub("%.json$", "")..".json", preset)
+    local path = presets_path.."/"..name:gsub("%.json$", "")..".json"
+    CreateDirectoryIfNotExists(presets_path)
+    gson.SaveJSON(path, preset)
 end
 
 function System.ImportPresetReplaceRuleset(preset)

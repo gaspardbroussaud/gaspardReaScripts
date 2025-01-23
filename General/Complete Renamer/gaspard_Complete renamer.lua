@@ -1,11 +1,11 @@
 --@description Complete renamer
 --@author gaspard
---@version 1.0.2
+--@version 1.0.3
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/GUI_Elements/*.lua
 --@changelog
---  - Ctrl + A shortcut only on visible userdata sections
+--  - Fix crash on save preset with no folder in Reaper directory
 --@about
 --  ### Complete renamer
 --  - A complete renamer with selectable and editable rule blocks for items, tracks, markers and regions (may evolve).
