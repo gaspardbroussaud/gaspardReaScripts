@@ -89,7 +89,13 @@ local function DisplayUserdata()
                     System.last_selected_area = "userdata"
                 end
                 reaper.ImGui_SameLine(ctx)
-                if reaper.ImGui_TreeNode(ctx, System.global_datas[key]["display"].."##index"..tostring(index), tree_flags) then
+                System.global_datas[key]["show"] = reaper.ImGui_TreeNode(ctx, System.global_datas[key]["display"].."##index"..tostring(index), tree_flags)
+                local changed = reaper.ImGui_IsItemToggledOpen(ctx)
+                if changed then
+                    System.one_renamed = false
+                    System.last_selected_area = "userdata"
+                end
+                if System.global_datas[key]["show"] then
                     local table_flags = reaper.ImGui_TableFlags_BordersInnerV() | reaper.ImGui_TableColumnFlags_WidthFixed() | reaper.ImGui_TableFlags_Resizable()
                     if reaper.ImGui_BeginTable(ctx, "table_"..key, 3, table_flags) then
                         local column_flags = reaper.ImGui_TableColumnFlags_WidthFixed() | reaper.ImGui_TableFlags_SizingFixedFit() | reaper.ImGui_TableColumnFlags_NoResize()
@@ -150,7 +156,6 @@ local function DisplayUserdata()
                                 reaper.ImGui_TableNextColumn(ctx)
                                 local can_apply = System.global_datas[key].state and userdata.state
                                 local replaced_text = nil
-                                if selection_based and not userdata.selected then can_apply = false end
                                 if can_apply then
                                     replaced_text = System.GetReplacedName(userdata.name)
                                     if replaced_text and replaced_text ~= userdata.name then System.one_renamed = true end

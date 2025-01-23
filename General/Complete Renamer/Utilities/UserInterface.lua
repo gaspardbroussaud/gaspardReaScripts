@@ -175,13 +175,6 @@ end
 -- At every frame
 local function OnTick()
     System.ProjectUpdates()
-    if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Escape()) then
-        if System.last_selected_area == "rule" then
-            System.ClearTableSelection(System.ruleset)
-        elseif System.last_selected_area == "userdata" then
-            System.ClearUserdataSelection()
-        end
-    end
     System.KeyboardHold()
 end
 

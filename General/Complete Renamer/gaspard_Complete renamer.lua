@@ -1,12 +1,11 @@
 --@description Complete renamer
 --@author gaspard
---@version 1.0.1
+--@version 1.0.2
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/GUI_Elements/*.lua
 --@changelog
---  - Fix crash on save preset
---  - Uniform buttons
+--  - Ctrl + A shortcut only on visible userdata sections
 --@about
 --  ### Complete renamer
 --  - A complete renamer with selectable and editable rule blocks for items, tracks, markers and regions (may evolve).
