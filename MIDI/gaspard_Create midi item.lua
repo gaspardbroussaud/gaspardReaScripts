@@ -1,0 +1,8 @@
+--@noindex
+--@description Pattern generator
+--@author gaspard
+--@version 0.0.1b
+--@changelog
+--  - Add script
+--@about
+--  ### Create MIDI item
