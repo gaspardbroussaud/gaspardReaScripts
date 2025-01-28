@@ -5,6 +5,7 @@
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/GUI_Elements/*.lua
+--    [nomain] Presets/*.json
 --@changelog
 --  - Add script
 --@about
@@ -20,8 +21,6 @@ function SetButtonState(set)
       local pkg = reaper.ReaPack_GetOwner(name)
       version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
       reaper.ReaPack_FreeEntry(pkg)
-    else
-      if Settings.clean_rpp.value then System.CleanExtState() end
     end
     reaper.SetToggleCommandState(sec, cmd, set or 0)
     reaper.RefreshToolbar2(sec, cmd)

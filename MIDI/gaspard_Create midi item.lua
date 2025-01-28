@@ -5,4 +5,5 @@
 --@changelog
 --  - Add script
 --@about
---  ### Create MIDI item
+--  ### MIDI item
+--  - Create MIDI item on new track with ReaSamplOmatic5000

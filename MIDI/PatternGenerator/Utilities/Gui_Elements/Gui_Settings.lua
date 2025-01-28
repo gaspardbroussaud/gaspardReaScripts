@@ -1,7 +1,7 @@
 --@noindex
---@description Complete renamer user interface gui settings
+--@description Pattern generator user interface gui settings
 --@author gaspard
---@about User interface settings used in gaspard_Complete renamer.lua script
+--@about User interface settings used in gaspard_Pattern generator.lua script
 
 local settings_window = {}
 
