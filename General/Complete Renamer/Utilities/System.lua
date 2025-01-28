@@ -21,10 +21,10 @@ System.last_selected_area = "userdata"
 
 -- Init Settings from file
 function System.InitSettings()
-    local settings_version = "1.0"
+    local settings_version = "1.0.1"
     default_settings = {
         version = settings_version,
-        order = {"link_selection", "tree_start_open"},
+        order = {"alphabetical_order", "link_selection", "tree_start_open", "clean_rpp"},
         alphabetical_order = {
             value = false,
             name = "Alphabetical order",
@@ -48,7 +48,7 @@ function System.InitSettings()
     }
     Settings = gson.LoadJSON(settings_path, default_settings)
     if settings_version ~= Settings.version then
-        reaper.MB("Settings are erased due to update in file.\nPlease excuse this behaviour.\nThis won't happen once released.", "WARNING", 0)
+        reaper.MB("Settings are erased due to update in file.\nPlease excuse this behaviour.", "WARNING", 0)
         Settings = gson.SaveJSON(settings_path, default_settings)
         Settings = gson.LoadJSON(settings_path, Settings)
     end
