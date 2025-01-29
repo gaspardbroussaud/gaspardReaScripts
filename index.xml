@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="1f229c941eeaf9bbf4ca39a16b2347fd6e415c2f">
+<index version="1" name="Gaspard ReaScripts" commit="a53901dd80b95842ef4be2540dfa4803b754ee89">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -800,7 +800,7 @@
   <category name="Marker">
     <reapack name="gaspard_Set marker to first transient in selected items using name pattern.lua" type="script" desc="Set marker to first transient in selected items using name pattern">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
@@ -815,6 +815,10 @@
       <version name="1.0" author="gaspard" time="2025-01-10T16:27:18Z">
         <changelog><![CDATA[- Add script]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/ee9acd5e4d2bb8cad05997053208507adb0bd884/Marker/gaspard_Set%20marker%20to%20first%20transient%20in%20selected%20items%20using%20name%20pattern.lua</source>
+      </version>
+      <version name="1.0.1" author="gaspard" time="2025-01-29T16:05:02Z">
+        <changelog><![CDATA[- Typo in variable name]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a53901dd80b95842ef4be2540dfa4803b754ee89/Marker/gaspard_Set%20marker%20to%20first%20transient%20in%20selected%20items%20using%20name%20pattern.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Set marker to first transient in selected items.lua" type="script" desc="Set marker to first transient in selected items">
@@ -1304,6 +1308,25 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       <version name="1.1.1" author="gaspard" time="2024-03-14T09:53:17Z">
         <changelog><![CDATA[+Unselect track after collapse.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/98114939f7252b24cff337a2ec5b1ee44f54e547/Track/gaspard_Collapse%20to%20small%20track%20in%20folder%20under%20mouse%20in%20TCP.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Insert tracks with name inputs.lua" type="script" desc="Insert tracks with name inputs">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 ###Insert tracks with name inputs\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab How to use:\par}
+{\pard \ql \f0 \sa0 \li720 \fi-360 \endash \tx360\tab Launch\par}
+{\pard \ql \f0 \sa0 \li720 \fi-360 \endash \tx360\tab Enter names in GUI\par}
+{\pard \ql \f0 \sa0 \li720 \fi-360 \endash \tx360\tab Create tracks with button\sa180\sa180\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2025-01-29T16:05:02Z">
+        <changelog><![CDATA[- Add script]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a53901dd80b95842ef4be2540dfa4803b754ee89/Track/gaspard_Insert%20tracks%20with%20name%20inputs.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Invert selected tracks phase, add 'inv phase' in name and change color.lua" type="script" desc="Invert selected tracks phase, add 'inv phase' in name and change color">
