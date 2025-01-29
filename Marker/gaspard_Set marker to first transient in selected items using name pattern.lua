@@ -1,8 +1,8 @@
 --@description Set marker to first transient in selected items using name pattern
 --@author gaspard
---@version 1.0
+--@version 1.0.1
 --@changelog
---  - Add script
+--  - Typo in variable name
 --@about
 --  - Set marker to first transient in selected items using name pattern
 --  - How to use:
@@ -181,7 +181,7 @@ function Gui_Elements()
 
         item_count = reaper.CountSelectedMediaItems(0)
         disabled = item_count == 0
-        if disable then reaper.ImGui_BeginDisabled(ctx) end
+        if disabled then reaper.ImGui_BeginDisabled(ctx) end
 
         if reaper.ImGui_Button(ctx, "CREATE##button_create_marker", 100) then
             reaper.Undo_BeginBlock()
@@ -190,7 +190,7 @@ function Gui_Elements()
             reaper.UpdateArrange()
         end
 
-        if disable then
+        if disabled then
             reaper.ImGui_EndDisabled(ctx)
             reaper.ImGui_SetItemTooltip(ctx, "Please select at least one item.")
         end
