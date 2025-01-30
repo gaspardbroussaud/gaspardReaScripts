@@ -1,11 +1,11 @@
 --@description Complete renamer
 --@author gaspard
---@version 1.0.5
+--@version 1.0.6
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/GUI_Elements/*.lua
 --@changelog
---  - Fix Settings json structure
+--  - Fix crash on marker/region rename
 --@about
 --  ### Complete renamer
 --  - A complete renamer with selectable and editable rule blocks for items, tracks, markers and regions (may evolve).

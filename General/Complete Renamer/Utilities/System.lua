@@ -199,7 +199,7 @@ local function GetMarkersRegionsFromProject()
     for i = 0, marker_count + region_count - 1 do
         local _, markrgn_id = reaper.GetSetProjectInfo_String(project_id, "MARKER_GUID:"..i, "", false)
 
-        local _, isrgn, _, _, name, _ = reaper.EnumProjectMarkers2(0, i)
+        local _, isrgn, pos, rgnend, name, _ = reaper.EnumProjectMarkers2(0, i)
 
         local selected = false
         local extstate, val = reaper.GetProjExtState(project_id, tostring(markrgn_id), script_ext.."_Selected")
@@ -218,9 +218,9 @@ local function GetMarkersRegionsFromProject()
         end
 
         if isrgn then
-            table.insert(regions, {id = markrgn_id, name = name, selected = selected, state = state})
+            table.insert(regions, {id = markrgn_id, pos = pos, rgnend = rgnend, name = name, selected = selected, state = state})
         else
-            table.insert(markers, {id = markrgn_id, name = name, selected = selected, state = state})
+            table.insert(markers, {id = markrgn_id, pos = pos, rgnend = rgnend, name = name, selected = selected, state = state})
         end
     end
 
