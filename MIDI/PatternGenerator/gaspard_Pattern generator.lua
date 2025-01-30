@@ -21,6 +21,8 @@ function SetButtonState(set)
       local pkg = reaper.ReaPack_GetOwner(name)
       version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
       reaper.ReaPack_FreeEntry(pkg)
+    else
+      System.ClearOnExitIfEmpty()
     end
     reaper.SetToggleCommandState(sec, cmd, set or 0)
     reaper.RefreshToolbar2(sec, cmd)
@@ -43,7 +45,7 @@ gson = require("json_utilities_lib")
 settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/Utilities/gaspard_'..action_name..'_settings.json'
 presets_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/Presets'
 
-System.InitSettings()
+System.Init()
 Gui.Init()
 
 reaper.defer(Gui.Loop)

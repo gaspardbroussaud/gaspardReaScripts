@@ -5,8 +5,6 @@
 
 local System = {}
 
-local path_to_file = "C:/Users/Gaspard/Documents/Local_ReaScripts/test_patterns/Media/RS5K samples/Kick.wav"
-
 -- Global variables
 local project_name = reaper.GetProjectName(0)
 local project_id, project_path = reaper.EnumProjects(-1)
@@ -14,7 +12,7 @@ System.focus_main_window = false
 
 -- Object track variables
 System.parent_obj_track = nil
-System.objects = {{name = "Kick", path = path_to_file}}
+System.objects = {}
 
 -- Presets variables
 System.presets = {}
@@ -38,8 +36,26 @@ function System.ProjectUpdates()
     end
 end
 
+local function CopyFile(src, dest)
+    local input = io.open(src, "rb")
+    if not input then return false, "Source file not found" end
+
+    local output = io.open(dest, "wb")
+    if not output then 
+        input:close()
+        return false, "Failed to create destination file"
+    end
+
+    local data = input:read("*a")
+    output:write(data)
+
+    input:close()
+    output:close()
+    return true
+end
+
 -- Init Settings from file
-function System.InitSettings()
+local function InitSettings()
     local settings_version = "0.0.1b"
     default_settings = {
         version = settings_version,
@@ -67,22 +83,31 @@ end
 -- Object track creation ------
 -- Add parent track if not exist
 local function CreateParentObjectsTrack()
-    local add_parent = true
     local track_count = reaper.CountTracks(0)
     for i = 0, track_count - 1 do
         local track = reaper.GetTrack(0, i)
-        if track == System.parent_obj_track then
-            add_parent = false
-            break
+        local retval, _ = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:PatternGenerator:MasterTrack", "", false)
+        if retval then
+            return
         end
     end
-    if add_parent then
-        reaper.InsertTrackInProject(0, track_count, 0)
-        local parent_track = reaper.GetTrack(0, track_count)
-        reaper.GetSetMediaTrackInfo_String(parent_track, "P_NAME", "DRUMS", true)
-        reaper.SetMediaTrackInfo_Value(parent_track, "I_FOLDERDEPTH", 1)
-        System.parent_obj_track = parent_track
+    reaper.InsertTrackInProject(0, track_count, 0)
+    local parent_track = reaper.GetTrack(0, track_count)
+    reaper.GetSetMediaTrackInfo_String(parent_track, "P_NAME", "DRUMS", true)
+    reaper.SetMediaTrackInfo_Value(parent_track, "I_FOLDERDEPTH", 1)
+    reaper.GetSetMediaTrackInfo_String(parent_track, "P_EXT:PatternGenerator:MasterTrack", "true", true)
+end
+
+local function GetParentTrackIndex()
+    local track_count = reaper.CountTracks(0)
+    for i = 0, track_count - 1 do
+        local track = reaper.GetTrack(0, i)
+        local retval, _ = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:PatternGenerator:MasterTrack", "", false)
+        if retval then
+            return i
+        end
     end
+    return nil
 end
 
 -- Add object tracks
@@ -103,14 +128,22 @@ local function CreateIndividualObjectTrack()
 end
 
 -- Overall add parent and objects with undo block
-function System.CreateObjectTracks()
+function System.CreateObjectTrack(object, index)
     if #System.objects > 0 then
         reaper.PreventUIRefresh(1)
         reaper.Undo_BeginBlock()
 
-        CreateParentObjectsTrack()
-
-        CreateIndividualObjectTrack()
+        local parent_index = GetParentTrackIndex()
+        if parent_index then
+            local track_index = parent_index + index
+            reaper.InsertTrackInProject(0, track_index, 0)
+            local track = reaper.GetTrack(0, track_index)
+            reaper.GetSetMediaTrackInfo_String(track, "P_NAME", object.name, true)
+            --reaper.SetMediaTrackInfo_Value(track, "I_FOLDERDEPTH", depth)
+            local fx_index = reaper.TrackFX_AddByName(track, "VSTi: ReaSamplOmatic5000 (Cockos)", false, -1000)
+            reaper.TrackFX_SetNamedConfigParm(track, fx_index, "+FILE0", object.path)
+            reaper.TrackFX_SetNamedConfigParm(track, fx_index, "DONE", "")
+        end
 
         reaper.Undo_EndBlock("gaspard_Pattern generator_Add drums tracks", -1)
         reaper.PreventUIRefresh(-1)
@@ -157,6 +190,30 @@ function System.ScanPresetFiles()
     end
 
     System.presets = files
+end
+
+function System.CopyFileToProjectDirectory(name, path)
+    local dir_path = path:match("(.+)[\\/][^\\/]+$") or path
+    if dir_path == path then return path end
+    local sample_path = reaper.GetProjectPathEx(0).."/RS5K Samples"
+    if dir_path ~= sample_path then
+        CreateDirectoryIfNotExists(sample_path)
+        CopyFile(path, sample_path.."/"..name)
+        return sample_path.."/"..name
+    end
+end
+
+function System.Init()
+    InitSettings()
+    CreateParentObjectsTrack()
+end
+
+function System.ClearOnExitIfEmpty()
+    if not System.objects or #System.objects < 1 then
+        local index = GetParentTrackIndex()
+        local track = reaper.GetTrack(0, index)
+        reaper.DeleteTrack(track)
+    end
 end
 
 return System
