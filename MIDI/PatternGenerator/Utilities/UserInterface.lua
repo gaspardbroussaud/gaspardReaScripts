@@ -11,8 +11,10 @@ local presets_window = require('Utilities/GUI_Elements/Gui_Presets')
 local drop_window = require('Utilities/GUI_Elements/Gui_DropZone')
 
 --#region Initial Variables
-local og_window_width = 500
-local og_window_height = 300
+local og_window_width = 1000
+local og_window_height = 330
+local og_win_min_w = og_window_width
+local og_win_min_h = og_window_height
 window_width = og_window_width
 window_height = og_window_height
 local topbar_height = 30
@@ -141,7 +143,7 @@ function Gui.Loop()
     end
 
     reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
-    reaper.ImGui_SetNextWindowSizeConstraints(ctx, 244, 400, math.huge, math.huge)
+    reaper.ImGui_SetNextWindowSizeConstraints(ctx, og_win_min_w, og_win_min_h, math.huge, math.huge)
 
     -- Font
     reaper.ImGui_PushFont(ctx, font)

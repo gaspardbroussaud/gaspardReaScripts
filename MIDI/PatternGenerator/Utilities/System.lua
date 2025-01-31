@@ -17,6 +17,10 @@ System.objects = {}
 -- Presets variables
 System.presets = {}
 
+-- Patterns variables
+System.patterns = {"Pattern 1", "My pattern", "Breakcore"}
+System.selected_pattern = {}
+
 -- Global funcitons ------
 -- Check current focused project
 local function ProjectChange()

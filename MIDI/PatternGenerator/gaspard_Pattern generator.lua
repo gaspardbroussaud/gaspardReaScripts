@@ -32,7 +32,7 @@ SetButtonState(1)
 -- Load Utilities
 dofile(reaper.GetResourcePath() ..
        '/Scripts/ReaTeam Extensions/API/imgui.lua')
-  ('0.9.0.2') -- current version at the time of writing the script
+  ('0.9.3.2') -- current version at the time of writing the script
 
 package.path = package.path..';'..debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]] .. "?.lua" -- GET DIRECTORY FOR REQUIRE
 System = require('Utilities/System')
