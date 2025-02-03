@@ -46,8 +46,8 @@ function sample_window.Show()
                         local _, filepath = reaper.ImGui_GetDragDropPayloadFile(ctx, 0)
                         local filename = filepath:match("([^\\/]+)$")
                         local skip = false
-                        for _, object in ipairs(System.samples) do
-                            if filename == object.name then
+                        for _, sample in ipairs(System.samples) do
+                            if filename == sample.name then
                                 skip = true
                                 break
                             end
@@ -56,7 +56,7 @@ function sample_window.Show()
                             filepath = System.CopyFileToProjectDirectory(filename, filepath)
                             table.insert(System.samples, {name = filename, path = filepath})
                             table.insert(System.selected_pattern, 0)
-                            System.CreateObjectTrack(System.samples[#System.samples], #System.samples)
+                            System.CreateSampleTrack(System.samples[#System.samples], #System.samples)
                         end
                     end
                     reaper.ImGui_EndDragDropTarget(ctx)

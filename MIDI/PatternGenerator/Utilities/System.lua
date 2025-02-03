@@ -10,7 +10,7 @@ local project_name = reaper.GetProjectName(0)
 local project_id, project_path = reaper.EnumProjects(-1)
 System.focus_main_window = false
 
--- Object track variables
+-- Sample track variables
 System.parent_obj_track = nil
 System.samples = {}
 
@@ -18,7 +18,7 @@ System.samples = {}
 System.presets = {}
 
 -- Patterns variables
-System.patterns = {{name = "Pattern 1", path = "C:/Users/Gaspard/Documents/Local_ReaScripts/test_patterns/Media/RS5K Patterns/test_midi.MID"}}
+System.patterns = {}
 System.selected_pattern = {}
 
 -- Global funcitons ------
@@ -84,7 +84,7 @@ function System.RepositionInTable(table_update, from_index, to_index)
     return table_update
 end
 
--- Object track creation ------
+-- Sample track creation ------
 -- Add parent track if not exist
 local function CreateParentSamplesTrack()
     local track_count = reaper.CountTracks(0)
@@ -114,25 +114,25 @@ local function GetParentTrackIndex()
     return nil
 end
 
--- Add object tracks
-local function CreateIndividualObjectTrack()
-    for i, object in ipairs(System.samples) do
+-- Add sample tracks
+local function CreateIndividualSampleTrack()
+    for i, sample in ipairs(System.samples) do
         local depth = 0
-        if i == #object then depth = -1 end
+        if i == #sample then depth = -1 end
         track_count = reaper.CountTracks(0)
 
         reaper.InsertTrackInProject(0, track_count, 0)
         local track = reaper.GetTrack(0, track_count)
-        reaper.GetSetMediaTrackInfo_String(track, "P_NAME", object.name, true)
+        reaper.GetSetMediaTrackInfo_String(track, "P_NAME", sample.name, true)
         reaper.SetMediaTrackInfo_Value(track, "I_FOLDERDEPTH", depth)
         local fx_index = reaper.TrackFX_AddByName(track, "VSTi: ReaSamplOmatic5000 (Cockos)", false, -1000)
-        reaper.TrackFX_SetNamedConfigParm(track, fx_index, "+FILE0", object.path)
+        reaper.TrackFX_SetNamedConfigParm(track, fx_index, "+FILE0", sample.path)
         reaper.TrackFX_SetNamedConfigParm(track, fx_index, "DONE", "")
     end
 end
 
 -- Overall add parent and samples with undo block
-function System.CreateObjectTrack(object, index)
+function System.CreateSampleTrack(sample, index)
     if #System.samples > 0 then
         reaper.PreventUIRefresh(1)
         reaper.Undo_BeginBlock()
@@ -142,9 +142,9 @@ function System.CreateObjectTrack(object, index)
             local track_index = parent_index + index
             reaper.InsertTrackInProject(0, track_index, 0)
             local track = reaper.GetTrack(0, track_index)
-            reaper.GetSetMediaTrackInfo_String(track, "P_NAME", object.name, true)
+            reaper.GetSetMediaTrackInfo_String(track, "P_NAME", sample.name, true)
             local fx_index = reaper.TrackFX_AddByName(track, "VSTi: ReaSamplOmatic5000 (Cockos)", false, -1000)
-            reaper.TrackFX_SetNamedConfigParm(track, fx_index, "+FILE0", object.path)
+            reaper.TrackFX_SetNamedConfigParm(track, fx_index, "+FILE0", sample.path)
             reaper.TrackFX_SetNamedConfigParm(track, fx_index, "DONE", "")
         end
 
@@ -195,6 +195,23 @@ function System.ScanPresetFiles()
     System.presets = files
 end
 
+-- Get all preset files from folder
+function System.ScanPatternFiles()
+    local files = {}
+    local index = 0
+    local file = reaper.EnumerateFiles(patterns_path, index)
+
+    while file do
+        if file:match("%.MID$") then
+            table.insert(files, {path = patterns_path.."/"..file, name = file:gsub("%.MID$", ""), selected = false})
+        end
+        index = index + 1
+        file = reaper.EnumerateFiles(patterns_path, index)
+    end
+
+    System.patterns = files
+end
+
 function System.CopyFileToProjectDirectory(name, path)
     local dir_path = path:match("(.+)[\\/][^\\/]+$") or path
     if dir_path == path then return path end
@@ -209,13 +226,16 @@ end
 function System.Init()
     InitSettings()
     CreateParentSamplesTrack()
+    System.ScanPatternFiles()
 end
 
 function System.ClearOnExitIfEmpty()
     if not System.samples or #System.samples < 1 then
         local index = GetParentTrackIndex()
-        local track = reaper.GetTrack(0, index)
-        reaper.DeleteTrack(track)
+        if index then
+            local track = reaper.GetTrack(0, index)
+            reaper.DeleteTrack(track)
+        end
     end
 end
 

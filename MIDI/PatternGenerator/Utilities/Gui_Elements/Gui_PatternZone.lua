@@ -5,8 +5,6 @@
 
 local pattern_window = {}
 
-local item_path = "C:/Users/Gaspard/Documents/Local_ReaScripts/test_patterns/Media/RS5K Patterns/test_midi.MID"
-local payload_on = false
 local payload_drop = nil
 
 function pattern_window.Show()
@@ -27,9 +25,6 @@ function pattern_window.Show()
                 local x, y = reaper.GetMousePosition()
                 _, _, _ = reaper.BR_GetMouseCursorContext()
                 local time_pos = reaper.SnapToGrid(0, reaper.BR_GetMouseCursorContext_Position())
-
-                --[[retval, measures, cml, fullbeats, cdenom = reaper.TimeMap2_timeToBeats(0, time_pos)
-                reaper.ShowConsoleMsg(tostring(measures)..":"..tostring(cml)..":"..tostring(fullbeats)..":"..tostring(cdenom).."\n")]]
 
                 reaper.SetEditCurPos(time_pos, false, false)
                 local track = reaper.GetTrackFromPoint(x, y)
@@ -54,24 +49,10 @@ function pattern_window.Show()
             reaper.ImGui_Selectable(ctx, pattern.name.."##sel_pattern"..tostring(i), false)
             if reaper.ImGui_BeginDragDropSource(ctx) then
                 payload_drop = pattern.path
-                --reaper.ImGui_SetDragDropPayload(ctx, "DND_MEDIA_ITEM", pattern.path)
                 reaper.ImGui_Text(ctx, "Moving...")
                 reaper.ImGui_EndDragDropSource(ctx)
             end
         end
-
-        --[[reaper.ImGui_Text(ctx, "Destination")
-        if reaper.ImGui_BeginDragDropTarget(ctx) then
-            local retval, payload = reaper.ImGui_AcceptDragDropPayload(ctx, "DND_MEDIA_ITEM")
-            if retval then
-                local path = payload
-                reaper.ShowConsoleMsg(path.."\n")
-                reaper.InsertMedia(path, 0)
-                reaper.UpdateArrange()
-            end
-            reaper.ImGui_EndDragDropTarget(ctx)
-        end]]
-
         reaper.ImGui_EndListBox(ctx)
     end
 end

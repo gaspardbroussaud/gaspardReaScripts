@@ -6,6 +6,7 @@
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/GUI_Elements/*.lua
 --    [nomain] Presets/*.json
+--    [nomain] Patterns/*.MID
 --@changelog
 --  - Add script
 --@about
@@ -44,6 +45,7 @@ gson = require("json_utilities_lib")
 
 settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/Utilities/gaspard_'..action_name..'_settings.json'
 presets_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/Presets'
+patterns_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/Patterns'
 
 System.Init()
 Gui.Init()
