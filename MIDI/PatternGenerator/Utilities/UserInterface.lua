@@ -8,7 +8,8 @@ local Gui = {}
 -- Get all elements
 local settings_window = require('Utilities/GUI_Elements/Gui_Settings')
 local presets_window = require('Utilities/GUI_Elements/Gui_Presets')
-local drop_window = require('Utilities/GUI_Elements/Gui_DropZone')
+local sample_window = require('Utilities/GUI_Elements/Gui_SampleZone')
+local pattern_window = require('Utilities/GUI_Elements/Gui_PatternZone')
 
 --#region Initial Variables
 local og_window_width = 1000
@@ -90,8 +91,18 @@ local function VisualTopBar()
 end
 
 -- Gui window elements
-local function VisualElements(child_width, child_height)
-    drop_window.Show()
+local function VisualElements()
+    local child_width = window_width - 16 - 8
+    local child_height = window_height - topbar_height - 40
+    if reaper.ImGui_BeginChild(ctx, "child_sample_zone", child_width * 0.5, child_height, reaper.ImGui_ChildFlags_Border()) then
+        sample_window.Show()
+        reaper.ImGui_EndChild(ctx)
+    end
+    reaper.ImGui_SameLine(ctx)
+    if reaper.ImGui_BeginChild(ctx, "child_patterns_zone", child_width * 0.5, child_height, reaper.ImGui_ChildFlags_Border()) then
+        pattern_window.Show()
+        reaper.ImGui_EndChild(ctx)
+    end
 end
 
 -- Gui Version on bottom right
@@ -164,12 +175,7 @@ function Gui.Loop()
         if show_settings then settings_window.Show() end
 
         -- Script GUI Elements
-        local child_width = window_width - 16
-        local child_height = window_height - topbar_height - 40
-        if reaper.ImGui_BeginChild(ctx, "child_global", child_width, child_height, reaper.ImGui_ChildFlags_Border()) then
-            VisualElements(child_width, child_height)
-            reaper.ImGui_EndChild(ctx)
-        end
+        VisualElements()
 
         -- Show script version on  bottom right
         VisualVersion()

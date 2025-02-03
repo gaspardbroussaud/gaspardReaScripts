@@ -12,13 +12,13 @@ System.focus_main_window = false
 
 -- Object track variables
 System.parent_obj_track = nil
-System.objects = {}
+System.samples = {}
 
 -- Presets variables
 System.presets = {}
 
 -- Patterns variables
-System.patterns = {"Pattern 1", "My pattern", "Breakcore"}
+System.patterns = {{name = "Pattern 1", path = "C:/Users/Gaspard/Documents/Local_ReaScripts/test_patterns/Media/RS5K Patterns/test_midi.MID"}}
 System.selected_pattern = {}
 
 -- Global funcitons ------
@@ -86,7 +86,7 @@ end
 
 -- Object track creation ------
 -- Add parent track if not exist
-local function CreateParentObjectsTrack()
+local function CreateParentSamplesTrack()
     local track_count = reaper.CountTracks(0)
     for i = 0, track_count - 1 do
         local track = reaper.GetTrack(0, i)
@@ -116,7 +116,7 @@ end
 
 -- Add object tracks
 local function CreateIndividualObjectTrack()
-    for i, object in ipairs(System.objects) do
+    for i, object in ipairs(System.samples) do
         local depth = 0
         if i == #object then depth = -1 end
         track_count = reaper.CountTracks(0)
@@ -131,9 +131,9 @@ local function CreateIndividualObjectTrack()
     end
 end
 
--- Overall add parent and objects with undo block
+-- Overall add parent and samples with undo block
 function System.CreateObjectTrack(object, index)
-    if #System.objects > 0 then
+    if #System.samples > 0 then
         reaper.PreventUIRefresh(1)
         reaper.Undo_BeginBlock()
 
@@ -143,7 +143,6 @@ function System.CreateObjectTrack(object, index)
             reaper.InsertTrackInProject(0, track_index, 0)
             local track = reaper.GetTrack(0, track_index)
             reaper.GetSetMediaTrackInfo_String(track, "P_NAME", object.name, true)
-            --reaper.SetMediaTrackInfo_Value(track, "I_FOLDERDEPTH", depth)
             local fx_index = reaper.TrackFX_AddByName(track, "VSTi: ReaSamplOmatic5000 (Cockos)", false, -1000)
             reaper.TrackFX_SetNamedConfigParm(track, fx_index, "+FILE0", object.path)
             reaper.TrackFX_SetNamedConfigParm(track, fx_index, "DONE", "")
@@ -209,11 +208,11 @@ end
 
 function System.Init()
     InitSettings()
-    CreateParentObjectsTrack()
+    CreateParentSamplesTrack()
 end
 
 function System.ClearOnExitIfEmpty()
-    if not System.objects or #System.objects < 1 then
+    if not System.samples or #System.samples < 1 then
         local index = GetParentTrackIndex()
         local track = reaper.GetTrack(0, index)
         reaper.DeleteTrack(track)

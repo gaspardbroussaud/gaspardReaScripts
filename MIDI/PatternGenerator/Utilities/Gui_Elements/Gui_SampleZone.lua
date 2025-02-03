@@ -3,26 +3,30 @@
 --@author gaspard
 --@about User interface drop zone used in gaspard_Pattern generator.lua script
 
-local drop_window = {}
+local sample_window = {}
 
-local drop_zone_count = 9
+local sample_zone_count = 2
 
-function drop_window.Show()
+function sample_window.Show()
+    reaper.ImGui_Text(ctx, "DRUMPAD")
+    local test = false
+    if not test then return end
+
     reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Border(), 0xFFFFFFFF)
 
-    if reaper.ImGui_BeginTable(ctx, "table_drop_zones", drop_zone_count) then
+    if reaper.ImGui_BeginTable(ctx, "table_samples", sample_zone_count) then
         reaper.ImGui_TableNextRow(ctx)
-        for i = 1, drop_zone_count do
+        for i = 1, sample_zone_count do
             reaper.ImGui_TableNextColumn(ctx)
             if reaper.ImGui_BeginChild(ctx, "child_element"..tostring(i), -1, -1, reaper.ImGui_ChildFlags_Border()) then
                 local display_text = ""
                 local col_display = false
-                if System.objects[i] then
-                    display_text = System.objects[i].name
+                if System.samples[i] then
+                    display_text = System.samples[i].name
                     col_display = true
                 end
                 if col_display then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ChildBg(), 0x574F8EAA) end
-                if reaper.ImGui_BeginChild(ctx, "drop_zone"..tostring(i), -1, 70, reaper.ImGui_ChildFlags_Border()) then
+                if reaper.ImGui_BeginChild(ctx, "sample_zone"..tostring(i), -1, 70, reaper.ImGui_ChildFlags_Border()) then
                     reaper.ImGui_Text(ctx, tostring(display_text))
                     if col_display then
                         if reaper.ImGui_Button(ctx, ">##"..tostring(i)) then
@@ -41,10 +45,19 @@ function drop_window.Show()
                         end
                         local _, filepath = reaper.ImGui_GetDragDropPayloadFile(ctx, 0)
                         local filename = filepath:match("([^\\/]+)$")
-                        filepath = System.CopyFileToProjectDirectory(filename, filepath)
-                        table.insert(System.objects, {name = filename, path = filepath})
-                        table.insert(System.selected_pattern, 0)
-                        System.CreateObjectTrack(System.objects[#System.objects], #System.objects)
+                        local skip = false
+                        for _, object in ipairs(System.samples) do
+                            if filename == object.name then
+                                skip = true
+                                break
+                            end
+                        end
+                        if not skip then
+                            filepath = System.CopyFileToProjectDirectory(filename, filepath)
+                            table.insert(System.samples, {name = filename, path = filepath})
+                            table.insert(System.selected_pattern, 0)
+                            System.CreateObjectTrack(System.samples[#System.samples], #System.samples)
+                        end
                     end
                     reaper.ImGui_EndDragDropTarget(ctx)
                 end
@@ -83,4 +96,4 @@ function drop_window.Show()
     reaper.ImGui_PopStyleColor(ctx)
 end
 
-return drop_window
+return sample_window
