@@ -13,13 +13,13 @@ System.focus_main_window = false
 -- Sample track variables
 System.parent_obj_track = nil
 System.samples = {}
+System.max_samples = 9
 
 -- Presets variables
 System.presets = {}
 
 -- Patterns variables
 System.patterns = {}
-System.selected_pattern = {}
 
 -- Global funcitons ------
 -- Check current focused project
@@ -85,6 +85,19 @@ function System.RepositionInTable(table_update, from_index, to_index)
     return table_update
 end
 
+-- Get all child tracks from parent
+function GetChildTracks(parent)
+    local list = {}
+    local count = reaper.CountTracks(0)
+    for i = 0, count - 1 do
+        local track = reaper.GetTrack(0, i)
+        if reaper.GetParentTrack(track) == parent then
+            table.insert(list, track)
+        end
+    end
+    return list
+end
+
 -- Sample track creation ------
 -- Add parent track if not exist with MIDI input track as hidden child
 local function CreateParentSamplesTrack()
@@ -96,6 +109,10 @@ local function CreateParentSamplesTrack()
             return
         end
     end
+
+    reaper.PreventUIRefresh(1)
+    reaper.Undo_BeginBlock()
+
     reaper.InsertTrackInProject(0, track_count, 0)
     local parent_track = reaper.GetTrack(0, track_count)
     reaper.GetSetMediaTrackInfo_String(parent_track, "P_NAME", "DRUMS", true)
@@ -104,12 +121,28 @@ local function CreateParentSamplesTrack()
 
     reaper.InsertTrackInProject(0, track_count + 1, 0)
     local in_midi_track = reaper.GetTrack(0, track_count + 1)
-    reaper.GetSetMediaTrackInfo_String(in_midi_track, "P_NAME", "MIDI_INPUTS", true)
+    reaper.GetSetMediaTrackInfo_String(in_midi_track, "P_NAME", "PATTERN_GENERATOR_MIDI_INPUTS", true)
     reaper.SetMediaTrackInfo_Value(in_midi_track, "B_SHOWINMIXER", 0)
     reaper.SetMediaTrackInfo_Value(in_midi_track, "B_SHOWINTCP", 0)
     reaper.SetMediaTrackInfo_Value(in_midi_track, "I_RECARM", 1)
     reaper.SetMediaTrackInfo_Value(in_midi_track, "I_RECMON", 1)
     reaper.SetMediaTrackInfo_Value(in_midi_track, "I_RECMODE", 0)
+
+    local parent_index = track_count
+    for i = 1, System.max_samples do
+        local track_index = parent_index + 1 + i
+        reaper.InsertTrackInProject(0, track_index, 0)
+        local track = reaper.GetTrack(0, track_index)
+        reaper.SetMediaTrackInfo_Value(track, "B_SHOWINMIXER", 0)
+        reaper.SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+        if i >= System.max_samples then
+            reaper.SetMediaTrackInfo_Value(track, "I_FOLDERDEPTH", -1)
+        end
+    end
+
+    reaper.Undo_EndBlock("gaspard_Pattern generator_Add parent and midi inputs tracks", -1)
+    reaper.PreventUIRefresh(-1)
+    reaper.UpdateArrange()
 end
 
 -- Get index in TCP of parent track
@@ -134,18 +167,19 @@ function System.CreateSampleTrack(name, path, index)
 
     local parent_index = GetParentTrackIndex()
     if parent_index then
-        local track_index = parent_index + index + 1
-        reaper.InsertTrackInProject(0, track_index, 0)
+        local track_index = parent_index + 1 + index
         track = reaper.GetTrack(0, track_index)
         reaper.GetSetMediaTrackInfo_String(track, "P_NAME", name, true)
         local fx_index = reaper.TrackFX_AddByName(track, "VSTi: ReaSamplOmatic5000 (Cockos)", false, -1000)
         reaper.TrackFX_SetNamedConfigParm(track, fx_index, "+FILE0", path)
         reaper.TrackFX_SetNamedConfigParm(track, fx_index, "DONE", "")
-        local midi_track = reaper.GetTrack(0, GetParentTrackIndex() + 1)
+        local midi_track = reaper.GetTrack(0, parent_index + 1)
         reaper.CreateTrackSend(midi_track, track)
         reaper.SetTrackSendInfo_Value(track, -1, 0, "I_SRCCHAN", -1)
         reaper.SetTrackSendInfo_Value(track, -1, 0, "I_MIDIFLAGS", 0)
         reaper.SetTrackSendInfo_Value(track, -1, 0, "B_MUTE", 1)
+        reaper.SetMediaTrackInfo_Value(track, "B_SHOWINMIXER", 1)
+        reaper.SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
     end
 
     reaper.Undo_EndBlock("gaspard_Pattern generator_Add drums tracks", -1)
@@ -153,6 +187,19 @@ function System.CreateSampleTrack(name, path, index)
     reaper.UpdateArrange()
 
     return name, path, track
+end
+
+function System.ReplaceSample(index)
+    --[[local parent_index = GetParentTrackIndex()
+    if parent_index then
+        local track_index = parent_index + index + 1
+        local track = reaper.GetTrack(0, track_index)]]
+        local track = System.samples[index].track
+        reaper.GetSetMediaTrackInfo_String(track, "P_NAME", System.samples[index].name, true)
+        local fx_index = reaper.TrackFX_GetByName(track, "VSTi: ReaSamplOmatic5000 (Cockos)", false)
+        reaper.TrackFX_SetNamedConfigParm(track, fx_index, "+FILE0", System.samples[index].path)
+        reaper.TrackFX_SetNamedConfigParm(track, fx_index, "DONE", "")
+    --end
 end
 
 -- Play MIDI note for sample on track
@@ -246,19 +293,6 @@ function System.Init()
     InitSettings()
     CreateParentSamplesTrack()
     System.ScanPatternFiles()
-end
-
--- Get all child tracks from parent
-function GetChildTracks(parent)
-    local list = {}
-    local count = reaper.CountTracks(0)
-    for i = 0, count - 1 do
-        local track = reaper.GetTrack(0, i)
-        if reaper.GetParentTrack(track) == parent then
-            table.insert(list, track)
-        end
-    end
-    return list
 end
 
 -- Delete all tracks on exit

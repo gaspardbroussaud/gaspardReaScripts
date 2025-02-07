@@ -5,7 +5,12 @@
 
 local sample_window = {}
 
-local sample_zone_count = 9
+local function GetNameNoExtension(name)
+    name = name:gsub("%.wav$", "")
+    name = name:gsub("%.mp3$", "")
+    name = name:gsub("%.ogg$", "")
+    return name
+end
 
 function sample_window.Show()
     reaper.ImGui_Text(ctx, "DRUMPAD")
@@ -14,12 +19,14 @@ function sample_window.Show()
 
     reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Border(), 0xFFFFFFFF)
 
-    for i = 1, sample_zone_count do
+    for i = 1, System.max_samples do
         local display_text = ""
         local col_display = false
-        if System.samples[i] then
+        if System.samples[i] and System.samples[i].track then
             display_text = System.samples[i].name
             col_display = true
+        else
+            System.samples[i] = {}
         end
         if col_display then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ChildBg(), 0x574F8EAA) end
         if reaper.ImGui_BeginChild(ctx, "sample_zone"..tostring(i), 85, 70, reaper.ImGui_ChildFlags_Border()) then
@@ -62,10 +69,17 @@ function sample_window.Show()
                         end
                     end
 
+                    local name = GetNameNoExtension(filename)
                     if add then
-                        local name, path, track = System.CreateSampleTrack(filename:gsub("%.wav$", "") , filepath, #System.samples + 1)
-                        table.insert(System.samples, {name = name, path = path, track = track})
-                        table.insert(System.selected_pattern, 0)
+                        --local index = reaper.CountTracks(0) 
+                        --local index = loaded_samples_count > #System.samples and #System.samples + 1 or i
+                        name, path, track = System.CreateSampleTrack(name, filepath, i)
+                        System.samples[i] = {name = name, path = path, track = track}
+                        --table.insert(System.samples, {name = name, path = path, track = track})
+                    else
+                        local existing_track = System.samples[i].track
+                        System.samples[i] = {name = name, path = filepath, track = existing_track}
+                        System.ReplaceSample(i)
                     end
                 end
             end
