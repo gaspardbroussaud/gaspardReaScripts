@@ -9,6 +9,10 @@ local payload_drop = nil
 
 function pattern_window.Show()
     reaper.ImGui_Text(ctx, "PATTERNS")
+    if reaper.ImGui_Button(ctx, "SAVE##pattern_save", 100) then
+        reaper.Main_OnCommand(40849, 0) -- Export MIDI
+    end
+
     if reaper.ImGui_BeginListBox(ctx, "##listbox_patterns", -1, -1) then
 
         if reaper.ImGui_IsMouseReleased(ctx, reaper.ImGui_MouseButton_Left()) then

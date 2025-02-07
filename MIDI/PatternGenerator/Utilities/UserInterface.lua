@@ -12,7 +12,7 @@ local sample_window = require('Utilities/GUI_Elements/Gui_SampleZone')
 local pattern_window = require('Utilities/GUI_Elements/Gui_PatternZone')
 
 --#region Initial Variables
-local og_window_width = 1000
+local og_window_width = 600
 local og_window_height = 330
 local og_win_min_w = og_window_width
 local og_win_min_h = og_window_height
