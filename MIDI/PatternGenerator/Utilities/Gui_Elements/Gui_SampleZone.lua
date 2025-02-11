@@ -71,11 +71,8 @@ function sample_window.Show()
 
                     local name = GetNameNoExtension(filename)
                     if add then
-                        --local index = reaper.CountTracks(0) 
-                        --local index = loaded_samples_count > #System.samples and #System.samples + 1 or i
-                        name, path, track = System.CreateSampleTrack(name, filepath, i)
-                        System.samples[i] = {name = name, path = path, track = track}
-                        --table.insert(System.samples, {name = name, path = path, track = track})
+                        local track = System.InsertSampleTrack(name, filepath, i)
+                        System.samples[i] = {name = name, path = filepath, track = track}
                     else
                         local existing_track = System.samples[i].track
                         System.samples[i] = {name = name, path = filepath, track = existing_track}

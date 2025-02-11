@@ -14,6 +14,9 @@ System.focus_main_window = false
 System.parent_obj_track = nil
 System.samples = {}
 System.max_samples = 9
+local ext_PatternGenerator = "gaspard_PatternGenerator"
+local key_parent_track = "ParentTrack_GUID"
+local key_in_midi_track = "InMidiTrack_GUID"
 
 -- Presets variables
 System.presets = {}
@@ -85,8 +88,16 @@ function System.RepositionInTable(table_update, from_index, to_index)
     return table_update
 end
 
+-- Get parent track from GUID
+local function GetTrackFromExtState(extname, key)
+    local retval, GUID = reaper.GetProjExtState(0, extname, key)
+    if not retval then return nil end
+    local track = reaper.BR_GetMediaTrackByGUID(0, GUID)
+    return track
+end
+
 -- Get all child tracks from parent
-function GetChildTracks(parent)
+local function GetChildTracks(parent)
     local list = {}
     local count = reaper.CountTracks(0)
     for i = 0, count - 1 do
@@ -99,36 +110,55 @@ function GetChildTracks(parent)
 end
 
 -- Sample track creation ------
+-- Declare samples list if parent exists on script launch
+local function DeclareSamplesList(parent_track)
+    local child_tracks = GetChildTracks(parent_track)
+    for i = 1, System.max_samples do
+        System.samples[i] = {}
+    end
+    for _, track in ipairs(child_tracks) do
+        local _, name = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:gaspard_PatternGenerator:SampleName", "", false)
+        local _, path = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:gaspard_PatternGenerator:SamplePath", "", false)
+        local _, index = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:gaspard_PatternGenerator:SampleIndex", "", false)
+        System.samples[index] = {name = name, path = path, track = track}
+    end
+end
+
 -- Add parent track if not exist with MIDI input track as hidden child
 local function CreateParentSamplesTrack()
-    local track_count = reaper.CountTracks(0)
-    for i = 0, track_count - 1 do
-        local track = reaper.GetTrack(0, i)
-        local retval, _ = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:PatternGenerator:MasterTrack", "", false)
-        if retval then
-            return
-        end
+    local parent_track = GetTrackFromExtState(ext_PatternGenerator, key_parent_track)
+    if parent_track then
+        DeclareSamplesList(parent_track)
+        return
     end
 
     reaper.PreventUIRefresh(1)
     reaper.Undo_BeginBlock()
 
+    local track_count = reaper.CountTracks(0)
+
+    -- Parent track ------
     reaper.InsertTrackInProject(0, track_count, 0)
-    local parent_track = reaper.GetTrack(0, track_count)
+    parent_track = reaper.GetTrack(0, track_count)
     reaper.GetSetMediaTrackInfo_String(parent_track, "P_NAME", "DRUMS", true)
     reaper.SetMediaTrackInfo_Value(parent_track, "I_FOLDERDEPTH", 1)
-    reaper.GetSetMediaTrackInfo_String(parent_track, "P_EXT:PatternGenerator:MasterTrack", "true", true)
+    reaper.SetMediaTrackInfo_Value(parent_track, "I_FOLDERCOMPACT", 1)
+    reaper.GetSetMediaTrackInfo_String(parent_track, "P_EXT:gaspard_PatternGenerator:MasterTrack", "true", true)
+    local GUID = reaper.GetTrackGUID(parent_track)
+    reaper.SetProjExtState(0, ext_PatternGenerator, key_parent_track, GUID)
 
+    -- MIDI inputs track ------
     reaper.InsertTrackInProject(0, track_count + 1, 0)
     local in_midi_track = reaper.GetTrack(0, track_count + 1)
     reaper.GetSetMediaTrackInfo_String(in_midi_track, "P_NAME", "PATTERN_GENERATOR_MIDI_INPUTS", true)
-    reaper.SetMediaTrackInfo_Value(in_midi_track, "B_SHOWINMIXER", 0)
-    reaper.SetMediaTrackInfo_Value(in_midi_track, "B_SHOWINTCP", 0)
     reaper.SetMediaTrackInfo_Value(in_midi_track, "I_RECARM", 1)
     reaper.SetMediaTrackInfo_Value(in_midi_track, "I_RECMON", 1)
     reaper.SetMediaTrackInfo_Value(in_midi_track, "I_RECMODE", 0)
+    reaper.SetMediaTrackInfo_Value(in_midi_track, "I_FOLDERDEPTH", -1)
+    local midi_GUID = reaper.GetTrackGUID(in_midi_track)
+    reaper.SetProjExtState(0, ext_PatternGenerator, key_in_midi_track, midi_GUID)
 
-    local parent_index = track_count
+    --[[local parent_index = track_count
     for i = 1, System.max_samples do
         local track_index = parent_index + 1 + i
         reaper.InsertTrackInProject(0, track_index, 0)
@@ -138,7 +168,7 @@ local function CreateParentSamplesTrack()
         if i >= System.max_samples then
             reaper.SetMediaTrackInfo_Value(track, "I_FOLDERDEPTH", -1)
         end
-    end
+    end]]
 
     reaper.Undo_EndBlock("gaspard_Pattern generator_Add parent and midi inputs tracks", -1)
     reaper.PreventUIRefresh(-1)
@@ -147,31 +177,88 @@ end
 
 -- Get index in TCP of parent track
 local function GetParentTrackIndex()
-    local track_count = reaper.CountTracks(0)
+    local parent_track = GetTrackFromExtState(ext_PatternGenerator, key_parent_track)
+    if not parent_track then return nil, nil end
+    local index = reaper.GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER") - 1
+    return parent_track, index
+    --[[local track_count = reaper.CountTracks(0)
     for i = 0, track_count - 1 do
         local track = reaper.GetTrack(0, i)
-        local retval, _ = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:PatternGenerator:MasterTrack", "", false)
+        local retval, _ = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:gaspard_PatternGenerator:MasterTrack", "", false)
         if retval then
+            reaper.ShowConsoleMsg(tostring(index).." = "..tostring(i).."\n")
             return i
         end
-    end
-    return nil
+    end]]
+end
+
+local function SetSampleTrackParams(name, filepath, index, track)
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:gaspard_PatternGenerator:SampleName", tostring(name), true)
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:gaspard_PatternGenerator:SamplePath", tostring(filepath), true)
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:gaspard_PatternGenerator:SampleIndex", tostring(index), true)
+
+    -- Set track name
+    reaper.GetSetMediaTrackInfo_String(track, "P_NAME", name, true)
+
+    -- Insert fx with sample
+    local fx_index = reaper.TrackFX_AddByName(track, "VSTi: ReaSamplOmatic5000 (Cockos)", false, -1000)
+    reaper.TrackFX_SetNamedConfigParm(track, fx_index, "+FILE0", filepath)
+    reaper.TrackFX_SetNamedConfigParm(track, fx_index, "DONE", "")
+
+    -- Send midi inputs from midi track to track
+    local midi_track = GetTrackFromExtState(ext_PatternGenerator, key_in_midi_track)
+    reaper.CreateTrackSend(midi_track, track)
+    reaper.SetTrackSendInfo_Value(track, -1, 0, "I_SRCCHAN", -1)
+    reaper.SetTrackSendInfo_Value(track, -1, 0, "I_MIDIFLAGS", 0)
+    reaper.SetTrackSendInfo_Value(track, -1, 0, "B_MUTE", 1)
 end
 
 -- Overall add parent and samples with undo block
-function System.CreateSampleTrack(name, path, index)
+function System.InsertSampleTrack(name, filepath, index)
+    local parent_track, parent_index = GetParentTrackIndex()
+    if parent_track and parent_index then
+        -- Get index track position
+        local insert_index = index
+        local child_tracks = GetChildTracks(parent_track)
+        local loaded_samples = #child_tracks - 1
+        if loaded_samples > 0 then
+            
+        else
+            insert_index = 1
+        end
+
+        reaper.PreventUIRefresh(1)
+        reaper.Undo_BeginBlock()
+
+        -- Insert track
+        local track_index = parent_index + insert_index
+        reaper.InsertTrackInProject(0, track_index, 0)
+        local inserted_track = reaper.GetTrack(0, track_index)
+
+        SetSampleTrackParams(name, filepath, index, inserted_track)
+
+        reaper.Undo_EndBlock("gaspard_Pattern generator_Add drums tracks", -1)
+        reaper.PreventUIRefresh(-1)
+        reaper.UpdateArrange()
+
+        return inserted_track
+    else
+        return nil
+    end
+
+    --[[
     local track = nil
 
     reaper.PreventUIRefresh(1)
     reaper.Undo_BeginBlock()
 
-    local parent_index = GetParentTrackIndex()
+    local _, parent_index = GetParentTrackIndex()
     if parent_index then
-        local track_index = parent_index + 1 + index
+        local track_index = parent_index + 1 + list_index
         track = reaper.GetTrack(0, track_index)
         reaper.GetSetMediaTrackInfo_String(track, "P_NAME", name, true)
         local fx_index = reaper.TrackFX_AddByName(track, "VSTi: ReaSamplOmatic5000 (Cockos)", false, -1000)
-        reaper.TrackFX_SetNamedConfigParm(track, fx_index, "+FILE0", path)
+        reaper.TrackFX_SetNamedConfigParm(track, fx_index, "+FILE0", filepath)
         reaper.TrackFX_SetNamedConfigParm(track, fx_index, "DONE", "")
         local midi_track = reaper.GetTrack(0, parent_index + 1)
         reaper.CreateTrackSend(midi_track, track)
@@ -186,20 +273,16 @@ function System.CreateSampleTrack(name, path, index)
     reaper.PreventUIRefresh(-1)
     reaper.UpdateArrange()
 
-    return name, path, track
+    return name, filepath, track
+    ]]
 end
 
 function System.ReplaceSample(index)
-    --[[local parent_index = GetParentTrackIndex()
-    if parent_index then
-        local track_index = parent_index + index + 1
-        local track = reaper.GetTrack(0, track_index)]]
-        local track = System.samples[index].track
-        reaper.GetSetMediaTrackInfo_String(track, "P_NAME", System.samples[index].name, true)
-        local fx_index = reaper.TrackFX_GetByName(track, "VSTi: ReaSamplOmatic5000 (Cockos)", false)
-        reaper.TrackFX_SetNamedConfigParm(track, fx_index, "+FILE0", System.samples[index].path)
-        reaper.TrackFX_SetNamedConfigParm(track, fx_index, "DONE", "")
-    --end
+    local track = System.samples[index].track
+    reaper.GetSetMediaTrackInfo_String(track, "P_NAME", System.samples[index].name, true)
+    local fx_index = reaper.TrackFX_GetByName(track, "VSTi: ReaSamplOmatic5000 (Cockos)", false)
+    reaper.TrackFX_SetNamedConfigParm(track, fx_index, "+FILE0", System.samples[index].path)
+    reaper.TrackFX_SetNamedConfigParm(track, fx_index, "DONE", "")
 end
 
 -- Play MIDI note for sample on track
@@ -207,7 +290,7 @@ function System.PreviewReaSamplOmatic(track)
     if not track then return end
 
     reaper.SetTrackSendInfo_Value(track, -1, 0, "B_MUTE", 0)
-    local index = GetParentTrackIndex()
+    local _, index = GetParentTrackIndex()
 
     --Play MIDI note
     reaper.StuffMIDIMessage(index, 0x90, 60, 100) -- Note On (C4, Vel 100)
@@ -299,15 +382,16 @@ end
 function System.ClearOnExitIfEmpty()
     local test = true
     if not System.samples or #System.samples < 1 or test then
-        local index = GetParentTrackIndex()
-        if index then
-            local parent_track = reaper.GetTrack(0, index)
-            local tracks = GetChildTracks(parent_track)
-            for _, track in ipairs(tracks) do
-                reaper.DeleteTrack(track)
-            end
-            reaper.DeleteTrack(parent_track)
+        local parent_track = GetTrackFromExtState(ext_PatternGenerator, key_parent_track)
+        if not parent_track then return end
+
+        local tracks = GetChildTracks(parent_track)
+        for _, track in ipairs(tracks) do
+            reaper.DeleteTrack(track)
         end
+
+        reaper.SetProjExtState(0, ext_PatternGenerator, key_parent_track, "")
+        reaper.DeleteTrack(parent_track)
     end
 end
 
