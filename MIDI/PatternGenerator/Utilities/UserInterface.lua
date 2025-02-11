@@ -141,6 +141,9 @@ function Gui.Init()
 end
 
 function Gui.Loop()
+    System.ProjectUpdates()
+    System.SamplesListUpdate()
+
     ImGuiPushTheme()
 
     -- Window Settings

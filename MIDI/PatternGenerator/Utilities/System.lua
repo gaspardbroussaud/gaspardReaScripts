@@ -111,16 +111,32 @@ end
 
 -- Sample track creation ------
 -- Declare samples list if parent exists on script launch
-local function DeclareSamplesList(parent_track)
-    local child_tracks = GetChildTracks(parent_track)
+local function DeclareSamplesList(parent)
+    local child_tracks = GetChildTracks(parent)
     for i = 1, System.max_samples do
         System.samples[i] = {}
     end
     for _, track in ipairs(child_tracks) do
-        local _, name = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:gaspard_PatternGenerator:SampleName", "", false)
-        local _, path = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:gaspard_PatternGenerator:SamplePath", "", false)
         local _, index = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:gaspard_PatternGenerator:SampleIndex", "", false)
-        System.samples[index] = {name = name, path = path, track = track}
+        if index then
+            local _, name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            local _, path = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:gaspard_PatternGenerator:SamplePath", "", false)
+            System.samples[index] = {name = name, path = path, track = track}
+        end
+    end
+end
+
+function System.SamplesListUpdate()
+    local parent_track = GetTrackFromExtState(ext_PatternGenerator, key_parent_track)
+    local child_tracks = GetChildTracks(parent_track)
+    for _, track in ipairs(child_tracks) do
+        local _, index = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:gaspard_PatternGenerator:SampleIndex", "", false)
+        index = tonumber(index)
+        if index and index ~= "" then
+            local _, name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+            local _, path = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:gaspard_PatternGenerator:SamplePath", "", false)
+            System.samples[index] = {name = name, path = path, track = track}
+        end
     end
 end
 
@@ -147,6 +163,8 @@ local function CreateParentSamplesTrack()
     local GUID = reaper.GetTrackGUID(parent_track)
     reaper.SetProjExtState(0, ext_PatternGenerator, key_parent_track, GUID)
 
+    DeclareSamplesList(parent_track)
+
     -- MIDI inputs track ------
     reaper.InsertTrackInProject(0, track_count + 1, 0)
     local in_midi_track = reaper.GetTrack(0, track_count + 1)
@@ -157,18 +175,6 @@ local function CreateParentSamplesTrack()
     reaper.SetMediaTrackInfo_Value(in_midi_track, "I_FOLDERDEPTH", -1)
     local midi_GUID = reaper.GetTrackGUID(in_midi_track)
     reaper.SetProjExtState(0, ext_PatternGenerator, key_in_midi_track, midi_GUID)
-
-    --[[local parent_index = track_count
-    for i = 1, System.max_samples do
-        local track_index = parent_index + 1 + i
-        reaper.InsertTrackInProject(0, track_index, 0)
-        local track = reaper.GetTrack(0, track_index)
-        reaper.SetMediaTrackInfo_Value(track, "B_SHOWINMIXER", 0)
-        reaper.SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
-        if i >= System.max_samples then
-            reaper.SetMediaTrackInfo_Value(track, "I_FOLDERDEPTH", -1)
-        end
-    end]]
 
     reaper.Undo_EndBlock("gaspard_Pattern generator_Add parent and midi inputs tracks", -1)
     reaper.PreventUIRefresh(-1)
@@ -181,19 +187,9 @@ local function GetParentTrackIndex()
     if not parent_track then return nil, nil end
     local index = reaper.GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER") - 1
     return parent_track, index
-    --[[local track_count = reaper.CountTracks(0)
-    for i = 0, track_count - 1 do
-        local track = reaper.GetTrack(0, i)
-        local retval, _ = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:gaspard_PatternGenerator:MasterTrack", "", false)
-        if retval then
-            reaper.ShowConsoleMsg(tostring(index).." = "..tostring(i).."\n")
-            return i
-        end
-    end]]
 end
 
 local function SetSampleTrackParams(name, filepath, index, track)
-    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:gaspard_PatternGenerator:SampleName", tostring(name), true)
     reaper.GetSetMediaTrackInfo_String(track, "P_EXT:gaspard_PatternGenerator:SamplePath", tostring(filepath), true)
     reaper.GetSetMediaTrackInfo_String(track, "P_EXT:gaspard_PatternGenerator:SampleIndex", tostring(index), true)
 
@@ -218,13 +214,23 @@ function System.InsertSampleTrack(name, filepath, index)
     local parent_track, parent_index = GetParentTrackIndex()
     if parent_track and parent_index then
         -- Get index track position
-        local insert_index = index
+        local insert_index = 1
         local child_tracks = GetChildTracks(parent_track)
-        local loaded_samples = #child_tracks - 1
-        if loaded_samples > 0 then
-            
-        else
-            insert_index = 1
+        local samples_count = #child_tracks - 1
+        if samples_count > 0 then
+            insert_index = samples_count
+            for i, child in ipairs(child_tracks) do
+                local retval, sample_index = reaper.GetSetMediaTrackInfo_String(child, "P_EXT:gaspard_PatternGenerator:SampleIndex", "", false)
+                if retval then
+                    sample_index = tonumber(sample_index)
+                    if index < sample_index then
+                        reaper.ShowConsoleMsg(tostring(i + 1))
+                        reaper.ShowConsoleMsg("\n")
+                        insert_index = i + 1
+                        break
+                    end
+                end
+            end
         end
 
         reaper.PreventUIRefresh(1)
@@ -245,36 +251,6 @@ function System.InsertSampleTrack(name, filepath, index)
     else
         return nil
     end
-
-    --[[
-    local track = nil
-
-    reaper.PreventUIRefresh(1)
-    reaper.Undo_BeginBlock()
-
-    local _, parent_index = GetParentTrackIndex()
-    if parent_index then
-        local track_index = parent_index + 1 + list_index
-        track = reaper.GetTrack(0, track_index)
-        reaper.GetSetMediaTrackInfo_String(track, "P_NAME", name, true)
-        local fx_index = reaper.TrackFX_AddByName(track, "VSTi: ReaSamplOmatic5000 (Cockos)", false, -1000)
-        reaper.TrackFX_SetNamedConfigParm(track, fx_index, "+FILE0", filepath)
-        reaper.TrackFX_SetNamedConfigParm(track, fx_index, "DONE", "")
-        local midi_track = reaper.GetTrack(0, parent_index + 1)
-        reaper.CreateTrackSend(midi_track, track)
-        reaper.SetTrackSendInfo_Value(track, -1, 0, "I_SRCCHAN", -1)
-        reaper.SetTrackSendInfo_Value(track, -1, 0, "I_MIDIFLAGS", 0)
-        reaper.SetTrackSendInfo_Value(track, -1, 0, "B_MUTE", 1)
-        reaper.SetMediaTrackInfo_Value(track, "B_SHOWINMIXER", 1)
-        reaper.SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
-    end
-
-    reaper.Undo_EndBlock("gaspard_Pattern generator_Add drums tracks", -1)
-    reaper.PreventUIRefresh(-1)
-    reaper.UpdateArrange()
-
-    return name, filepath, track
-    ]]
 end
 
 function System.ReplaceSample(index)
@@ -380,19 +356,23 @@ end
 
 -- Delete all tracks on exit
 function System.ClearOnExitIfEmpty()
-    local test = true
-    if not System.samples or #System.samples < 1 or test then
-        local parent_track = GetTrackFromExtState(ext_PatternGenerator, key_parent_track)
-        if not parent_track then return end
+    local parent_track = GetTrackFromExtState(ext_PatternGenerator, key_parent_track)
+    if not parent_track then return end
 
-        local tracks = GetChildTracks(parent_track)
-        for _, track in ipairs(tracks) do
-            reaper.DeleteTrack(track)
-        end
+    reaper.PreventUIRefresh(1)
+    reaper.Undo_BeginBlock()
 
-        reaper.SetProjExtState(0, ext_PatternGenerator, key_parent_track, "")
-        reaper.DeleteTrack(parent_track)
+    local tracks = GetChildTracks(parent_track)
+    for _, track in ipairs(tracks) do
+        reaper.DeleteTrack(track)
     end
+
+    reaper.SetProjExtState(0, ext_PatternGenerator, key_parent_track, "")
+    reaper.DeleteTrack(parent_track)
+
+    reaper.Undo_EndBlock("gaspard_Pattern generator_Clear elements", -1)
+    reaper.PreventUIRefresh(-1)
+    reaper.UpdateArrange()
 end
 
 return System
