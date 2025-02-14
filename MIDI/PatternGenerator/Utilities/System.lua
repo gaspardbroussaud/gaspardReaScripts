@@ -9,6 +9,8 @@ local System = {}
 local project_name = reaper.GetProjectName(0)
 local project_id, project_path = reaper.EnumProjects(-1)
 System.focus_main_window = false
+System.separator = reaper.GetOS():match("Win") and "\\" or "/"
+System.show_pattern_export = false
 
 -- Sample track variables
 System.parent_obj_track = nil
@@ -151,11 +153,11 @@ local function CreateParentSamplesTrack()
     reaper.PreventUIRefresh(1)
     reaper.Undo_BeginBlock()
 
-    local track_count = reaper.CountTracks(0)
+    --local track_count = reaper.CountTracks(0)
 
     -- Parent track ------
-    reaper.InsertTrackInProject(0, track_count, 0)
-    parent_track = reaper.GetTrack(0, track_count)
+    reaper.InsertTrackInProject(0, 0, 0)
+    parent_track = reaper.GetTrack(0, 0)
     reaper.GetSetMediaTrackInfo_String(parent_track, "P_NAME", "DRUMS", true)
     reaper.SetMediaTrackInfo_Value(parent_track, "I_FOLDERDEPTH", 1)
     reaper.SetMediaTrackInfo_Value(parent_track, "I_FOLDERCOMPACT", 1)
@@ -166,8 +168,8 @@ local function CreateParentSamplesTrack()
     DeclareSamplesList(parent_track)
 
     -- MIDI inputs track ------
-    reaper.InsertTrackInProject(0, track_count + 1, 0)
-    local in_midi_track = reaper.GetTrack(0, track_count + 1)
+    reaper.InsertTrackInProject(0, 1, 0)
+    local in_midi_track = reaper.GetTrack(0, 1)
     reaper.GetSetMediaTrackInfo_String(in_midi_track, "P_NAME", "PATTERN_GENERATOR_MIDI_INPUTS", true)
     reaper.SetMediaTrackInfo_Value(in_midi_track, "I_RECARM", 1)
     reaper.SetMediaTrackInfo_Value(in_midi_track, "I_RECMON", 1)
