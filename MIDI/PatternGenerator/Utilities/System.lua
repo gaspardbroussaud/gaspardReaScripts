@@ -218,19 +218,13 @@ function System.InsertSampleTrack(name, filepath, index)
         -- Get index track position
         local insert_index = 1
         local child_tracks = GetChildTracks(parent_track)
-        local samples_count = #child_tracks - 1
-        if samples_count > 0 then
-            insert_index = samples_count
+        table.remove(child_tracks) -- Remove midi inputs track (last track)
+        if #child_tracks > 0 then
             for i, child in ipairs(child_tracks) do
                 local retval, sample_index = reaper.GetSetMediaTrackInfo_String(child, "P_EXT:gaspard_PatternGenerator:SampleIndex", "", false)
                 if retval then
                     sample_index = tonumber(sample_index)
-                    if index < sample_index then
-                        reaper.ShowConsoleMsg(tostring(i + 1))
-                        reaper.ShowConsoleMsg("\n")
-                        insert_index = i + 1
-                        break
-                    end
+
                 end
             end
         end

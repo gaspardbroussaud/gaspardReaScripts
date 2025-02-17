@@ -24,7 +24,6 @@ function pattern_window.Show()
     end
 
     if reaper.ImGui_BeginListBox(ctx, "##listbox_patterns", -1, -1) then
-
         if reaper.ImGui_IsMouseReleased(ctx, reaper.ImGui_MouseButton_Left()) then
             if payload_drop then
                 reaper.PreventUIRefresh(1)
