@@ -71,8 +71,13 @@ function sample_window.Show()
 
                     local name = GetNameNoExtension(filename)
                     if add then
+                        System.samples[i] = {name = name, path = filepath, track = nil}
                         local track = System.InsertSampleTrack(name, filepath, i)
-                        System.samples[i] = {name = name, path = filepath, track = track}
+                        if track then
+                            System.samples[i].track = track
+                        else
+                            System.samples[i] = {}
+                        end
                     else
                         local existing_track = System.samples[i].track
                         System.samples[i] = {name = name, path = filepath, track = existing_track}

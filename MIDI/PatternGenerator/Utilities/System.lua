@@ -212,19 +212,22 @@ local function SetSampleTrackParams(name, filepath, index, track)
 end
 
 -- Overall add parent and samples with undo block
-function System.InsertSampleTrack(name, filepath, index)
+function System.InsertSampleTrack(name, filepath, sample_index)
     local parent_track, parent_index = GetParentTrackIndex()
     if parent_track and parent_index then
-        -- Get index track position
+        -- Get insert index track position
         local insert_index = 1
         local child_tracks = GetChildTracks(parent_track)
-        table.remove(child_tracks) -- Remove midi inputs track (last track)
+        table.remove(child_tracks)
         if #child_tracks > 0 then
-            for i, child in ipairs(child_tracks) do
-                local retval, sample_index = reaper.GetSetMediaTrackInfo_String(child, "P_EXT:gaspard_PatternGenerator:SampleIndex", "", false)
-                if retval then
-                    sample_index = tonumber(sample_index)
-
+            local count = 0
+            for i, sample in ipairs(System.samples) do
+                if sample and sample.name then
+                    count = count + 1
+                    if i == sample_index then
+                        insert_index = count
+                        break
+                    end
                 end
             end
         end
@@ -237,7 +240,7 @@ function System.InsertSampleTrack(name, filepath, index)
         reaper.InsertTrackInProject(0, track_index, 0)
         local inserted_track = reaper.GetTrack(0, track_index)
 
-        SetSampleTrackParams(name, filepath, index, inserted_track)
+        SetSampleTrackParams(name, filepath, sample_index, inserted_track)
 
         reaper.Undo_EndBlock("gaspard_Pattern generator_Add drums tracks", -1)
         reaper.PreventUIRefresh(-1)
