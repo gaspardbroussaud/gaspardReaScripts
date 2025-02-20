@@ -21,13 +21,13 @@ window_height = og_window_height
 local topbar_height = 30
 local font_size = 16
 local small_font_size = font_size * 0.75
-local window_name = "PATTERN GENERATOR"
+local window_name = 'PATTERN GENERATOR'
 local no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
 --#endregion
 
 -- Get GUI style from file
 local function GetGuiStylesFromFile()
-    local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
+    local gui_style_settings_path = reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua'
     local style = dofile(gui_style_settings_path)
     style_vars = style.vars
     style_colors = style.colors
@@ -45,7 +45,7 @@ end
 -- GUI Top Bar
 local function VisualTopBar()
     -- GUI Menu Bar
-    if reaper.ImGui_BeginChild(ctx, "child_top_bar", window_width, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
+    if reaper.ImGui_BeginChild(ctx, 'child_top_bar', window_width, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
         reaper.ImGui_Text(ctx, window_name)
 
         local spacing = 5
@@ -62,7 +62,7 @@ local function VisualTopBar()
         local buttons_width = presets_width + settings_width + quit_width + 3 * padding + 2 * spacing
         reaper.ImGui_SetCursorPos(ctx, window_width - buttons_width, 0)
 
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", buttons_width, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
+        if reaper.ImGui_BeginChild(ctx, 'child_top_bar_buttons', buttons_width, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
             reaper.ImGui_Dummy(ctx, 3, 1)
             reaper.ImGui_SameLine(ctx)
             local text = presets_width == button_w and 'PRESETS' or 'P'
@@ -94,12 +94,12 @@ end
 local function VisualElements()
     local child_width = window_width - 16 - 8
     local child_height = window_height - topbar_height - 40
-    if reaper.ImGui_BeginChild(ctx, "child_sample_zone", child_width * 0.5, child_height, reaper.ImGui_ChildFlags_Border()) then
+    if reaper.ImGui_BeginChild(ctx, 'child_sample_zone', child_width * 0.5, child_height, reaper.ImGui_ChildFlags_Border()) then
         sample_window.Show()
         reaper.ImGui_EndChild(ctx)
     end
     reaper.ImGui_SameLine(ctx)
-    if reaper.ImGui_BeginChild(ctx, "child_patterns_zone", child_width * 0.5, child_height, reaper.ImGui_ChildFlags_Border()) then
+    if reaper.ImGui_BeginChild(ctx, 'child_patterns_zone', child_width * 0.5, child_height, reaper.ImGui_ChildFlags_Border()) then
         pattern_window.Show()
         reaper.ImGui_EndChild(ctx)
     end
@@ -107,7 +107,7 @@ end
 
 -- Gui Version on bottom right
 local function VisualVersion()
-    local text = "gaspard v"..version
+    local text = 'gaspard v'..version
     reaper.ImGui_PushFont(ctx, small_font)
     local w, h = reaper.ImGui_CalcTextSize(ctx, text)
     reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
