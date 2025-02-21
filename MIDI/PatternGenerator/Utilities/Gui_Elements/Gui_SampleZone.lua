@@ -7,6 +7,7 @@ local sample_window = {}
 
 -- Global variables
 local popup_name = ''
+local note_playing = false
 
 --Functions
 local function GetNameNoExtension(name)
@@ -110,7 +111,7 @@ function sample_window.Show()
                 w, h = reaper.ImGui_GetWindowSize(ctx)
                 reaper.ImGui_Text(ctx, 'Track name:')
                 changed, popup_name = reaper.ImGui_InputText(ctx, '##popupinputtext', popup_name)
-                local flags = reaper.ImGui_TableColumnFlags_WidthStretch() | reaper.ImGui_TableFlags_SizingStretchSame()
+                flags = reaper.ImGui_TableColumnFlags_WidthStretch() | reaper.ImGui_TableFlags_SizingStretchSame()
                 if reaper.ImGui_BeginTable(ctx, 'tablepopup', 3, flags) then
                     reaper.ImGui_TableNextRow(ctx)
                     reaper.ImGui_TableNextColumn(ctx)
@@ -134,25 +135,26 @@ function sample_window.Show()
                 local button_size = 15
                 reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (x - button_size) * 0.5)
                 reaper.ImGui_SetCursorPosY(ctx, reaper.ImGui_GetCursorPosY(ctx) + y - 24)
-                if reaper.ImGui_Button(ctx, '>##'..tostring(i), button_size) then
-                    System.PreviewReaSamplOmatic(System.samples[i].track)
+                reaper.ImGui_Button(ctx, '>##'..tostring(i), button_size)
+                if reaper.ImGui_IsItemActivated(ctx) then
+                    local _, parent_index = System.GetParentTrackIndex()
+                    reaper.SetTrackSendInfo_Value(System.samples[i].track, -1, 0, 'B_MUTE', 0)
+                    reaper.StuffMIDIMessage(parent_index, 0x90, 60, 100) -- Note On (C4, Vel 100)
+                end
+                if reaper.ImGui_IsItemDeactivated(ctx) then
+                    local _, parent_index = System.GetParentTrackIndex()
+                    reaper.StuffMIDIMessage(parent_index, 0x80, 60, 0) -- Note Off (C4, Vel 0)
+                    reaper.defer(function() reaper.SetTrackSendInfo_Value(System.samples[i].track, -1, 0, 'B_MUTE', 1) end)
                 end
             end
 
-            --local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
             reaper.ImGui_SetCursorPosX(ctx, 0)
             reaper.ImGui_SetCursorPosY(ctx, 0)
             reaper.ImGui_SetNextItemAllowOverlap(ctx)
             reaper.ImGui_InvisibleButton(ctx, 'drag_button_'..tostring(i), 85, 70)
-            --local min_x, min_y = reaper.ImGui_GetItemRectMin(ctx)
-            --local max_x, max_y = reaper.ImGui_GetItemRectMax(ctx)
-            --local col = 0xFF0000FF  -- Red color (RGBA: ABGR format)
-            --local thickness = 2.0
-            --reaper.ImGui_DrawList_AddRect(draw_list, min_x, min_y, max_x, max_y, col, 0, 0, thickness)
-            --if reaper.ImGui_IsItemHovered(ctx) then reaper.ImGui_SetItemTooltip(ctx, 'Invisible button '..tostring(i)) end
 
             if System.samples[i] and System.samples[i].track and reaper.ImGui_BeginDragDropSource(ctx, reaper.ImGui_DragDropFlags_SourceAllowNullID()) then
-                reaper.ImGui_SetDragDropPayload(ctx, 'BUTTON_ORDER', i) -- Store the index
+                reaper.ImGui_SetDragDropPayload(ctx, 'BUTTON_ORDER', i)
                 local display_tooltip = System.samples[i].name or 'nill'
                 reaper.ImGui_Text(ctx, 'Dragging '..display_tooltip)
                 reaper.ImGui_EndDragDropSource(ctx)

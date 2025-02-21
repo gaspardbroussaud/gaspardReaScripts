@@ -66,10 +66,25 @@ end
 
 -- Init Settings from file
 local function InitSettings()
-    local settings_version = '0.0.1b'
+    local settings_version = '0.0.2b'
     default_settings = {
         version = settings_version,
-        order = {''}
+        order = {'obey_note_off', 'release', 'release_amount'},
+        obey_note_off = {
+            value = true,
+            name = 'Obey note off',
+            description = 'Obey not off activated on track insert.'
+        },
+        release = {
+            value = true,
+            name = 'Release',
+            description = 'Release is applied on track insert.'
+        },
+        release_amount = {
+            value = 40,
+            name = 'Release amount',
+            description = 'Release amount in milliseconds.'
+        }
     }
     Settings = gson.LoadJSON(settings_path, default_settings)
     if settings_version ~= Settings.version then
@@ -184,7 +199,7 @@ local function CreateParentSamplesTrack()
 end
 
 -- Get index in TCP of parent track
-local function GetParentTrackIndex()
+function System.GetParentTrackIndex()
     local parent_track = GetTrackFromExtState(ext_PatternGenerator, key_parent_track)
     if not parent_track then return nil, nil end
     local index = reaper.GetMediaTrackInfo_Value(parent_track, 'IP_TRACKNUMBER') - 1
@@ -199,7 +214,7 @@ function System.GetMidiTrackIndex()
 end
 
 function System.GetSamplesTracks()
-    local parent_track, parent_index = GetParentTrackIndex()
+    local parent_track, parent_index = System.GetParentTrackIndex()
     if parent_track and parent_index then
         local sample_tracks = GetChildTracks(parent_track)
         table.remove(sample_tracks)
@@ -223,6 +238,14 @@ local function SetSampleTrackParams(name, filepath, index, track)
     local fx_index = reaper.TrackFX_AddByName(track, 'VSTi: ReaSamplOmatic5000 (Cockos)', false, -1000)
     reaper.TrackFX_SetNamedConfigParm(track, fx_index, '+FILE0', filepath)
     reaper.TrackFX_SetNamedConfigParm(track, fx_index, 'DONE', '')
+    reaper.TrackFX_SetParam(track, fx_index, 2, 0) -- Parameter index for "Min vol" is 2 (value 0 == -inf)
+    if Settings.obey_note_off.value then
+        reaper.TrackFX_SetParam(track, fx_index, 11, 1) -- Parameter index for "Obey Note Off" is 11 (value 1 == true)
+    end
+    if Settings.release.value then
+        local ms = Settings.release_amount.value / 2000
+        reaper.TrackFX_SetParam(track, fx_index, 10, ms) -- Parameter index for "Release" is 10 (value 1 == 2s)
+    end
 
     -- Send midi inputs from midi track to track
     local midi_track = GetTrackFromExtState(ext_PatternGenerator, key_in_midi_track)
@@ -234,7 +257,7 @@ end
 
 -- Overall add parent and samples with undo block
 function System.InsertSampleTrack(name, filepath, sample_index)
-    local parent_track, parent_index = GetParentTrackIndex()
+    local parent_track, parent_index = System.GetParentTrackIndex()
     if parent_track and parent_index then
         -- Get insert index track position
         local insert_index = 1
@@ -279,21 +302,6 @@ function System.ReplaceSample(index)
     local fx_index = reaper.TrackFX_GetByName(track, 'VSTi: ReaSamplOmatic5000 (Cockos)', false)
     reaper.TrackFX_SetNamedConfigParm(track, fx_index, '+FILE0', System.samples[index].path)
     reaper.TrackFX_SetNamedConfigParm(track, fx_index, 'DONE', '')
-end
-
--- Play MIDI note for sample on track
-function System.PreviewReaSamplOmatic(track)
-    if not track then return end
-
-    reaper.SetTrackSendInfo_Value(track, -1, 0, 'B_MUTE', 0)
-    local _, index = GetParentTrackIndex()
-
-    --Play MIDI note
-    reaper.StuffMIDIMessage(index, 0x90, 60, 100) -- Note On (C4, Vel 100)
-    reaper.defer(function()
-        reaper.StuffMIDIMessage(index, 0x80, 60, 0) -- Note Off
-        reaper.SetTrackSendInfo_Value(track, -1, 0, 'B_MUTE', 1)
-    end)
 end
 
 -- Preset systems ------
