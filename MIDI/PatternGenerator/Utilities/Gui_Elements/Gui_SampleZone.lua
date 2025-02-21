@@ -16,6 +16,48 @@ local function GetNameNoExtension(name)
     return name
 end
 
+local function SwapSamplesInTable(from_index, to_index)
+    if System.samples[to_index].track then
+        local selected_tracks = {}
+        local selected_tracks_count = reaper.CountSelectedTracks(0)
+        if selected_tracks_count > 0 then
+            for i = 0, selected_tracks_count - 1 do
+                table.insert(selected_tracks, reaper.GetSelectedTrack(0, i))
+            end
+        end
+
+        local from_track_index = math.floor(reaper.GetMediaTrackInfo_Value(System.samples[from_index].track, "IP_TRACKNUMBER")) - 1
+        if from_index > to_index then from_track_index = from_track_index + 1 end
+        local to_track_index = math.floor(reaper.GetMediaTrackInfo_Value(System.samples[to_index].track, "IP_TRACKNUMBER")) - 1
+
+        reaper.PreventUIRefresh(1)
+        reaper.Undo_BeginBlock()
+
+        -- Set in from_index track with to_index element
+        reaper.GetSetMediaTrackInfo_String(System.samples[from_index].track, 'P_EXT:gaspard_PatternGenerator:SampleIndex', tostring(to_index), true)
+        reaper.SetOnlyTrackSelected(System.samples[from_index].track)
+        reaper.ReorderSelectedTracks(to_track_index, 0)
+
+        -- Set in to_index track with from_index element
+        reaper.GetSetMediaTrackInfo_String(System.samples[to_index].track, 'P_EXT:gaspard_PatternGenerator:SampleIndex', tostring(from_index), true)
+        reaper.SetOnlyTrackSelected(System.samples[to_index].track)
+        reaper.ReorderSelectedTracks(from_track_index, 0)
+        reaper.SetTrackSelected(System.samples[to_index].track, false)
+
+        System.samples[from_index], System.samples[to_index] = System.samples[to_index], System.samples[from_index]
+
+        for _, track in ipairs(selected_tracks) do
+            reaper.SetTrackSelected(track, true)
+        end
+
+        reaper.Undo_EndBlock('gaspard_Pattern generator_Change samples list order in GUI', -1)
+        reaper.PreventUIRefresh(-1)
+        reaper.UpdateArrange()
+    else
+        --nothing
+    end
+end
+
 function sample_window.Show()
     reaper.ImGui_Text(ctx, 'DRUMPAD')
     local test = true
@@ -55,7 +97,8 @@ function sample_window.Show()
             System.samples[i] = {}
         end
         if col_display then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_ChildBg(), 0x574F8EAA) end
-        if reaper.ImGui_BeginChild(ctx, 'sample_zone'..tostring(i), 85, 70, reaper.ImGui_ChildFlags_Border()) then
+        local flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
+        if reaper.ImGui_BeginChild(ctx, 'sample_zone'..tostring(i), 85, 70, reaper.ImGui_ChildFlags_Border(), flags) then
             reaper.ImGui_Text(ctx, tostring(display_text))
             -- On Double clic text
             if reaper.ImGui_IsItemHovered(ctx) and reaper.ImGui_IsMouseDoubleClicked(ctx, reaper.ImGui_MouseButton_Left()) and System.samples[i].track then
@@ -96,12 +139,32 @@ function sample_window.Show()
                 end
             end
 
-
+            --local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
             reaper.ImGui_SetCursorPosX(ctx, 0)
             reaper.ImGui_SetCursorPosY(ctx, 0)
             reaper.ImGui_SetNextItemAllowOverlap(ctx)
-            reaper.ImGui_InvisibleButton(ctx, 'drag_button_'..tostring(i), 25, 25)
-            if reaper.ImGui_IsItemHovered(ctx) then reaper.ShowConsoleMsg('Invisible: '..tostring(i)..'\n') end
+            reaper.ImGui_InvisibleButton(ctx, 'drag_button_'..tostring(i), 85, 70)
+            --local min_x, min_y = reaper.ImGui_GetItemRectMin(ctx)
+            --local max_x, max_y = reaper.ImGui_GetItemRectMax(ctx)
+            --local col = 0xFF0000FF  -- Red color (RGBA: ABGR format)
+            --local thickness = 2.0
+            --reaper.ImGui_DrawList_AddRect(draw_list, min_x, min_y, max_x, max_y, col, 0, 0, thickness)
+            --if reaper.ImGui_IsItemHovered(ctx) then reaper.ImGui_SetItemTooltip(ctx, 'Invisible button '..tostring(i)) end
+
+            if System.samples[i] and System.samples[i].track and reaper.ImGui_BeginDragDropSource(ctx, reaper.ImGui_DragDropFlags_SourceAllowNullID()) then
+                reaper.ImGui_SetDragDropPayload(ctx, 'BUTTON_ORDER', i) -- Store the index
+                local display_tooltip = System.samples[i].name or 'nill'
+                reaper.ImGui_Text(ctx, 'Dragging '..display_tooltip)
+                reaper.ImGui_EndDragDropSource(ctx)
+            end
+            if reaper.ImGui_BeginDragDropTarget(ctx) then
+                local payload, dragged_index = reaper.ImGui_AcceptDragDropPayload(ctx, 'BUTTON_ORDER')
+                if payload then
+                    dragged_index = tonumber(dragged_index)
+                    SwapSamplesInTable(dragged_index, i)
+                end
+                reaper.ImGui_EndDragDropTarget(ctx)
+            end
 
             reaper.ImGui_EndChild(ctx)
         end
