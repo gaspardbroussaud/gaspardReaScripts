@@ -17,21 +17,21 @@ local function GetNameNoExtension(name)
 end
 
 local function SwapSamplesInTable(from_index, to_index)
-    if System.samples[to_index].track then
-        local selected_tracks = {}
-        local selected_tracks_count = reaper.CountSelectedTracks(0)
-        if selected_tracks_count > 0 then
-            for i = 0, selected_tracks_count - 1 do
-                table.insert(selected_tracks, reaper.GetSelectedTrack(0, i))
-            end
-        end
+    reaper.PreventUIRefresh(1)
+    reaper.Undo_BeginBlock()
 
+    local selected_tracks = {}
+    local selected_tracks_count = reaper.CountSelectedTracks(0)
+    if selected_tracks_count > 0 then
+        for i = 0, selected_tracks_count - 1 do
+            table.insert(selected_tracks, reaper.GetSelectedTrack(0, i))
+        end
+    end
+
+    if System.samples[to_index].track then
         local from_track_index = math.floor(reaper.GetMediaTrackInfo_Value(System.samples[from_index].track, "IP_TRACKNUMBER")) - 1
         if from_index > to_index then from_track_index = from_track_index + 1 end
         local to_track_index = math.floor(reaper.GetMediaTrackInfo_Value(System.samples[to_index].track, "IP_TRACKNUMBER")) - 1
-
-        reaper.PreventUIRefresh(1)
-        reaper.Undo_BeginBlock()
 
         -- Set in from_index track with to_index element
         reaper.GetSetMediaTrackInfo_String(System.samples[from_index].track, 'P_EXT:gaspard_PatternGenerator:SampleIndex', tostring(to_index), true)
@@ -43,46 +43,46 @@ local function SwapSamplesInTable(from_index, to_index)
         reaper.SetOnlyTrackSelected(System.samples[to_index].track)
         reaper.ReorderSelectedTracks(from_track_index, 0)
         reaper.SetTrackSelected(System.samples[to_index].track, false)
+    else
+        local to_track_index = 1
 
-        System.samples[from_index], System.samples[to_index] = System.samples[to_index], System.samples[from_index]
-
-        for _, track in ipairs(selected_tracks) do
-            reaper.SetTrackSelected(track, true)
+        local found_parent_and_children, sample_tracks, parent_track, parent_index = System.GetSamplesTracks()
+        if found_parent_and_children then
+            local found_track = false
+            for _, sample_track in ipairs(sample_tracks) do
+                local retval, sample_index = reaper.GetSetMediaTrackInfo_String(sample_track, 'P_EXT:gaspard_PatternGenerator:SampleIndex', '', false)
+                if retval then
+                    sample_index = tonumber(sample_index)
+                    if to_index < sample_index then
+                        to_track_index = math.floor(reaper.GetMediaTrackInfo_Value(sample_track, "IP_TRACKNUMBER")) - 1
+                        found_track = true
+                        break
+                    end
+                end
+            end
+            if not found_track then to_track_index = math.floor(reaper.GetMediaTrackInfo_Value(sample_tracks[#sample_tracks], "IP_TRACKNUMBER")) end
         end
 
-        reaper.Undo_EndBlock('gaspard_Pattern generator_Change samples list order in GUI', -1)
-        reaper.PreventUIRefresh(-1)
-        reaper.UpdateArrange()
-    else
-        --nothing
+        -- Set in from_index track with to_index element
+        reaper.GetSetMediaTrackInfo_String(System.samples[from_index].track, 'P_EXT:gaspard_PatternGenerator:SampleIndex', tostring(to_index), true)
+        reaper.SetOnlyTrackSelected(System.samples[from_index].track)
+        reaper.ReorderSelectedTracks(to_track_index, 0)
+        reaper.SetTrackSelected(System.samples[from_index].track, false)
     end
+
+    System.samples[from_index], System.samples[to_index] = System.samples[to_index], System.samples[from_index]
+
+    for _, track in ipairs(selected_tracks) do
+        reaper.SetTrackSelected(track, true)
+    end
+
+    reaper.Undo_EndBlock('gaspard_Pattern generator_Change samples list order in GUI', -1)
+    reaper.PreventUIRefresh(-1)
+    reaper.UpdateArrange()
 end
 
 function sample_window.Show()
     reaper.ImGui_Text(ctx, 'DRUMPAD')
-    local test = true
-    if not test then
-        reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Border(), 0xFFFFFFFF)
-
-        reaper.ImGui_BeginGroup(ctx)
-        reaper.ImGui_Text(ctx, "Yopla")
-        if reaper.ImGui_Button(ctx, '>##1', button_size) then
-            --System.PreviewReaSamplOmatic(System.samples[i].track)
-        end
-        reaper.ImGui_EndGroup(ctx)
-
-        reaper.ImGui_SameLine(ctx)
-
-        reaper.ImGui_BeginGroup(ctx)
-        reaper.ImGui_Text(ctx, "Yopla")
-        if reaper.ImGui_Button(ctx, '>##2', button_size) then
-            --System.PreviewReaSamplOmatic(System.samples[i].track)
-        end
-        reaper.ImGui_EndGroup(ctx)
-
-        reaper.ImGui_PopStyleColor(ctx)
-        return
-    end
 
     reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Border(), 0xFFFFFFFF)
 

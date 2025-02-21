@@ -191,6 +191,27 @@ local function GetParentTrackIndex()
     return parent_track, index
 end
 
+function System.GetMidiTrackIndex()
+    local midi_track = GetTrackFromExtState(ext_PatternGenerator, key_in_midi_track)
+    if not midi_track then return nil, nil end
+    local index = reaper.GetMediaTrackInfo_Value(midi_track, 'IP_TRACKNUMBER') - 1
+    return midi_track, index
+end
+
+function System.GetSamplesTracks()
+    local parent_track, parent_index = GetParentTrackIndex()
+    if parent_track and parent_index then
+        local sample_tracks = GetChildTracks(parent_track)
+        table.remove(sample_tracks)
+
+        if #sample_tracks > 0 then
+            return true, sample_tracks, parent_track, parent_index
+        end
+    end
+
+    return false, nil, nil, nil
+end
+
 local function SetSampleTrackParams(name, filepath, index, track)
     reaper.GetSetMediaTrackInfo_String(track, 'P_EXT:gaspard_PatternGenerator:SamplePath', tostring(filepath), true)
     reaper.GetSetMediaTrackInfo_String(track, 'P_EXT:gaspard_PatternGenerator:SampleIndex', tostring(index), true)
