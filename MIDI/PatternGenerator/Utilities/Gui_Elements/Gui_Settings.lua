@@ -46,7 +46,7 @@ function settings_window.Show()
             reaper.ImGui_Text(ctx, Settings.release_amount.name..":")
             reaper.ImGui_SameLine(ctx)
             reaper.ImGui_PushItemWidth(ctx, 60)
-            changed, release_amount = reaper.ImGui_DragDouble(ctx, '##settings_release_amount', release_amount, 1, 0, math.huge, '%.0f')
+            changed, release_amount = reaper.ImGui_DragDouble(ctx, '##settings_release_amount', release_amount, 1, 0, math.huge, '%.1f')
             reaper.ImGui_SetItemTooltip(ctx, Settings.release_amount.description)
             if changed then settings_one_changed = true end
 
