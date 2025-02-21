@@ -9,6 +9,8 @@ local System = {}
 local project_name = reaper.GetProjectName(0)
 local project_id, project_path = reaper.EnumProjects(-1)
 System.focus_main_window = false
+System.Shift = false
+System.Ctrl = false
 System.separator = reaper.GetOS():match('Win') and '\\' or '/'
 System.show_pattern_export = false
 
@@ -43,6 +45,9 @@ function System.ProjectUpdates()
         project_name = reaper.GetProjectName(0)
         project_id, project_path = reaper.EnumProjects(-1)
     end
+
+    System.Shift = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftShift())
+    System.Ctrl = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftCtrl())
 end
 
 -- Copy file to new file

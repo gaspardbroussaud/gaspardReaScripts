@@ -89,7 +89,6 @@ function sample_window.Show()
 
     for i = 1, System.max_samples do
         local display_text = ''
-        local name_double_clic = false
         local col_display = false
         if System.samples[i] and System.samples[i].track then
             display_text = System.samples[i].name
@@ -101,11 +100,38 @@ function sample_window.Show()
         local flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
         if reaper.ImGui_BeginChild(ctx, 'sample_zone'..tostring(i), 85, 70, reaper.ImGui_ChildFlags_Border(), flags) then
             reaper.ImGui_Text(ctx, tostring(display_text))
-            -- On Double clic text
+
+            if col_display then
+                local x, y = reaper.ImGui_GetContentRegionAvail(ctx)
+                local button_size = 15
+                reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (x - button_size) * 0.5)
+                reaper.ImGui_SetCursorPosY(ctx, reaper.ImGui_GetCursorPosY(ctx) + y - 24)
+                reaper.ImGui_Button(ctx, '>##'..tostring(i), button_size)
+                if reaper.ImGui_IsItemActivated(ctx) then
+                    local _, parent_index = System.GetParentTrackIndex()
+                    reaper.SetTrackSendInfo_Value(System.samples[i].track, -1, 0, 'B_MUTE', 0)
+                    reaper.StuffMIDIMessage(parent_index, 0x90, 60, 100) -- Note On (C4, Vel 100)
+                end
+                if reaper.ImGui_IsItemDeactivated(ctx) then
+                    local _, parent_index = System.GetParentTrackIndex()
+                    reaper.StuffMIDIMessage(parent_index, 0x80, 60, 0) -- Note Off (C4, Vel 0)
+                    reaper.defer(function() reaper.SetTrackSendInfo_Value(System.samples[i].track, -1, 0, 'B_MUTE', 1) end)
+                end
+            end
+
+            reaper.ImGui_SetCursorPosX(ctx, 0)
+            reaper.ImGui_SetCursorPosY(ctx, 0)
+            reaper.ImGui_SetNextItemAllowOverlap(ctx)
+            reaper.ImGui_InvisibleButton(ctx, 'drag_button_'..tostring(i), 85, 70)
+            -- On ctrl + Double clic open popup
             if reaper.ImGui_IsItemHovered(ctx) and reaper.ImGui_IsMouseDoubleClicked(ctx, reaper.ImGui_MouseButton_Left()) and System.samples[i].track then
-                reaper.ImGui_OpenPopup(ctx, 'popupnameupdate')
-                popup_name = System.samples[i].name
-                name_double_clic = true
+                if System.Ctrl then
+                    reaper.ImGui_OpenPopup(ctx, 'popupnameupdate')
+                    popup_name = System.samples[i].name
+                else
+                    local fx_index = reaper.TrackFX_GetByName(System.samples[i].track, System.samples[i].name, false)
+                    if fx_index then reaper.TrackFX_Show(System.samples[i].track, fx_index, 3) end -- Open fx in floating window
+                end
             end
             if reaper.ImGui_BeginPopup(ctx, 'popupnameupdate') then
                 w, h = reaper.ImGui_GetWindowSize(ctx)
@@ -130,29 +156,6 @@ function sample_window.Show()
                 reaper.ImGui_EndPopup(ctx)
             end
 
-            if col_display then
-                local x, y = reaper.ImGui_GetContentRegionAvail(ctx)
-                local button_size = 15
-                reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (x - button_size) * 0.5)
-                reaper.ImGui_SetCursorPosY(ctx, reaper.ImGui_GetCursorPosY(ctx) + y - 24)
-                reaper.ImGui_Button(ctx, '>##'..tostring(i), button_size)
-                if reaper.ImGui_IsItemActivated(ctx) then
-                    local _, parent_index = System.GetParentTrackIndex()
-                    reaper.SetTrackSendInfo_Value(System.samples[i].track, -1, 0, 'B_MUTE', 0)
-                    reaper.StuffMIDIMessage(parent_index, 0x90, 60, 100) -- Note On (C4, Vel 100)
-                end
-                if reaper.ImGui_IsItemDeactivated(ctx) then
-                    local _, parent_index = System.GetParentTrackIndex()
-                    reaper.StuffMIDIMessage(parent_index, 0x80, 60, 0) -- Note Off (C4, Vel 0)
-                    reaper.defer(function() reaper.SetTrackSendInfo_Value(System.samples[i].track, -1, 0, 'B_MUTE', 1) end)
-                end
-            end
-
-            reaper.ImGui_SetCursorPosX(ctx, 0)
-            reaper.ImGui_SetCursorPosY(ctx, 0)
-            reaper.ImGui_SetNextItemAllowOverlap(ctx)
-            reaper.ImGui_InvisibleButton(ctx, 'drag_button_'..tostring(i), 85, 70)
-
             if System.samples[i] and System.samples[i].track and reaper.ImGui_BeginDragDropSource(ctx, reaper.ImGui_DragDropFlags_SourceAllowNullID()) then
                 reaper.ImGui_SetDragDropPayload(ctx, 'BUTTON_ORDER', i)
                 local display_tooltip = System.samples[i].name or 'nill'
@@ -176,12 +179,6 @@ function sample_window.Show()
             reaper.ImGui_SetDragDropPayload(ctx, 'SWAP_CHILD', i)
             reaper.ImGui_Text(ctx, 'Dragging Child ' .. tostring(i))
             reaper.ImGui_EndDragDropSource(ctx)
-        end
-
-        -- On Double clic
-        if reaper.ImGui_IsItemHovered(ctx) and reaper.ImGui_IsMouseDoubleClicked(ctx, reaper.ImGui_MouseButton_Left()) and System.samples[i].track and not name_double_clic then
-            local fx_index = reaper.TrackFX_GetByName(System.samples[i].track, System.samples[i].name, false)
-            if fx_index then reaper.TrackFX_Show(System.samples[i].track, fx_index, 3) end -- Open fx in floating window
         end
 
         if reaper.ImGui_BeginDragDropTarget(ctx) then
