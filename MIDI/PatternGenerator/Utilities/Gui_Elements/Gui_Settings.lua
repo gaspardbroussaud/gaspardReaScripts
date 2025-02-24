@@ -61,6 +61,7 @@ function settings_window.Show()
             SetSettings()
             gson.SaveJSON(settings_path, Settings)
             settings_one_changed = false
+            settings_open = false
         end
         if disable then reaper.ImGui_EndDisabled(ctx) end
 

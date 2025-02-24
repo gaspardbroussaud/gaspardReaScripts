@@ -7,7 +7,6 @@ local sample_window = {}
 
 -- Global variables
 local popup_name = ''
-local note_playing = false
 
 --Functions
 local function GetNameNoExtension(name)
@@ -123,12 +122,14 @@ function sample_window.Show()
             reaper.ImGui_SetCursorPosY(ctx, 0)
             reaper.ImGui_SetNextItemAllowOverlap(ctx)
             reaper.ImGui_InvisibleButton(ctx, 'drag_button_'..tostring(i), 85, 70)
-            -- On ctrl + Double clic open popup
-            if reaper.ImGui_IsItemHovered(ctx) and reaper.ImGui_IsMouseDoubleClicked(ctx, reaper.ImGui_MouseButton_Left()) and System.samples[i].track then
-                if System.Ctrl then
+            -- On Ctrl hold + Double clic open popup
+            if System.ctrl then
+                if reaper.ImGui_IsItemHovered(ctx) and reaper.ImGui_IsMouseDoubleClicked(ctx, reaper.ImGui_MouseButton_Left()) and System.samples[i].track then
                     reaper.ImGui_OpenPopup(ctx, 'popupnameupdate')
                     popup_name = System.samples[i].name
-                else
+                end
+            else
+                if reaper.ImGui_IsItemHovered(ctx) and reaper.ImGui_IsMouseDoubleClicked(ctx, reaper.ImGui_MouseButton_Left()) and System.samples[i].track then
                     local fx_index = reaper.TrackFX_GetByName(System.samples[i].track, System.samples[i].name, false)
                     if fx_index then reaper.TrackFX_Show(System.samples[i].track, fx_index, 3) end -- Open fx in floating window
                 end
@@ -159,7 +160,7 @@ function sample_window.Show()
             if System.samples[i] and System.samples[i].track and reaper.ImGui_BeginDragDropSource(ctx, reaper.ImGui_DragDropFlags_SourceAllowNullID()) then
                 reaper.ImGui_SetDragDropPayload(ctx, 'BUTTON_ORDER', i)
                 local display_tooltip = System.samples[i].name or 'nill'
-                reaper.ImGui_Text(ctx, 'Dragging '..display_tooltip)
+                reaper.ImGui_Text(ctx, 'Dragging: '..display_tooltip)
                 reaper.ImGui_EndDragDropSource(ctx)
             end
             if reaper.ImGui_BeginDragDropTarget(ctx) then
@@ -175,27 +176,19 @@ function sample_window.Show()
         end
         if col_display then reaper.ImGui_PopStyleColor(ctx) end
 
-        if reaper.ImGui_BeginDragDropSource(ctx, reaper.ImGui_DragDropFlags_SourceAllowNullID()) then
-            reaper.ImGui_SetDragDropPayload(ctx, 'SWAP_CHILD', i)
-            reaper.ImGui_Text(ctx, 'Dragging Child ' .. tostring(i))
-            reaper.ImGui_EndDragDropSource(ctx)
-        end
-
         if reaper.ImGui_BeginDragDropTarget(ctx) then
             local retval, data_count = reaper.ImGui_AcceptDragDropPayloadFiles(ctx)
             if retval then
                 if data_count > 1 then
                     reaper.MB('Insert only one file at a time. Will use first of selection.', 'WARNING', 0)
                 end
-                local skip = false
+
                 local _, filepath = reaper.ImGui_GetDragDropPayloadFile(ctx, 0)
                 local filename = filepath:match('([^\\/]+)$')
                 local file_exist = false
                 file_exist, filepath = System.CheckFileInDirectory(filepath, filename)
                 if not file_exist and filepath then retval, filepath = System.CopyFileToProjectDirectory(filename, filepath) end
-                if not filepath then skip = true end
-
-                if not skip then
+                if filepath then
                     local name = GetNameNoExtension(filename)
 
                     local add = true

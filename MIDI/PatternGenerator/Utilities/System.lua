@@ -9,8 +9,8 @@ local System = {}
 local project_name = reaper.GetProjectName(0)
 local project_id, project_path = reaper.EnumProjects(-1)
 System.focus_main_window = false
-System.Shift = false
-System.Ctrl = false
+System.shift = false
+System.ctrl = false
 System.separator = reaper.GetOS():match('Win') and '\\' or '/'
 System.show_pattern_export = false
 
@@ -46,8 +46,8 @@ function System.ProjectUpdates()
         project_id, project_path = reaper.EnumProjects(-1)
     end
 
-    System.Shift = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftShift())
-    System.Ctrl = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftCtrl())
+    System.shift = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftShift())
+    System.ctrl = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftCtrl())
 end
 
 -- Copy file to new file
@@ -197,6 +197,18 @@ local function CreateParentSamplesTrack()
     reaper.SetMediaTrackInfo_Value(in_midi_track, 'I_FOLDERDEPTH', -1)
     local midi_GUID = reaper.GetTrackGUID(in_midi_track)
     reaper.SetProjExtState(0, ext_PatternGenerator, key_in_midi_track, midi_GUID)
+
+    --TEMP FOR DEV------------
+    local name = 'Kick'
+    local filepath = 'C:/Users/Gaspard/Documents/000-Temp/_Tests/Kick 808.wav'
+    System.samples[1] = {name = name, path = filepath, track = nil}
+    local track = System.InsertSampleTrack(name, filepath, 1)
+    if track then
+        System.samples[1].track = track
+    else
+        System.samples[1] = {}
+    end
+    --------------------------
 
     reaper.Undo_EndBlock('gaspard_Pattern generator_Add parent and midi inputs tracks', -1)
     reaper.PreventUIRefresh(-1)
