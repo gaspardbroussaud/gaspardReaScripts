@@ -137,7 +137,7 @@ function sample_window.Show()
             if reaper.ImGui_BeginPopup(ctx, 'popupnameupdate') then
                 w, h = reaper.ImGui_GetWindowSize(ctx)
                 reaper.ImGui_Text(ctx, 'Track name:')
-                changed, popup_name = reaper.ImGui_InputText(ctx, '##popupinputtext', popup_name, reaper.ImGui_InputTextFlags_EnterReturnsTrue())
+                _, popup_name = reaper.ImGui_InputText(ctx, '##popupinputtext', popup_name)--, reaper.ImGui_InputTextFlags_EnterReturnsTrue())
                 flags = reaper.ImGui_TableColumnFlags_WidthStretch() | reaper.ImGui_TableFlags_SizingStretchSame()
                 if reaper.ImGui_BeginTable(ctx, 'tablepopup', 3, flags) then
                     reaper.ImGui_TableNextRow(ctx)
@@ -147,7 +147,7 @@ function sample_window.Show()
                         reaper.ImGui_CloseCurrentPopup(ctx)
                     end
                     reaper.ImGui_TableNextColumn(ctx)
-                    if reaper.ImGui_Button(ctx, 'APPLY', -1) or changed then
+                    if reaper.ImGui_Button(ctx, 'APPLY', -1) or reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Enter()) then-- or changed then
                         System.samples[i].name = popup_name
                         reaper.GetSetMediaTrackInfo_String(System.samples[i].track, 'P_NAME', System.samples[i].name, true)
                         reaper.ImGui_CloseCurrentPopup(ctx)

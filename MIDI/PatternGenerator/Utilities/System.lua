@@ -148,6 +148,7 @@ local function DeclareSamplesList(parent)
     end
 end
 
+-- Update sample list infos each frame
 function System.SamplesListUpdate()
     local parent_track = GetTrackFromExtState(ext_PatternGenerator, key_parent_track)
     local child_tracks = GetChildTracks(parent_track)
