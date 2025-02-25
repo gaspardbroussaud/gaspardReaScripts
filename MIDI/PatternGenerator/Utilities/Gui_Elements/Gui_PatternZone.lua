@@ -1,7 +1,7 @@
 --@noindex
---@description Pattern generator user interface gui drop zone
+--@description Pattern generator user interface gui pattern zone
 --@author gaspard
---@about User interface drop zone used in gaspard_Pattern generator.lua script
+--@about User interface pattern zone used in gaspard_Pattern generator.lua script
 
 local pattern_window = {}
 
@@ -11,17 +11,7 @@ local payload_text = 'Moving...'
 function pattern_window.Show()
     reaper.ImGui_Text(ctx, 'PATTERNS')
     if reaper.ImGui_Button(ctx, 'SAVE##pattern_save', 100) then
-        local retval, pattern_name = reaper.GetUserInputs('SAVE PATTERN', 1, 'Pattern name:', '')
-        if retval then
-            reaper.CF_SetClipboard(patterns_path..System.separator..pattern_name..'.mid')
-            local text_part_1 = 'The midi patterns path has been set to clipboard. Paste pattern in next window to save.\nPattern name: '
-            local text_part_2 = '\nSettings to select are displayed in main Pattern Generator window.'
-            retval = reaper.MB(text_part_1..pattern_name..text_part_2, 'WARNING', 1)
-            if retval == 1 then
-                reaper.Main_OnCommand(40849, 0) -- Export MIDI
-                System.ScanPatternFiles()
-            end
-        end
+        System.show_midi_export_settings = true
     end
 
     if reaper.ImGui_BeginListBox(ctx, '##listbox_patterns', -1, -1) then

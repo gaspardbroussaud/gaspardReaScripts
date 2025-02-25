@@ -5,14 +5,16 @@
 
 local System = {}
 
+local midi_read = require('Utilities/ReadMidiFile')
+
 -- Global variables
 local project_name = reaper.GetProjectName(0)
 local project_id, project_path = reaper.EnumProjects(-1)
 System.focus_main_window = false
+System.show_midi_export_settings = false
 System.shift = false
 System.ctrl = false
 System.separator = reaper.GetOS():match('Win') and '\\' or '/'
-System.show_pattern_export = false
 
 -- Sample track variables
 System.parent_obj_track = nil
@@ -380,6 +382,10 @@ function System.ScanPatternFiles()
     end
 
     System.patterns = files
+end
+
+function System.GetMidiInfoFromFile(filepath)
+    return midi_read.ReadMidiFile(filepath)
 end
 
 -- Get Samples directory for current project

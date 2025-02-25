@@ -10,9 +10,10 @@ local settings_window = require('Utilities/GUI_Elements/Gui_Settings')
 local presets_window = require('Utilities/GUI_Elements/Gui_Presets')
 local sample_window = require('Utilities/GUI_Elements/Gui_SampleZone')
 local pattern_window = require('Utilities/GUI_Elements/Gui_PatternZone')
+local piano_roll = require('Utilities/GUI_Elements/Gui_PianoRoll')
 
 --#region Initial Variables
-local og_window_width = 600
+local og_window_width = 800
 local og_window_height = 330
 local og_win_min_w = og_window_width
 local og_win_min_h = og_window_height
@@ -23,6 +24,7 @@ local font_size = 16
 local small_font_size = font_size * 0.75
 local window_name = 'PATTERN GENERATOR'
 local no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
+local wait = 0
 --#endregion
 
 -- Get GUI style from file
@@ -92,17 +94,45 @@ end
 
 -- Gui window elements
 local function VisualElements()
-    local child_width = window_width - 16 - 8
-    local child_height = window_height - topbar_height - 40
+    local child_width = 600 - 16 - 8
+    local child_height = 330 - topbar_height - 40
     if reaper.ImGui_BeginChild(ctx, 'child_sample_zone', child_width * 0.5, child_height, reaper.ImGui_ChildFlags_Border()) then
         sample_window.Show()
         reaper.ImGui_EndChild(ctx)
     end
     reaper.ImGui_SameLine(ctx)
-    if reaper.ImGui_BeginChild(ctx, 'child_patterns_zone', child_width * 0.5, child_height, reaper.ImGui_ChildFlags_Border()) then
+    if reaper.ImGui_BeginChild(ctx, 'child_patterns_zone', child_width * 0.3, child_height, reaper.ImGui_ChildFlags_Border()) then
         pattern_window.Show()
         reaper.ImGui_EndChild(ctx)
     end
+    reaper.ImGui_SameLine(ctx)
+    if reaper.ImGui_BeginChild(ctx, 'child_piano_roll', 308, child_height, reaper.ImGui_ChildFlags_Border()) then
+        piano_roll.Show()
+        reaper.ImGui_EndChild(ctx)
+    end
+end
+
+local function VisualMidiExportSettings()
+    reaper.ImGui_Text(ctx, 'MIDI EXPORT SETTINGS')
+    reaper.ImGui_SameLine(ctx)
+    reaper.ImGui_TextDisabled(ctx, 'Select these settings in the MIDI export window.')
+    reaper.ImGui_Dummy(ctx, 1, 1)
+    reaper.ImGui_Text(ctx, 'INPUT:')
+    reaper.ImGui_RadioButton(ctx, 'Consolidate time: Time selection only', true)
+    reaper.ImGui_RadioButton(ctx, 'Consolidate MIDI items: Selected items only', true)
+    reaper.ImGui_Dummy(ctx, 1, 1)
+    reaper.ImGui_Text(ctx, 'OUTPUT:')
+    reaper.ImGui_RadioButton(ctx, 'Export to MIDI file: Multitrack MIDI file (type 1 MIDI file)', true)
+    reaper.ImGui_Text(ctx, 'PPQN:')
+    reaper.ImGui_SameLine(ctx)
+    reaper.ImGui_PushItemWidth(ctx, 50)
+    reaper.ImGui_InputText(ctx, '##input_ppqn', '960', reaper.ImGui_InputTextFlags_ReadOnly())
+    reaper.ImGui_Checkbox(ctx, 'Embed project tempo/time signature changes', true)
+    reaper.ImGui_Checkbox(ctx, 'Embed SMPTE offset', true)
+    reaper.ImGui_Checkbox(ctx, 'Export project markers as MIDI:', true)
+    reaper.ImGui_SameLine(ctx)
+    reaper.ImGui_Text(ctx, 'markers')
+    reaper.ImGui_Checkbox(ctx, "Only export project markers that begin with '#'", false)
 end
 
 -- Gui Version on bottom right
@@ -133,6 +163,32 @@ end
 local function ImGuiPopTheme()
     reaper.ImGui_PopStyleVar(ctx, #style_vars)
     reaper.ImGui_PopStyleColor(ctx, #style_colors)
+end
+
+local function ExportMidiPattern(item)
+    reaper.PreventUIRefresh(1)
+    reaper.Undo_BeginBlock()
+
+    local item_start = reaper.GetMediaItemInfo_Value(item, 'D_POSITION')
+    local item_end = item_start + reaper.GetMediaItemInfo_Value(item, 'D_LENGTH')
+    local time_start, time_end = reaper.GetSet_LoopTimeRange2(0, false, false, 0, 0, false)
+    reaper.GetSet_LoopTimeRange2(0, true, false, item_start, item_end, false)
+    local retval, pattern_name = reaper.GetUserInputs('SAVE PATTERN', 1, 'Pattern name:', '')
+    if retval then
+        reaper.CF_SetClipboard(patterns_path..System.separator..pattern_name..'.mid')
+        local text_part_1 = 'The midi patterns path has been set to clipboard. Paste pattern in next window to save.\nPattern name: '
+        local text_part_2 = '\nSettings to select are displayed in main Pattern Generator window.'
+        retval = reaper.MB(text_part_1..pattern_name..text_part_2, 'WARNING', 1)
+        if retval == 1 then
+            reaper.Main_OnCommand(40849, 0) -- Export MIDI
+            System.ScanPatternFiles()
+        end
+    end
+    reaper.GetSet_LoopTimeRange2(0, true, false, time_start, time_end, false)
+
+    reaper.Undo_EndBlock('gaspard_Pattern generator_ExportMidiPattern', -1)
+    reaper.PreventUIRefresh(-1)
+    reaper.UpdateArrange()
 end
 
 function Gui.Init()
@@ -177,8 +233,25 @@ function Gui.Loop()
         -- Settings window
         if show_settings then settings_window.Show() end
 
-        -- Script GUI Elements
-        VisualElements()
+        -- Script GUI Elements and MIDI Export settings
+        if System.show_midi_export_settings then
+            local item = reaper.GetSelectedMediaItem(0, 0)
+            if item then
+                VisualMidiExportSettings()
+                if wait > 0 then
+                    System.show_midi_export_settings = false
+                    reaper.defer(ExportMidiPattern(item))
+                end
+                wait = wait + 1
+            else
+                reaper.MB('No item selected.\nPlease select one midi item.', 'ERROR', 0)
+                VisualElements()
+                System.show_midi_export_settings = false
+            end
+        else
+            if wait > 0 then wait = 0 end
+            VisualElements()
+        end
 
         -- Show script version on  bottom right
         VisualVersion()
