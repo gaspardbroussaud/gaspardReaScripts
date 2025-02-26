@@ -203,9 +203,8 @@ local function CreateParentSamplesTrack()
 
     --TEMP FOR DEV------------
     local name = 'Kick'
-    local filepath = 'C:/Users/Gaspard/Documents/000-Temp/_Tests/Kick 808.wav'
-    System.samples[1] = {name = name, path = filepath, track = nil}
-    local track = System.InsertSampleTrack(name, filepath, 1)
+    System.samples[1] = {name = name, path = test_sample_filepath, track = nil}
+    local track = System.InsertSampleTrack(name, test_sample_filepath, 1)
     if track then
         System.samples[1].track = track
     else
@@ -226,6 +225,7 @@ function System.GetParentTrackIndex()
     return parent_track, index
 end
 
+-- Get track index of MIDI inputs track
 function System.GetMidiTrackIndex()
     local midi_track = GetTrackFromExtState(ext_PatternGenerator, key_in_midi_track)
     if not midi_track then return nil, nil end
@@ -233,6 +233,7 @@ function System.GetMidiTrackIndex()
     return midi_track, index
 end
 
+-- Return a table of all sample tracks
 function System.GetSamplesTracks()
     local parent_track, parent_index = System.GetParentTrackIndex()
     if parent_track and parent_index then
@@ -247,6 +248,7 @@ function System.GetSamplesTracks()
     return false, nil, nil, nil
 end
 
+-- Params for sample track insert
 local function SetSampleTrackParams(name, filepath, index, track)
     reaper.GetSetMediaTrackInfo_String(track, 'P_EXT:gaspard_PatternGenerator:SamplePath', tostring(filepath), true)
     reaper.GetSetMediaTrackInfo_String(track, 'P_EXT:gaspard_PatternGenerator:SampleIndex', tostring(index), true)
@@ -316,6 +318,7 @@ function System.InsertSampleTrack(name, filepath, sample_index)
     end
 end
 
+-- Replace sample in list via drag and drop
 function System.ReplaceSample(index)
     local track = System.samples[index].track
     reaper.GetSetMediaTrackInfo_String(track, 'P_NAME', System.samples[index].name, true)
@@ -384,6 +387,7 @@ function System.ScanPatternFiles()
     System.patterns = files
 end
 
+-- Get MIDI infos from file (notes, bpm, etc)
 function System.GetMidiInfoFromFile(filepath)
     return midi_read.ReadMidiFile(filepath)
 end
@@ -406,6 +410,7 @@ function System.CopyFileToProjectDirectory(name, path)
     return false, path
 end
 
+-- Check for file in given directory
 function System.CheckFileInDirectory(file_path, file_name, dir_path)
     dir_path = dir_path or GetSamplesDirectory()
     local dir_file = io.open(dir_path..System.separator..file_name, 'rb')
@@ -430,6 +435,7 @@ function System.CheckFileInDirectory(file_path, file_name, dir_path)
     return false, nil
 end
 
+-- System init variables and functions
 function System.Init()
     InitSettings()
     CreateParentSamplesTrack()

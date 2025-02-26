@@ -55,7 +55,7 @@ local function VisualTopBar()
 
         reaper.ImGui_SameLine(ctx)
 
-        local button_w = 80
+        local button_w = System.separator == '\\' and 80 or 90
         local small_button_w = 18
         local presets_width = window_width > 369 and button_w or small_button_w
         local settings_width = window_width > 305 and button_w or small_button_w

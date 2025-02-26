@@ -103,8 +103,4 @@ function midi_read.ReadMidiFile(filepath)
     return notes, interval
 end
 
-function midi_read.Show()
-    reaper.ImGui_DrawList_AddRectFilled(draw_list, 600, 150, 700, 170, 0xFF0000FF)
-end
-
 return midi_read

@@ -47,6 +47,9 @@ settings_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]..'Util
 presets_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]..'Presets'
 patterns_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]..'Patterns'
 
+test_sample_filepath = '/Users/gaspardbroussaud/Documents/Travail/Code/kick-gritty.wav'
+--'C:/Users/Gaspard/Documents/000-Temp/_Tests/Kick 808.wav'
+
 System.Init()
 Gui.Init()
 
