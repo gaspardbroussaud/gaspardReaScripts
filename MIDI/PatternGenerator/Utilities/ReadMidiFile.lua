@@ -34,6 +34,8 @@ function midi_read.ReadMidiFile(filepath)
     local time = 0
     local active_notes = {}
 
+    local interval = { min = 0, max = 0 }
+
     -- Read the header chunk
     if data:sub(1, 4) == "MThd" then
         pos = pos + 4
@@ -74,6 +76,8 @@ function midi_read.ReadMidiFile(filepath)
                     pos = pos + meta_length
                 elseif status >= 0x80 and status <= 0xEF then  -- Channel event
                     local pitch = data:byte(pos + 1)
+                    if pitch < interval.min then interval.min = pitch end
+                    if pitch > interval.max then interval.max = pitch end
                     local velocity = data:byte(pos + 2)
 
                     if (status >= 0x90 and status <= 0x9F) and velocity > 0 then -- Note On
@@ -96,7 +100,7 @@ function midi_read.ReadMidiFile(filepath)
         end
     end
 
-    return notes
+    return notes, interval
 end
 
 function midi_read.Show()
