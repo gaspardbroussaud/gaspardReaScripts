@@ -29,6 +29,8 @@ System.presets = {}
 
 -- Patterns variables
 System.patterns = {}
+System.pianoroll_notes = {}
+System.pianoroll_range = {min = nil, max = nil}
 
 -- Global funcitons ------
 -- Check current focused project
@@ -389,7 +391,7 @@ end
 
 -- Get MIDI infos from file (notes, bpm, etc)
 function System.GetMidiInfoFromFile(filepath)
-    return midi_read.ReadMidiFile(filepath)
+    midi_read.ReadMidiFile(filepath)
 end
 
 -- Get Samples directory for current project

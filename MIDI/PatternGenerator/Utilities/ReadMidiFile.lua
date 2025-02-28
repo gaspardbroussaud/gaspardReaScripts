@@ -21,20 +21,19 @@ end
 
 -- Function to read the MIDI file and extract PPQ and BPM
 function midi_read.ReadMidiFile(filepath)
-    local notes = {}
+    System.pianoroll_notes = {}
 
     local file = io.open(filepath, "rb")
-    if not file then return nil end
+    if not file then return false end
 
     local data = file:read("*all")
     file:close()
-    notes = {}
 
     local pos = 1
     local time = 0
     local active_notes = {}
 
-    local interval = { min = 0, max = 0 }
+    System.pianoroll_range = {}
 
     -- Read the header chunk
     if data:sub(1, 4) == "MThd" then
@@ -76,8 +75,8 @@ function midi_read.ReadMidiFile(filepath)
                     pos = pos + meta_length
                 elseif status >= 0x80 and status <= 0xEF then  -- Channel event
                     local pitch = data:byte(pos + 1)
-                    if pitch < interval.min then interval.min = pitch end
-                    if pitch > interval.max then interval.max = pitch end
+                    if not System.pianoroll_range.min or pitch <= System.pianoroll_range.min then System.pianoroll_range.min = pitch end
+                    if not System.pianoroll_range.max or pitch >= System.pianoroll_range.max then System.pianoroll_range.max = pitch end
                     local velocity = data:byte(pos + 2)
 
                     if (status >= 0x90 and status <= 0x9F) and velocity > 0 then -- Note On
@@ -86,7 +85,7 @@ function midi_read.ReadMidiFile(filepath)
                         if active_notes[pitch] then
                             local start_time = active_notes[pitch]
                             local length = time - start_time
-                            table.insert(notes, { pitch = pitch, start = start_time, length = length })
+                            table.insert(System.pianoroll_notes, { pitch = pitch, start = start_time, length = length })
                             active_notes[pitch] = nil
                         end
                     end
@@ -100,7 +99,7 @@ function midi_read.ReadMidiFile(filepath)
         end
     end
 
-    return notes, interval
+    return true
 end
 
 return midi_read
