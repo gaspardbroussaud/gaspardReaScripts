@@ -75,8 +75,6 @@ function midi_read.ReadMidiFile(filepath)
                     pos = pos + meta_length
                 elseif status >= 0x80 and status <= 0xEF then  -- Channel event
                     local pitch = data:byte(pos + 1)
-                    if not System.pianoroll_range.min or pitch <= System.pianoroll_range.min then System.pianoroll_range.min = pitch end
-                    if not System.pianoroll_range.max or pitch >= System.pianoroll_range.max then System.pianoroll_range.max = pitch end
                     local velocity = data:byte(pos + 2)
 
                     if (status >= 0x90 and status <= 0x9F) and velocity > 0 then -- Note On
@@ -85,6 +83,8 @@ function midi_read.ReadMidiFile(filepath)
                         if active_notes[pitch] then
                             local start_time = active_notes[pitch]
                             local length = time - start_time
+                            if not System.pianoroll_range.min or pitch <= System.pianoroll_range.min then System.pianoroll_range.min = pitch end
+                            if not System.pianoroll_range.max or pitch >= System.pianoroll_range.max then System.pianoroll_range.max = pitch end
                             table.insert(System.pianoroll_notes, { pitch = pitch, start = start_time, length = length })
                             active_notes[pitch] = nil
                         end

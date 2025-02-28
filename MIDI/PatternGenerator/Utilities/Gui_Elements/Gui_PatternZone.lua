@@ -62,8 +62,9 @@ function pattern_window.Show()
             changed, pattern.selected = reaper.ImGui_Selectable(ctx, pattern.name..'##sel_pattern'..tostring(i), pattern.selected)
             if changed then
                 System.GetMidiInfoFromFile(pattern.path)
+                -- Unselect other patterns
                 for j, other_pattern in ipairs(System.patterns) do
-                    if j ~= i then
+                    if j ~= i and other_pattern.selected then
                         other_pattern.selected = false
                     end
                 end

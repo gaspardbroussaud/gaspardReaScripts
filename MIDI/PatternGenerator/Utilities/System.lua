@@ -7,6 +7,8 @@ local System = {}
 
 local midi_read = require('Utilities/ReadMidiFile')
 
+reaper.ClearConsole()
+
 -- Global variables
 local project_name = reaper.GetProjectName(0)
 local project_id, project_path = reaper.EnumProjects(-1)
