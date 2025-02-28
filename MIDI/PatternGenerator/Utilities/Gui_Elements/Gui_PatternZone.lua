@@ -62,6 +62,11 @@ function pattern_window.Show()
             changed, pattern.selected = reaper.ImGui_Selectable(ctx, pattern.name..'##sel_pattern'..tostring(i), pattern.selected)
             if changed then
                 System.GetMidiInfoFromFile(pattern.path)
+                for j, other_pattern in ipairs(System.patterns) do
+                    if j ~= i then
+                        other_pattern.selected = false
+                    end
+                end
             end
             if reaper.ImGui_BeginDragDropSource(ctx) then
                 payload_drop = pattern.path
