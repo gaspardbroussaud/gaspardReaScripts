@@ -122,7 +122,6 @@ function midi_read.ReadMidiFile(filepath)
         pos = pos + 4
         if header_length == 6 then
             pos = pos + 4
-            --reaper.ShowConsoleMsg(pos)
             PPQ = data:byte(pos) * 0x100 + data:byte(pos + 1)
             pos = pos + 2
         end

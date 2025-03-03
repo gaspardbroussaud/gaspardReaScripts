@@ -11,15 +11,15 @@ function piano_roll.Show()
     local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
 
     reaper.ImGui_Text(ctx, 'PIANO ROLL')
-    local BPM = System.pianoroll_param.bpm and 'Tempo: '..tostring(System.pianoroll_param.bpm):gsub('^%.0$', '') or ''
+    --[[local BPM = System.pianoroll_param.bpm and 'Tempo: '..tostring(System.pianoroll_param.bpm):gsub('%.0$', '') or ''
     local BPL_BPI = ''
-    if System.pianoroll_param.bpL and System.pianoroll_param.bpi then
+    if System.pianoroll_param.bpl and System.pianoroll_param.bpi then
         BPL_BPI = 'Time Sig: '..System.pianoroll_param.bpl..'/'..math.floor(System.pianoroll_param.bpi)
     end
     reaper.ImGui_SameLine(ctx)
     reaper.ImGui_Text(ctx, tostring(BPM))
     reaper.ImGui_SameLine(ctx)
-    reaper.ImGui_Text(ctx, tostring(BPL_BPI))
+    reaper.ImGui_Text(ctx, tostring(BPL_BPI))]]
     local child_width, child_height = reaper.ImGui_GetContentRegionAvail(ctx)
 
     if reaper.ImGui_BeginChild(ctx, 'child_piano_roll_display', child_width, child_height, reaper.ImGui_ChildFlags_Border()) then
