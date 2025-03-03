@@ -1,11 +1,11 @@
 --@description Pattern generator
 --@author gaspard
---@version 0.0.1b
+--@version 0.0.2b
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/Gui_Elements/*.lua
 --@changelog
---  - Add script
+--  - Remove auto add sample at script start (used only for debug by dev)
 --@about
 --  ### Pattern generator
 --  - A MIDI pattern generator.

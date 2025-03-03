@@ -206,7 +206,7 @@ local function CreateParentSamplesTrack()
     local midi_GUID = reaper.GetTrackGUID(in_midi_track)
     reaper.SetProjExtState(0, ext_PatternGenerator, key_in_midi_track, midi_GUID)
 
-    --TEMP FOR DEV------------
+    --[[TEMP FOR DEV------------
     local name = 'Kick'
     System.samples[1] = {name = name, path = test_sample_filepath, track = nil}
     local track = System.InsertSampleTrack(name, test_sample_filepath, 1)
@@ -215,7 +215,7 @@ local function CreateParentSamplesTrack()
     else
         System.samples[1] = {}
     end
-    --------------------------
+    --------------------------]]
 
     reaper.Undo_EndBlock('gaspard_Pattern generator_Add parent and midi inputs tracks', -1)
     reaper.PreventUIRefresh(-1)
