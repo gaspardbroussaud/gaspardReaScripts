@@ -78,7 +78,7 @@ end
 
 -- Init Settings from file
 local function InitSettings()
-    local settings_version = '0.0.2b'
+    local settings_version = '0.0.1b'
     default_settings = {
         version = settings_version,
         order = {'obey_note_off', 'release', 'release_amount'},
