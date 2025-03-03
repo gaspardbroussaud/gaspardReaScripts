@@ -3,7 +3,7 @@
 --@version 0.0.1b
 --@provides
 --    [nomain] Utilities/*.lua
---    [nomain] Utilities/GUI_Elements/*.lua
+--    [nomain] Utilities/Gui_Elements/*.lua
 --    [nomain] Presets/*.json
 --    [nomain] Patterns/*.MID
 --@changelog
