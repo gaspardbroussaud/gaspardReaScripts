@@ -11,17 +11,32 @@ function piano_roll.Show()
     local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
 
     reaper.ImGui_Text(ctx, 'PIANO ROLL')
+    local BPM = System.pianoroll_param.bpm and 'Tempo: '..tostring(System.pianoroll_param.bpm):gsub('^%.0$', '') or ''
+    local BPL_BPI = ''
+    if System.pianoroll_param.bpL and System.pianoroll_param.bpi then
+        BPL_BPI = 'Time Sig: '..System.pianoroll_param.bpl..'/'..math.floor(System.pianoroll_param.bpi)
+    end
+    reaper.ImGui_SameLine(ctx)
+    reaper.ImGui_Text(ctx, tostring(BPM))
+    reaper.ImGui_SameLine(ctx)
+    reaper.ImGui_Text(ctx, tostring(BPL_BPI))
     local child_width, child_height = reaper.ImGui_GetContentRegionAvail(ctx)
+
     if reaper.ImGui_BeginChild(ctx, 'child_piano_roll_display', child_width, child_height, reaper.ImGui_ChildFlags_Border()) then
         local start_x, start_y = reaper.ImGui_GetCursorScreenPos(ctx)
-        local bpm, bpi = reaper.GetProjectTimeSignature()
-        local _, grid_line_height = reaper.ImGui_GetContentRegionAvail(ctx)
-        reaper.ImGui_DrawList_AddLine(draw_list, start_x, start_y - 20, start_x, 600, 0xFF0000DD, 1) -- Grid line
+        local pianoroll_length, grid_line_height = reaper.ImGui_GetContentRegionAvail(ctx)
 
-        if System.pianoroll_notes and System.pianoroll_range then
+        local grid_length = pianoroll_length / 4
+        for i = 0, 4 do
+            local pos_x = start_x + (grid_length * i)
+            reaper.ImGui_DrawList_AddLine(draw_list, pos_x, start_y, pos_x, start_y + grid_line_height, 0x6B60B555, 1) -- Grid line
+        end
+
+        if System.pianoroll_notes and System.pianoroll_range.min then
+            local PPQ_one_mesure = System.pianoroll_param.ppq * 4
             for _, note in ipairs(System.pianoroll_notes) do
-                local note_start = note.start / 15
-                local note_length = note.length / 15
+                local note_start = (note.start / PPQ_one_mesure) * pianoroll_length
+                local note_length = (note.length / PPQ_one_mesure) * pianoroll_length
                 local note_start_x = start_x + note_start
                 local note_start_y = start_y + ((System.pianoroll_range.max - note.pitch) * 10)
                 local note_end_x = note_start_x + note_length

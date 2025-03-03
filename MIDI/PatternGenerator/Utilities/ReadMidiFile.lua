@@ -5,9 +5,6 @@
 
 local midi_read = {}
 
-local PPQ = 480  -- Default PPQ (will be extracted from MIDI header)
-local BPM = 120  -- Default BPM (will be extracted from tempo events)
-
 -- Function to read a variable length number from MIDI data
 local function ReadVarLen(data, pos)
     local value = 0
@@ -19,7 +16,7 @@ local function ReadVarLen(data, pos)
     return value, pos
 end
 
--- Function to read the MIDI file and extract PPQ and BPM
+--[[ Function to read the MIDI file and extract PPQ and BPM
 function midi_read.ReadMidiFile(filepath)
     System.pianoroll_notes = {}
 
@@ -100,6 +97,104 @@ function midi_read.ReadMidiFile(filepath)
     end
 
     return true
+end]]
+
+function midi_read.ReadMidiFile(filepath)
+    System.pianoroll_notes = {}
+
+    local file = io.open(filepath, "rb")
+    if not file then return false end
+
+    local data = file:read("*all")
+    file:close()
+
+    local pos = 1
+    local time = 0
+    local active_notes = {}
+
+    System.pianoroll_range = {}
+    local PPQ, BPM, BPI = 0, 120, 4 -- Default values
+
+    -- Read the header chunk
+    if data:sub(1, 4) == "MThd" then
+        pos = pos + 4
+        local header_length = data:byte(pos) * 0x1000000 + data:byte(pos + 1) * 0x10000 + data:byte(pos + 2) * 0x100 + data:byte(pos + 3)
+        pos = pos + 4
+        if header_length == 6 then
+            pos = pos + 4
+            --reaper.ShowConsoleMsg(pos)
+            PPQ = data:byte(pos) * 0x100 + data:byte(pos + 1)
+            pos = pos + 2
+        end
+    end
+
+    -- Extract tempo and events
+    while pos < #data do
+        if data:sub(pos, pos + 3) == "MTrk" then
+            pos = pos + 4
+            local track_length = data:byte(pos) * 0x1000000 + data:byte(pos + 1) * 0x10000 + data:byte(pos + 2) * 0x100 + data:byte(pos + 3)
+            pos = pos + 4
+            local track_end = pos + track_length
+
+            -- Scan through track events
+            while pos < track_end do
+                local delta, first_new_pos = ReadVarLen(data, pos)
+                time = time + delta
+                pos = first_new_pos
+
+                local status = data:byte(pos)
+                if status == 0xFF then  -- Meta event
+                    local meta_type = data:byte(pos + 1)
+                    local meta_length, new_pos = ReadVarLen(data, pos + 2)
+                    pos = new_pos
+                    local meta_data = data:sub(pos, pos + meta_length - 1)
+
+                    -- Tempo Meta Event (0x51)
+                    if meta_type == 0x51 and meta_length == 3 then
+                        local b1, b2, b3 = meta_data:byte(1, 3)
+                        local microseconds_per_quarter = (b1 << 16) | (b2 << 8) | b3
+                        BPM = 60000000 / microseconds_per_quarter  -- Convert to BPM
+
+                    -- Time Signature Meta Event (0x58)
+                    elseif meta_type == 0x58 and meta_length >= 2 then
+                        BPL = meta_data:byte(1) -- First byte is numerator (beats per measure)
+                        BPI = 2 ^ meta_data:byte(2) -- Second byte is denominator as power of 2
+                    end
+
+                    pos = pos + meta_length
+                elseif status >= 0x80 and status <= 0xEF then  -- Channel event
+                    local pitch = data:byte(pos + 1)
+                    local velocity = data:byte(pos + 2)
+
+                    if (status >= 0x90 and status <= 0x9F) and velocity > 0 then -- Note On
+                        active_notes[pitch] = time
+                    elseif (status >= 0x80 and status <= 0x8F) or (status >= 0x90 and velocity == 0) then -- Note Off
+                        if active_notes[pitch] then
+                            local start_time = active_notes[pitch]
+                            local length = time - start_time
+                            if not System.pianoroll_range.min or pitch <= System.pianoroll_range.min then System.pianoroll_range.min = pitch end
+                            if not System.pianoroll_range.max or pitch >= System.pianoroll_range.max then System.pianoroll_range.max = pitch end
+                            table.insert(System.pianoroll_notes, { pitch = pitch, start = start_time, length = length })
+                            active_notes[pitch] = nil
+                        end
+                    end
+                    pos = pos + 3
+                else
+                    pos = pos + 1
+                end
+            end
+        else
+            pos = pos + 1
+        end
+    end
+
+    System.pianoroll_param.ppq = PPQ
+    System.pianoroll_param.bpm = BPM
+    System.pianoroll_param.bpi = BPI
+    System.pianoroll_param.bpl = BPL
+
+    return true
 end
+
 
 return midi_read

@@ -61,12 +61,18 @@ function pattern_window.Show()
         for i, pattern in ipairs(System.patterns) do
             changed, pattern.selected = reaper.ImGui_Selectable(ctx, pattern.name..'##sel_pattern'..tostring(i), pattern.selected)
             if changed then
-                System.GetMidiInfoFromFile(pattern.path)
                 -- Unselect other patterns
                 for j, other_pattern in ipairs(System.patterns) do
                     if j ~= i and other_pattern.selected then
                         other_pattern.selected = false
                     end
+                end
+                if pattern.selected then
+                    System.GetMidiInfoFromFile(pattern.path)
+                else
+                    System.pianoroll_notes = {}
+                    System.pianoroll_range = {min = nil, max = nil}
+                    System.pianoroll_param = {ppq = nil, bpm = nil, bpi = nil, bpl = nil}
                 end
             end
             if reaper.ImGui_BeginDragDropSource(ctx) then

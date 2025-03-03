@@ -33,6 +33,7 @@ System.presets = {}
 System.patterns = {}
 System.pianoroll_notes = {}
 System.pianoroll_range = {min = nil, max = nil}
+System.pianoroll_param = {ppq = nil, bpm = nil, bpi = nil, bpl = nil}
 
 -- Global funcitons ------
 -- Check current focused project
