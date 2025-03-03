@@ -4,8 +4,6 @@
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/Gui_Elements/*.lua
---    [nomain] Presets/*.json
---    [nomain] Patterns/*.MID
 --@changelog
 --  - Add script
 --@about
