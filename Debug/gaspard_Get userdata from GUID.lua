@@ -1,10 +1,10 @@
 --@description Get userdata from GUID
 --@author gaspard
---@version 0.0.1b
+--@version 1.0
 --@changelog
 --  - Add script
 --@about
---  Get userdata from GUID input.--@description Set marker to first transient in selected items using name pattern
+--  - Get any REAPER userdata from GUID input if found.
 
 -- Toggle button state in Reaper
 function SetButtonState(set)
@@ -141,7 +141,7 @@ function SelectUserdata(userdata)
     elseif userdata.type == "Marker" or "Region" then
         local _, num_markers, num_regions = reaper.CountProjectMarkers(0)
         for j = 0, num_markers + num_regions - 1 do
-            local _, isrgn, pos, rgnend, name, index = reaper.EnumProjectMarkers2(0, j)
+            local _, _, pos, _, _, _ = reaper.EnumProjectMarkers2(0, j)
             local _, markrgn_id = reaper.GetSetProjectInfo_String(0, "MARKER_GUID:"..j, "", false)
             if markrgn_id == userdata.id then
                 reaper.SetEditCurPos(pos, true, true)
