@@ -11,23 +11,15 @@ function piano_roll.Show()
     local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
 
     reaper.ImGui_Text(ctx, 'PIANO ROLL')
-    --[[local BPM = System.pianoroll_param.bpm and 'Tempo: '..tostring(System.pianoroll_param.bpm):gsub('%.0$', '') or ''
-    local BPL_BPI = ''
-    if System.pianoroll_param.bpl and System.pianoroll_param.bpi then
-        BPL_BPI = 'Time Sig: '..System.pianoroll_param.bpl..'/'..math.floor(System.pianoroll_param.bpi)
-    end
-    reaper.ImGui_SameLine(ctx)
-    reaper.ImGui_Text(ctx, tostring(BPM))
-    reaper.ImGui_SameLine(ctx)
-    reaper.ImGui_Text(ctx, tostring(BPL_BPI))]]
     local child_width, child_height = reaper.ImGui_GetContentRegionAvail(ctx)
 
-    if reaper.ImGui_BeginChild(ctx, 'child_piano_roll_display', child_width, child_height, reaper.ImGui_ChildFlags_Border()) then
+    local flags = reaper.ImGui_WindowFlags_AlwaysHorizontalScrollbar()
+    if reaper.ImGui_BeginChild(ctx, 'child_piano_roll_display', child_width, child_height, reaper.ImGui_ChildFlags_Border(), flags) then
         local start_x, start_y = reaper.ImGui_GetCursorScreenPos(ctx)
         local pianoroll_length, grid_line_height = reaper.ImGui_GetContentRegionAvail(ctx)
 
         local grid_length = pianoroll_length / 4
-        for i = 0, 4 do
+        for i = 0, 9 do
             local pos_x = start_x + (grid_length * i)
             reaper.ImGui_DrawList_AddLine(draw_list, pos_x, start_y, pos_x, start_y + grid_line_height, 0x6B60B555, 1) -- Grid line
         end
@@ -50,6 +42,8 @@ function piano_roll.Show()
                 reaper.ImGui_DrawList_AddLine(draw_list, note_end_x, note_start_y, note_end_x, note_end_y, border_color, 1) -- Right line
             end
         end
+        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + child_width * 1.9)
+        reaper.ImGui_Text(ctx, '')
         reaper.ImGui_EndChild(ctx)
     end
 end

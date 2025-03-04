@@ -7,6 +7,7 @@ local pattern_window = {}
 
 local payload_drop = nil
 local payload_text = 'Moving...'
+local above_track = false
 
 function pattern_window.Show()
     reaper.ImGui_Text(ctx, 'PATTERNS')
@@ -20,9 +21,11 @@ function pattern_window.Show()
             local x, y = reaper.GetMousePosition()
             track = reaper.GetTrackFromPoint(x, y)
             if track then
-                payload_text = 'Release mouse to drop here.'
+                payload_text = 'Release mouse to drop here. '
+                above_track = true
             else
                 payload_text = 'No track under mouse cursor.'
+                above_track = false
             end
         end
 
@@ -60,6 +63,9 @@ function pattern_window.Show()
 
         for i, pattern in ipairs(System.patterns) do
             changed, pattern.selected = reaper.ImGui_Selectable(ctx, pattern.name..'##sel_pattern'..tostring(i), pattern.selected)
+            if reaper.ImGui_IsItemHovered(ctx, reaper.ImGui_HoveredFlags_Stationary()) then
+                reaper.ImGui_SetItemTooltip(ctx, pattern.name)
+            end
             if changed then
                 -- Unselect other patterns
                 for j, other_pattern in ipairs(System.patterns) do
@@ -77,7 +83,12 @@ function pattern_window.Show()
             end
             if reaper.ImGui_BeginDragDropSource(ctx) then
                 payload_drop = pattern.path
+                if not above_track then reaper.ImGui_BeginDisabled(ctx) end
+                reaper.ImGui_Text(ctx, pattern.name)
+                if not above_track then reaper.ImGui_EndDisabled(ctx) end
+                if not above_track then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xAA2222FF) end
                 reaper.ImGui_Text(ctx, payload_text)
+                if not above_track then reaper.ImGui_PopStyleColor(ctx) end
                 reaper.ImGui_EndDragDropSource(ctx)
             end
         end

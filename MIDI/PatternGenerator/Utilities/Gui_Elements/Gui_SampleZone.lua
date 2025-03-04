@@ -82,7 +82,7 @@ local function SwapSamplesInTable(from_index, to_index)
 end
 
 function sample_window.Show()
-    reaper.ImGui_Text(ctx, 'DRUMPAD')
+    reaper.ImGui_Text(ctx, 'PADS')
 
     reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Border(), 0xFFFFFFFF)
 

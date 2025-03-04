@@ -30,6 +30,10 @@ local key_in_midi_track = 'InMidiTrack_GUID'
 System.presets = {}
 
 -- Patterns variables
+local local_pattern_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]--..'Patterns'
+local_pattern_path = string.gsub(local_pattern_path, '\\', System.separator)
+local_pattern_path = string.gsub(local_pattern_path, '/', System.separator)
+local_pattern_path = string.gsub(local_pattern_path, 'Utilities', 'Patterns')
 System.patterns = {}
 System.pianoroll_notes = {}
 System.pianoroll_range = {min = nil, max = nil}
@@ -78,7 +82,7 @@ end
 
 -- Init Settings from file
 local function InitSettings()
-    local settings_version = '0.0.1b'
+    local settings_version = '0.0.3b'
     default_settings = {
         version = settings_version,
         order = {'obey_note_off', 'release', 'release_amount'},
@@ -96,6 +100,11 @@ local function InitSettings()
             value = 40,
             name = 'Release amount',
             description = 'Release amount in milliseconds.'
+        },
+        pattern_folder_paths = {
+            value = {local_pattern_path},
+            name = 'Pattern folder paths',
+            description = 'All paths to look for MIDI patterns.'
         }
     }
     Settings = gson.LoadJSON(settings_path, default_settings)
@@ -373,21 +382,34 @@ function System.ScanPresetFiles()
     System.presets = files
 end
 
+local function SortByName(t)
+    table.sort(t, function(a, b)
+        return a.name:lower() < b.name:lower()
+    end)
+    return t
+end
+
 -- Get all preset files from folder
 function System.ScanPatternFiles()
     local files = {}
-    local index = 0
-    local file = reaper.EnumerateFiles(patterns_path, index)
 
-    while file do
-        if file:match('%.MID$') or file:match('%.mid$') then
-            local name = file:gsub('%.MID$', '')
-            name = file:gsub('%.mid$', '')
-            table.insert(files, {path = patterns_path..'/'..file, name = name, selected = false})
+    for i = 1, #Settings.pattern_folder_paths.value do
+        local index = 0
+        local pattern = Settings.pattern_folder_paths.value[i]
+        local file = reaper.EnumerateFiles(pattern, index)
+
+        while file do
+            if file:match('%.MID$') or file:match('%.mid$') then
+                local name = file:gsub('%.MID$', '')
+                name = file:gsub('%.mid$', '')
+                table.insert(files, {path = pattern..'/'..file, name = name, selected = false})
+            end
+            index = index + 1
+            file = reaper.EnumerateFiles(pattern, index)
         end
-        index = index + 1
-        file = reaper.EnumerateFiles(patterns_path, index)
     end
+
+    files = SortByName(files)
 
     System.patterns = files
 end
@@ -452,10 +474,12 @@ function System.ClearOnExitIfEmpty()
     local parent_track = GetTrackFromExtState(ext_PatternGenerator, key_parent_track)
     if not parent_track then return end
 
+    local tracks = GetChildTracks(parent_track)
+    if #tracks > 1 then return end
+
     reaper.PreventUIRefresh(1)
     reaper.Undo_BeginBlock()
 
-    local tracks = GetChildTracks(parent_track)
     for _, track in ipairs(tracks) do
         reaper.DeleteTrack(track)
     end

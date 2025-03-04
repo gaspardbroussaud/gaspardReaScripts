@@ -13,7 +13,7 @@ local pattern_window = require('Utilities/GUI_Elements/Gui_PatternZone')
 local piano_roll = require('Utilities/GUI_Elements/Gui_PianoRoll')
 
 --#region Initial Variables
-local og_window_width = 800
+local og_window_width = 858
 local og_window_height = 330
 local og_win_min_w = og_window_width
 local og_win_min_h = og_window_height
@@ -101,7 +101,7 @@ local function VisualElements()
         reaper.ImGui_EndChild(ctx)
     end
     reaper.ImGui_SameLine(ctx)
-    if reaper.ImGui_BeginChild(ctx, 'child_patterns_zone', child_width * 0.3, child_height, reaper.ImGui_ChildFlags_Border()) then
+    if reaper.ImGui_BeginChild(ctx, 'child_patterns_zone', child_width * 0.4, child_height, reaper.ImGui_ChildFlags_Border()) then
         pattern_window.Show()
         reaper.ImGui_EndChild(ctx)
     end
