@@ -111,6 +111,7 @@ function midi_read.ReadMidiFile(filepath)
     local pos = 1
     local time = 0
     local active_notes = {}
+    local furthest_pos = 0
 
     System.pianoroll_range = {}
     local PPQ, BPM, BPI = 0, 120, 4 -- Default values
@@ -174,6 +175,7 @@ function midi_read.ReadMidiFile(filepath)
                             if not System.pianoroll_range.min or pitch <= System.pianoroll_range.min then System.pianoroll_range.min = pitch end
                             if not System.pianoroll_range.max or pitch >= System.pianoroll_range.max then System.pianoroll_range.max = pitch end
                             table.insert(System.pianoroll_notes, { pitch = pitch, start = start_time, length = length })
+                            if start_time + length > furthest_pos then furthest_pos = start_time + length end
                             active_notes[pitch] = nil
                         end
                     end
@@ -191,6 +193,7 @@ function midi_read.ReadMidiFile(filepath)
     System.pianoroll_param.bpm = BPM
     System.pianoroll_param.bpi = BPI
     System.pianoroll_param.bpl = BPL
+    System.pianoroll_param.end_pos = furthest_pos
 
     return true
 end

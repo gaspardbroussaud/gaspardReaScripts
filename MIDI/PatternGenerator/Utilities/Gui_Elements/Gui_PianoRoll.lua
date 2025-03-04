@@ -19,13 +19,21 @@ function piano_roll.Show()
         local pianoroll_length, grid_line_height = reaper.ImGui_GetContentRegionAvail(ctx)
 
         local grid_length = pianoroll_length / 4
-        for i = 0, 9 do
+        local bar_num = 4
+        local end_pos = pianoroll_length
+        local PPQ_one_mesure = 0
+        if System.pianoroll_param.end_pos then
+            PPQ_one_mesure = System.pianoroll_param.ppq * 4
+            end_pos = (System.pianoroll_param.end_pos / PPQ_one_mesure) * pianoroll_length
+            bar_num = System.pianoroll_param.end_pos / pianoroll_length
+            bar_num = math.floor(bar_num) * 4
+        end
+        for i = 0, bar_num do
             local pos_x = start_x + (grid_length * i)
             reaper.ImGui_DrawList_AddLine(draw_list, pos_x, start_y, pos_x, start_y + grid_line_height, 0x6B60B555, 1) -- Grid line
         end
 
         if System.pianoroll_notes and System.pianoroll_range.min then
-            local PPQ_one_mesure = System.pianoroll_param.ppq * 4
             for _, note in ipairs(System.pianoroll_notes) do
                 local note_start = (note.start / PPQ_one_mesure) * pianoroll_length
                 local note_length = (note.length / PPQ_one_mesure) * pianoroll_length
@@ -41,9 +49,11 @@ function piano_roll.Show()
                 reaper.ImGui_DrawList_AddLine(draw_list, note_start_x, note_start_y, note_start_x, note_end_y, border_color, 1) -- Left line
                 reaper.ImGui_DrawList_AddLine(draw_list, note_end_x, note_start_y, note_end_x, note_end_y, border_color, 1) -- Right line
             end
+
+            reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + end_pos)
+            reaper.ImGui_Text(ctx, '')
         end
-        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + child_width * 1.9)
-        reaper.ImGui_Text(ctx, '')
+
         reaper.ImGui_EndChild(ctx)
     end
 end

@@ -1,15 +1,11 @@
 --@description Pattern generator
 --@author gaspard
---@version 0.0.3b
+--@version 0.0.4b
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/Gui_Elements/*.lua
 --@changelog
---  - Update payload text for midi files
---  - Added scroll in pianoroll
---  - Update name DRUMPADS to PADS
---  - Added folder path setting for pattern files
---  - Fixes
+--  - Adaptative scroll in pianoroll
 --@about
 --  ### Pattern generator
 --  - A MIDI pattern generator.

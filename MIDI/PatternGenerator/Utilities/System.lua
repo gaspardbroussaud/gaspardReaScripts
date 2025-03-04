@@ -37,7 +37,7 @@ local_pattern_path = string.gsub(local_pattern_path, 'Utilities', 'Patterns')
 System.patterns = {}
 System.pianoroll_notes = {}
 System.pianoroll_range = {min = nil, max = nil}
-System.pianoroll_param = {ppq = nil, bpm = nil, bpi = nil, bpl = nil}
+System.pianoroll_param = {ppq = nil, bpm = nil, bpi = nil, bpl = nil, end_pos = nil}
 
 -- Global funcitons ------
 -- Check current focused project

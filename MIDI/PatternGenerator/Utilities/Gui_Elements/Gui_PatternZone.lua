@@ -78,7 +78,7 @@ function pattern_window.Show()
                 else
                     System.pianoroll_notes = {}
                     System.pianoroll_range = {min = nil, max = nil}
-                    System.pianoroll_param = {ppq = nil, bpm = nil, bpi = nil, bpl = nil}
+                    System.pianoroll_param = {ppq = nil, bpm = nil, bpi = nil, bpl = nil, end_pos = nil}
                 end
             end
             if reaper.ImGui_BeginDragDropSource(ctx) then
