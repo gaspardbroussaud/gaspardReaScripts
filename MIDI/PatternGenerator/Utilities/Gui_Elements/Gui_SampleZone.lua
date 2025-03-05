@@ -46,7 +46,7 @@ local function SwapSamplesInTable(from_index, to_index)
     else
         local to_track_index = 1
 
-        local found_parent_and_children, sample_tracks, parent_track, parent_index = System.GetSamplesTracks()
+        local found_parent_and_children, sample_tracks, _, _ = System.GetSamplesTracks()
         if found_parent_and_children then
             local found_track = false
             for _, sample_track in ipairs(sample_tracks) do

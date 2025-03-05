@@ -1,12 +1,11 @@
 --@description Pattern generator
 --@author gaspard
---@version 0.0.5b
+--@version 0.0.6b
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/Gui_Elements/*.lua
 --@changelog
---  - Fix Patterns folder creation if not exist
---  - Rescan patterns on pattern file path invalid
+--  - Pianoroll scrollbar not always visible
 --@about
 --  ### Pattern generator
 --  - A MIDI pattern generator.
