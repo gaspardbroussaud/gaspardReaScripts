@@ -10,6 +10,17 @@ for i = 0, reaper.CountTracks(0) - 1 do
 end
 -- DEBUG TEST --------------------------------
 
+local function TextButton(text, i)
+    x, y = reaper.ImGui_GetCursorPos(ctx)
+    reaper.ImGui_Text(ctx, text)
+    reaper.ImGui_SetNextItemAllowOverlap(ctx)
+    reaper.ImGui_SetCursorPos(ctx, x, y)
+    av_x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
+    reaper.ImGui_InvisibleButton(ctx, "##"..text..i, av_x, font_size)
+    if reaper.ImGui_IsItemActivated(ctx) then return true end
+    return false
+end
+
 function window_samples.Show()
     local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
 
@@ -33,7 +44,7 @@ function window_samples.Show()
 
                 reaper.ImGui_TableNextRow(ctx)
                 reaper.ImGui_TableNextColumn(ctx)
-                local lx, uy = reaper.ImGui_GetCursorScreenPos(ctx)
+                local left_x, upper_y = reaper.ImGui_GetCursorScreenPos(ctx)
                 changed, selected = reaper.ImGui_Selectable(ctx, name, selected)
                 local hovered = reaper.ImGui_IsItemHovered(ctx)
                 if changed then
@@ -66,13 +77,7 @@ function window_samples.Show()
 
                 if mute > 0 then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xFFAAAAFF) end
                 reaper.ImGui_TableNextColumn(ctx)
-                x, y = reaper.ImGui_GetCursorPos(ctx)
-                reaper.ImGui_Text(ctx, "M")
-                reaper.ImGui_SetNextItemAllowOverlap(ctx)
-                reaper.ImGui_SetCursorPos(ctx, x, y)
-                av_x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
-                reaper.ImGui_InvisibleButton(ctx, "##mute"..i, av_x, font_size)
-                if reaper.ImGui_IsItemActivated(ctx) then
+                if TextButton("M", i) then
                     reaper.SetMediaTrackInfo_Value(track, "B_MUTE", math.abs(mute - 1))
                 end
                 if mute > 0 then reaper.ImGui_PopStyleColor(ctx, 1) end
@@ -80,30 +85,19 @@ function window_samples.Show()
                 reaper.ImGui_TableNextColumn(ctx)
                 x, y = reaper.ImGui_GetCursorPos(ctx)
                 if solo > 0 then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xF0E115FF) end
-                reaper.ImGui_Text(ctx, "S")
-                reaper.ImGui_SetNextItemAllowOverlap(ctx)
-                reaper.ImGui_SetCursorPos(ctx, x, y)
-                av_x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
-                reaper.ImGui_InvisibleButton(ctx, "##solo"..i, av_x, font_size)
-                if reaper.ImGui_IsItemActivated(ctx) then
+                if TextButton("S", i) then
                     if solo > 0 then solo = 1 end
                     reaper.SetMediaTrackInfo_Value(track, "I_SOLO", math.abs(solo - 1))
                 end
                 if solo > 0 then reaper.ImGui_PopStyleColor(ctx, 1) end
 
-                local rx, ly = reaper.ImGui_GetCursorScreenPos(ctx)
+                local _, lower_y = reaper.ImGui_GetCursorScreenPos(ctx)
                 if selected or hovered then
-                    left_x = lx - 5
-                    upper_y = uy - 2
-                    right_x = left_x + child_width - 17
-                    lower_y = ly - 2
+                    local right_x = left_x + child_width - 17
                     local thickness = 1
                     local col_line = 0xFF000055
                     if hovered and not selected then col_line = 0xFFFFFF55 end
-                    reaper.ImGui_DrawList_AddLine(draw_list, left_x, upper_y, right_x, upper_y, col_line, thickness) -- TOP
-                    reaper.ImGui_DrawList_AddLine(draw_list, left_x, lower_y, right_x, lower_y, col_line, thickness) -- BOTTOM
-                    reaper.ImGui_DrawList_AddLine(draw_list, left_x, upper_y, left_x, lower_y, col_line, thickness) -- LEFT
-                    reaper.ImGui_DrawList_AddLine(draw_list, right_x, upper_y, right_x, lower_y + 1, col_line, thickness) -- RIGHT
+                    reaper.ImGui_DrawList_AddRect(draw_list, left_x - 5, upper_y - 2, right_x, lower_y - 2, col_line, thickness)
                 end
 
                 ::continue::
