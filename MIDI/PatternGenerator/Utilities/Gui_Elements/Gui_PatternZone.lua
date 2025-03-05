@@ -74,7 +74,10 @@ function pattern_window.Show()
                     end
                 end
                 if pattern.selected then
-                    System.GetMidiInfoFromFile(pattern.path)
+                    if not System.GetMidiInfoFromFile(pattern.path) then
+                        reaper.MB('Selected file has invalid path.\nScanning patterns.', 'ERROR', 0)
+                        System.ScanPatternFiles()
+                    end
                 else
                     System.pianoroll_notes = {}
                     System.pianoroll_range = {min = nil, max = nil}

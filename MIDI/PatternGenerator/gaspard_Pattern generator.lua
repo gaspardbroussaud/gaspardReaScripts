@@ -1,11 +1,12 @@
 --@description Pattern generator
 --@author gaspard
---@version 0.0.4b
+--@version 0.0.5b
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/Gui_Elements/*.lua
 --@changelog
---  - Adaptative scroll in pianoroll
+--  - Fix Patterns folder creation if not exist
+--  - Rescan patterns on pattern file path invalid
 --@about
 --  ### Pattern generator
 --  - A MIDI pattern generator.
@@ -44,7 +45,7 @@ settings_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]..'Util
 presets_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]..'Presets'
 patterns_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]..'Patterns'
 
-test_sample_filepath = 'C:/Users/Gaspard/Documents/000-Temp/_Tests/Kick 808.wav'
+--test_sample_filepath = 'C:/Users/Gaspard/Documents/000-Temp/_Tests/Kick 808.wav'
 --'/Users/gaspardbroussaud/Documents/Travail/Code/kick-gritty.wav'
 
 System.Init()

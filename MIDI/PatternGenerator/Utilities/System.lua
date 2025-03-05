@@ -396,6 +396,7 @@ function System.ScanPatternFiles()
     for i = 1, #Settings.pattern_folder_paths.value do
         local index = 0
         local pattern = Settings.pattern_folder_paths.value[i]
+        CreateDirectoryIfNotExists(pattern)
         local file = reaper.EnumerateFiles(pattern, index)
 
         while file do
@@ -416,7 +417,7 @@ end
 
 -- Get MIDI infos from file (notes, bpm, etc)
 function System.GetMidiInfoFromFile(filepath)
-    midi_read.ReadMidiFile(filepath)
+    return midi_read.ReadMidiFile(filepath)
 end
 
 -- Get Samples directory for current project
