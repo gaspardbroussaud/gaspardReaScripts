@@ -24,7 +24,7 @@ end
 function window_samples.Show()
     local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
 
-    local child_width = (window_width - 20) / 4.15 -- = a default width of 200
+    local child_width = (og_window_width - 20) / 4.15 -- = a default width of 200 with og_window_width at 850
     local child_height = (window_height - topbar_height - small_font_size - 30) - font_size - 8
     if reaper.ImGui_BeginChild(ctx, "child_samples", child_width, child_height, reaper.ImGui_ChildFlags_Border(), no_scrollbar_flags) then
         if reaper.ImGui_BeginTable(ctx, "table_samples", 4, reaper.ImGui_TableFlags_Borders() | reaper.ImGui_TableFlags_SizingStretchProp()) then
@@ -72,7 +72,6 @@ function window_samples.Show()
                 local av_x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
                 reaper.ImGui_InvisibleButton(ctx, "##play"..i, av_x, font_size)
                 if reaper.ImGui_IsItemActivated(ctx) then
-                    reaper.ShowConsoleMsg("Played: "..i.."\n")
                 end
 
                 if mute > 0 then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xFFAAAAFF) end
@@ -97,7 +96,7 @@ function window_samples.Show()
                     local thickness = 1
                     local col_line = 0xFF000055
                     if hovered and not selected then col_line = 0xFFFFFF55 end
-                    reaper.ImGui_DrawList_AddRect(draw_list, left_x - 5, upper_y - 2, right_x, lower_y - 2, col_line, thickness)
+                    reaper.ImGui_DrawList_AddRect(draw_list, left_x - 5, upper_y - 2, right_x - 5, lower_y - 2, col_line, thickness)
                 end
 
                 ::continue::

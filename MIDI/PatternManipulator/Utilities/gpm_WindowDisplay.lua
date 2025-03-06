@@ -5,7 +5,7 @@ local gpmgui = {}
 local window_samples = require('Utilities/gpm_SamplesDisplay')
 
 -- Window variables
-local og_window_width = 850
+og_window_width = 850
 local og_window_height = 300
 window_width = og_window_width
 window_height = og_window_height
@@ -16,6 +16,7 @@ local window_name = "PATTERN MANIPULATOR"
 topbar_height = 30
 font_size = 16
 small_font_size = font_size * 0.75
+huge = math.huge
 
 -- ImGui Init
 ctx = reaper.ImGui_CreateContext('random_play_context')
@@ -105,6 +106,7 @@ function gpmgui.Loop()
     -- Window Settings
     local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | no_scrollbar_flags
     reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
+    reaper.ImGui_SetNextWindowSizeConstraints(ctx, og_window_width / 2.08, og_window_height / 1.33, huge, huge)
     -- Font
     reaper.ImGui_PushFont(ctx, font)
     -- Begin
