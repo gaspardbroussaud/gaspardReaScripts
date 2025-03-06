@@ -3,6 +3,7 @@
 local gpmgui = {}
 
 local window_samples = require('Utilities/gpm_SamplesDisplay')
+local window_tabs = require('Utilities/gpm_TabDisplay')
 
 -- Window variables
 og_window_width = 850
@@ -16,7 +17,7 @@ local window_name = "PATTERN MANIPULATOR"
 topbar_height = 30
 font_size = 16
 small_font_size = font_size * 0.75
-huge = math.huge
+local huge = math.huge
 
 -- ImGui Init
 ctx = reaper.ImGui_CreateContext('random_play_context')
@@ -24,6 +25,7 @@ font = reaper.ImGui_CreateFont('sans-serif', font_size)
 small_font = reaper.ImGui_CreateFont('sans-serif', small_font_size, reaper.ImGui_FontFlags_Italic())
 reaper.ImGui_Attach(ctx, font)
 reaper.ImGui_Attach(ctx, small_font)
+global_spacing = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing())
 
 -- Get GUI style from file
 local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
@@ -34,30 +36,37 @@ local style_colors = style.colors
 -- GUI Top Bar
 local function TopBarDisplay()
     -- GUI Menu Bar
-    if reaper.ImGui_BeginChild(ctx, "child_top_bar", window_width, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
+    local child_width = window_width - global_spacing
+    if reaper.ImGui_BeginChild(ctx, "child_top_bar", child_width, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
         reaper.ImGui_Text(ctx, window_name)
+        reaper.ImGui_SameLine(ctx)
+        reaper.ImGui_Text(ctx, "x="..window_x.." ; y="..window_y.." / w="..window_width.." ; h="..window_height)
 
         reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing(), 5, 0)
 
         reaper.ImGui_SameLine(ctx)
+        reaper.ImGui_Dummy(ctx, 3, 1)
+        reaper.ImGui_SameLine(ctx)
+        local spacing_x_2 = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing()) * 2
 
-        local w, _ = reaper.ImGui_CalcTextSize(ctx, "Settings X")
-        reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 40, 0)
+        --local settings_w = 60 + spacing_x_2
+        local quit_w = 10 + spacing_x_2
+        local y_pos = 0
+        --reaper.ImGui_SetCursorPos(ctx, child_width - settings_w - quit_w - spacing_x_2, y_pos)
+        reaper.ImGui_SetCursorPos(ctx, child_width - quit_w - spacing_x_2, y_pos)
 
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 40, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
-            reaper.ImGui_Dummy(ctx, 3, 1)
-            reaper.ImGui_SameLine(ctx)
-            if reaper.ImGui_Button(ctx, 'Settings##settings_button') then
-                show_settings = not show_settings
-                if settings_one_changed then
-                    settings_one_changed = false
-                end
+        --[[if reaper.ImGui_Button(ctx, 'Settings##settings_button', settings_w) then
+            show_settings = not show_settings
+            if settings_one_changed then
+                settings_one_changed = false
             end
-            reaper.ImGui_SameLine(ctx)
-            if reaper.ImGui_Button(ctx, 'X##quit_button') then
-                open = false
-            end
-            reaper.ImGui_EndChild(ctx)
+        end
+
+        reaper.ImGui_SameLine(ctx)]]
+
+        reaper.ImGui_SetCursorPosY(ctx, y_pos)
+        if reaper.ImGui_Button(ctx, 'X##quit_button', quit_w) then
+            open = false
         end
 
         reaper.ImGui_PopStyleVar(ctx, 1)
@@ -77,7 +86,21 @@ end
 
 -- Set all child elements area attribution
 local function ElementsDisplay()
-    window_samples.Show()
+    local child_width = og_window_width - (global_spacing * 2)
+    local child_height = window_height - topbar_height - small_font_size - 30
+    if reaper.ImGui_BeginChild(ctx, "child_tabs", child_width, child_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
+        reaper.ImGui_SetCursorPosX(ctx, 0)
+        reaper.ImGui_SetCursorPosY(ctx, 0)
+        window_samples.Show()
+
+        reaper.ImGui_SameLine(ctx)
+
+        --reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) - global_spacing)
+        reaper.ImGui_SetCursorPosY(ctx, 0)
+        window_tabs.Show()
+
+        reaper.ImGui_EndChild(ctx)
+    end
 end
 
 -- Push all GUI style settings
@@ -101,6 +124,10 @@ end
 
 -- Main loop
 function gpmgui.Loop()
+    -- On tick
+    gpmsys.sample_list = gpmsys_samples.CheckForSampleTracks()
+
+    -- GUI --------
     Gui_PushTheme()
 
     -- Window Settings
@@ -113,6 +140,8 @@ function gpmgui.Loop()
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
     window_width, window_height = reaper.ImGui_GetWindowSize(ctx)
+
+    global_spacing = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing())
 
     if visible then
         TopBarDisplay()

@@ -2,14 +2,6 @@
 
 local window_samples = {}
 
--- DEBUG TEST --------------------------------
-local track_list = {}
-for i = 0, reaper.CountTracks(0) - 1 do
-    local track = reaper.GetTrack(0, i)
-    table.insert(track_list, track)
-end
--- DEBUG TEST --------------------------------
-
 local function TextButton(text, i)
     x, y = reaper.ImGui_GetCursorPos(ctx)
     reaper.ImGui_Text(ctx, text)
@@ -22,11 +14,14 @@ local function TextButton(text, i)
 end
 
 function window_samples.Show()
+
     local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
 
     local child_width = (og_window_width - 20) / 4.15 -- = a default width of 200 with og_window_width at 850
-    local child_height = (window_height - topbar_height - small_font_size - 30) - font_size - 8
-    if reaper.ImGui_BeginChild(ctx, "child_samples", child_width, child_height, reaper.ImGui_ChildFlags_Border(), no_scrollbar_flags) then
+    local child_height = (window_height - topbar_height - small_font_size - 30)
+    if reaper.ImGui_BeginChild(ctx, "child_samples", child_width, child_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
+        if not gpmsys.sample_list then goto drop_zone end
+
         if reaper.ImGui_BeginTable(ctx, "table_samples", 4, reaper.ImGui_TableFlags_Borders() | reaper.ImGui_TableFlags_SizingStretchProp()) then
             local name_len, play_len, mute_len, solo_len = child_width / 3, 8, 10, 8
             reaper.ImGui_TableSetupColumn(ctx, "Name", 0, name_len)
@@ -34,7 +29,7 @@ function window_samples.Show()
             reaper.ImGui_TableSetupColumn(ctx, "Mute", 0, mute_len)
             reaper.ImGui_TableSetupColumn(ctx, "Solo", 0, solo_len)
 
-            for i, track in ipairs(track_list) do
+            for i, track in ipairs(gpmsys.sample_list) do
                 local retval, name = reaper.GetTrackName(track)
                 if not retval then goto continue end
 
@@ -92,9 +87,9 @@ function window_samples.Show()
 
                 local _, lower_y = reaper.ImGui_GetCursorScreenPos(ctx)
                 if selected or hovered then
-                    local right_x = left_x + child_width - 17
+                    local right_x = left_x + child_width
                     local thickness = 1
-                    local col_line = 0xFF000055
+                    local col_line = 0x7C71C2FF
                     if hovered and not selected then col_line = 0xFFFFFF55 end
                     reaper.ImGui_DrawList_AddRect(draw_list, left_x - 5, upper_y - 2, right_x - 5, lower_y - 2, col_line, thickness)
                 end
@@ -105,7 +100,24 @@ function window_samples.Show()
             reaper.ImGui_EndTable(ctx)
         end
 
+        ::drop_zone::
         reaper.ImGui_EndChild(ctx)
+    end
+
+    if reaper.ImGui_BeginDragDropTarget(ctx) then
+        local retval, data_count = reaper.ImGui_AcceptDragDropPayloadFiles(ctx)
+        if retval then
+            if data_count > 1 then
+                reaper.MB('Insert only one file at a time. Will use first of selection.', 'WARNING', 0)
+            end
+
+            local _, filepath = reaper.ImGui_GetDragDropPayloadFile(ctx, 0)
+            local filename = filepath:match('([^\\/]+)$')
+            if reaper.file_exists(filepath) then
+                gpmsys_samples.InsertSampleTrack(filename, filepath)
+            end
+        end
+        reaper.ImGui_EndDragDropTarget(ctx)
     end
 end
 
