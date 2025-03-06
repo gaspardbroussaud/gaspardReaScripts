@@ -1,8 +1,11 @@
 --@description Gui Settings for all gaspard's scripts
 --@author gaspard
---@version 1.0.1
+--@version 1.0.2
 --@provides [nomain] .
 --@about Gui Settings for all gaspard's scripts, called at frame 1 on each GUI script.
+
+local grey_bg = 0x2B2B2BFF
+local black_bg = 0x14141BFF
 
 local style_vars = {
     {var = reaper.ImGui_StyleVar_WindowRounding(), value = 6},
@@ -13,12 +16,13 @@ local style_vars = {
 
 local style_colors = {
     -- Backgrounds
-    {col = reaper.ImGui_Col_WindowBg(), value = 0x14141BFF},
-    {col = reaper.ImGui_Col_ChildBg(), value = 0x14141BFF},
+    {col = reaper.ImGui_Col_WindowBg(), value = black_bg},
+    {col = reaper.ImGui_Col_ChildBg(), value = black_bg},
     {col = reaper.ImGui_Col_MenuBarBg(), value = 0x1F1F28FF},
+    {col = reaper.ImGui_Col_PopupBg(), value = black_bg},
 
     -- Borders
-    {col = reaper.ImGui_Col_Border(), value = 0x594A8C4A},
+    {col = reaper.ImGui_Col_Border(), value = 0x594A8C4A},--0x594A8C4A
     {col = reaper.ImGui_Col_BorderShadow(), value = 0x0000003D},
 
     -- Text
@@ -26,18 +30,15 @@ local style_colors = {
     {col = reaper.ImGui_Col_TextDisabled(), value = 0x808080FF},
 
     -- Headers
-    {col = reaper.ImGui_Col_Header(), value = 0x574F8E55},
-    {col = reaper.ImGui_Col_HeaderHovered(), value = 0x7C71C255},
-    {col = reaper.ImGui_Col_HeaderActive(), value = 0x6B60B555},
+    {col = reaper.ImGui_Col_Header(), value = 0x574F8EFF},--0x574F8E55
+    {col = reaper.ImGui_Col_HeaderHovered(), value = 0x7C71C2FF},--0x7C71C255
+    {col = reaper.ImGui_Col_HeaderActive(), value = 0x6B60B5FA},--0x6B60B555
 
     -- Buttons
     {col = reaper.ImGui_Col_Button(), value = 0x574F8EFF},
     {col = reaper.ImGui_Col_ButtonHovered(), value = 0x7C71C2FF},
     {col = reaper.ImGui_Col_ButtonActive(), value = 0x6B60B5FF},
     {col = reaper.ImGui_Col_CheckMark(), value = 0xFFFFFFFF},
-
-    -- Popups
-    {col = reaper.ImGui_Col_PopupBg(), value = 0x14141BFF},
 
     -- Sliders
     {col = reaper.ImGui_Col_SliderGrab(), value = 0x796BB6FF},
@@ -49,9 +50,9 @@ local style_colors = {
     {col = reaper.ImGui_Col_FrameBgActive(), value = 0x6B60B5AA},
 
     -- Tabs
-    {col = reaper.ImGui_Col_Tab(), value = 0x23232BFF},
-    {col = reaper.ImGui_Col_TabHovered(), value = 0x3B2F66FF},
-    {col = reaper.ImGui_Col_TabSelected(), value = 0x312652FF},
+    {col = reaper.ImGui_Col_Tab(), value = 0x574F8EA1},--0x23232BFF
+    {col = reaper.ImGui_Col_TabHovered(), value = 0x7C71C2FF},--0x3B2F66FF
+    {col = reaper.ImGui_Col_TabSelected(), value = 0x6B60B5FF},--0x312652FF
     {col = reaper.ImGui_Col_TabDimmed(), value = 0x23232BFF},
     {col = reaper.ImGui_Col_TabDimmedSelected(), value = 0x23232BFF},
 
