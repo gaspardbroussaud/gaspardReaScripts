@@ -50,6 +50,7 @@ function tab_sampler.Show()
     note = tonumber(note)
     --changed, note = reaper.ImGui_InputText(ctx, "MIDI note", tostring(note), reaper.ImGui_InputTextFlags_EnterReturnsTrue())
     changed, note = reaper.ImGui_DragDouble(ctx, "MIDI note##drag_note", note, 0.2, 0, 127, tostring(GetMIDINoteName(tonumber(note))))
+    note = math.floor(note)
     if changed then
         local _, fx_name = reaper.GetTrackName(track)
         local fx_index = reaper.TrackFX_GetByName(track, fx_name.." (RS5K)", false)

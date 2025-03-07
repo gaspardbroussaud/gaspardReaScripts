@@ -101,6 +101,7 @@ local function InsertMIDITrack(parent_index)
         reaper.GetSetMediaTrackInfo_String(midi_track, "P_EXT:"..extname_is_midi_track, "true", true)
         reaper.GetSetMediaTrackInfo_String(midi_track, "P_EXT:"..extname_parent_track_GUID, reaper.GetTrackGUID(gpmsys.parent_track), true)
         reaper.GetSetMediaTrackInfo_String(gpmsys.parent_track, "P_EXT:"..extname_midi_track_GUID, reaper.GetTrackGUID(midi_track), true)
+        gpmsys.midi_track = midi_track
     end
 end
 
@@ -133,15 +134,9 @@ local function SetSampleTrackParams(name, filepath, track)
     reaper.TrackFX_SetParam(track, fx_index, 5, 0) -- Parameter index for "Pitch@start" is 5 (value 0 == pitch at note (default = C4))
 
     -- Send midi inputs from midi track to track
-    local retval, midi_track_GUID = reaper.GetSetMediaTrackInfo_String(gpmsys.parent_track, "P_EXT:"..extname_global.."MIDI_INPUTS_TRACK", "", false)
-    local midi_track = nil
-    if retval then
-        midi_track = reaper.BR_GetMediaTrackByGUID(0, midi_track_GUID)
-        reaper.CreateTrackSend(midi_track, track)
-        reaper.SetTrackSendInfo_Value(track, -1, 0, 'I_SRCCHAN', -1)
-        reaper.SetTrackSendInfo_Value(track, -1, 0, 'I_MIDIFLAGS', 0)
-        --reaper.SetTrackSendInfo_Value(track, -1, 0, 'B_MUTE', 1)
-    end
+    reaper.CreateTrackSend(gpmsys.midi_track, track)
+    reaper.SetTrackSendInfo_Value(track, -1, 0, 'I_SRCCHAN', -1)
+    reaper.SetTrackSendInfo_Value(track, -1, 0, 'I_MIDIFLAGS', 0)
 end
 
 function gpmsys_samples.InsertSampleTrack(name, filepath)
