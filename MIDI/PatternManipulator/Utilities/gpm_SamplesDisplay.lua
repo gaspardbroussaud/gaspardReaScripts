@@ -19,7 +19,16 @@ function window_samples.Show()
 
     local child_width = (og_window_width - 20) / 4.15 -- = a default width of 200 with og_window_width at 850
     local child_height = (window_height - topbar_height - small_font_size - 30)
+
+    local drop_x, drop_y = reaper.ImGui_GetCursorScreenPos(ctx)
+
     if reaper.ImGui_BeginChild(ctx, "child_samples", child_width, child_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
+        local parent_name = ""
+        if gpmsys.parent_track then _, parent_name = reaper.GetTrackName(gpmsys.parent_track) end
+        reaper.ImGui_Text(ctx, parent_name)
+        local forground_draw_list = reaper.ImGui_GetForegroundDrawList(ctx)
+        local pos = {x1 = drop_x - 5, y1 = drop_y - 5, x2 = drop_x + child_width + 5, y2 = drop_y + child_height + 5}
+        reaper.ImGui_DrawList_AddRect(forground_draw_list, pos.x1, pos.y1, pos.x2, pos.y2, 0xFFFFFF55, 2, reaper.ImGui_DrawFlags_None(), 2)
         if not gpmsys.sample_list then goto drop_zone end
 
         if reaper.ImGui_BeginTable(ctx, "table_samples", 4, reaper.ImGui_TableFlags_Borders() | reaper.ImGui_TableFlags_SizingStretchProp()) then
@@ -35,19 +44,17 @@ function window_samples.Show()
 
                 local mute = reaper.GetMediaTrackInfo_Value(track, "B_MUTE")
                 local solo = reaper.GetMediaTrackInfo_Value(track, "I_SOLO")
-                local selected = reaper.IsTrackSelected(track)
+                local selected = gpmsys.selected_sample_index == i
 
                 reaper.ImGui_TableNextRow(ctx)
                 reaper.ImGui_TableNextColumn(ctx)
                 local left_x, upper_y = reaper.ImGui_GetCursorScreenPos(ctx)
-                changed, selected = reaper.ImGui_Selectable(ctx, name, selected)
+                local changed, _ = reaper.ImGui_Selectable(ctx, name, selected)
                 local hovered = reaper.ImGui_IsItemHovered(ctx)
                 if changed then
-                    if selected then
-                        reaper.SetOnlyTrackSelected(track)
-                    else
-                        reaper.SetTrackSelected(track, false)
-                    end
+                    reaper.SetOnlyTrackSelected(track)
+                    gpmsys.selected_sample_index = i
+                    reaper.GetSetMediaTrackInfo_String(gpmsys.parent_track, "P_EXT:"..extname_track_selected_index, i, true)
                 end
 
                 reaper.ImGui_TableNextColumn(ctx)
@@ -113,8 +120,9 @@ function window_samples.Show()
 
             local _, filepath = reaper.ImGui_GetDragDropPayloadFile(ctx, 0)
             local filename = filepath:match('([^\\/]+)$')
+            local name_without_extension = filename:match("(.+)%..+") or filename
             if reaper.file_exists(filepath) then
-                gpmsys_samples.InsertSampleTrack(filename, filepath)
+                gpmsys_samples.InsertSampleTrack(name_without_extension, filepath)
             end
         end
         reaper.ImGui_EndDragDropTarget(ctx)

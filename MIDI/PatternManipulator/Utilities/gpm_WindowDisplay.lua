@@ -88,6 +88,7 @@ end
 local function ElementsDisplay()
     local child_width = og_window_width - (global_spacing * 2)
     local child_height = window_height - topbar_height - small_font_size - 30
+    reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + global_spacing)
     if reaper.ImGui_BeginChild(ctx, "child_tabs", child_width, child_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
         reaper.ImGui_SetCursorPosX(ctx, 0)
         reaper.ImGui_SetCursorPosY(ctx, 0)
@@ -95,7 +96,7 @@ local function ElementsDisplay()
 
         reaper.ImGui_SameLine(ctx)
 
-        --reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) - global_spacing)
+        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + global_spacing)
         reaper.ImGui_SetCursorPosY(ctx, 0)
         window_tabs.Show()
 

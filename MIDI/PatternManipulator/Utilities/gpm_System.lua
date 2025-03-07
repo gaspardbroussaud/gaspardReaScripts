@@ -3,13 +3,14 @@
 local gpmsys = {}
 
 -- Global variables
-extname_global = "g_PGM"
+extname_global = "g_PGM_"
 extkey_parent_track = "PARENT_TRACK_GUID"
 gpmsys.parent_track = nil
 
 -- Samples variables
 gpmsys_samples = require("Utilities/gpm_Sys_Samples")
 gpmsys.sample_list = {}
+gpmsys.selected_sample_index = 0
 
 local function SettingsInit()
     local settings_version = '0.0.4b'
@@ -48,8 +49,7 @@ end
 function gpmsys.GetTrackFromExtState(extname, extkey)
     local retval, GUID = reaper.GetProjExtState(0, extname, extkey)
     if not retval then return nil end
-    local track = reaper.BR_GetMediaTrackByGUID(0, GUID)
-    return track
+    return reaper.BR_GetMediaTrackByGUID(0, GUID)
 end
 
 return gpmsys
