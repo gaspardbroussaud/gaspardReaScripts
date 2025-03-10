@@ -1,5 +1,7 @@
 --@noindex
 
+-- 9 attack 10 release 24 decay 25 sustain 13 sample start offset 14 sample end offset
+
 local tab_sampler = {}
 
 local function GetMIDINoteName(note_number)
@@ -48,7 +50,6 @@ function tab_sampler.Show()
     reaper.ImGui_PushItemWidth(ctx, 80)
     local _, note = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_note, "", false)
     note = tonumber(note)
-    --changed, note = reaper.ImGui_InputText(ctx, "MIDI note", tostring(note), reaper.ImGui_InputTextFlags_EnterReturnsTrue())
     changed, note = reaper.ImGui_DragDouble(ctx, "MIDI note##drag_note", note, 0.2, 0, 127, tostring(GetMIDINoteName(tonumber(note))))
     note = math.floor(note)
     if changed then
@@ -57,6 +58,12 @@ function tab_sampler.Show()
         reaper.TrackFX_SetParam(track, fx_index, 3, note / 127) -- Parameter index for "Note start" is 3
         reaper.TrackFX_SetParam(track, fx_index, 4, note / 127) -- Parameter index for "Note end" is 4
         reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_note, note, true)
+    end
+
+    local _, attack = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_attack, "", false)
+    changed, attack = reaper.ImGui_DragDouble(ctx, "##drag_attack", attack, 0.1, 0, 2000, "%.1f")
+    if changed then
+        reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_attack, attack, true)
     end
 end
 

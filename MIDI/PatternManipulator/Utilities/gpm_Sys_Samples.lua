@@ -7,6 +7,7 @@ local extname_midi_track_GUID = extname_global.."MIDI_INPUTS_GUID"
 local extname_is_midi_track = extname_global.."IS_MIDI_TRACK"
 extname_track_selected_index = extname_global.."TRACK_SELECTED_INDEX"
 extname_sample_track_note = extname_global.."SAMPLE_NOTE"
+extname_sample_track_attack = extname_global.."SAMPLE_ATTACK"
 
 local function GetParentFromSelectedTrack()
     local sel_track_count = reaper.CountSelectedTracks(0)
@@ -132,6 +133,8 @@ local function SetSampleTrackParams(name, filepath, track)
     reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_note, 60, true)
 
     reaper.TrackFX_SetParam(track, fx_index, 5, 0) -- Parameter index for "Pitch@start" is 5 (value 0 == pitch at note (default = C4))
+
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_attack, 0.01, true) -- Attack
 
     -- Send midi inputs from midi track to track
     reaper.CreateTrackSend(gpmsys.midi_track, track)
