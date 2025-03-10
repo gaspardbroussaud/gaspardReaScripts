@@ -6,8 +6,12 @@ local extname_parent_track_GUID = extname_global.."PARENT_TRACK_GUID"
 local extname_midi_track_GUID = extname_global.."MIDI_INPUTS_GUID"
 local extname_is_midi_track = extname_global.."IS_MIDI_TRACK"
 extname_track_selected_index = extname_global.."TRACK_SELECTED_INDEX"
+extname_sample_track_length = extname_global.."SAMPLE_LENGTH"
 extname_sample_track_note = extname_global.."SAMPLE_NOTE"
 extname_sample_track_attack = extname_global.."SAMPLE_ATTACK"
+extname_sample_track_decay = extname_global.."SAMPLE_DECAY"
+extname_sample_track_sustain = extname_global.."SAMPLE_SUSTAIN"
+extname_sample_track_release = extname_global.."SAMPLE_RELEASE"
 
 local function GetParentFromSelectedTrack()
     local sel_track_count = reaper.CountSelectedTracks(0)
@@ -106,6 +110,30 @@ local function InsertMIDITrack(parent_index)
     end
 end
 
+local function GetWaveForm(filepath)
+    local pcm_source = reaper.PCM_Source_CreateFromFile(filepath)
+    local length, _ = reaper.GetMediaSourceLength(pcm_source)
+    local sample_rate = reaper.GetMediaSourceSampleRate(pcm_source)
+    local num_channels = reaper.GetMediaSourceNumChannels(pcm_source)
+
+    local buffer_size = 500 * num_channels
+    local buffer = reaper.new_array(buffer_size)
+
+    local samples_read = reaper.GetMediaSourcePeakRMS(media_source, 0, num_points, buffer)
+    reaper.PCM_Source_GetPeaks(src, peakrate, starttime, numchannels, numsamplesperchannel, want_extra_type, buf)
+    if samples_read < num_points then
+        return nil, nil
+    end
+
+    gpmsys.sample_waveform = {}
+    for i = 1, num_points do
+        local amplitude = buffer[i] or 0
+        table.insert(gpmsys.sample_waveform, amplitude)
+    end
+
+    return length
+end
+
 local function SetSampleTrackParams(name, filepath, track)
     -- Set parent GUID as extstate
     local parent_GUID = reaper.GetTrackGUID(gpmsys.parent_track)
@@ -119,27 +147,46 @@ local function SetSampleTrackParams(name, filepath, track)
     reaper.TrackFX_SetNamedConfigParm(track, fx_index, '+FILE0', filepath)
     reaper.TrackFX_SetNamedConfigParm(track, fx_index, 'DONE', '')
 
-    reaper.TrackFX_SetParam(track, fx_index, 2, 0) -- Parameter index for "Min vol" is 2 (value 0 == -inf)
+    -- Sample length
+    local sample_length = GetWaveForm(filepath) * 1000
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_length, sample_length, true)
 
+    -- Min volume (index 2) (default 0 == -inf)
+    reaper.TrackFX_SetParam(track, fx_index, 2, 0)
+
+    -- Obey note-off (index 11) (default 1 == true)
     if Settings.obey_note_off.value then
-        reaper.TrackFX_SetParam(track, fx_index, 11, 1) -- Parameter index for "Obey Note Off" is 11 (value 1 == true)
+        reaper.TrackFX_SetParam(track, fx_index, 11, 1)
     end
 
-    local ms = Settings.release_amount.value / 2000
-    reaper.TrackFX_SetParam(track, fx_index, 10, ms) -- Parameter index for "Release" is 10 (value 1 == 2s)
-
-    reaper.TrackFX_SetParam(track, fx_index, 3, 60/127) -- Parameter index for "Note start" is 3 (value note (default = C4 = 60 == 0.47))
-    reaper.TrackFX_SetParam(track, fx_index, 4, 60/127) -- Parameter index for "Note end" is 4 (value note (default = C4))
+    -- Note start / end pitch (index 3, 4) (default C4 == 60 == 0.47)
+    reaper.TrackFX_SetParam(track, fx_index, 3, 60 / 127)
+    reaper.TrackFX_SetParam(track, fx_index, 4, 60 / 127)
     reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_note, 60, true)
 
-    reaper.TrackFX_SetParam(track, fx_index, 5, 0) -- Parameter index for "Pitch@start" is 5 (value 0 == pitch at note (default = C4))
+    -- Pitch start (index 5) (default 0 == pitch at note start == C4)
+    reaper.TrackFX_SetParam(track, fx_index, 5, 0)
 
-    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_attack, 0.01, true) -- Attack
+    -- ADSR (index 9, 24, 25, 10) (default 0.96ms, 248ms, 0db, 40ms)
+    reaper.TrackFX_SetParam(track, fx_index, 9, Settings.attack_amount.value / 2000) -- Attack (range 0/2000)
+    reaper.TrackFX_SetParam(track, fx_index, 9, Settings.decay_amount.value / 15000) -- Decay (range 0/15000)
+    reaper.TrackFX_SetParam(track, fx_index, 10, Settings.sustain_amount.value / 132) -- Sustain (range -120/12 == 132)
+    reaper.TrackFX_SetParam(track, fx_index, 9, Settings.release_amount.value / 2000) -- Release (range 0/2000)
 
     -- Send midi inputs from midi track to track
     reaper.CreateTrackSend(gpmsys.midi_track, track)
     reaper.SetTrackSendInfo_Value(track, -1, 0, 'I_SRCCHAN', -1)
     reaper.SetTrackSendInfo_Value(track, -1, 0, 'I_MIDIFLAGS', 0)
+
+    --[[ DEBUG
+    -- Print all parameter names and values
+    local num_params = reaper.TrackFX_GetNumParams(track, fx_index)
+    reaper.ShowConsoleMsg("ReaSamplomatic5000 Parameters:\n")
+    for param = 0, num_params - 1 do
+        local _, param_name = reaper.TrackFX_GetParamName(track, fx_index, param, "")
+        local param_value = reaper.TrackFX_GetParam(track, fx_index, param)
+        reaper.ShowConsoleMsg(param .. ": " .. param_name .. " = " .. param_value .. "\n")
+    end]]
 end
 
 function gpmsys_samples.InsertSampleTrack(name, filepath)

@@ -11,9 +11,10 @@ gpmsys.parent_track = nil
 gpmsys_samples = require("Utilities/gpm_Sys_Samples")
 gpmsys.sample_list = {}
 gpmsys.selected_sample_index = 0
+gpmsys.sample_waveform = {}
 
 local function SettingsInit()
-    local settings_version = '0.0.4b'
+    local settings_version = '0.0.5b'
     local default_settings = {
         version = settings_version,
         order = {'project_based_parent'},
@@ -26,6 +27,21 @@ local function SettingsInit()
             value = true,
             name = 'Obey note off',
             description = 'Obey note off on sample insert.'
+        },
+        attack_amount = {
+            value = 0.96,
+            name = 'Attack time',
+            description = 'Attack time in milliseconds.'
+        },
+        decay_amount = {
+            value = 248,
+            name = 'Decay time',
+            description = 'Decay time in milliseconds.'
+        },
+        sustain_amount = {
+            value = 0,
+            name = 'Sustain volume',
+            description = 'Sustain volume in db.'
         },
         release_amount = {
             value = 40,
