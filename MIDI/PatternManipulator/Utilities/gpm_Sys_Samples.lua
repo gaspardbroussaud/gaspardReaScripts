@@ -111,25 +111,39 @@ local function InsertMIDITrack(parent_index)
 end
 
 local function GetWaveForm(filepath)
-    local pcm_source = reaper.PCM_Source_CreateFromFile(filepath)
-    local length, _ = reaper.GetMediaSourceLength(pcm_source)
-    local sample_rate = reaper.GetMediaSourceSampleRate(pcm_source)
-    local num_channels = reaper.GetMediaSourceNumChannels(pcm_source)
-
-    local buffer_size = 500 * num_channels
-    local buffer = reaper.new_array(buffer_size)
-
-    local samples_read = reaper.GetMediaSourcePeakRMS(media_source, 0, num_points, buffer)
-    reaper.PCM_Source_GetPeaks(src, peakrate, starttime, numchannels, numsamplesperchannel, want_extra_type, buf)
-    if samples_read < num_points then
-        return nil, nil
-    end
-
     gpmsys.sample_waveform = {}
-    for i = 1, num_points do
-        local amplitude = buffer[i] or 0
-        table.insert(gpmsys.sample_waveform, amplitude)
+
+    local pcm_source = reaper.PCM_Source_CreateFromFileEx(filepath, true)
+    local length = reaper.GetMediaSourceLength(pcm_source)
+    --local sample_rate = reaper.GetMediaSourceSampleRate(pcm_source)
+    local peakrate = 1000
+    local num_channels = 1--reaper.GetMediaSourceNumChannels(pcm_source)
+    local want_extra_type = 0
+
+    local num_points = math.floor(length * peakrate)
+    if num_points < 10 then return length end
+
+    local buf = reaper.new_array(num_points * num_channels * 2)
+
+    local retval = reaper.PCM_Source_GetPeaks(pcm_source, peakrate, 0, num_channels, num_points, want_extra_type, buf)
+    --local samples_count = (retval & 0xfffff)
+
+    --local samples_count_half = math.floor(samples_count)
+    local waveform = buf.table()
+
+    local min, max = math.huge, -math.huge
+    for i = 1, #waveform do
+        if waveform[i] < min then min = waveform[i] end
+        if waveform[i] > max then max = waveform[i] end
     end
+    local amplitude_range = max_val - min_val
+    if amplitude_range == 0 then amplitude_range = 1 end
+
+    for i, sample in ipairs(gpmsys.sample_waveform) do
+        reaper.ShowConsoleMsg(sample.."\n")
+    end
+
+    buf.clear()
 
     return length
 end

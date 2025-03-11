@@ -32,6 +32,9 @@ function tab_sampler.Show()
         reaper.ImGui_Text(ctx, "To create a new sampler parent track, simply select a track and insert a sample.")
         return
     end
+
+    local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
+
     local track = gpmsys.sample_list[gpmsys.selected_sample_index]
     local _, fx_name = reaper.GetTrackName(track)
     local fx_index = reaper.TrackFX_GetByName(track, fx_name.." (RS5K)", false)
@@ -124,15 +127,21 @@ function tab_sampler.Show()
     end
 
     local win_x, win_y = reaper.ImGui_GetCursorScreenPos(ctx)
-    local width, height = 300, 100  -- Waveform area size
+    local width, height = 400, 200  -- Waveform area size
     local mid_y = win_y + height / 2
 
+    local waveform = gpmsys.sample_waveform  -- Store the waveform table in a local variable
+    local half_size = math.floor(#waveform / 2)  -- Calculate halfway point
+
     -- Loop through the waveform data and draw lines to represent it
-    for i = 1, #gpmsys.sample_waveform - 1 do
-        local x1 = win_x + (i / #gpmsys.sample_waveform) * width
-        local x2 = win_x + ((i + 1) / #gpmsys.sample_waveform) * width
-        local y1 = mid_y - (gpmsys.sample_waveform[i] * height / 2)
-        local y2 = mid_y - (gpmsys.sample_waveform[i + 1] * height / 2)
+    for i = 1, #waveform - 1 do
+        -- Restart at half the table
+        local index = (i <= half_size) and i or (i - half_size)
+
+        local x1 = win_x + (index / half_size) * width
+        local x2 = win_x + ((index + 1) / half_size) * width
+        local y1 = mid_y - (waveform[i] * height / 2)
+        local y2 = mid_y - (waveform[i + 1] * height / 2)
 
         reaper.ImGui_DrawList_AddLine(draw_list, x1, y1, x2, y2, 0xFFFFFFFF)
     end
