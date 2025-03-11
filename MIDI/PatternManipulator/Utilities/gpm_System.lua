@@ -11,7 +11,6 @@ gpmsys.parent_track = nil
 gpmsys_samples = require("Utilities/gpm_Sys_Samples")
 gpmsys.sample_list = {}
 gpmsys.selected_sample_index = 0
-gpmsys.sample_waveform = {}
 
 local function SettingsInit()
     local settings_version = '0.0.5b'

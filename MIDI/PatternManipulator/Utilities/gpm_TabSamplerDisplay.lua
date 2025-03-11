@@ -128,14 +128,13 @@ function tab_sampler.Show()
 
     local win_x, win_y = reaper.ImGui_GetCursorScreenPos(ctx)
     local width, height = 400, 100
-    --local mid_y = win_y + height / 2
 
     local _, encoded = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_peaks, "", false)
     local waveform = gpmsys.DecodeFromBase64(encoded)
-    local half_size = math.ceil(#waveform / 2)
 
     local min_val, max_val = math.huge, -math.huge
-    for i = 1, #waveform do
+    local num_samples = #waveform
+    for i = 1, num_samples do
         if waveform[i] < min_val then min_val = waveform[i] end
         if waveform[i] > max_val then max_val = waveform[i] end
     end
@@ -143,23 +142,16 @@ function tab_sampler.Show()
     local amplitude_range = max_val - min_val
     if amplitude_range == 0 then amplitude_range = 1 end
 
-    local zero_count = 0
-    for i = 1, #waveform - 1 do
-        local index = (i <= half_size - 1) and i or (i - half_size)
-        local x1 = win_x + (index / half_size) * width
-        local x2 = win_x + ((index + 1) / half_size) * width
+    for i = 1, num_samples - 1 do
+        local x1 = win_x + (i / num_samples) * width
+        local x2 = win_x + ((i + 1) / num_samples) * width
 
+        -- Normalize values
         local norm_y1 = (waveform[i] - min_val) / amplitude_range
         local norm_y2 = (waveform[i + 1] - min_val) / amplitude_range
+
         local y1 = win_y + height - (norm_y1 * height)
         local y2 = win_y + height - (norm_y2 * height)
-
-        if y1 == y2 == 0 then
-            zero_count = zero_count + 1
-            if zero_count > 5 then
-                break
-            end
-        end
 
         reaper.ImGui_DrawList_AddLine(draw_list, x1, y1, x2, y2, 0xFFFFFFFF)
     end
