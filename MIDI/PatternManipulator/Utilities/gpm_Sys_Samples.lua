@@ -114,7 +114,7 @@ end
 local function GetWaveForm(filepath)
     local pcm_source = reaper.PCM_Source_CreateFromFileEx(filepath, true)
     local length = reaper.GetMediaSourceLength(pcm_source)
-    local peakrate = 1000
+    local peakrate = 500
     local num_channels = 1--reaper.GetMediaSourceNumChannels(pcm_source)
     local want_extra_type = 0
 
@@ -182,9 +182,9 @@ local function SetSampleTrackParams(name, filepath, track)
 
     -- ADSR (index 9, 24, 25, 10) (default 0.96ms, 248ms, 0db, 40ms)
     reaper.TrackFX_SetParam(track, fx_index, 9, Settings.attack_amount.value / 2000) -- Attack (range 0/2000)
-    reaper.TrackFX_SetParam(track, fx_index, 9, Settings.decay_amount.value / 15000) -- Decay (range 0/15000)
-    reaper.TrackFX_SetParam(track, fx_index, 10, Settings.sustain_amount.value / 132) -- Sustain (range -120/12 == 132)
-    reaper.TrackFX_SetParam(track, fx_index, 9, Settings.release_amount.value / 2000) -- Release (range 0/2000)
+    reaper.TrackFX_SetParam(track, fx_index, 24, Settings.decay_amount.value / 15000) -- Decay (range 0/15000)
+    reaper.TrackFX_SetParam(track, fx_index, 25, Settings.sustain_amount.value / 132) -- Sustain (range -120/12 == 132)
+    reaper.TrackFX_SetParam(track, fx_index, 10, Settings.release_amount.value / 2000) -- Release (range 0/2000)
 
     -- Send midi inputs from midi track to track
     reaper.CreateTrackSend(gpmsys.midi_track, track)

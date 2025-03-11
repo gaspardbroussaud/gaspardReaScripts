@@ -8,6 +8,7 @@ local window_tabs = require('Utilities/gpm_TabDisplay')
 -- Window variables
 og_window_width = 850
 local og_window_height = 300
+local min_width, min_height = 500, 250
 window_width = og_window_width
 window_height = og_window_height
 local no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
@@ -86,10 +87,10 @@ end
 
 -- Set all child elements area attribution
 local function ElementsDisplay()
-    local child_width = og_window_width - (global_spacing * 2)
+    local child_width = window_width - (global_spacing * 2)
     local child_height = window_height - topbar_height - small_font_size - 30
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + global_spacing)
-    if reaper.ImGui_BeginChild(ctx, "child_tabs", child_width, child_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
+    if reaper.ImGui_BeginChild(ctx, "child_tabs", child_width, child_height, reaper.ImGui_ChildFlags_Border(), no_scrollbar_flags) then
         reaper.ImGui_SetCursorPosX(ctx, 0)
         reaper.ImGui_SetCursorPosY(ctx, 0)
         window_samples.Show()
@@ -134,7 +135,7 @@ function gpmgui.Loop()
     -- Window Settings
     local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | no_scrollbar_flags
     reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
-    reaper.ImGui_SetNextWindowSizeConstraints(ctx, og_window_width / 2.08, og_window_height / 1.33, huge, huge)
+    reaper.ImGui_SetNextWindowSizeConstraints(ctx, min_width, min_height, huge, huge)
     -- Font
     reaper.ImGui_PushFont(ctx, font)
     -- Begin
