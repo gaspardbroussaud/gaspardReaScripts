@@ -7,6 +7,7 @@ local extname_midi_track_GUID = extname_global.."MIDI_INPUTS_GUID"
 local extname_is_midi_track = extname_global.."IS_MIDI_TRACK"
 extname_track_selected_index = extname_global.."TRACK_SELECTED_INDEX"
 extname_sample_track_length = extname_global.."SAMPLE_LENGTH"
+extname_sample_track_peaks = extname_global.."SAMPLE_PEAKS"
 extname_sample_track_note = extname_global.."SAMPLE_NOTE"
 extname_sample_track_attack = extname_global.."SAMPLE_ATTACK"
 extname_sample_track_decay = extname_global.."SAMPLE_DECAY"
@@ -110,12 +111,12 @@ local function InsertMIDITrack(parent_index)
     end
 end
 
-local function GetWaveForm(filepath)
+local function GetWaveForm(filepath, track)
     gpmsys.sample_waveform = {}
 
     local pcm_source = reaper.PCM_Source_CreateFromFileEx(filepath, true)
     local length = reaper.GetMediaSourceLength(pcm_source)
-    --local sample_rate = reaper.GetMediaSourceSampleRate(pcm_source)
+    local sample_rate = reaper.GetMediaSourceSampleRate(pcm_source)
     local peakrate = 1000
     local num_channels = 1--reaper.GetMediaSourceNumChannels(pcm_source)
     local want_extra_type = 0
@@ -126,22 +127,12 @@ local function GetWaveForm(filepath)
     local buf = reaper.new_array(num_points * num_channels * 2)
 
     local retval = reaper.PCM_Source_GetPeaks(pcm_source, peakrate, 0, num_channels, num_points, want_extra_type, buf)
-    --local samples_count = (retval & 0xfffff)
+    local samples_count = (retval & 0xfffff)
 
-    --local samples_count_half = math.floor(samples_count)
+    local samples_count_half = math.floor(samples_count)
     local waveform = buf.table()
 
-    local min, max = math.huge, -math.huge
-    for i = 1, #waveform do
-        if waveform[i] < min then min = waveform[i] end
-        if waveform[i] > max then max = waveform[i] end
-    end
-    local amplitude_range = max_val - min_val
-    if amplitude_range == 0 then amplitude_range = 1 end
-
-    for i, sample in ipairs(gpmsys.sample_waveform) do
-        reaper.ShowConsoleMsg(sample.."\n")
-    end
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_peaks, gpmsys.EncodeToBase64(waveform), true)
 
     buf.clear()
 
@@ -162,7 +153,7 @@ local function SetSampleTrackParams(name, filepath, track)
     reaper.TrackFX_SetNamedConfigParm(track, fx_index, 'DONE', '')
 
     -- Sample length
-    local sample_length = GetWaveForm(filepath) * 1000
+    local sample_length = GetWaveForm(filepath, track) * 1000
     reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_length, sample_length, true)
 
     -- Min volume (index 2) (default 0 == -inf)

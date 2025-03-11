@@ -127,21 +127,39 @@ function tab_sampler.Show()
     end
 
     local win_x, win_y = reaper.ImGui_GetCursorScreenPos(ctx)
-    local width, height = 400, 200  -- Waveform area size
-    local mid_y = win_y + height / 2
+    local width, height = 400, 100
+    --local mid_y = win_y + height / 2
 
-    local waveform = gpmsys.sample_waveform  -- Store the waveform table in a local variable
-    local half_size = math.floor(#waveform / 2)  -- Calculate halfway point
+    local _, encoded = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_peaks, "", false)
+    local waveform = gpmsys.DecodeFromBase64(encoded)
+    local half_size = math.ceil(#waveform / 2)
 
-    -- Loop through the waveform data and draw lines to represent it
+    local min_val, max_val = math.huge, -math.huge
+    for i = 1, #waveform do
+        if waveform[i] < min_val then min_val = waveform[i] end
+        if waveform[i] > max_val then max_val = waveform[i] end
+    end
+
+    local amplitude_range = max_val - min_val
+    if amplitude_range == 0 then amplitude_range = 1 end
+
+    local zero_count = 0
     for i = 1, #waveform - 1 do
-        -- Restart at half the table
-        local index = (i <= half_size) and i or (i - half_size)
-
+        local index = (i <= half_size - 1) and i or (i - half_size)
         local x1 = win_x + (index / half_size) * width
         local x2 = win_x + ((index + 1) / half_size) * width
-        local y1 = mid_y - (waveform[i] * height / 2)
-        local y2 = mid_y - (waveform[i + 1] * height / 2)
+
+        local norm_y1 = (waveform[i] - min_val) / amplitude_range
+        local norm_y2 = (waveform[i + 1] - min_val) / amplitude_range
+        local y1 = win_y + height - (norm_y1 * height)
+        local y2 = win_y + height - (norm_y2 * height)
+
+        if y1 == y2 == 0 then
+            zero_count = zero_count + 1
+            if zero_count > 5 then
+                break
+            end
+        end
 
         reaper.ImGui_DrawList_AddLine(draw_list, x1, y1, x2, y2, 0xFFFFFFFF)
     end
