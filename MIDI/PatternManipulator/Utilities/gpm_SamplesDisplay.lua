@@ -40,7 +40,13 @@ function window_samples.Show()
         local forground_draw_list = reaper.ImGui_GetForegroundDrawList(ctx)
         local pos = {x1 = drop_x - 5, y1 = drop_y - 5, x2 = drop_x + child_width + 5, y2 = drop_y + child_height + 5}
         reaper.ImGui_DrawList_AddRect(forground_draw_list, pos.x1, pos.y1, pos.x2, pos.y2, 0xFFFFFF55, 2, reaper.ImGui_DrawFlags_None(), 2)
-        if not gpmsys.sample_list then goto drop_zone end
+        if not gpmsys.sample_list then
+            reaper.ImGui_PushFont(ctx, small_font)
+            --reaper.ImGui_GetCursorPos(ctx)
+            reaper.ImGui_TextWrapped(ctx, "Insert sample file here.")
+            reaper.ImGui_PopFont(ctx)
+            goto drop_zone
+        end
 
         if reaper.ImGui_BeginTable(ctx, "table_samples", 4, reaper.ImGui_TableFlags_Borders() | reaper.ImGui_TableFlags_SizingStretchProp()) then
             local name_len, play_len, mute_len, solo_len = child_width / 3, 8, 10, 8

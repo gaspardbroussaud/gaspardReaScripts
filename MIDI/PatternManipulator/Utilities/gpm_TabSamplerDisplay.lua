@@ -57,7 +57,7 @@ end
 function tab_sampler.Show()
     if not gpmsys.sample_list or gpmsys.selected_sample_index == 0 then
         reaper.ImGui_TextWrapped(ctx, "Please select a sampler track or parent track to display sampler parameters.")
-        reaper.ImGui_TextWrapped(ctx, "To create a new sampler parent track, simply select an empty and solo (not parent) track and insert a sample.")
+        reaper.ImGui_TextWrapped(ctx, "To create a new sampler parent track, simply select a track and insert a sample.")
         return
     end
 

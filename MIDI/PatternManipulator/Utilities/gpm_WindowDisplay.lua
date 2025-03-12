@@ -23,8 +23,10 @@ local huge = math.huge
 -- ImGui Init
 ctx = reaper.ImGui_CreateContext('random_play_context')
 font = reaper.ImGui_CreateFont('sans-serif', font_size)
+italic_font = reaper.ImGui_CreateFont('sans-serif', font_size, reaper.ImGui_FontFlags_Italic())
 small_font = reaper.ImGui_CreateFont('sans-serif', small_font_size, reaper.ImGui_FontFlags_Italic())
 reaper.ImGui_Attach(ctx, font)
+reaper.ImGui_Attach(ctx, italic_font)
 reaper.ImGui_Attach(ctx, small_font)
 global_spacing = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing())
 
