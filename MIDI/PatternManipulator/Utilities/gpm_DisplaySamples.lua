@@ -2,6 +2,8 @@
 
 local window_samples = {}
 
+local play_selected = -1
+
 local function TextButton(text, i)
     x, y = reaper.ImGui_GetCursorPos(ctx)
     reaper.ImGui_Text(ctx, text)
@@ -11,17 +13,6 @@ local function TextButton(text, i)
     reaper.ImGui_InvisibleButton(ctx, "##"..text..i, av_x, font_size)
     if reaper.ImGui_IsItemActivated(ctx) then return true end
     return false
-end
-
-local function PlayMIDINote(track)
-    local index = 0
-    local note = 60
-    if reaper.ImGui_IsItemActivated(ctx) then
-        reaper.StuffMIDIMessage(index, 0x90, note, 100) -- Note On (MIDI note, Vel 100)
-    end
-    if reaper.ImGui_IsItemDeactivated(ctx) then
-        reaper.StuffMIDIMessage(index, 0x80, note, 0) -- Note Off (MIDI note, Vel 0)
-    end
 end
 
 function window_samples.Show()
@@ -90,8 +81,8 @@ function window_samples.Show()
                 local s1 = {x = play_x, y = play_y}
                 local s2 = {x = play_x + b, y = play_y + a / 2}
                 local s3 = {x = play_x, y = play_y + a}
+                local play_color = play_selected == i and 0xFFFFFFAA or 0xFFFFFFFF
                 reaper.ImGui_Text(ctx, "")
-                reaper.ImGui_DrawList_AddTriangleFilled(draw_list, s1.x, s1.y, s2.x, s2.y, s3.x, s3.y, 0xFFFFFFFF)
                 reaper.ImGui_SetNextItemAllowOverlap(ctx)
                 reaper.ImGui_SetCursorPos(ctx, x, y)
                 local av_x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
@@ -100,6 +91,7 @@ function window_samples.Show()
                     local index = 0 --reaper.GetMediaTrackInfo_Value(gpmsys.parent_track, "IP_TRACKNUMBER") - 1
                     local retnote, note = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_note, "", false)
                     if retnote then
+                        play_selected = i
                         note = tonumber(note)
                         reaper.StuffMIDIMessage(index, 0x90, note, 100) -- Note On (MIDI note, Vel 100)
                     end
@@ -108,10 +100,12 @@ function window_samples.Show()
                     local index = reaper.GetMediaTrackInfo_Value(gpmsys.parent_track, "IP_TRACKNUMBER") - 1
                     local retnote, note = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_note, "", false)
                     if retnote then
+                        play_selected = -1
                         note = tonumber(note)
                         reaper.StuffMIDIMessage(index, 0x80, note, 0) -- Note Off (MIDI note, Vel 0)
                     end
                 end
+                reaper.ImGui_DrawList_AddTriangleFilled(draw_list, s1.x, s1.y, s2.x, s2.y, s3.x, s3.y, play_color)
 
                 if mute > 0 then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xFFAAAAFF) end
                 reaper.ImGui_TableNextColumn(ctx)
