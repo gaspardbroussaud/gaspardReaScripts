@@ -2,9 +2,9 @@
 
 local window_tabs = {}
 
-tab_sampler = require("Utilities/gpm_TabSamplerDisplay")
-tab_patterns = require("Utilities/gpm_TabPatternsDisplay")
-tab_settings = require("Utilities/gpm_TabSettingsDisplay")
+tab_sampler = require("Utilities/gpm_DisplayTabSampler")
+tab_patterns = require("Utilities/gpm_DisplayTabPatterns")
+tab_settings = require("Utilities/gpm_DisplayTabSettings")
 
 function window_tabs.Show()
     local child_width = reaper.ImGui_GetContentRegionAvail(ctx) - (global_spacing * 2) --(og_window_width - 20) / 2 -- = a default width of 200 with og_window_width at 850

@@ -8,7 +8,7 @@ extkey_parent_track = "PARENT_TRACK_GUID"
 gpmsys.parent_track = nil
 
 -- Samples variables
-gpmsys_samples = require("Utilities/gpm_Sys_Samples")
+gpmsys_samples = require("Utilities/gpm_SystemSamples")
 gpmsys.sample_list = {}
 gpmsys.selected_sample_index = 0
 

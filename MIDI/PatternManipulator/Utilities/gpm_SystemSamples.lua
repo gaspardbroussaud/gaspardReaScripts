@@ -146,6 +146,20 @@ local function GetWaveForm(filepath)
     return waveform, length
 end
 
+local function ConvertDbToVstValue(x)
+    local k = 0.1
+    if x < 0 then
+        -- Sigmoid transformation for values in the [-inf, 0] range (maps to [0, 1])
+        return 1 / (1 + math.exp(-k * (x - 0)))  -- x0 = 0 for this range
+    elseif x <= 12 then
+        -- Linear transformation for values in the [0, 12] range (maps to [1, 4])
+        return 1 + (x / 12) * (4 - 1)
+    else
+        -- Return 4 for values beyond 12
+        return 4
+    end
+end
+
 local function SetSampleTrackParams(name, filepath, track)
     -- Set parent GUID as extstate
     local parent_GUID = reaper.GetTrackGUID(gpmsys.parent_track)
@@ -183,7 +197,7 @@ local function SetSampleTrackParams(name, filepath, track)
     -- ADSR (index 9, 24, 25, 10) (default 0.96ms, 248ms, 0db, 40ms)
     reaper.TrackFX_SetParam(track, fx_index, 9, Settings.attack_amount.value / 2000) -- Attack (range 0/2000)
     reaper.TrackFX_SetParam(track, fx_index, 24, Settings.decay_amount.value / 15000) -- Decay (range 0/15000)
-    reaper.TrackFX_SetParam(track, fx_index, 25, Settings.sustain_amount.value / 132) -- Sustain (range -120/12 == 132)
+    reaper.TrackFX_SetParam(track, fx_index, 25, ConvertDbToVstValue(Settings.sustain_amount.value)) -- Sustain (range -120/12 == 132)
     reaper.TrackFX_SetParam(track, fx_index, 10, Settings.release_amount.value / 2000) -- Release (range 0/2000)
 
     -- Send midi inputs from midi track to track

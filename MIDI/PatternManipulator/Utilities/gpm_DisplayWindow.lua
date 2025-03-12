@@ -2,8 +2,8 @@
 
 local gpmgui = {}
 
-local window_samples = require('Utilities/gpm_SamplesDisplay')
-local window_tabs = require('Utilities/gpm_TabDisplay')
+local window_samples = require('Utilities/gpm_DisplaySamples')
+local window_tabs = require('Utilities/gpm_DisplayTab')
 
 -- Window variables
 og_window_width = 850

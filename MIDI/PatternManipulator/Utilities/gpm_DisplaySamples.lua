@@ -41,10 +41,16 @@ function window_samples.Show()
         local pos = {x1 = drop_x - 5, y1 = drop_y - 5, x2 = drop_x + child_width + 5, y2 = drop_y + child_height + 5}
         reaper.ImGui_DrawList_AddRect(forground_draw_list, pos.x1, pos.y1, pos.x2, pos.y2, 0xFFFFFF55, 2, reaper.ImGui_DrawFlags_None(), 2)
         if not gpmsys.sample_list then
+            local text_insert = "Insert sample file here."
+            local selected_tracks = reaper.CountSelectedTracks(0) > 0
+            if not selected_tracks then text_insert = "Please select one track." end
             reaper.ImGui_PushFont(ctx, small_font)
-            --reaper.ImGui_GetCursorPos(ctx)
-            reaper.ImGui_TextWrapped(ctx, "Insert sample file here.")
+            reaper.ImGui_TextWrapped(ctx, text_insert)
             reaper.ImGui_PopFont(ctx)
+            if not selected_tracks then
+                reaper.ImGui_EndChild(ctx)
+                goto no_selected_track
+            end
             goto drop_zone
         end
 
@@ -158,6 +164,8 @@ function window_samples.Show()
         end
         reaper.ImGui_EndDragDropTarget(ctx)
     end
+
+    ::no_selected_track::
 end
 
 return window_samples

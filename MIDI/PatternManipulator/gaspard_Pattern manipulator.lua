@@ -33,7 +33,7 @@ dofile(reaper.GetResourcePath() ..
 script_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]
 package.path = package.path..';'..script_path .. '?.lua' -- GET DIRECTORY FOR REQUIRE
 gpmsys = require('Utilities/gpm_System')
-gpmgui = require('Utilities/gpm_WindowDisplay')
+gpmgui = require('Utilities/gpm_DisplayWindow')
 
 local json_file_path = reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/JSON'
 package.path = package.path .. ';' .. json_file_path .. '/?.lua'

@@ -163,6 +163,40 @@ function tab_sampler.Show()
         local release_len = sample_len - attack
 
         -- Draw table
+        local item_width = 50
+        reaper.ImGui_TableNextRow(ctx)
+        reaper.ImGui_TableNextColumn(ctx)
+        reaper.ImGui_PushItemWidth(ctx, item_width)
+        changed, attack = reaper.ImGui_DragDouble(ctx, "##drag_attack", attack, 1, 0, attack_len, "%.0f")
+        if changed then
+            retval = reaper.TrackFX_SetParam(track, fx_index, 9, attack / 2000) -- Parameter index for "Attack" is 9
+        end
+
+        reaper.ImGui_TableNextColumn(ctx)
+        reaper.ImGui_PushItemWidth(ctx, item_width)
+        changed, decay = reaper.ImGui_DragDouble(ctx, "##drag_decay", decay, 1, 10, 15000, "%.0f")
+        --decay = math.max(10, math.min(decay, 15000))
+        if changed then
+            reaper.TrackFX_SetParam(track, fx_index, 24, decay / 15000) -- Parameter index for "Decay" is 24
+        end
+
+        reaper.ImGui_TableNextColumn(ctx)
+        reaper.ImGui_PushItemWidth(ctx, item_width)
+        local display_sustain = sustain < -119.9 and "-inf" or "%.1f"
+        local sustain_speed = math.abs(sustain) * 0.01
+        if sustain_speed < 0.1 then sustain_speed = 0.1 end
+        changed, sustain = reaper.ImGui_DragDouble(ctx, "##drag_sustain", sustain, sustain_speed, -120, 12, display_sustain)
+        if changed then
+            reaper.TrackFX_SetParam(track, fx_index, 25, ConvertDbToVstValue(sustain)) -- Parameter index for "Sustain" is 25
+        end
+
+        reaper.ImGui_TableNextColumn(ctx)
+        reaper.ImGui_PushItemWidth(ctx, item_width)
+        changed, release = reaper.ImGui_DragDouble(ctx, "##drag_release", release, 1, 0, release_len, "%.0f")
+        if changed then
+            reaper.TrackFX_SetParam(track, fx_index, 10, release / 2000) -- Parameter index for "Release" is 10
+        end
+
         reaper.ImGui_TableNextRow(ctx)
         reaper.ImGui_TableNextColumn(ctx)
         reaper.ImGui_Text(ctx, "A")
@@ -173,37 +207,8 @@ function tab_sampler.Show()
         reaper.ImGui_TableNextColumn(ctx)
         reaper.ImGui_Text(ctx, "R")
 
-        reaper.ImGui_TableNextRow(ctx)
-        reaper.ImGui_TableNextColumn(ctx)
-        changed, attack = reaper.ImGui_DragDouble(ctx, "##drag_attack", attack, 1, 0, attack_len, "%.0f")
-        if changed then
-            retval = reaper.TrackFX_SetParam(track, fx_index, 9, attack / 2000) -- Parameter index for "Attack" is 9
-        end
-
-        reaper.ImGui_TableNextColumn(ctx)
-        changed, decay = reaper.ImGui_DragDouble(ctx, "##drag_decay", decay, 1, 10, 15000, "%.0f")
-        if changed then
-            reaper.TrackFX_SetParam(track, fx_index, 24, decay / 15000) -- Parameter index for "Decay" is 24
-        end
-
-        reaper.ImGui_TableNextColumn(ctx)
-        local display_sustain = sustain < -119.9 and "-inf" or "%.1f"
-        local sustain_speed = math.abs(sustain) * 0.01
-        if sustain_speed < 0.1 then sustain_speed = 0.1 end
-        changed, sustain = reaper.ImGui_DragDouble(ctx, "##drag_sustain", sustain, sustain_speed, -120, 12, display_sustain)
-        if changed then
-            reaper.TrackFX_SetParam(track, fx_index, 25, ConvertDbToVstValue(sustain)) -- Parameter index for "Sustain" is 25
-        end
-
-        reaper.ImGui_TableNextColumn(ctx)
-        changed, release = reaper.ImGui_DragDouble(ctx, "##drag_release", release, 1, 0, release_len, "%.0f")
-        if changed then
-            reaper.TrackFX_SetParam(track, fx_index, 10, release / 2000) -- Parameter index for "Release" is 10
-        end
-
         reaper.ImGui_EndTable(ctx)
     end
-
 
 end
 
