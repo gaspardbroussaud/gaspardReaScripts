@@ -13,7 +13,7 @@ gpmsys.sample_list = {}
 gpmsys.selected_sample_index = 0
 
 local function SettingsInit()
-    local settings_version = '0.0.5b'
+    local settings_version = '0.0.1b'
     local default_settings = {
         version = settings_version,
         order = {'project_based_parent'},
@@ -46,11 +46,19 @@ local function SettingsInit()
             value = 40,
             name = 'Release time',
             description = 'Release time in milliseconds.'
+        },
+        selection_link = {
+            value = false,
+            name = 'Selection link',
+            description = 'Link track and GUI selection on GUI selected (not track selected).'
         }
     }
     Settings = gson.LoadJSON(settings_path, default_settings)
     if settings_version ~= Settings.version then
-        reaper.MB("Settings are erased due to update in file.\nPlease excuse this behaviour.\nThis won't happen once released.", 'WARNING', 0)
+        reaper.ShowConsoleMsg("\n!!! WARNING !!! (gaspard_Pattern manipulator.lua)\n")
+        reaper.ShowConsoleMsg("Settings are erased due to update in settings file.\nPlease excuse this behaviour.\nThis won't happen once released.\n")
+        reaper.ShowConsoleMsg("Now in version: "..settings_version.."\n")
+        --reaper.MB("Settings are erased due to update in file.\nPlease excuse this behaviour.\nThis won't happen once released.", 'WARNING', 0)
         Settings = gson.SaveJSON(settings_path, default_settings)
         Settings = gson.LoadJSON(settings_path, Settings)
     end
