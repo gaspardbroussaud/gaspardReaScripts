@@ -135,6 +135,7 @@ function window_samples.Show()
                     local index = 0 --reaper.GetMediaTrackInfo_Value(gpmsys.parent_track, "IP_TRACKNUMBER") - 1
                     local retnote, note = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_note, "", false)
                     if retnote then
+                        note = math.floor(note)
                         play_selected = i
                         note = tonumber(note)
                         reaper.StuffMIDIMessage(index, 0x90, note, 100) -- Note On (MIDI note, Vel 100)
@@ -144,6 +145,7 @@ function window_samples.Show()
                     local index = reaper.GetMediaTrackInfo_Value(gpmsys.parent_track, "IP_TRACKNUMBER") - 1
                     local retnote, note = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_note, "", false)
                     if retnote then
+                        note = math.floor(note)
                         play_selected = -1
                         note = tonumber(note)
                         reaper.StuffMIDIMessage(index, 0x80, note, 0) -- Note Off (MIDI note, Vel 0)
