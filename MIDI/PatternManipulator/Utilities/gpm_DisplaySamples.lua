@@ -6,6 +6,8 @@ local play_selected = -1
 
 local function TextButton(text, i)
     x, y = reaper.ImGui_GetCursorPos(ctx)
+    local center = text == "M" and 3 or 3.5
+    reaper.ImGui_SetCursorPosX(ctx, x + center)
     reaper.ImGui_Text(ctx, text)
     reaper.ImGui_SetNextItemAllowOverlap(ctx)
     reaper.ImGui_SetCursorPos(ctx, x, y)
@@ -153,7 +155,7 @@ function window_samples.Show()
                 end
                 reaper.ImGui_DrawList_AddTriangleFilled(draw_list, s1.x, s1.y, s2.x, s2.y, s3.x, s3.y, play_color)
 
-                if mute > 0 then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xFFAAAAFF) end
+                if mute > 0 then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xFF0000FF) end
                 reaper.ImGui_TableNextColumn(ctx)
                 if TextButton("M", i) then
                     reaper.SetMediaTrackInfo_Value(track, "B_MUTE", math.abs(mute - 1))
@@ -162,7 +164,7 @@ function window_samples.Show()
 
                 reaper.ImGui_TableNextColumn(ctx)
                 x, y = reaper.ImGui_GetCursorPos(ctx)
-                if solo > 0 then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xF0E115FF) end
+                if solo > 0 then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0x00FF00FF) end
                 if TextButton("S", i) then
                     if solo > 0 then solo = 1 end
                     reaper.SetMediaTrackInfo_Value(track, "I_SOLO", math.abs(solo - 1))
