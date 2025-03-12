@@ -7,6 +7,11 @@ local tab_sampler = {}
 local function GetMIDINoteName(note_number)
     note_number = math.floor(note_number)
     local note_names = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}
+    --[[if Settings.note_nomenclature.value then
+        note_names = {"Do", "Do#", "Re", "Re#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"}
+    else
+        note_names = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}
+    end]]
     if note_number >= 0 and note_number <= 127 then
         local note_index = (note_number % 12) + 1
         local octave = math.floor(note_number / 12) - 1
@@ -73,6 +78,7 @@ function tab_sampler.Show()
         gpmsys.selected_sample_index = 1
         return
     end
+
     local _, fx_name = reaper.GetTrackName(track)
     local fx_index = reaper.TrackFX_GetByName(track, fx_name.." (RS5K)", false)
 
@@ -92,7 +98,7 @@ function tab_sampler.Show()
     end
     local item_w = reaper.ImGui_GetItemRectSize(ctx)
 
-    -- WAVEFORM DISPLAY-----------------------------------------------------------------
+    -- WAVEFORM DISPLAY -----------------------------------------------------------------
     win_x = win_x + item_w + global_spacing
     local width, height = avail_x - item_w - global_spacing, 50
 
@@ -124,39 +130,54 @@ function tab_sampler.Show()
             reaper.ImGui_DrawList_AddLine(draw_list, x1, y1, x2, y2, 0xFFFFFFFF)
         end
     end
-    ------------------------------------------------------------------------------------
+    -------------------------------------------------------------------------------------
+
+    -- Note pitch (name)
+    local _, note_number = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_note, "", false)
+    note_number = tonumber(note_number)
+    if not note_number then note_number = 60 end
+    local note = math.floor(note_number) --reaper.TrackFX_GetParam(track, fx_index, 3)
 
     reaper.ImGui_PushItemWidth(ctx, 80)
-    local _, note = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_note, "", false)
-    note = tonumber(note)
-    changed, note = reaper.ImGui_DragDouble(ctx, "MIDI note##drag_note", note, 0.2, 0, 127, tostring(GetMIDINoteName(tonumber(note))))
-    note = math.floor(note)
+    changed, note_number = reaper.ImGui_DragDouble(ctx, "MIDI note##drag_note", note_number, 0.1, 0, 127, tostring(GetMIDINoteName(tonumber(note))))
+    note_number = math.max(0, math.min(note_number, 127))
+
+    --[[if reaper.ImGui_IsItemDeactivated(ctx) then
+        reaper.ShowConsoleMsg("deactivated\n")
+    end]]
+
+    --local x, y = reaper.ImGui_GetMousePos(ctx)
+    --local drag_x, drag_y = reaper.ImGui_GetMouseDragDelta(ctx, x, y)
+    --reaper.ImGui_Text(ctx, drag_x.." / "..drag_y)
+
     if changed then
+        note = math.floor(note_number)
         reaper.TrackFX_SetParam(track, fx_index, 3, note / 127) -- Parameter index for "Note start" is 3
         reaper.TrackFX_SetParam(track, fx_index, 4, note / 127) -- Parameter index for "Note end" is 4
-        reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_note, note, true)
+        reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_note, note_number, true)
     end
 
+    -- ADSR
     if reaper.ImGui_BeginTable(ctx, "table_adsr", 4) then
         local _, sample_len = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_length, "", false)
         if not sample_len then sample_len = 2000 end
 
         -- Get ADSR values
         -- Attack
-        local attack, attack_min, attack_max = reaper.TrackFX_GetParam(track, fx_index, 9)
+        local attack = reaper.TrackFX_GetParam(track, fx_index, 9)
         attack = attack * 2000
 
         -- Decay
-        local decay, decay_min, decay_max = reaper.TrackFX_GetParam(track, fx_index, 24)
+        local decay = reaper.TrackFX_GetParam(track, fx_index, 24)
         decay = decay * 15000
 
         -- Sustain
-        local sustain, sustain_min, sustain_max = reaper.TrackFX_GetParam(track, fx_index, 25)
+        local sustain = reaper.TrackFX_GetParam(track, fx_index, 25)
         if sustain > 3.98 then sustain = 12
         else sustain = ConvertVstValueToDb(sustain) end
 
         -- Release
-        local release, release_min, release_max = reaper.TrackFX_GetParam(track, fx_index, 10)
+        local release = reaper.TrackFX_GetParam(track, fx_index, 10)
         release = release * 2000
 
         local attack_len = sample_len - release
