@@ -158,7 +158,8 @@ function tab_sampler.Show()
     end
 
     -- ADSR
-    if reaper.ImGui_BeginTable(ctx, "table_adsr", 4) then
+    local item_width = 50
+    if reaper.ImGui_BeginTable(ctx, "table_adsr", 4, reaper.ImGui_TableFlags_None(), (item_width + 8)* 4) then
         local _, sample_len = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_length, "", false)
         if not sample_len then sample_len = 2000 end
 
@@ -184,7 +185,6 @@ function tab_sampler.Show()
         local release_len = sample_len - attack
 
         -- Draw table
-        local item_width = 50
         reaper.ImGui_TableNextRow(ctx)
         reaper.ImGui_TableNextColumn(ctx)
         reaper.ImGui_PushItemWidth(ctx, item_width)
@@ -196,7 +196,6 @@ function tab_sampler.Show()
         reaper.ImGui_TableNextColumn(ctx)
         reaper.ImGui_PushItemWidth(ctx, item_width)
         changed, decay = reaper.ImGui_DragDouble(ctx, "##drag_decay", decay, 1, 10, 15000, "%.0f")
-        --decay = math.max(10, math.min(decay, 15000))
         if changed then
             reaper.TrackFX_SetParam(track, fx_index, 24, decay / 15000) -- Parameter index for "Decay" is 24
         end
@@ -220,12 +219,23 @@ function tab_sampler.Show()
 
         reaper.ImGui_TableNextRow(ctx)
         reaper.ImGui_TableNextColumn(ctx)
+        local text_w = reaper.ImGui_CalcTextSize(ctx, "A")
+        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (item_width - text_w) * 0.5)
         reaper.ImGui_Text(ctx, "A")
+
         reaper.ImGui_TableNextColumn(ctx)
+        text_w = reaper.ImGui_CalcTextSize(ctx, "D")
+        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (item_width - text_w) * 0.5)
         reaper.ImGui_Text(ctx, "D")
+
         reaper.ImGui_TableNextColumn(ctx)
+        text_w = reaper.ImGui_CalcTextSize(ctx, "S")
+        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (item_width - text_w) * 0.5)
         reaper.ImGui_Text(ctx, "S")
+
         reaper.ImGui_TableNextColumn(ctx)
+        text_w = reaper.ImGui_CalcTextSize(ctx, "R")
+        reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (item_width - text_w) * 0.5)
         reaper.ImGui_Text(ctx, "R")
 
         reaper.ImGui_EndTable(ctx)
