@@ -187,8 +187,10 @@ function tab_sampler.Show()
         end
 
         reaper.ImGui_TableNextColumn(ctx)
-        local display_sustain = sustain <= -120 and "-inf" or "%.1f"
-        changed, sustain = reaper.ImGui_DragDouble(ctx, "##drag_sustain", sustain, 0.1, -120, 12, display_sustain)
+        local display_sustain = sustain < -119.9 and "-inf" or "%.1f"
+        local sustain_speed = math.abs(sustain) * 0.01
+        if sustain_speed < 0.1 then sustain_speed = 0.1 end
+        changed, sustain = reaper.ImGui_DragDouble(ctx, "##drag_sustain", sustain, sustain_speed, -120, 12, display_sustain)
         if changed then
             reaper.TrackFX_SetParam(track, fx_index, 25, ConvertDbToVstValue(sustain)) -- Parameter index for "Sustain" is 25
         end
