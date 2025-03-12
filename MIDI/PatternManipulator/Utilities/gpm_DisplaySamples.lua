@@ -70,6 +70,50 @@ function window_samples.Show()
                     gpmsys.selected_sample_index = i
                     reaper.GetSetMediaTrackInfo_String(gpmsys.parent_track, "P_EXT:"..extname_track_selected_index, i, true)
                 end
+                if reaper.ImGui_BeginDragDropSource(ctx) then
+                    reaper.ImGui_SetDragDropPayload(ctx, 'SAMPLE_INDEX', tostring(i))
+                    reaper.ImGui_Text(ctx, "Dragging...")
+                    reaper.ImGui_EndDragDropSource(ctx)
+                end
+                if reaper.ImGui_BeginDragDropTarget(ctx) then
+                    local payload, dragged_index = reaper.ImGui_AcceptDragDropPayload(ctx, 'SAMPLE_INDEX')
+                    if payload then
+                        local sel_tracks = {}
+                        if Settings.selection_link.value then
+                            local count_sel_tracks = reaper.CountSelectedTracks(0)
+                            if count_sel_tracks > 0 then
+                                for j = 0, count_sel_tracks - 1 do
+                                    sel_tracks[j] = reaper.GetSelectedTrack(0, j)
+                                end
+                            end
+                        end
+
+                        reaper.PreventUIRefresh(1)
+                        reaper.Undo_BeginBlock()
+
+                        dragged_index = tonumber(dragged_index)
+                        local track_moved = gpmsys.sample_list[dragged_index]
+
+                        reaper.SetOnlyTrackSelected(track)
+                        reaper.ReorderSelectedTracks(dragged_index, 0)
+
+                        reaper.SetOnlyTrackSelected(track_moved)
+                        reaper.ReorderSelectedTracks(i, 0)
+
+                        gpmsys.selected_sample_index = i
+
+                        if Settings.selection_link.value and count_sel_tracks > 0 then
+                            for j = 0, count_sel_tracks - 1 do
+                                reaper.SetTrackSelected(sel_tracks[j], true)
+                            end
+                        end
+
+                        reaper.Undo_EndBlock('gaspard_Pattern manipulator_Change sample tracks order', -1)
+                        reaper.PreventUIRefresh(-1)
+                        reaper.UpdateArrange()
+                    end
+                    reaper.ImGui_EndDragDropTarget(ctx)
+                end
 
                 reaper.ImGui_TableNextColumn(ctx)
                 local x, y = reaper.ImGui_GetCursorPos(ctx)
