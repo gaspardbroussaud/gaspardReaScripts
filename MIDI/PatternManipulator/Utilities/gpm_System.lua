@@ -67,6 +67,10 @@ function gpmsys.GetTrackFromExtState(extname, extkey)
     return reaper.BR_GetMediaTrackByGUID(0, GUID)
 end
 
+function gpmsys.SetTrackToExtState(track, extname, extkey)
+    reaper.SetProjExtState(0, extname, extkey, reaper.GetTrackGUID(track))
+end
+
 function gpmsys.EncodeToBase64(waveform)
     local b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
     local function to_binary(num)

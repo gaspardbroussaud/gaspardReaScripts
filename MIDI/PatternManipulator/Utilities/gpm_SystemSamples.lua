@@ -14,7 +14,7 @@ extname_sample_track_decay = extname_global.."SAMPLE_DECAY"
 extname_sample_track_sustain = extname_global.."SAMPLE_SUSTAIN"
 extname_sample_track_release = extname_global.."SAMPLE_RELEASE"
 
-local function GetParentFromSelectedTrack()
+function gpmsys_samples.GetParentFromSelectedTrack()
     local sel_track_count = reaper.CountSelectedTracks(0)
     if sel_track_count == 0 then return nil end
 
@@ -32,8 +32,9 @@ end
 
 local function GetParentTrack()
     local parent_track = nil
-    if Settings.project_based_parent.value then parent_track = gpmsys.GetTrackFromExtState(extname_global, extkey_parent_track) end
-    if not parent_track then parent_track = GetParentFromSelectedTrack() end
+    if Settings.project_based_parent.value then parent_track = gpmsys.GetTrackFromExtState(extname_global, extkey_parent_track)
+    else parent_track = gpmsys_samples.GetParentFromSelectedTrack() end
+    --if not parent_track then parent_track = gpmsys_samples.GetParentFromSelectedTrack() end
     return parent_track
 end
 

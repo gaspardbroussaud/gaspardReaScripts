@@ -42,31 +42,19 @@ local function TopBarDisplay()
     local child_width = window_width - global_spacing
     if reaper.ImGui_BeginChild(ctx, "child_top_bar", child_width, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
         reaper.ImGui_Text(ctx, window_name)
-        reaper.ImGui_SameLine(ctx)
-        reaper.ImGui_Text(ctx, "x="..window_x.." ; y="..window_y.." / w="..window_width.." ; h="..window_height)
+        --reaper.ImGui_SameLine(ctx)
+        --reaper.ImGui_Text(ctx, "x="..window_x.." ; y="..window_y.." / w="..window_width.." ; h="..window_height)
 
         reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing(), 5, 0)
 
         reaper.ImGui_SameLine(ctx)
         reaper.ImGui_Dummy(ctx, 3, 1)
         reaper.ImGui_SameLine(ctx)
-        local spacing_x_2 = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing()) * 2
 
-        --local settings_w = 60 + spacing_x_2
+        local spacing_x_2 = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing()) * 2
         local quit_w = 10 + spacing_x_2
         local y_pos = 0
-        --reaper.ImGui_SetCursorPos(ctx, child_width - settings_w - quit_w - spacing_x_2, y_pos)
         reaper.ImGui_SetCursorPos(ctx, child_width - quit_w - spacing_x_2, y_pos)
-
-        --[[if reaper.ImGui_Button(ctx, 'Settings##settings_button', settings_w) then
-            show_settings = not show_settings
-            if settings_one_changed then
-                settings_one_changed = false
-            end
-        end
-
-        reaper.ImGui_SameLine(ctx)]]
-
         reaper.ImGui_SetCursorPosY(ctx, y_pos)
         if reaper.ImGui_Button(ctx, 'X##quit_button', quit_w) then
             open = false
@@ -92,7 +80,7 @@ local function ElementsDisplay()
     local child_width = window_width - (global_spacing * 2)
     local child_height = window_height - topbar_height - small_font_size - 30
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + global_spacing)
-    if reaper.ImGui_BeginChild(ctx, "child_tabs", child_width, child_height, reaper.ImGui_ChildFlags_Border(), no_scrollbar_flags) then
+    if reaper.ImGui_BeginChild(ctx, "child_tabs", child_width, child_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
         reaper.ImGui_SetCursorPosX(ctx, 0)
         reaper.ImGui_SetCursorPosY(ctx, 0)
         window_samples.Show()
