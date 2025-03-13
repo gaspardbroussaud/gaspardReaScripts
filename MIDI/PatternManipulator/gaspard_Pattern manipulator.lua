@@ -1,4 +1,3 @@
---@noindex
 --@description Pattern Manipulator
 --@author gaspard
 --@version 0.0.1b
