@@ -10,7 +10,7 @@ tab_patterns = require("Utilities/gpm_DisplayTabPatterns")
 tab_settings = require("Utilities/gpm_DisplayTabSettings")
 
 function window_tabs.Show()
-    local child_width = reaper.ImGui_GetContentRegionAvail(ctx) - (global_spacing * 2) --(og_window_width - 20) / 2 -- = a default width of 200 with og_window_width at 850
+    local child_width = reaper.ImGui_GetContentRegionAvail(ctx) - (global_spacing * 2)
     local child_height = (window_height - topbar_height - small_font_size - 30)
     if reaper.ImGui_BeginChild(ctx, "child_tabs", child_width, child_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
 

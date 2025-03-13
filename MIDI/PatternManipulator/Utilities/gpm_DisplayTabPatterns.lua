@@ -99,7 +99,6 @@ function tab_patterns.Show()
     reaper.ImGui_SameLine(ctx)
     if reaper.ImGui_BeginChild(ctx, 'child_piano_roll', -1, -1, reaper.ImGui_ChildFlags_Border()) then
         local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
-        local child_width, child_height = reaper.ImGui_GetContentRegionAvail(ctx)
 
         local flags = reaper.ImGui_WindowFlags_HorizontalScrollbar()
         reaper.ImGui_WindowFlags_AlwaysHorizontalScrollbar()
@@ -133,10 +132,7 @@ function tab_patterns.Show()
                     local note_color = 0x6B60B5FF
                     local border_color = 0xFFFFFFAA
                     reaper.ImGui_DrawList_AddRectFilled(draw_list, note_start_x, note_start_y, note_end_x, note_end_y, note_color) -- Rect fill
-                    reaper.ImGui_DrawList_AddLine(draw_list, note_start_x, note_start_y, note_end_x, note_start_y, border_color, 1) -- Top line
-                    reaper.ImGui_DrawList_AddLine(draw_list, note_start_x, note_end_y, note_end_x + 1, note_end_y, border_color, 1) -- Bottom line
-                    reaper.ImGui_DrawList_AddLine(draw_list, note_start_x, note_start_y, note_start_x, note_end_y, border_color, 1) -- Left line
-                    reaper.ImGui_DrawList_AddLine(draw_list, note_end_x, note_start_y, note_end_x, note_end_y, border_color, 1) -- Right line
+                    reaper.ImGui_DrawList_AddRect(draw_list, note_start_x, note_start_y, note_end_x, note_end_y, border_color) -- Rect borders
                 end
 
                 reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + end_pos)

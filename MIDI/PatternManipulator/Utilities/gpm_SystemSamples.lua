@@ -248,6 +248,7 @@ function gpmsys_samples.ReplaceSampleOnTrack(track, name, filepath)
     -- Name
     reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_name, name, true)
     reaper.GetSetMediaTrackInfo_String(track, 'P_NAME', name, true)
+
     -- Sample peaks and length
     local waveform, length = GetWaveForm(filepath)
     reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_peaks, gpmsys.EncodeToBase64(waveform), true)

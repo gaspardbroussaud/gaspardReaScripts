@@ -82,7 +82,6 @@ function tab_sampler.Show()
         return
     end
 
-    --local _, fx_name = reaper.GetTrackName(track)
     local _, fx_name = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_name, "", false)
     local fx_index = reaper.TrackFX_GetByName(track, fx_name.." (RS5K)", false)
 
@@ -163,7 +162,7 @@ function tab_sampler.Show()
     local _, note_number = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_note, "", false)
     note_number = tonumber(note_number)
     if not note_number then note_number = 60 end
-    local note = math.floor(note_number) --reaper.TrackFX_GetParam(track, fx_index, 3)
+    local note = math.floor(note_number)
 
     reaper.ImGui_PushItemWidth(ctx, 80)
     changed, note_number = reaper.ImGui_DragDouble(ctx, "MIDI note##drag_note", note_number, 0.1, 0, 127, tostring(GetMIDINoteName(tonumber(note))))

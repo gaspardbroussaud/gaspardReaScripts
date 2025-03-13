@@ -196,10 +196,6 @@ function window_samples.Show()
     if reaper.ImGui_BeginDragDropTarget(ctx) then
         local retval, data_count = reaper.ImGui_AcceptDragDropPayloadFiles(ctx)
         if retval then
-            --[[if data_count > 1 then
-                reaper.MB('Insert only one file at a time. Will use first of selection.', 'WARNING', 0)
-            end]]
-
             local max_data = data_count - 1
             for i = 0, max_data do
                 reaper.ShowConsoleMsg(max_data.." / "..i.."\n")
