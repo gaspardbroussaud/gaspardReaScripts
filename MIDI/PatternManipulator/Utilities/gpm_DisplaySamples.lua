@@ -198,7 +198,6 @@ function window_samples.Show()
         if retval then
             local max_data = data_count - 1
             for i = 0, max_data do
-                reaper.ShowConsoleMsg(max_data.." / "..i.."\n")
                 local _, filepath = reaper.ImGui_GetDragDropPayloadFile(ctx, max_data - i)
                 local filename = filepath:match('([^\\/]+)$')
                 local name_without_extension = filename:match("(.+)%..+") or filename
