@@ -80,6 +80,7 @@ end
 function gpmsys.Init()
     SettingsInit()
     gpmsys.sample_list = gpmsys_samples.CheckForSampleTracks()
+    gpmsys_patterns.ScanPatternFiles()
 end
 
 function gpmsys.GetTrackFromExtState(extname, extkey)

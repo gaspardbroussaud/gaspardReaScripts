@@ -115,6 +115,21 @@ function gpmsys_patterns.GetMidiInfoFromFile(filepath)
     return true
 end
 
+-- Create presets directory if not exist
+local function CreateDirectoryIfNotExists(path)
+    local attr = reaper.EnumerateFiles(path, 0)
+    if not attr then
+        reaper.RecursiveCreateDirectory(path, 0)
+    end
+end
+
+local function SortByName(t)
+    table.sort(t, function(a, b)
+        return a.name:lower() < b.name:lower()
+    end)
+    return t
+end
+
 function gpmsys_patterns.ScanPatternFiles()
     local files = {}
 
@@ -137,7 +152,7 @@ function gpmsys_patterns.ScanPatternFiles()
 
     files = SortByName(files)
 
-    System.patterns = files
+    gpmsys_patterns.file_list = files
 end
 
 return gpmsys_patterns

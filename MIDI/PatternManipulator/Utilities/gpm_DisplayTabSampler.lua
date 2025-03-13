@@ -142,14 +142,6 @@ function tab_sampler.Show()
     changed, note_number = reaper.ImGui_DragDouble(ctx, "MIDI note##drag_note", note_number, 0.1, 0, 127, tostring(GetMIDINoteName(tonumber(note))))
     note_number = math.max(0, math.min(note_number, 127))
 
-    --[[if reaper.ImGui_IsItemDeactivated(ctx) then
-        reaper.ShowConsoleMsg("deactivated\n")
-    end]]
-
-    --local x, y = reaper.ImGui_GetMousePos(ctx)
-    --local drag_x, drag_y = reaper.ImGui_GetMouseDragDelta(ctx, x, y)
-    --reaper.ImGui_Text(ctx, drag_x.." / "..drag_y)
-
     if changed then
         note = math.floor(note_number)
         reaper.TrackFX_SetParam(track, fx_index, 3, note / 127) -- Parameter index for "Note start" is 3
@@ -159,7 +151,7 @@ function tab_sampler.Show()
 
     -- ADSR
     local item_width = 50
-    if reaper.ImGui_BeginTable(ctx, "table_adsr", 4, reaper.ImGui_TableFlags_None(), (item_width + 8)* 4) then
+    if reaper.ImGui_BeginTable(ctx, "table_adsr", 4, reaper.ImGui_TableFlags_None(), (item_width + 8) * 4) then
         local _, sample_len = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_length, "", false)
         if not sample_len then sample_len = 2000 end
 
