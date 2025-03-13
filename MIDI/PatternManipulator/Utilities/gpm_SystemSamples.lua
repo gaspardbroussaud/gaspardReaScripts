@@ -6,13 +6,10 @@ local extname_parent_track_GUID = extname_global.."PARENT_TRACK_GUID"
 local extname_midi_track_GUID = extname_global.."MIDI_INPUTS_GUID"
 local extname_is_midi_track = extname_global.."IS_MIDI_TRACK"
 extname_track_selected_index = extname_global.."TRACK_SELECTED_INDEX"
-extname_sample_track_length = extname_global.."SAMPLE_LENGTH"
-extname_sample_track_peaks = extname_global.."SAMPLE_PEAKS"
-extname_sample_track_note = extname_global.."SAMPLE_NOTE"
-extname_sample_track_attack = extname_global.."SAMPLE_ATTACK"
-extname_sample_track_decay = extname_global.."SAMPLE_DECAY"
-extname_sample_track_sustain = extname_global.."SAMPLE_SUSTAIN"
-extname_sample_track_release = extname_global.."SAMPLE_RELEASE"
+extname_sample_name = extname_global.."SAMPLE_NAME"
+extname_sample_length = extname_global.."SAMPLE_LENGTH"
+extname_sample_peaks = extname_global.."SAMPLE_PEAKS"
+extname_sample_note = extname_global.."SAMPLE_NOTE"
 
 function gpmsys_samples.GetParentFromSelectedTrack()
     local sel_track_count = reaper.CountSelectedTracks(0)
@@ -34,7 +31,6 @@ local function GetParentTrack()
     local parent_track = nil
     if Settings.project_based_parent.value then parent_track = gpmsys.GetTrackFromExtState(extname_global, extkey_parent_track)
     else parent_track = gpmsys_samples.GetParentFromSelectedTrack() end
-    --if not parent_track then parent_track = gpmsys_samples.GetParentFromSelectedTrack() end
     return parent_track
 end
 
@@ -173,11 +169,12 @@ local function SetSampleTrackParams(name, filepath, track)
     local fx_index = reaper.TrackFX_AddByName(track, 'VSTi: ReaSamplOmatic5000 (Cockos)', false, -1000)
     reaper.TrackFX_SetNamedConfigParm(track, fx_index, '+FILE0', filepath)
     reaper.TrackFX_SetNamedConfigParm(track, fx_index, 'DONE', '')
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_name, name, true)
 
     -- Sample peaks and length
     local waveform, length = GetWaveForm(filepath)
-    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_peaks, gpmsys.EncodeToBase64(waveform), true)
-    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_length, length * 1000, true)
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_peaks, gpmsys.EncodeToBase64(waveform), true)
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_length, length * 1000, true)
 
     -- Min volume (index 2) (default 0 == -inf)
     reaper.TrackFX_SetParam(track, fx_index, 2, 0)
@@ -190,7 +187,7 @@ local function SetSampleTrackParams(name, filepath, track)
     -- Note start / end pitch (index 3, 4) (default C4 == 60 == 0.47)
     reaper.TrackFX_SetParam(track, fx_index, 3, 60 / 127)
     reaper.TrackFX_SetParam(track, fx_index, 4, 60 / 127)
-    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_note, 60, true)
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_note, 60, true)
 
     -- Pitch start (index 5) (default 0 == pitch at note start == C4)
     reaper.TrackFX_SetParam(track, fx_index, 5, 0)
@@ -237,6 +234,21 @@ function gpmsys_samples.InsertSampleTrack(name, filepath)
     reaper.Undo_EndBlock('gaspard_Pattern manipulator_Add track', -1)
     reaper.PreventUIRefresh(-1)
     reaper.UpdateArrange()
+end
+
+function gpmsys_samples.ReplaceSampleOnTrack(track, name, filepath)
+    local _, fx_name = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_name, "", false)
+    local fx_index = reaper.TrackFX_GetByName(track, fx_name..' (RS5K)', false)
+    reaper.TrackFX_SetNamedConfigParm(track, fx_index, 'FILE0', filepath)
+    reaper.TrackFX_SetNamedConfigParm(track, fx_index, 'DONE', '')
+
+    -- Name
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_name, name, true)
+    reaper.GetSetMediaTrackInfo_String(track, 'P_NAME', name, true)
+    -- Sample peaks and length
+    local waveform, length = GetWaveForm(filepath)
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_peaks, gpmsys.EncodeToBase64(waveform), true)
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_length, length * 1000, true)
 end
 
 return gpmsys_samples

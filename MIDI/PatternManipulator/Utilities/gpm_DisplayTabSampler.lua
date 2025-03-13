@@ -79,7 +79,8 @@ function tab_sampler.Show()
         return
     end
 
-    local _, fx_name = reaper.GetTrackName(track)
+    --local _, fx_name = reaper.GetTrackName(track)
+    local _, fx_name = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_name, "", false)
     local fx_index = reaper.TrackFX_GetByName(track, fx_name.." (RS5K)", false)
 
     local _, name = reaper.GetTrackName(track)
@@ -102,8 +103,24 @@ function tab_sampler.Show()
     win_x = win_x + item_w + global_spacing
     local width, height = avail_x - item_w - global_spacing, 50
 
+    reaper.ImGui_SetCursorScreenPos(ctx, win_x, win_y)
+    --reaper.ImGui_DrawList_AddRect(reaper.ImGui_GetForegroundDrawList(ctx), win_x - 2, win_y - 2, win_x + width + 2, win_y + height + 2, 0xFFFFFFA1, 0, 0, 1)
+    reaper.ImGui_SetNextItemAllowOverlap(ctx)
+    reaper.ImGui_InvisibleButton(ctx, "##button_replace_sample", width, height)
+    if reaper.ImGui_BeginDragDropTarget(ctx) then
+        local retval, count = reaper.ImGui_AcceptDragDropPayloadFiles(ctx)
+        if retval and count > 0 then
+            local _, filepath = reaper.ImGui_GetDragDropPayloadFile(ctx, 0)
+            local filename = filepath:match('([^\\/]+)$')
+            local name_without_extension = filename:match("(.+)%..+") or filename
+            if reaper.file_exists(filepath) then
+                gpmsys_samples.ReplaceSampleOnTrack(track, name_without_extension, filepath)
+            end
+        end
+    end
+
     if window_width >= 600 then
-        local _, encoded = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_peaks, "", false)
+        local _, encoded = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_peaks, "", false)
         local waveform = gpmsys.DecodeFromBase64(encoded)
 
         local min_val, max_val = math.huge, -math.huge
@@ -133,7 +150,7 @@ function tab_sampler.Show()
     -------------------------------------------------------------------------------------
 
     -- Note pitch (name)
-    local _, note_number = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_note, "", false)
+    local _, note_number = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_note, "", false)
     note_number = tonumber(note_number)
     if not note_number then note_number = 60 end
     local note = math.floor(note_number) --reaper.TrackFX_GetParam(track, fx_index, 3)
@@ -146,13 +163,13 @@ function tab_sampler.Show()
         note = math.floor(note_number)
         reaper.TrackFX_SetParam(track, fx_index, 3, note / 127) -- Parameter index for "Note start" is 3
         reaper.TrackFX_SetParam(track, fx_index, 4, note / 127) -- Parameter index for "Note end" is 4
-        reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_note, note_number, true)
+        reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_note, note_number, true)
     end
 
     -- ADSR
     local item_width = 50
     if reaper.ImGui_BeginTable(ctx, "table_adsr", 4, reaper.ImGui_TableFlags_None(), (item_width + 8) * 4) then
-        local _, sample_len = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_length, "", false)
+        local _, sample_len = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_length, "", false)
         if not sample_len then sample_len = 2000 end
 
         -- Get ADSR values

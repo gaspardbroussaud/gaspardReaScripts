@@ -135,7 +135,7 @@ function window_samples.Show()
                 reaper.ImGui_InvisibleButton(ctx, "##play"..i, av_x, font_size)
                 if reaper.ImGui_IsItemActivated(ctx) then
                     local index = 0 --reaper.GetMediaTrackInfo_Value(gpmsys.parent_track, "IP_TRACKNUMBER") - 1
-                    local retnote, note = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_note, "", false)
+                    local retnote, note = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_note, "", false)
                     if retnote then
                         note = math.floor(note)
                         play_selected = i
@@ -145,7 +145,7 @@ function window_samples.Show()
                 end
                 if reaper.ImGui_IsItemDeactivated(ctx) then
                     local index = reaper.GetMediaTrackInfo_Value(gpmsys.parent_track, "IP_TRACKNUMBER") - 1
-                    local retnote, note = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_track_note, "", false)
+                    local retnote, note = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_note, "", false)
                     if retnote then
                         note = math.floor(note)
                         play_selected = -1
