@@ -1,4 +1,7 @@
 --@noindex
+--@description Pattern manipulator utility System samples
+--@author gaspard
+--@about Pattern manipulator utility
 
 local gpmsys_samples = {}
 

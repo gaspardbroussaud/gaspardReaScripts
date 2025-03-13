@@ -1,4 +1,7 @@
 --@noindex
+--@description Pattern manipulator utility Display tab patterns
+--@author gaspard
+--@about Pattern manipulator utility
 
 local tab_patterns = {}
 

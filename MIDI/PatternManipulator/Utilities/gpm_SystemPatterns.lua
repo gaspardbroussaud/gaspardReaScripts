@@ -1,4 +1,7 @@
 --@noindex
+--@description Pattern manipulator utility System Patterns
+--@author gaspard
+--@about Pattern manipulator utility
 
 local gpmsys_patterns = {}
 
@@ -131,6 +134,7 @@ local function SortByName(t)
 end
 
 function gpmsys_patterns.ScanPatternFiles()
+    gpmsys_patterns.file_list = {}
     local files = {}
 
     for i = 1, #Settings.pattern_folder_paths.value do
@@ -150,9 +154,7 @@ function gpmsys_patterns.ScanPatternFiles()
         end
     end
 
-    files = SortByName(files)
-
-    gpmsys_patterns.file_list = files
+    gpmsys_patterns.file_list = SortByName(files)
 end
 
 return gpmsys_patterns

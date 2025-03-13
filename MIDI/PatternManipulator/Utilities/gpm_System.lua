@@ -1,4 +1,7 @@
 --@noindex
+--@description Pattern manipulator utility System
+--@author gaspard
+--@about Pattern manipulator utility
 
 local gpmsys = {}
 
@@ -21,7 +24,7 @@ local_pattern_path = string.gsub(local_pattern_path, '/', gpmsys.separator)
 local_pattern_path = string.gsub(local_pattern_path, 'Utilities', 'Patterns')
 
 local function SettingsInit()
-    local settings_version = '0.0.2b'
+    local settings_version = '0.0.1b'
     local default_settings = {
         version = settings_version,
         order = {'project_based_parent'},
@@ -162,6 +165,5 @@ function gpmsys.DecodeFromBase64(encoded)
 
     return waveform
 end
-
 
 return gpmsys

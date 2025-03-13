@@ -1,4 +1,7 @@
 --@noindex
+--@description Pattern manipulator utility Display tab sampler
+--@author gaspard
+--@about Pattern manipulator utility
 
 -- 9 attack 10 release 24 decay 25 sustain 13 sample start offset 14 sample end offset
 
@@ -89,6 +92,8 @@ function tab_sampler.Show()
         reaper.GetSetMediaTrackInfo_String(track, "P_NAME", name, true)
     end
 
+    local note_pos_y = reaper.ImGui_GetCursorPosY(ctx) + 2
+
     reaper.ImGui_SameLine(ctx)
     local win_x, win_y = reaper.ImGui_GetCursorScreenPos(ctx)
     local avail_x = reaper.ImGui_GetContentRegionAvail(ctx)
@@ -104,9 +109,12 @@ function tab_sampler.Show()
     local width, height = avail_x - item_w - global_spacing, 50
 
     reaper.ImGui_SetCursorScreenPos(ctx, win_x, win_y)
-    --reaper.ImGui_DrawList_AddRect(reaper.ImGui_GetForegroundDrawList(ctx), win_x - 2, win_y - 2, win_x + width + 2, win_y + height + 2, 0xFFFFFFA1, 0, 0, 1)
     reaper.ImGui_SetNextItemAllowOverlap(ctx)
     reaper.ImGui_InvisibleButton(ctx, "##button_replace_sample", width, height)
+    reaper.ImGui_SetItemTooltip(ctx, "Drop file on top of waveform to change sample.")
+    if reaper.ImGui_IsItemHovered(ctx) then
+        reaper.ImGui_DrawList_AddRect(reaper.ImGui_GetForegroundDrawList(ctx), win_x - 2, win_y - 2, win_x + width + 2, win_y + height + 2, 0xFFFFFFA1, 2, 0, 1)
+    end
     if reaper.ImGui_BeginDragDropTarget(ctx) then
         local retval, count = reaper.ImGui_AcceptDragDropPayloadFiles(ctx)
         if retval and count > 0 then
@@ -119,7 +127,7 @@ function tab_sampler.Show()
         end
     end
 
-    if window_width >= 600 then
+    if window_width >= 0 then
         local _, encoded = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_peaks, "", false)
         local waveform = gpmsys.DecodeFromBase64(encoded)
 
@@ -148,6 +156,8 @@ function tab_sampler.Show()
         end
     end
     -------------------------------------------------------------------------------------
+
+    reaper.ImGui_SetCursorPosY(ctx, note_pos_y)
 
     -- Note pitch (name)
     local _, note_number = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_note, "", false)

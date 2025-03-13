@@ -1,4 +1,7 @@
 --@noindex
+--@description Pattern manipulator utility Display tab settings
+--@author gaspard
+--@about Pattern manipulator utility
 
 local tab_settings = {}
 
@@ -86,15 +89,29 @@ function tab_settings.Show()
         -- Pattern paths
         reaper.ImGui_Text(ctx, Settings.pattern_folder_paths.name..":")
         reaper.ImGui_SameLine(ctx)
+        local disable = not Settings.pattern_folder_paths.value[1]
+        if disable then reaper.ImGui_BeginDisabled(ctx) end
+        local button_x, button_y = reaper.ImGui_GetCursorScreenPos(ctx)
+        local avail_x = reaper.ImGui_GetContentRegionAvail(ctx)
+        reaper.ImGui_SetCursorScreenPos(ctx, button_x + avail_x - 140 -2, button_y)
+        if reaper.ImGui_Button(ctx, "Force pattern scan", 140) then
+            gpmsys_patterns.ScanPatternFiles()
+        end
+        reaper.ImGui_SetItemTooltip(ctx, "Force pattern scan (automatic rescan on paths update).")
+        if disable then reaper.ImGui_EndDisabled(ctx) end
+
         reaper.ImGui_PushItemWidth(ctx, 100)
         changed, multiline_concat = reaper.ImGui_InputTextMultiline(ctx, "input_paths", table.concat(Settings.pattern_folder_paths.value, "\n"), -1)
         reaper.ImGui_SetItemTooltip(ctx, Settings.pattern_folder_paths.description)
         if changed then
             one_changed = true
             Settings.pattern_folder_paths.value = {}
-            for line in multiline_concat:gmatch("[^\n]+") do
-                table.insert(Settings.pattern_folder_paths.value, line)
+            if multiline_concat ~= "" then
+                for line in multiline_concat:gmatch("[^\n]+") do
+                    table.insert(Settings.pattern_folder_paths.value, line)
+                end
             end
+            gpmsys_patterns.ScanPatternFiles()
         end
 
         reaper.ImGui_EndChild(ctx)

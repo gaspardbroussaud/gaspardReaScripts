@@ -1,4 +1,7 @@
 --@noindex
+--@description Pattern manipulator utility isplay samples
+--@author gaspard
+--@about Pattern manipulator utility
 
 local window_samples = {}
 
@@ -193,15 +196,19 @@ function window_samples.Show()
     if reaper.ImGui_BeginDragDropTarget(ctx) then
         local retval, data_count = reaper.ImGui_AcceptDragDropPayloadFiles(ctx)
         if retval then
-            if data_count > 1 then
+            --[[if data_count > 1 then
                 reaper.MB('Insert only one file at a time. Will use first of selection.', 'WARNING', 0)
-            end
+            end]]
 
-            local _, filepath = reaper.ImGui_GetDragDropPayloadFile(ctx, 0)
-            local filename = filepath:match('([^\\/]+)$')
-            local name_without_extension = filename:match("(.+)%..+") or filename
-            if reaper.file_exists(filepath) then
-                gpmsys_samples.InsertSampleTrack(name_without_extension, filepath)
+            local max_data = data_count - 1
+            for i = 0, max_data do
+                reaper.ShowConsoleMsg(max_data.." / "..i.."\n")
+                local _, filepath = reaper.ImGui_GetDragDropPayloadFile(ctx, max_data - i)
+                local filename = filepath:match('([^\\/]+)$')
+                local name_without_extension = filename:match("(.+)%..+") or filename
+                if reaper.file_exists(filepath) then
+                    gpmsys_samples.InsertSampleTrack(name_without_extension, filepath)
+                end
             end
         end
         reaper.ImGui_EndDragDropTarget(ctx)

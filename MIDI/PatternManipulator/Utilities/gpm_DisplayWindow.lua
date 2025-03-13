@@ -1,4 +1,7 @@
 --@noindex
+--@description Pattern manipulator utility Display window
+--@author gaspard
+--@about Pattern manipulator utility
 
 local gpmgui = {}
 
@@ -9,6 +12,7 @@ local window_tabs = require('Utilities/gpm_DisplayTab')
 og_window_width = 850
 local og_window_height = 300
 local min_width, min_height = 500, 250
+local max_width, max_height = 1000, 400
 window_width = og_window_width
 window_height = og_window_height
 local no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
@@ -125,7 +129,7 @@ function gpmgui.Loop()
     -- Window Settings
     local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | no_scrollbar_flags
     reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
-    reaper.ImGui_SetNextWindowSizeConstraints(ctx, min_width, min_height, huge, huge)
+    reaper.ImGui_SetNextWindowSizeConstraints(ctx, min_width, min_height, max_width, max_height)
     -- Font
     reaper.ImGui_PushFont(ctx, font)
     -- Begin

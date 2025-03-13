@@ -7,8 +7,18 @@
 --@changelog
 --  - Add script
 --@about
---  ### Pattern manipulator
---  - A MIDI pattern manipulator.
+--  # Pattern manipulator
+--  Set racks of samples to manipulate using midi patterns.
+--  ### Sampler
+--  * The sampler stores and displays sample files dragged and dropped from explorer/finder.
+--  * Available: name, color, waveform display, midi note, ADSR, play, mute, solo (and more to come).
+--  * You can drop multiple files at once to import.
+--  * To replace a sample file in an existing slot: select slot and drop new file on waveform.
+--  * You can reorder the list using both tracks in Reaper TCP and in GUI.
+--  ### Patterns
+--  * The patterns is a visual display of midi files gathered from a folder path (in settings).
+--  * You can drag and drop from the list into a Reaper track to insert the pattern at mouse cursor position.
+--  * Pattern paths can be added or removed from the settings tab (and force rescanned).
 
 -- Toggle button state in Reaper
 function SetButtonState(set)
