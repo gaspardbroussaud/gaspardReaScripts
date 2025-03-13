@@ -49,6 +49,13 @@ function tab_settings.Show()
     reaper.ImGui_PushItemWidth(ctx, 100)
     changed, Settings.release_amount.value = reaper.ImGui_DragDouble(ctx, "##release_amount", Settings.release_amount.value, 0.1, 0, 2000, "%0.1f")
     reaper.ImGui_SetItemTooltip(ctx, Settings.release_amount.description)
+
+    -- Pattern paths
+    reaper.ImGui_Text(ctx, Settings.pattern_folder_paths.name..":")
+    reaper.ImGui_SameLine(ctx)
+    reaper.ImGui_PushItemWidth(ctx, 100)
+    changed, Settings.pattern_folder_paths.value[1] = reaper.ImGui_InputTextMultiline(ctx, "input_paths", Settings.pattern_folder_paths.value[1], -1)
+    reaper.ImGui_SetItemTooltip(ctx, Settings.pattern_folder_paths.description)
 end
 
 return tab_settings

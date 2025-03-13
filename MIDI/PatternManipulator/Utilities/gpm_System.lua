@@ -3,6 +3,7 @@
 local gpmsys = {}
 
 -- Global variables
+gpmsys.separator = reaper.GetOS():match('Win') and '\\' or '/'
 extname_global = "g_PGM_"
 extkey_parent_track = "PARENT_TRACK_GUID"
 gpmsys.parent_track = nil
@@ -12,8 +13,15 @@ gpmsys_samples = require("Utilities/gpm_SystemSamples")
 gpmsys.sample_list = {}
 gpmsys.selected_sample_index = 0
 
+-- Patterns variables
+gpmsys_patterns = require("Utilities/gpm_SystemPatterns")
+local local_pattern_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]--..'Patterns'
+local_pattern_path = string.gsub(local_pattern_path, '\\', gpmsys.separator)
+local_pattern_path = string.gsub(local_pattern_path, '/', gpmsys.separator)
+local_pattern_path = string.gsub(local_pattern_path, 'Utilities', 'Patterns')
+
 local function SettingsInit()
-    local settings_version = '0.0.1b'
+    local settings_version = '0.0.2b'
     local default_settings = {
         version = settings_version,
         order = {'project_based_parent'},
@@ -51,6 +59,11 @@ local function SettingsInit()
             value = false,
             name = 'Selection link',
             description = 'Link track and GUI selection on GUI selected (not track selected).'
+        },
+        pattern_folder_paths = {
+            value = {local_pattern_path},
+            name = 'Patterns folder',
+            description = 'Patterns folders OS location path.'
         }
     }
     Settings = gson.LoadJSON(settings_path, default_settings)
