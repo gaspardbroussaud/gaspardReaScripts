@@ -1,10 +1,11 @@
 --@description Pattern Manipulator
 --@author gaspard
---@version 0.0.1b
+--@version 0.0.2b
 --@provides
 --    [nomain] Utilities/*.lua
 --@changelog
---  - Add script
+--  - Update sliders width in settings tab
+--  - Add Gain slider for sampler
 --@about
 --  # Pattern manipulator
 --  Set racks of samples to manipulate using midi patterns.
