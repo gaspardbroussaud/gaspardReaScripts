@@ -35,7 +35,7 @@ function tab_settings.Show()
         -- ADSR
         reaper.ImGui_Text(ctx, "ADSR default values:")
         reaper.ImGui_SameLine(ctx)
-        local item_width = 50
+        local item_width = 80
         if reaper.ImGui_BeginTable(ctx, "table_settings_adsr", 4, reaper.ImGui_TableFlags_None(), (item_width + 8) * 4) then
             reaper.ImGui_TableNextRow(ctx)
             reaper.ImGui_TableNextColumn(ctx)

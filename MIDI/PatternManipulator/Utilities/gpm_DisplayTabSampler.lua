@@ -160,31 +160,27 @@ function tab_sampler.Show()
 
     reaper.ImGui_SetCursorPosY(ctx, note_pos_y)
 
-    -- Vst volume
-    --local _, volume = reaper.TrackFX_GetFormattedParamValue(track, fx_index, 0)
-    local retval, volume, pan = reaper.GetTrackUIVolPan(track)
-    volume = tonumber(volume)
-    if not volume then volume = -120
-    else volume = volume - 2 end
-    reaper.ShowConsoleMsg(volume.."\n")
-
-    --reaper.SetTrackUIVolume(track, volume, false, false, 1)
+    -- Vst gain
+    local _, gain = reaper.TrackFX_GetFormattedParamValue(track, fx_index, 0)
+    gain = tonumber(gain)
+    if not gain then gain = -120 end
 
     reaper.ImGui_PushItemWidth(ctx, item_width)
-    local display_volume = volume <= -119.99 and "-inf dB" or "%.1f dB"
-    if volume >= 0 then display_volume = "+"..display_volume end
+    local display_gain = gain <= -119.99 and "-inf dB" or "%.1f dB"
+    if gain >= 0 then display_gain = "+"..display_gain end
 
-    local volume_speed = volume > -25 and 0.1 or 0.25
-    if volume < -115 then volume_speed = 1
-    elseif volume < -65 then volume_speed = 0.5 end
+    local gain_speed = gain > -25 and 0.1 or 0.25
+    if gain < -115 then gain_speed = 1
+    elseif gain < -65 then gain_speed = 0.5 end
 
-    changed, volume = reaper.ImGui_DragDouble(ctx, "Volume##drag_volume", volume, volume_speed, -120, 12, display_volume)
+    changed, gain = reaper.ImGui_DragDouble(ctx, "Gain##drag_gain", gain, gain_speed, -120, 12, display_gain)
     if changed then
-        volume = (10^(volume / 20) - 10^(-120 / 20)) / (10^(6 / 20) - 10^(-120 / 20))
-        reaper.ShowConsoleMsg(volume.."\n")
-        --reaper.TrackFX_SetParamNormalized(track, fx_index, 0, volume)
+        gain = (10^(gain / 20) - 10^(-120 / 20)) / (10^(6 / 20) - 10^(-120 / 20))
+        reaper.TrackFX_SetParamNormalized(track, fx_index, 0, gain)
     end
 
+    reaper.ImGui_SameLine(ctx)
+    reaper.ImGui_Dummy(ctx, 50, 1)
     reaper.ImGui_SameLine(ctx)
 
     -- Note pitch (name)
