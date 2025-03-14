@@ -7,6 +7,8 @@
 
 local tab_sampler = {}
 
+local item_width = 80
+
 local function GetMIDINoteName(note_number)
     note_number = math.floor(note_number)
     local note_names = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}
@@ -158,6 +160,33 @@ function tab_sampler.Show()
 
     reaper.ImGui_SetCursorPosY(ctx, note_pos_y)
 
+    -- Vst volume
+    --local _, volume = reaper.TrackFX_GetFormattedParamValue(track, fx_index, 0)
+    local retval, volume, pan = reaper.GetTrackUIVolPan(track)
+    volume = tonumber(volume)
+    if not volume then volume = -120
+    else volume = volume - 2 end
+    reaper.ShowConsoleMsg(volume.."\n")
+
+    --reaper.SetTrackUIVolume(track, volume, false, false, 1)
+
+    reaper.ImGui_PushItemWidth(ctx, item_width)
+    local display_volume = volume <= -119.99 and "-inf dB" or "%.1f dB"
+    if volume >= 0 then display_volume = "+"..display_volume end
+
+    local volume_speed = volume > -25 and 0.1 or 0.25
+    if volume < -115 then volume_speed = 1
+    elseif volume < -65 then volume_speed = 0.5 end
+
+    changed, volume = reaper.ImGui_DragDouble(ctx, "Volume##drag_volume", volume, volume_speed, -120, 12, display_volume)
+    if changed then
+        volume = (10^(volume / 20) - 10^(-120 / 20)) / (10^(6 / 20) - 10^(-120 / 20))
+        reaper.ShowConsoleMsg(volume.."\n")
+        --reaper.TrackFX_SetParamNormalized(track, fx_index, 0, volume)
+    end
+
+    reaper.ImGui_SameLine(ctx)
+
     -- Note pitch (name)
     local _, note_number = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_note, "", false)
     note_number = tonumber(note_number)
@@ -176,7 +205,6 @@ function tab_sampler.Show()
     end
 
     -- ADSR
-    local item_width = 80
     if reaper.ImGui_BeginTable(ctx, "table_adsr", 4, reaper.ImGui_TableFlags_None(), (item_width + 8) * 4) then
         local _, sample_len = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_length, "", false)
         if not sample_len then sample_len = 2000 end
