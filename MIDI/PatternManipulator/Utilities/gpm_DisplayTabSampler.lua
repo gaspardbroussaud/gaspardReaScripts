@@ -8,6 +8,7 @@
 local tab_sampler = {}
 
 local item_width = 80
+local table_width = (item_width + 8) * 4
 
 local function GetMIDINoteName(note_number)
     note_number = math.floor(note_number)
@@ -159,6 +160,7 @@ function tab_sampler.Show()
     -------------------------------------------------------------------------------------
 
     reaper.ImGui_SetCursorPosY(ctx, note_pos_y)
+    local pos_x_start = reaper.ImGui_GetCursorPosX(ctx)
 
     -- Vst gain
     local _, gain = reaper.TrackFX_GetFormattedParamValue(track, fx_index, 0)
@@ -180,8 +182,10 @@ function tab_sampler.Show()
     end
 
     reaper.ImGui_SameLine(ctx)
-    reaper.ImGui_Dummy(ctx, 50, 1)
-    reaper.ImGui_SameLine(ctx)
+    --reaper.ShowConsoleMsg(tostring(reaper.ImGui_GetItemRectSize(ctx)).."\n")
+    --reaper.ImGui_Dummy(ctx, item_width - reaper.ImGui_CalcTextSize(ctx, "Gain"), 1)
+    --reaper.ImGui_SameLine(ctx)
+    reaper.ImGui_SetCursorPosX(ctx, pos_x_start + (item_width * 2 + global_spacing * 2))--reaper.ImGui_GetItemRectSize(ctx))
 
     -- Note pitch (name)
     local _, note_number = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_note, "", false)
@@ -200,8 +204,96 @@ function tab_sampler.Show()
         reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_note, note_number, true)
     end
 
-    -- ADSR
-    if reaper.ImGui_BeginTable(ctx, "table_adsr", 4, reaper.ImGui_TableFlags_None(), (item_width + 8) * 4) then
+    -- TEST -------------------------------------
+    local _, sample_len = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_length, "", false)
+    if not sample_len then sample_len = 2000 end
+
+    -- Get ADSR values
+    -- Attack
+    local attack = reaper.TrackFX_GetParam(track, fx_index, 9)
+    attack = attack * 2000
+
+    -- Decay
+    local decay = reaper.TrackFX_GetParam(track, fx_index, 24)
+    decay = decay * 15000
+
+    -- Sustain
+    local _, sustain = reaper.TrackFX_GetFormattedParamValue(track, fx_index, 25)
+    sustain = tonumber(sustain)
+    if not sustain then sustain = -119.99 end
+
+    -- Release
+    local release = reaper.TrackFX_GetParam(track, fx_index, 10)
+    release = release * 2000
+
+    local attack_len = sample_len - release
+    local release_len = sample_len - attack
+
+    -- Draw table
+    local Adsr_x = reaper.ImGui_GetCursorPosX(ctx)
+    reaper.ImGui_SetCursorPosY(ctx, reaper.ImGui_GetCursorPosY(ctx) + 2)
+    reaper.ImGui_PushItemWidth(ctx, item_width)
+    changed, attack = reaper.ImGui_DragDouble(ctx, "##drag_attack", attack, 1, 0, attack_len, "%.0f ms")
+    if changed then
+        retval = reaper.TrackFX_SetParam(track, fx_index, 9, attack / 2000) -- Parameter index for "Attack" is 9
+    end
+
+    reaper.ImGui_SameLine(ctx)
+    local aDsr_x = reaper.ImGui_GetCursorPosX(ctx)
+    reaper.ImGui_PushItemWidth(ctx, item_width)
+    changed, decay = reaper.ImGui_DragDouble(ctx, "##drag_decay", decay, 1, 10, 15000, "%.0f ms")
+    if changed then
+        reaper.TrackFX_SetParam(track, fx_index, 24, decay / 15000) -- Parameter index for "Decay" is 24
+    end
+
+    reaper.ImGui_SameLine(ctx)
+    local adSr_x = reaper.ImGui_GetCursorPosX(ctx)
+    reaper.ImGui_PushItemWidth(ctx, item_width)
+    local display_sustain = sustain <= -119.99 and "-inf dB" or "%.1f dB"
+    if sustain >= 0 then display_sustain = "+"..display_sustain end
+    local sustain_speed = sustain > -25 and 0.1 or 0.25
+    if sustain < -115 then sustain_speed = 1
+    elseif sustain < -65 then sustain_speed = 0.5 end
+    changed, sustain = reaper.ImGui_DragDouble(ctx, "##drag_sustain", sustain, sustain_speed, -119.99, 12, display_sustain)
+    if changed then
+        sustain = (10^(sustain / 20) - 10^(-120 / 20)) / (10^(6 / 20) - 10^(-120 / 20))
+        reaper.TrackFX_SetParamNormalized(track, fx_index, 25, sustain) --ConvertDbToVstValue(sustain)) -- Parameter index for "Sustain" is 25
+    end
+
+    reaper.ImGui_SameLine(ctx)
+    local adsR_x = reaper.ImGui_GetCursorPosX(ctx)
+    reaper.ImGui_PushItemWidth(ctx, item_width)
+    changed, release = reaper.ImGui_DragDouble(ctx, "##drag_release", release, -1, 0, release_len, "%.0f ms")
+    if changed then
+        reaper.TrackFX_SetParam(track, fx_index, 10, release / 2000) -- Parameter index for "Release" is 10
+    end
+
+    reaper.ImGui_SetCursorPosX(ctx, Adsr_x)
+    local text_w = reaper.ImGui_CalcTextSize(ctx, "A")
+    reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (item_width - text_w) * 0.5)
+    reaper.ImGui_Text(ctx, "A")
+
+    reaper.ImGui_SameLine(ctx)
+    reaper.ImGui_SetCursorPosX(ctx, aDsr_x)
+    text_w = reaper.ImGui_CalcTextSize(ctx, "D")
+    reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (item_width - text_w) * 0.5)
+    reaper.ImGui_Text(ctx, "D")
+
+    reaper.ImGui_SameLine(ctx)
+    reaper.ImGui_SetCursorPosX(ctx, adSr_x)
+    text_w = reaper.ImGui_CalcTextSize(ctx, "S")
+    reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (item_width - text_w) * 0.5)
+    reaper.ImGui_Text(ctx, "S")
+
+    reaper.ImGui_SameLine(ctx)
+    reaper.ImGui_SetCursorPosX(ctx, adsR_x)
+    text_w = reaper.ImGui_CalcTextSize(ctx, "R")
+    reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (item_width - text_w) * 0.5)
+    reaper.ImGui_Text(ctx, "R")
+    -- TEST -------------------------------------
+
+    --[[ ADSR
+    if reaper.ImGui_BeginTable(ctx, "table_adsr", 4, reaper.ImGui_TableFlags_None(), table_width) then
         local _, sample_len = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_length, "", false)
         if not sample_len then sample_len = 2000 end
 
@@ -284,7 +376,7 @@ function tab_sampler.Show()
         reaper.ImGui_Text(ctx, "R")
 
         reaper.ImGui_EndTable(ctx)
-    end
+    end]]
 
 end
 
