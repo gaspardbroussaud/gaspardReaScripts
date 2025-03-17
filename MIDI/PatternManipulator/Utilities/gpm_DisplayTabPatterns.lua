@@ -118,7 +118,9 @@ function tab_patterns.Show()
             end
             for i = 0, bar_num do
                 local pos_x = start_x + (grid_length * i)
-                reaper.ImGui_DrawList_AddLine(draw_list, pos_x, start_y, pos_x, start_y + grid_line_height, 0x6B60B555, 1) -- Grid line
+                local grid_size = gpmsys_patterns.pianoroll.params.bpi and gpmsys_patterns.pianoroll.params.bpi or 4
+                local color = i % grid_size == 0 and 0x6B60B5FF or 0x6B60B555
+                reaper.ImGui_DrawList_AddLine(draw_list, pos_x, start_y, pos_x, start_y + grid_line_height, color, 1) -- Grid line
             end
 
             if gpmsys_patterns.pianoroll.notes and gpmsys_patterns.pianoroll.range.min then

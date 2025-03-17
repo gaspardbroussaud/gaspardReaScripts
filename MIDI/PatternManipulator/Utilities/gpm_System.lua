@@ -24,7 +24,7 @@ local_pattern_path = string.gsub(local_pattern_path, '/', gpmsys.separator)
 local_pattern_path = string.gsub(local_pattern_path, 'Utilities', 'Patterns')
 
 local function SettingsInit()
-    local settings_version = '0.0.1b'
+    local settings_version = '0.0.3b'
     local default_settings = {
         version = settings_version,
         order = {'project_based_parent'},
@@ -54,7 +54,7 @@ local function SettingsInit()
             description = 'Sustain volume in db.'
         },
         release_amount = {
-            value = 40,
+            value = 20,
             name = 'Release time',
             description = 'Release time in milliseconds.'
         },
@@ -67,6 +67,11 @@ local function SettingsInit()
             value = {local_pattern_path},
             name = 'Patterns folder',
             description = 'Patterns folders OS location path.'
+        },
+        note_nomenclature = {
+            value = 'american',
+            name = 'Note nomenclature',
+            description = 'Note nomenclature display in slider.'
         }
     }
     Settings = gson.LoadJSON(settings_path, default_settings)

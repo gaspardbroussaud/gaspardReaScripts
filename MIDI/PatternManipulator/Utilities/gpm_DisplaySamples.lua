@@ -32,7 +32,12 @@ function window_samples.Show()
     if reaper.ImGui_BeginChild(ctx, "child_samples", child_width, child_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
         local parent_name = ""
         if gpmsys.parent_track then _, parent_name = reaper.GetTrackName(gpmsys.parent_track) end
-        reaper.ImGui_Text(ctx, parent_name)
+        local name_is_too_long = reaper.ImGui_CalcTextSize(ctx, parent_name) > reaper.ImGui_GetContentRegionAvail(ctx)
+        local parent_name_display = name_is_too_long and string.sub(parent_name, 1, 29).."..." or parent_name
+        reaper.ImGui_Text(ctx, parent_name_display) -- Rack name display
+        if name_is_too_long then reaper.ImGui_SetItemTooltip(ctx, parent_name) end
+        reaper.ImGui_Separator(ctx)
+
         local forground_draw_list = reaper.ImGui_GetForegroundDrawList(ctx)
         local pos = {x1 = drop_x - 5, y1 = drop_y - 5, x2 = drop_x + child_width + 5, y2 = drop_y + child_height + 5}
         reaper.ImGui_DrawList_AddRect(forground_draw_list, pos.x1, pos.y1, pos.x2, pos.y2, 0xFFFFFF55, 2, reaper.ImGui_DrawFlags_None(), 2)

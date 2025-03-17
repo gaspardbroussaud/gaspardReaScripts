@@ -1,11 +1,12 @@
 --@description Pattern Manipulator
 --@author gaspard
---@version 0.0.2b
+--@version 0.0.3b
 --@provides
 --    [nomain] Utilities/*.lua
 --@changelog
---  - Update sliders width in settings tab
---  - Add Gain slider for sampler
+--  - Update ADSR spacing for better macOS rendering
+--  - Update settings with new note name display american or european (WIP)
+--  - Minor updates
 --@about
 --  # Pattern manipulator
 --  Set racks of samples to manipulate using midi patterns.

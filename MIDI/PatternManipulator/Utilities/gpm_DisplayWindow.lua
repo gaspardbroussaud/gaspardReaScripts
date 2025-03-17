@@ -11,7 +11,7 @@ local window_tabs = require('Utilities/gpm_DisplayTab')
 -- Window variables
 og_window_width = 850
 local og_window_height = 300
-local min_width, min_height = 500, 250
+local min_width, min_height = 645, 250
 local max_width, max_height = 1000, 400
 window_width = og_window_width
 window_height = og_window_height
@@ -46,8 +46,8 @@ local function TopBarDisplay()
     local child_width = window_width - global_spacing
     if reaper.ImGui_BeginChild(ctx, "child_top_bar", child_width, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
         reaper.ImGui_Text(ctx, window_name)
-        --reaper.ImGui_SameLine(ctx)
-        --reaper.ImGui_Text(ctx, "x="..window_x.." ; y="..window_y.." / w="..window_width.." ; h="..window_height)
+        reaper.ImGui_SameLine(ctx)
+        reaper.ImGui_Text(ctx, "x="..window_x.." ; y="..window_y.." / w="..window_width.." ; h="..window_height)
 
         reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing(), 5, 0)
 
