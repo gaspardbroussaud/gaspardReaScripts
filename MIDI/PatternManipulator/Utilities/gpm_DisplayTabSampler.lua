@@ -8,12 +8,14 @@
 local tab_sampler = {}
 
 local item_width = 80
+local popup_note = "C4"
 local table_width = (item_width + 8) * 4
+local popup_width, popup_height = 300, 88
 
 local function GetMIDINoteName(note_number)
     note_number = math.floor(note_number)
     local note_names = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}
-    if Settings.note_nomenclature.value == "european" then
+    if Settings.note_nomenclature.selected_index == 2 then
         note_names = {"Do", "Do#", "Re", "Re#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"}
     else
         note_names = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}
@@ -28,9 +30,23 @@ local function GetMIDINoteName(note_number)
 end
 
 local function GetMIDINoteNumber(note_name)
-    local note_names = {["C"] = 0, ["C#"] = 1, ["D"] = 2, ["D#"] = 3, ["E"] = 4, ["F"] = 5, ["F#"] = 6, ["G"] = 7, ["G#"] = 8, ["A"] = 9, ["A#"] = 10, ["B"] = 11}
-    local note, octave = note_name:match("([A-G]#?)(%-?%d+)")
+    -- Define mappings for both C and Do notations (all in lower-case)
+    local note_names = {
+        ["c"] = 0, ["c#"] = 1, ["d"] = 2, ["d#"] = 3, ["e"] = 4, ["f"] = 5,
+        ["f#"] = 6, ["g"] = 7, ["g#"] = 8, ["a"] = 9, ["a#"] = 10, ["b"] = 11,
+        ["do"] = 0, ["do#"] = 1, ["re"] = 2, ["re#"] = 3, ["mi"] = 4, ["fa"] = 5,
+        ["fa#"] = 6, ["sol"] = 7, ["sol#"] = 8, ["la"] = 9, ["la#"] = 10, ["si"] = 11
+    }
+
+    -- If the input is purely numeric, return it as a number
+    if note_name:match("^%-?%d+$") then
+        return tonumber(note_name)
+    end
+
+    -- Match the note and octave from the string (letters possibly with a '#' and an octave number)
+    local note, octave = note_name:match("([A-Za-z]+#?)(%-?%d+)")
     if note and octave then
+        note = note:lower()  -- Normalize the note to lower-case for lookup
         return (note_names[note] or 0) + (tonumber(octave) + 1) * 12
     else
         return nil  -- Invalid note name
@@ -45,7 +61,7 @@ function tab_sampler.Show()
     end
 
     local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
-    item_width = window_width >= og_window_width / 1.16 and 80 or window_width / 9.19
+    --item_width = window_width >= og_window_width / 1.16 and 80 or window_width / 9.19
 
     local track = gpmsys.sample_list[gpmsys.selected_sample_index]
     if not track then
@@ -164,9 +180,46 @@ function tab_sampler.Show()
     local note = math.floor(note_number)
 
     reaper.ImGui_PushItemWidth(ctx, item_width)
-    changed, note_number = reaper.ImGui_DragDouble(ctx, "MIDI note##drag_note", note_number, 0.1, 0, 127, tostring(GetMIDINoteName(tonumber(note))))
-    note_number = math.max(0, math.min(note_number, 127))
+    local note_display = tostring(GetMIDINoteName(tonumber(note)))
+    changed, note_number = reaper.ImGui_DragDouble(ctx, "MIDI note##drag_note", note_number, 0.1, 0, 127, note_display, reaper.ImGui_SliderFlags_NoInput())
+    if reaper.ImGui_IsItemHovered(ctx) and reaper.ImGui_IsMouseDoubleClicked(ctx, reaper.ImGui_MouseButton_Left()) then
+        reaper.ImGui_OpenPopup(ctx, 'popup_note_name')
+        popup_note = note_display
+        popup_width = 0
+        --popup_height = 0
+    end
 
+    -- POPUP note
+    reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - popup_width) * 0.5, window_y + 68)
+    reaper.ImGui_SetNextWindowSize(ctx, popup_width, popup_height)
+    if popup_width < 300 then popup_width = popup_width + 100 end
+    --if popup_height < 85 then popup_height = popup_height + 45 end
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Border(), 0xFFFFFFAA)
+    if reaper.ImGui_BeginPopup(ctx, 'popup_note_name') then
+        reaper.ImGui_Text(ctx, 'NOTE (C or Do notation or midi number):')
+        _, popup_note = reaper.ImGui_InputText(ctx, '##popup_inputtext', popup_note)
+        flags = reaper.ImGui_TableColumnFlags_WidthStretch() | reaper.ImGui_TableFlags_SizingStretchSame()
+        if reaper.ImGui_BeginTable(ctx, 'table_popup', 3, flags) then
+            reaper.ImGui_TableNextRow(ctx)
+            reaper.ImGui_TableNextColumn(ctx)
+            reaper.ImGui_TableNextColumn(ctx)
+            if reaper.ImGui_Button(ctx, 'CANCEL', -1) then
+                reaper.ImGui_CloseCurrentPopup(ctx)
+            end
+            reaper.ImGui_TableNextColumn(ctx)
+            if reaper.ImGui_Button(ctx, 'APPLY', -1) or reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Enter()) then
+                note_number = GetMIDINoteNumber(popup_note)
+                changed = true
+                reaper.ImGui_CloseCurrentPopup(ctx)
+            end
+            reaper.ImGui_EndTable(ctx)
+        end
+        reaper.ImGui_EndPopup(ctx)
+    end
+    reaper.ImGui_PopStyleColor(ctx)
+
+    if not note_number then note_number = 60 end
+    note_number = math.max(0, math.min(note_number, 127))
     if changed then
         note = math.floor(note_number)
         reaper.TrackFX_SetParam(track, fx_index, 3, note / 127) -- Parameter index for "Note start" is 3

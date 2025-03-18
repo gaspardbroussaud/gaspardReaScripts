@@ -11,10 +11,10 @@ local window_tabs = require('Utilities/gpm_DisplayTab')
 -- Window variables
 og_window_width = 850
 local og_window_height = 300
-local min_width, min_height = 645, 250
+local min_width, min_height = 735, 250
 local max_width, max_height = 1000, 400
-window_width = og_window_width
-window_height = og_window_height
+window_width, window_height = og_window_width, og_window_height
+window_x, window_y = 0, 0
 local no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
 local window_name = "PATTERN MANIPULATOR"
 

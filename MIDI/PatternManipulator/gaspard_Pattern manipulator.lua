@@ -1,12 +1,10 @@
 --@description Pattern Manipulator
 --@author gaspard
---@version 0.0.3b
+--@version 0.0.4b
 --@provides
 --    [nomain] Utilities/*.lua
 --@changelog
---  - Update ADSR spacing for better macOS rendering
---  - Update settings with new note name display american or european (WIP)
---  - Minor updates
+--  - Update note nomenclature to both C4 and Do4 notations available
 --@about
 --  # Pattern manipulator
 --  Set racks of samples to manipulate using midi patterns.

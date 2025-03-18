@@ -5,6 +5,8 @@
 
 local tab_settings = {}
 
+local item_width = 80
+
 function tab_settings.Show()
     local one_changed = false
 
@@ -32,10 +34,22 @@ function tab_settings.Show()
         reaper.ImGui_SetItemTooltip(ctx, Settings.obey_note_off.description)
         if changed then one_changed = true end
 
+        -- Note nomenclature
+        reaper.ImGui_Text(ctx, Settings.note_nomenclature.name..":")
+        reaper.ImGui_SameLine(ctx)
+        if reaper.ImGui_BeginCombo(ctx, "##combo_note_nomenclature", Settings.note_nomenclature.value[Settings.note_nomenclature.selected_index]) then
+            for i = 1, #Settings.note_nomenclature.value do
+                if reaper.ImGui_Selectable(ctx, Settings.note_nomenclature.value[i], Settings.note_nomenclature.selected_index == i) then
+                    Settings.note_nomenclature.selected_index = i
+                    one_changed = true
+                end
+            end
+            reaper.ImGui_EndCombo(ctx)
+        end
+        reaper.ImGui_SetItemTooltip(ctx, Settings.obey_note_off.description)
+
         -- ADSR
         reaper.ImGui_Text(ctx, "ADSR default values:")
-        reaper.ImGui_SameLine(ctx)
-        local item_width = 80
 
         reaper.ImGui_SameLine(ctx)
         local Adsr_x = reaper.ImGui_GetCursorPosX(ctx)

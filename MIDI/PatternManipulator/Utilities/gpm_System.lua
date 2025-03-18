@@ -69,7 +69,8 @@ local function SettingsInit()
             description = 'Patterns folders OS location path.'
         },
         note_nomenclature = {
-            value = 'american',
+            value = {'American (C)', 'European (Do)'},
+            selected_index = 1,
             name = 'Note nomenclature',
             description = 'Note nomenclature display in slider.'
         }
