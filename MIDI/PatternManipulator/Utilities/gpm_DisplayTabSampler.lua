@@ -3,13 +3,10 @@
 --@author gaspard
 --@about Pattern manipulator utility
 
--- 9 attack 10 release 24 decay 25 sustain 13 sample start offset 14 sample end offset
-
 local tab_sampler = {}
 
 local item_width = 80
 local popup_note = "C4"
-local table_width = (item_width + 8) * 4
 local popup_width, popup_height = 300, 88
 
 local function GetMIDINoteName(note_number)
@@ -61,7 +58,6 @@ function tab_sampler.Show()
     end
 
     local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
-    --item_width = window_width >= og_window_width / 1.16 and 80 or window_width / 9.19
 
     local track = gpmsys.sample_list[gpmsys.selected_sample_index]
     if not track then
@@ -186,14 +182,12 @@ function tab_sampler.Show()
         reaper.ImGui_OpenPopup(ctx, 'popup_note_name')
         popup_note = note_display
         popup_width = 0
-        --popup_height = 0
     end
 
     -- POPUP note
     reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - popup_width) * 0.5, window_y + 68)
     reaper.ImGui_SetNextWindowSize(ctx, popup_width, popup_height)
     if popup_width < 300 then popup_width = popup_width + 100 end
-    --if popup_height < 85 then popup_height = popup_height + 45 end
     reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Border(), 0xFFFFFFAA)
     if reaper.ImGui_BeginPopup(ctx, 'popup_note_name') then
         reaper.ImGui_Text(ctx, 'NOTE (C or Do notation or midi number):')

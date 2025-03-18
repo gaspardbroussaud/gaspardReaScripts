@@ -18,7 +18,7 @@ gpmsys.selected_sample_index = 0
 
 -- Patterns variables
 gpmsys_patterns = require("Utilities/gpm_SystemPatterns")
-local local_pattern_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]--..'Patterns'
+local local_pattern_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]
 local_pattern_path = string.gsub(local_pattern_path, '\\', gpmsys.separator)
 local_pattern_path = string.gsub(local_pattern_path, '/', gpmsys.separator)
 local_pattern_path = string.gsub(local_pattern_path, 'Utilities', 'Patterns')

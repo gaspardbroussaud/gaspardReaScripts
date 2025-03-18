@@ -22,7 +22,6 @@ local window_name = "PATTERN MANIPULATOR"
 topbar_height = 30
 font_size = 16
 small_font_size = font_size * 0.75
-local huge = math.huge
 
 -- ImGui Init
 ctx = reaper.ImGui_CreateContext('random_play_context')
