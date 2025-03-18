@@ -91,59 +91,7 @@ function tab_sampler.Show()
     end
     local item_w = reaper.ImGui_GetItemRectSize(ctx)
 
-    -- WAVEFORM DISPLAY -----------------------------------------------------------------
-    win_x = win_x + item_w + global_spacing
-    local width, height = avail_x - item_w - global_spacing, 50
-
-    reaper.ImGui_SetCursorScreenPos(ctx, win_x, win_y)
-    reaper.ImGui_SetNextItemAllowOverlap(ctx)
-    reaper.ImGui_InvisibleButton(ctx, "##button_replace_sample", width, height)
-    reaper.ImGui_SetItemTooltip(ctx, "Drop file on top of waveform to change sample.")
-    if reaper.ImGui_IsItemHovered(ctx) then
-        reaper.ImGui_DrawList_AddRect(reaper.ImGui_GetForegroundDrawList(ctx), win_x - 2, win_y - 2, win_x + width + 2, win_y + height + 2, 0xFFFFFFA1, 2, 0, 1)
-    end
-    if reaper.ImGui_BeginDragDropTarget(ctx) then
-        local retval, count = reaper.ImGui_AcceptDragDropPayloadFiles(ctx)
-        if retval and count > 0 then
-            local _, filepath = reaper.ImGui_GetDragDropPayloadFile(ctx, 0)
-            local filename = filepath:match('([^\\/]+)$')
-            local name_without_extension = filename:match("(.+)%..+") or filename
-            if reaper.file_exists(filepath) then
-                gpmsys_samples.ReplaceSampleOnTrack(track, name_without_extension, filepath)
-            end
-        end
-    end
-
-    if window_width >= 0 then
-        local _, encoded = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_peaks, "", false)
-        local waveform = gpmsys.DecodeFromBase64(encoded)
-
-        local min_val, max_val = math.huge, -math.huge
-        local num_samples = #waveform
-        for i = 1, num_samples do
-            if waveform[i] < min_val then min_val = waveform[i] end
-            if waveform[i] > max_val then max_val = waveform[i] end
-        end
-
-        local amplitude_range = max_val - min_val
-        if amplitude_range == 0 then amplitude_range = 1 end
-
-        for i = 1, num_samples - 1 do
-            local x1 = win_x + (i / num_samples) * width
-            local x2 = win_x + ((i + 1) / num_samples) * width
-
-            -- Normalize values
-            local norm_y1 = (waveform[i] - min_val) / amplitude_range
-            local norm_y2 = (waveform[i + 1] - min_val) / amplitude_range
-
-            local y1 = win_y + height - (norm_y1 * height)
-            local y2 = win_y + height - (norm_y2 * height)
-
-            reaper.ImGui_DrawList_AddLine(draw_list, x1, y1, x2, y2, 0xFFFFFFFF)
-        end
-    end
-    -------------------------------------------------------------------------------------
-
+    
     reaper.ImGui_SetCursorPosY(ctx, note_pos_y)
     local pos_x_start = reaper.ImGui_GetCursorPosX(ctx)
 
@@ -273,8 +221,8 @@ function tab_sampler.Show()
     elseif sustain < -65 then sustain_speed = 0.5 end
     changed, sustain = reaper.ImGui_DragDouble(ctx, "##drag_sustain", sustain, sustain_speed, -119.99, 12, display_sustain)
     if changed then
-        sustain = (10^(sustain / 20) - 10^(-120 / 20)) / (10^(6 / 20) - 10^(-120 / 20))
-        reaper.TrackFX_SetParamNormalized(track, fx_index, 25, sustain) -- Parameter index for "Sustain" is 25
+        local sustain_norm = (10^(sustain / 20) - 10^(-120 / 20)) / (10^(6 / 20) - 10^(-120 / 20))
+        reaper.TrackFX_SetParamNormalized(track, fx_index, 25, sustain_norm) -- Parameter index for "Sustain" is 25
     end
 
     reaper.ImGui_SameLine(ctx)
@@ -307,6 +255,105 @@ function tab_sampler.Show()
     text_w = reaper.ImGui_CalcTextSize(ctx, "R")
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (item_width - text_w) * 0.5)
     reaper.ImGui_Text(ctx, "R")
+
+
+
+    -- WAVEFORM DISPLAY -----------------------------------------------------------------
+    win_x = win_x + item_w + global_spacing
+    local wf_width, wf_height = avail_x - item_w - global_spacing, 50
+    reaper.ImGui_SetCursorScreenPos(ctx, win_x, win_y)
+    if reaper.ImGui_BeginChild(ctx, "child_waveform", wf_width, wf_height) then
+        reaper.ImGui_SetCursorScreenPos(ctx, win_x, win_y)
+        reaper.ImGui_SetNextItemAllowOverlap(ctx)
+        reaper.ImGui_InvisibleButton(ctx, "##button_replace_sample", wf_width, wf_height)
+        reaper.ImGui_SetItemTooltip(ctx, "Drop file on top of waveform to change sample.")
+        if reaper.ImGui_IsItemHovered(ctx) then
+            reaper.ImGui_DrawList_AddRect(reaper.ImGui_GetForegroundDrawList(ctx), win_x - 2, win_y - 2, win_x + wf_width + 2, win_y + wf_height + 2, 0xFFFFFFA1, 2, 0, 1)
+        end
+        if reaper.ImGui_BeginDragDropTarget(ctx) then
+            local retval, count = reaper.ImGui_AcceptDragDropPayloadFiles(ctx)
+            if retval and count > 0 then
+                local _, filepath = reaper.ImGui_GetDragDropPayloadFile(ctx, 0)
+                local filename = filepath:match('([^\\/]+)$')
+                local name_without_extension = filename:match("(.+)%..+") or filename
+                if reaper.file_exists(filepath) then
+                    gpmsys_samples.ReplaceSampleOnTrack(track, name_without_extension, filepath)
+                end
+            end
+        end
+
+        if window_width >= 0 then
+            local _, encoded = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_peaks, "", false)
+            local waveform = gpmsys.DecodeFromBase64(encoded)
+
+            local min_val, max_val = math.huge, -math.huge
+            local num_samples = #waveform
+            for i = 1, num_samples do
+                if waveform[i] < min_val then min_val = waveform[i] end
+                if waveform[i] > max_val then max_val = waveform[i] end
+            end
+
+            local amplitude_range = max_val - min_val
+            if amplitude_range == 0 then amplitude_range = 1 end
+
+            for i = 1, num_samples - 1 do
+                local x1 = win_x + (i / num_samples) * wf_width
+                local x2 = win_x + ((i + 1) / num_samples) * wf_width
+
+                -- Normalize values
+                local norm_y1 = (waveform[i] - min_val) / amplitude_range
+                local norm_y2 = (waveform[i + 1] - min_val) / amplitude_range
+
+                local y1 = win_y + wf_height - (norm_y1 * wf_height)
+                local y2 = win_y + wf_height - (norm_y2 * wf_height)
+
+                reaper.ImGui_DrawList_AddLine(draw_list, x1, y1, x2, y2, 0xFFFFFFAA)
+            end
+        end
+
+        -- Draw ADSR on Waveform
+        local ADSR_color = 0xFFAAAAFF
+        local a_x1, a_y1 = win_x, win_y + wf_height
+        local a_x2, a_y2 = win_x + attack / 2000 * wf_width, win_y + 10
+        reaper.ImGui_DrawList_AddLine(draw_list, a_x1, a_y1, a_x2, a_y2, ADSR_color, 3) -- Attack
+
+        local r_x1 = win_x + wf_width - release / 2000 * wf_width
+        local r_y1 = a_y2 - ((10^(sustain / 20) - 10^(-120 / 20)) / (10^(6 / 20) - 10^(-120 / 20)) - 0.5) * wf_height
+        local r_x2, r_y2 = win_x + wf_width, a_y1
+        reaper.ImGui_DrawList_AddLine(draw_list, r_x1, r_y1, r_x2, r_y2, ADSR_color, 3) -- Release
+
+        --wf_width = wf_width - (a_x2 - win_x) - (r_x1 - win_x)
+        local d_x = a_x2 + ((decay - 10) / 14990 * wf_width) * 10
+        local d_y = a_y2 - ((10^(sustain / 20) - 10^(-120 / 20)) / (10^(6 / 20) - 10^(-120 / 20)) - 0.5) * wf_height
+        if d_x > r_x1 then d_x = r_x1 end
+        reaper.ImGui_DrawList_AddBezierQuadratic(draw_list, a_x2 - 1, a_y2, d_x, d_y, r_x1 + 1, r_y1, ADSR_color, 3)
+
+        --[[local num_points = 100  -- Number of points in the curve
+        local base = 10  -- Logarithm base (adjust for different curves)
+        local log_max = math.log(num_points) / math.log(base)  -- Normalize log scaling
+
+        win_x, win_y = a_x2, a_y2
+        wf_width, wf_height = wf_width - (a_x2 - win_x) - (r_x1 - win_x), wf_height - 10 - (a_y1 - r_y1)
+
+        for i = 1, num_points - 1 do
+            -- X moves linearly
+            local x1 = win_x + (i / num_points) * wf_width
+            local x2 = win_x + ((i + 1) / num_points) * wf_width
+
+            -- Logarithmic decay for Y
+            local norm_y1 = (math.log(i) / math.log(base)) / log_max  -- Log-scaled Y
+            local norm_y2 = (math.log(i + 1) / math.log(base)) / log_max
+
+            -- Scale Y values to fit within wf_height (flipped for top-left start)
+            local y1 = win_y + norm_y1 * wf_height
+            local y2 = win_y + norm_y2 * wf_height
+
+            -- Draw the line
+            reaper.ImGui_DrawList_AddLine(draw_list, x1, y1, x2, y2, 0xFFFFFFFF)
+        end]]
+
+        reaper.ImGui_EndChild(ctx)
+    end
 end
 
 return tab_sampler
