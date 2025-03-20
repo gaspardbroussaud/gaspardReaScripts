@@ -172,6 +172,8 @@ function tab_sampler.Show()
     -- ADSR
     local _, sample_len = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_length, "", false)
     if not sample_len then sample_len = 2000 end
+    local _, display_sample_len = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_display_sample_length, "", false)
+    if not display_sample_len then display_sample_len = 2000 end
 
     -- Get ADSR values
     -- Attack
@@ -198,7 +200,7 @@ function tab_sampler.Show()
     local Adsr_x = reaper.ImGui_GetCursorPosX(ctx)
     reaper.ImGui_SetCursorPosY(ctx, reaper.ImGui_GetCursorPosY(ctx) + 2)
     reaper.ImGui_PushItemWidth(ctx, item_width)
-    changed, attack = reaper.ImGui_DragDouble(ctx, "##drag_attack", attack, 1, 0, attack_len, "%.2f ms")
+    changed, attack = reaper.ImGui_DragDouble(ctx, "##drag_attack", attack, 1, 0, attack_len, "%.2fms")
     if changed then
         retval = reaper.TrackFX_SetParam(track, fx_index, 9, attack / 2000) -- Parameter index for "Attack" is 9
     end
@@ -206,7 +208,7 @@ function tab_sampler.Show()
     reaper.ImGui_SameLine(ctx)
     local aDsr_x = reaper.ImGui_GetCursorPosX(ctx)
     reaper.ImGui_PushItemWidth(ctx, item_width)
-    changed, decay = reaper.ImGui_DragDouble(ctx, "##drag_decay", decay, 1, 10, 15000, "%.0f ms")
+    changed, decay = reaper.ImGui_DragDouble(ctx, "##drag_decay", decay, 1, 10, 15000, "%.0fms")
     if changed then
         reaper.TrackFX_SetParam(track, fx_index, 24, (decay - 10) / 14990) -- Parameter index for "Decay" is 24
     end
@@ -214,7 +216,7 @@ function tab_sampler.Show()
     reaper.ImGui_SameLine(ctx)
     local adSr_x = reaper.ImGui_GetCursorPosX(ctx)
     reaper.ImGui_PushItemWidth(ctx, item_width)
-    local display_sustain = sustain <= -119.99 and "-inf dB" or "%.1f dB"
+    local display_sustain = sustain <= -119.99 and "-infdB" or "%.1fdB"
     if sustain >= 0 then display_sustain = "+"..display_sustain end
     local sustain_speed = sustain > -25 and 0.1 or 0.25
     if sustain < -115 then sustain_speed = 1
@@ -228,10 +230,13 @@ function tab_sampler.Show()
     reaper.ImGui_SameLine(ctx)
     local adsR_x = reaper.ImGui_GetCursorPosX(ctx)
     reaper.ImGui_PushItemWidth(ctx, item_width)
-    changed, release = reaper.ImGui_DragDouble(ctx, "##drag_release", release, -1, 0, release_len, "%.0f ms")
+    changed, release = reaper.ImGui_DragDouble(ctx, "##drag_release", release, -1, 0, release_len, "%.0fms")
     if changed then
         reaper.TrackFX_SetParam(track, fx_index, 10, release / 2000) -- Parameter index for "Release" is 10
     end
+
+    reaper.ImGui_SameLine(ctx)
+    _, Settings.show_adsr.value = reaper.ImGui_Checkbox(ctx, "Show##checkbox_adsr", Settings.show_adsr.value)
 
     reaper.ImGui_SetCursorPosX(ctx, Adsr_x)
     local text_w = reaper.ImGui_CalcTextSize(ctx, "A")
@@ -256,11 +261,14 @@ function tab_sampler.Show()
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (item_width - text_w) * 0.5)
     reaper.ImGui_Text(ctx, "R")
 
+    -- Offset values
+
+    --Start offset
     local start_offset = reaper.TrackFX_GetParam(track, fx_index, 13)
     start_offset = start_offset * sample_len / 1000
-    changed, start_offset = reaper.ImGui_DragDouble(ctx, "Start offset##drag_start_offset", start_offset, 0.01, 0, sample_len / 1000, "%.2f s")
-    start_offset = start_offset * 1000
-    start_offset = start_offset / sample_len
+    local display_start_offset = string.format("%.2f", start_offset * 1000)
+    changed, start_offset = reaper.ImGui_DragDouble(ctx, "Start offset##drag_start_offset", start_offset, 0.001, 0, sample_len / 1000, display_start_offset.."s")
+    start_offset = start_offset * 1000 / sample_len
     if changed then
         reaper.TrackFX_SetParam(track, fx_index, 13, start_offset) -- Parameter index for "Start offset" is 13
     end
@@ -268,14 +276,20 @@ function tab_sampler.Show()
     reaper.ImGui_SameLine(ctx)
     reaper.ImGui_SetCursorPosX(ctx, pos_x_start + (item_width * 2 + global_spacing * 2))
 
-    local end_offset = reaper.TrackFX_GetParam(track, fx_index, 14) - start_offset
+    -- End offset
+    local end_offset = reaper.TrackFX_GetParam(track, fx_index, 14)
     end_offset = end_offset * sample_len / 1000
-    changed, end_offset = reaper.ImGui_DragDouble(ctx, "Length##drag_end_offset", end_offset, 0.01, 0, sample_len / 1000, "%.2f s")
+    local display_end_offset = string.format("%.2f", tostring(end_offset * 1000 - start_offset * sample_len))-- / 1000))
+    changed, end_offset = reaper.ImGui_DragDouble(ctx, "Length##drag_end_offset", end_offset, 0.001, 0, sample_len / 1000, display_end_offset.."s")
     end_offset = end_offset * 1000 / sample_len
     if changed then
         reaper.TrackFX_SetParam(track, fx_index, 14, end_offset) -- Parameter index for "End offset" is 14
     end
-    end_offset = math.abs(end_offset - 1)
+
+    --display_sample_len = sample_len - end_offset * 1000 - start_offset * sample_len
+    display_sample_len = sample_len - start_offset * 1000 + (end_offset - 1) * 1000
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_display_sample_length, display_sample_len, true)
+    reaper.ImGui_Text(ctx, display_sample_len)
 
     -- WAVEFORM DISPLAY -----------------------------------------------------------------
     win_x = win_x + item_w + global_spacing
@@ -330,62 +344,59 @@ function tab_sampler.Show()
             end
         end
 
+        local offset_hide_color = (reaper.ImGui_GetColor(ctx, reaper.ImGui_Col_ChildBg()) & 0xFFFFFF00) | 0xDF
+        local offset_line_color = 0xFFFFFFAA
+
         -- Draw start offset on waveform
         if start_offset > 0 then
-            reaper.ImGui_DrawList_AddRectFilled(draw_list, win_x, win_y, win_x + start_offset * wf_width, win_y + wf_height, 0x000000AA, 0)
+            reaper.ImGui_DrawList_AddRectFilled(draw_list, win_x, win_y, win_x + start_offset * wf_width, win_y + wf_height, offset_hide_color, 0)
 
             win_x = win_x + start_offset * wf_width
-            reaper.ImGui_DrawList_AddLine(draw_list, win_x, win_y, win_x, win_y + wf_height, 0xFFFFFFAA, 2)
+            reaper.ImGui_DrawList_AddLine(draw_list, win_x, win_y, win_x, win_y + wf_height, offset_line_color, 2)
         end
 
         local ADSR_start_offset = start_offset * wf_width
-        local ADSR_end_offset = end_offset * wf_width
+        local ADSR_end_offset = math.abs(end_offset - start_offset - 1) * wf_width
         local ADSR_width = wf_width - ADSR_start_offset - ADSR_end_offset
-        local ADSR_sustain = ((10^(sustain / 20) - 10^(-120 / 20)) / (10^(12 / 20) - 10^(-120 / 20)))
+        local ADSR_color = 0x7C71C2FF
+        local ADSR_color_bg = 0x14141BFF
+        local ADSR_thick = 3
+        local ADSR_thick_bg = 5
 
         -- Draw Adsr on waveform
-        local ADSR_color = 0xFF0000AA
-        --local a_x1, a_y1 = win_x, win_y + wf_height
-        --local a_x2, a_y2 = win_x + attack / sample_len * ADSR_width - start_offset * ADSR_width - end_offset * ADSR_width, win_y + 10
         local a_x1 = win_x
         local a_y1 = win_y + wf_height
         local a_x2 = a_x1 + (attack / sample_len * wf_width)
         local a_y2 = win_y + 10
-        reaper.ImGui_DrawList_AddLine(draw_list, a_x1, a_y1, a_x2, a_y2, ADSR_color, 3) -- Attack
-        reaper.ImGui_DrawList_AddCircleFilled(draw_list, a_x2, a_y2, 1, ADSR_color)
 
         -- Draw adsR on waveform
-        --local r_x1 = win_x + ADSR_width - release / sample_len * ADSR_width - start_offset * ADSR_width - end_offset * ADSR_width
-        --local r_y1 = a_y2 - ((10^(sustain / 20) - 10^(-120 / 20)) / (10^(6 / 20) - 10^(-120 / 20)) - 0.5) * wf_height
-        --local r_x2, r_y2 = win_x + ADSR_width - start_offset * ADSR_width - end_offset * ADSR_width, a_y1
-        --if r_x1 < a_x2 then r_x1 = a_x2 end
-
         local r_x2 = win_x + wf_width - ADSR_end_offset
         local r_y2 = win_y + wf_height
         local r_x1 = r_x2 - (release / sample_len * wf_width)
         local r_y1 = math.min(a_y2 + (sustain * -1.1), win_y + wf_height - 5)
-        reaper.ImGui_DrawList_AddLine(draw_list, r_x1, r_y1, r_x2, r_y2, ADSR_color, 3) -- Release
-        --reaper.ImGui_DrawList_AddCircleFilled(draw_list, r_x1, r_y1, 1, ADSR_color)
 
         -- Draw aDSr on waveform
-        --local d_x = a_x2 + ((decay - 10) / 14990 * ADSR_width) * 10
-        --local d_y = a_y2 - ((10^(sustain / 20) - 10^(-120 / 20)) / (10^(6 / 20) - 10^(-120 / 20)) - 0.5) * wf_height
-        --if d_x > r_x1 then d_x = r_x1 end
-
         local ADSR_decay = ((decay - 10) / 14990 * ADSR_width)
         local d_x2 = a_x2 + ADSR_decay * 5
         local d_y2 = r_y1 - 5
         local d_x3 = a_x2 + ADSR_decay * 10
         if d_x3 > r_x1 then d_x3 = r_x1 end
         local d_y3 = r_y1 - ADSR_decay / 10
-        --reaper.ImGui_DrawList_AddBezierQuadratic(draw_list, a_x2, a_y2, d_x, d_y, r_x1 + 1, r_y1 + 1, ADSR_color, 3)
-        reaper.ImGui_DrawList_AddBezierCubic(draw_list, a_x2, a_y2, d_x2, d_y2, d_x3, d_y3, r_x1 + 1, r_y1, ADSR_color, 3)
+
+        if Settings.show_adsr.value then
+            reaper.ImGui_DrawList_AddLine(draw_list, a_x1, a_y1, a_x2, a_y2, ADSR_color_bg, ADSR_thick_bg) -- Attack bg
+            reaper.ImGui_DrawList_AddLine(draw_list, r_x1, r_y1, r_x2, r_y2, ADSR_color_bg, ADSR_thick_bg) -- Release bg
+            reaper.ImGui_DrawList_AddBezierCubic(draw_list, a_x2, a_y2, d_x2, d_y2, d_x3, d_y3, r_x1 + 1, r_y1, ADSR_color_bg, ADSR_thick_bg) -- Decay/Sustain bg
+
+            reaper.ImGui_DrawList_AddLine(draw_list, a_x1, a_y1, a_x2, a_y2, ADSR_color, ADSR_thick) -- Attack
+            reaper.ImGui_DrawList_AddLine(draw_list, r_x1, r_y1, r_x2, r_y2, ADSR_color, ADSR_thick) -- Release
+            reaper.ImGui_DrawList_AddBezierCubic(draw_list, a_x2, a_y2, d_x2, d_y2, d_x3, d_y3, r_x1 + 1, r_y1, ADSR_color, ADSR_thick) -- Decay/Sustain
+        end
 
         -- Draw end offset on waveform
-        if end_offset <= 0.0001 then end_offset = 0 end
-        if end_offset > 0 then
-            reaper.ImGui_DrawList_AddRectFilled(draw_list, r_x2, win_y, win_x + wf_width, r_y2, 0x000000AA, 0)
-            reaper.ImGui_DrawList_AddLine(draw_list, r_x2, win_y, r_x2, r_y2, 0xFFFFFFAA, 2)
+        if end_offset < 0.999 then
+            reaper.ImGui_DrawList_AddRectFilled(draw_list, r_x2, win_y, win_x + wf_width, r_y2, offset_hide_color, 0)
+            reaper.ImGui_DrawList_AddLine(draw_list, r_x2, win_y, r_x2, r_y2, offset_line_color, 2)
         end
 
         reaper.ImGui_EndChild(ctx)

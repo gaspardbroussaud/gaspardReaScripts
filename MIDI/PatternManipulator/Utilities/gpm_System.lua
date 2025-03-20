@@ -24,10 +24,10 @@ local_pattern_path = string.gsub(local_pattern_path, '/', gpmsys.separator)
 local_pattern_path = string.gsub(local_pattern_path, 'Utilities', 'Patterns')
 
 local function SettingsInit()
-    local settings_version = '0.0.3b'
+    local settings_version = '0.0.4b'
     local default_settings = {
         version = settings_version,
-        order = {'project_based_parent'},
+        order = {'project_based_parent', 'obey_note_off', 'attack_amount', 'decay_amount', 'sustain_amount', 'release_amount', 'selection_link', 'pattern_folder_paths', 'note_nomenclature', 'show_adsr'},
         project_based_parent = {
             value = false,
             name = 'Project based parent',
@@ -73,6 +73,11 @@ local function SettingsInit()
             selected_index = 1,
             name = 'Note nomenclature',
             description = 'Note nomenclature display in slider.'
+        },
+        show_adsr = {
+            value = true,
+            name = 'Display ADSR',
+            description = 'Display ADSR curves on sample waveform.'
         }
     }
     Settings = gson.LoadJSON(settings_path, default_settings)

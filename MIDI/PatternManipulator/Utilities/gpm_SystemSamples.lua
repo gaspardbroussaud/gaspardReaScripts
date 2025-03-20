@@ -11,6 +11,7 @@ local extname_is_midi_track = extname_global.."IS_MIDI_TRACK"
 extname_track_selected_index = extname_global.."TRACK_SELECTED_INDEX"
 extname_sample_name = extname_global.."SAMPLE_NAME"
 extname_sample_length = extname_global.."SAMPLE_LENGTH"
+extname_display_sample_length = extname_global.."DISPLAY_SAMPLE_LENGTH"
 extname_sample_peaks = extname_global.."SAMPLE_PEAKS"
 extname_sample_note = extname_global.."SAMPLE_NOTE"
 
@@ -178,6 +179,7 @@ local function SetSampleTrackParams(name, filepath, track)
     local waveform, length = GetWaveForm(filepath)
     reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_peaks, gpmsys.EncodeToBase64(waveform), true)
     reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_length, length * 1000, true)
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_display_sample_length, length * 1000, true)
 
     -- Min volume (index 2) (default 0 == -inf)
     reaper.TrackFX_SetParam(track, fx_index, 2, 0)
@@ -253,6 +255,7 @@ function gpmsys_samples.ReplaceSampleOnTrack(track, name, filepath)
     local waveform, length = GetWaveForm(filepath)
     reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_peaks, gpmsys.EncodeToBase64(waveform), true)
     reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_length, length * 1000, true)
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_display_sample_length, length * 1000, true)
 end
 
 return gpmsys_samples
