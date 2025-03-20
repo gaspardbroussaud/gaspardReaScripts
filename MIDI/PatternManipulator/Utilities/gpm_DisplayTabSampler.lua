@@ -256,7 +256,26 @@ function tab_sampler.Show()
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + (item_width - text_w) * 0.5)
     reaper.ImGui_Text(ctx, "R")
 
+    local start_offset = reaper.TrackFX_GetParam(track, fx_index, 13)
+    start_offset = start_offset * sample_len / 1000
+    changed, start_offset = reaper.ImGui_DragDouble(ctx, "Start offset##drag_start_offset", start_offset, 0.01, 0, sample_len / 1000, "%.2f s")
+    start_offset = start_offset * 1000
+    start_offset = start_offset / sample_len
+    if changed then
+        reaper.TrackFX_SetParam(track, fx_index, 13, start_offset) -- Parameter index for "Start offset" is 13
+    end
 
+    reaper.ImGui_SameLine(ctx)
+    reaper.ImGui_SetCursorPosX(ctx, pos_x_start + (item_width * 2 + global_spacing * 2))
+
+    local end_offset = reaper.TrackFX_GetParam(track, fx_index, 14) - start_offset
+    end_offset = end_offset * sample_len / 1000
+    changed, end_offset = reaper.ImGui_DragDouble(ctx, "Length##drag_end_offset", end_offset, 0.01, 0, sample_len / 1000, "%.2f s")
+    end_offset = end_offset * 1000 / sample_len
+    if changed then
+        reaper.TrackFX_SetParam(track, fx_index, 14, end_offset) -- Parameter index for "End offset" is 14
+    end
+    end_offset = math.abs(end_offset - 1)
 
     -- WAVEFORM DISPLAY -----------------------------------------------------------------
     win_x = win_x + item_w + global_spacing
@@ -311,46 +330,63 @@ function tab_sampler.Show()
             end
         end
 
-        -- Draw ADSR on Waveform
-        local ADSR_color = 0xFFAAAAFF
-        local a_x1, a_y1 = win_x, win_y + wf_height
-        local a_x2, a_y2 = win_x + attack / 2000 * wf_width, win_y + 10
+        -- Draw start offset on waveform
+        if start_offset > 0 then
+            reaper.ImGui_DrawList_AddRectFilled(draw_list, win_x, win_y, win_x + start_offset * wf_width, win_y + wf_height, 0x000000AA, 0)
+
+            win_x = win_x + start_offset * wf_width
+            reaper.ImGui_DrawList_AddLine(draw_list, win_x, win_y, win_x, win_y + wf_height, 0xFFFFFFAA, 2)
+        end
+
+        local ADSR_start_offset = start_offset * wf_width
+        local ADSR_end_offset = end_offset * wf_width
+        local ADSR_width = wf_width - ADSR_start_offset - ADSR_end_offset
+        local ADSR_sustain = ((10^(sustain / 20) - 10^(-120 / 20)) / (10^(12 / 20) - 10^(-120 / 20)))
+
+        -- Draw Adsr on waveform
+        local ADSR_color = 0xFF0000AA
+        --local a_x1, a_y1 = win_x, win_y + wf_height
+        --local a_x2, a_y2 = win_x + attack / sample_len * ADSR_width - start_offset * ADSR_width - end_offset * ADSR_width, win_y + 10
+        local a_x1 = win_x
+        local a_y1 = win_y + wf_height
+        local a_x2 = a_x1 + (attack / sample_len * wf_width)
+        local a_y2 = win_y + 10
         reaper.ImGui_DrawList_AddLine(draw_list, a_x1, a_y1, a_x2, a_y2, ADSR_color, 3) -- Attack
+        reaper.ImGui_DrawList_AddCircleFilled(draw_list, a_x2, a_y2, 1, ADSR_color)
 
-        local r_x1 = win_x + wf_width - release / 2000 * wf_width
-        local r_y1 = a_y2 - ((10^(sustain / 20) - 10^(-120 / 20)) / (10^(6 / 20) - 10^(-120 / 20)) - 0.5) * wf_height
-        local r_x2, r_y2 = win_x + wf_width, a_y1
+        -- Draw adsR on waveform
+        --local r_x1 = win_x + ADSR_width - release / sample_len * ADSR_width - start_offset * ADSR_width - end_offset * ADSR_width
+        --local r_y1 = a_y2 - ((10^(sustain / 20) - 10^(-120 / 20)) / (10^(6 / 20) - 10^(-120 / 20)) - 0.5) * wf_height
+        --local r_x2, r_y2 = win_x + ADSR_width - start_offset * ADSR_width - end_offset * ADSR_width, a_y1
+        --if r_x1 < a_x2 then r_x1 = a_x2 end
+
+        local r_x2 = win_x + wf_width - ADSR_end_offset
+        local r_y2 = win_y + wf_height
+        local r_x1 = r_x2 - (release / sample_len * wf_width)
+        local r_y1 = math.min(a_y2 + (sustain * -1.1), win_y + wf_height - 5)
         reaper.ImGui_DrawList_AddLine(draw_list, r_x1, r_y1, r_x2, r_y2, ADSR_color, 3) -- Release
+        --reaper.ImGui_DrawList_AddCircleFilled(draw_list, r_x1, r_y1, 1, ADSR_color)
 
-        --wf_width = wf_width - (a_x2 - win_x) - (r_x1 - win_x)
-        local d_x = a_x2 + ((decay - 10) / 14990 * wf_width) * 10
-        local d_y = a_y2 - ((10^(sustain / 20) - 10^(-120 / 20)) / (10^(6 / 20) - 10^(-120 / 20)) - 0.5) * wf_height
-        if d_x > r_x1 then d_x = r_x1 end
-        reaper.ImGui_DrawList_AddBezierQuadratic(draw_list, a_x2 - 1, a_y2, d_x, d_y, r_x1 + 1, r_y1, ADSR_color, 3)
+        -- Draw aDSr on waveform
+        --local d_x = a_x2 + ((decay - 10) / 14990 * ADSR_width) * 10
+        --local d_y = a_y2 - ((10^(sustain / 20) - 10^(-120 / 20)) / (10^(6 / 20) - 10^(-120 / 20)) - 0.5) * wf_height
+        --if d_x > r_x1 then d_x = r_x1 end
 
-        --[[local num_points = 100  -- Number of points in the curve
-        local base = 10  -- Logarithm base (adjust for different curves)
-        local log_max = math.log(num_points) / math.log(base)  -- Normalize log scaling
+        local ADSR_decay = ((decay - 10) / 14990 * ADSR_width)
+        local d_x2 = a_x2 + ADSR_decay * 5
+        local d_y2 = r_y1 - 5
+        local d_x3 = a_x2 + ADSR_decay * 10
+        if d_x3 > r_x1 then d_x3 = r_x1 end
+        local d_y3 = r_y1 - ADSR_decay / 10
+        --reaper.ImGui_DrawList_AddBezierQuadratic(draw_list, a_x2, a_y2, d_x, d_y, r_x1 + 1, r_y1 + 1, ADSR_color, 3)
+        reaper.ImGui_DrawList_AddBezierCubic(draw_list, a_x2, a_y2, d_x2, d_y2, d_x3, d_y3, r_x1 + 1, r_y1, ADSR_color, 3)
 
-        win_x, win_y = a_x2, a_y2
-        wf_width, wf_height = wf_width - (a_x2 - win_x) - (r_x1 - win_x), wf_height - 10 - (a_y1 - r_y1)
-
-        for i = 1, num_points - 1 do
-            -- X moves linearly
-            local x1 = win_x + (i / num_points) * wf_width
-            local x2 = win_x + ((i + 1) / num_points) * wf_width
-
-            -- Logarithmic decay for Y
-            local norm_y1 = (math.log(i) / math.log(base)) / log_max  -- Log-scaled Y
-            local norm_y2 = (math.log(i + 1) / math.log(base)) / log_max
-
-            -- Scale Y values to fit within wf_height (flipped for top-left start)
-            local y1 = win_y + norm_y1 * wf_height
-            local y2 = win_y + norm_y2 * wf_height
-
-            -- Draw the line
-            reaper.ImGui_DrawList_AddLine(draw_list, x1, y1, x2, y2, 0xFFFFFFFF)
-        end]]
+        -- Draw end offset on waveform
+        if end_offset <= 0.0001 then end_offset = 0 end
+        if end_offset > 0 then
+            reaper.ImGui_DrawList_AddRectFilled(draw_list, r_x2, win_y, win_x + wf_width, r_y2, 0x000000AA, 0)
+            reaper.ImGui_DrawList_AddLine(draw_list, r_x2, win_y, r_x2, r_y2, 0xFFFFFFAA, 2)
+        end
 
         reaper.ImGui_EndChild(ctx)
     end
