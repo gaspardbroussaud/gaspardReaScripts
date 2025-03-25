@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="6f4af0f593c4f71a3edea69be7fef4f857e9a9bb">
+<index version="1" name="Gaspard ReaScripts" commit="150c6cb01401c0352830958827b3a3640da4929e">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -1203,6 +1203,21 @@
       <version name="1.0" author="gaspard" time="2024-09-11T14:22:42Z">
         <changelog><![CDATA[# Initial release]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/44fb0f852568ac9778af500c3af1a70d2b951301/TCP/gaspard_Insert%20new%20track%20with%20one%20less%20folder%20depth%20if%20available.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Minimize selected tracks and lock height.lua" type="script" desc="Minimize selected tracks and lock height">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Minimize selected tracks and lock height\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="gaspard" time="2025-03-25T10:05:49Z">
+        <changelog><![CDATA[Initial release]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/150c6cb01401c0352830958827b3a3640da4929e/TCP/gaspard_Minimize%20selected%20tracks%20and%20lock%20height.lua</source>
       </version>
     </reapack>
   </category>
