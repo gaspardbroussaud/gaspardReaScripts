@@ -1,8 +1,10 @@
 -- @description Minimize selected tracks and lock height
 -- @author gaspard
--- @version 1.0
+-- @version 1.0.1
 -- @about Minimize selected tracks and lock height
--- @changelog Initial release
+-- @changelog Updated minimized height to 25 by default (can be modified in script file)
+
+local min_height = 25 -- CHANGE THIS VALUE TO DESIRED MIN HEIGHT (default REAPER min track height is 25)
 
 local sel_track_count = reaper.CountSelectedTracks(0)
 if sel_track_count > 0 then
@@ -30,7 +32,7 @@ if sel_track_count > 0 then
             end
             reaper.SetMediaTrackInfo_Value(track, "I_HEIGHTOVERRIDE", height)
         else
-            reaper.SetMediaTrackInfo_Value(track, "I_HEIGHTOVERRIDE", 20)
+            reaper.SetMediaTrackInfo_Value(track, "I_HEIGHTOVERRIDE", min_height)
             reaper.SetMediaTrackInfo_Value(track, "B_HEIGHTLOCK", 1)
         end
     end
