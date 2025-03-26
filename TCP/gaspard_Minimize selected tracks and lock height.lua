@@ -1,10 +1,11 @@
 -- @description Minimize selected tracks and lock height
 -- @author gaspard
--- @version 1.0.1
+-- @version 1.0.2
 -- @about Minimize selected tracks and lock height
--- @changelog Updated minimized height to 25 by default (can be modified in script file)
+-- @changelog Added mute track feature (activate within script file)
 
 local min_height = 25 -- CHANGE THIS VALUE TO DESIRED MIN HEIGHT (default REAPER min track height is 25)
+local should_mute = false -- CHANGE THIS TO true OR false
 
 local sel_track_count = reaper.CountSelectedTracks(0)
 if sel_track_count > 0 then
@@ -31,9 +32,11 @@ if sel_track_count > 0 then
                 end
             end
             reaper.SetMediaTrackInfo_Value(track, "I_HEIGHTOVERRIDE", height)
+            if should_mute then reaper.SetMediaTrackInfo_Value(track, "B_MUTE", 0) end
         else
             reaper.SetMediaTrackInfo_Value(track, "I_HEIGHTOVERRIDE", min_height)
             reaper.SetMediaTrackInfo_Value(track, "B_HEIGHTLOCK", 1)
+            if should_mute then reaper.SetMediaTrackInfo_Value(track, "B_MUTE", 1) end
         end
     end
 
