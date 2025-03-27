@@ -266,7 +266,7 @@ function tab_sampler.Show()
     --Start offset
     local start_offset = reaper.TrackFX_GetParam(track, fx_index, 13)
     start_offset = start_offset * sample_len / 1000
-    local display_start_offset = string.format("%.2f", start_offset * 1000)
+    local display_start_offset = string.format("%.2f", start_offset)
     changed, start_offset = reaper.ImGui_DragDouble(ctx, "Start offset##drag_start_offset", start_offset, 0.001, 0, sample_len / 1000, display_start_offset.."s")
     start_offset = start_offset * 1000 / sample_len
     if changed then
@@ -279,7 +279,7 @@ function tab_sampler.Show()
     -- End offset
     local end_offset = reaper.TrackFX_GetParam(track, fx_index, 14)
     end_offset = end_offset * sample_len / 1000
-    local display_end_offset = string.format("%.2f", tostring(end_offset * 1000 - start_offset * sample_len))-- / 1000))
+    local display_end_offset = string.format("%.2f", tostring(end_offset * 1000 - start_offset * sample_len) / 1000)
     changed, end_offset = reaper.ImGui_DragDouble(ctx, "Length##drag_end_offset", end_offset, 0.001, 0, sample_len / 1000, display_end_offset.."s")
     end_offset = end_offset * 1000 / sample_len
     if changed then
