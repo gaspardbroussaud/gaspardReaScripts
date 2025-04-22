@@ -8,6 +8,9 @@
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
 
+--#region SCRIPT INIT -------------------------------------------------
+-----------------------------------------------------------------------
+-----------------------------------------------------------------------
 -- Toggle button state in Reaper
 local action_name = ""
 local version = "0.0"
@@ -35,21 +38,30 @@ package.path = package.path .. ';' .. json_file_path .. '/?.lua'
 local gson = require('json_utilities_lib')
 local script_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]
 local settings_path = script_path..'Utilities/gaspard_'..action_name..'_settings.json'
---------------------------------------------------------------------
 
--- GUI ELEMENTS ----------------------------------------------------
+local Settings = {
+    close_on_open = {
+        value = true,
+        name = "Close on project open",
+        description = "Close launcher window on project open."
+    },
+    search_type = {
+        value = "A-Z",
+        name = "Search order type",
+        description = "Search order alphabetically, by order, by date..."
+    },
+    default_open_style = {
+        value = "new_tab",
+        name = "Default project openning style",
+        description = "Open project in current tab or in new tab as default behaviour."
+    }
+}
 
-local project_list = {}
-local function PopulateProjects()
-    table.insert(project_list, {name = "my_first_project", selected = false, path = "path"})
-    table.insert(project_list, {name = "big_file_for_project", selected = false, path = "path_number_2"})
-end
-PopulateProjects()
---------------------------------------------------------------------
+--#endregion
 
--- GUI ELEMENTS ----------------------------------------------------
-
---#region GUI Variables
+--#region GUI VARIABLES -----------------------------------------------
+-----------------------------------------------------------------------
+-----------------------------------------------------------------------
 -- Window variables
 local og_window_width = 850
 local og_window_height = 300
@@ -57,8 +69,10 @@ local min_width, min_height = 500, 201
 local max_width, max_height = 1000, 400
 local window_width, window_height = og_window_width, og_window_height
 local window_x, window_y = 0, 0
+local popup_x, popup_y = 0, 0
+local mouse_right_clic_popup = false
 local no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
-local window_name = "GASPARD REA LAUNCHER"
+local window_name = "GASPARD REAPER LAUNCHER"
 
 -- Sizing variables
 local topbar_height = 30
@@ -81,6 +95,101 @@ local style = dofile(gui_style_settings_path)
 local style_vars = style.vars
 local style_colors = style.colors
 --#endregion
+
+--region SCRIPT ELEMENTS ----------------------------------------------
+-----------------------------------------------------------------------
+-----------------------------------------------------------------------
+
+local project_list = {}
+local project_search = ""
+local search_types = {"A-Z", "1-9", "Date"}
+
+local current_right_clic_project = nil
+local project_already_selected = false
+
+local function GetRecentProjects()
+    local i = 1
+    local path = ""
+    while path ~= "noEntry" do
+        _, path = reaper.BR_Win32_GetPrivateProfileString("recent", "recent" .. string.format("%02d", i), "noEntry", reaper.get_ini_file())
+        if path == "noEntry" then return end
+        local cur_exists = reaper.file_exists(path)
+        local cur_name = path:match("([^\\/]+)$"):gsub("%.rpp$", "")
+        table.insert(project_list, {exists = cur_exists, name = cur_name, selected = false, path = path, stared = false})
+        i = i + 1
+    end
+end
+
+local function System_Init()
+    GetRecentProjects()
+end
+
+local function SortAtoZ()
+end
+
+local function Sort1to9()
+end
+
+local function SortDate()
+end
+
+local function SetSortingToType(type)
+    if type == "A-Z" then SortAtoZ()
+    elseif type == "1-9" then Sort1to9()
+    elseif type == "Date" then SortDate()
+    end
+end
+
+-- Split input text in multiple words (space between in orginial text)
+local function SplitIntoWords(text)
+    local words = {}
+    for word in text:gmatch("%S+") do
+        table.insert(words, word)
+    end
+    return words
+end
+
+-- Check for word matches in script names with input text
+local function MatchesAllWords(words, text)
+    for _, word in ipairs(words) do
+        if not text:lower():find(word:lower(), 1, true) then
+            return false
+        end
+    end
+    return true
+end
+
+local function ShiftSelectInTable(i_one, i_two, tab)
+    local first = 0
+    local last = 0
+    if i_one < i_two then first, last = i_one, i_two
+    else first, last = i_two, i_one end
+
+    for i = first, #tab do
+        tab[i].selected = true
+        if i == last then return end
+    end
+end
+
+local function LoadInCurrentTab(path)
+    reaper.Main_openProject(path)
+end
+
+local function LoadInNewTab(path)
+    reaper.Main_OnCommand(41929, 0) -- New project tab (ignore default template)
+    reaper.Main_openProject(path)
+end
+
+local function System_Loop()
+    CTRL = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftCtrl()) or reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_RightCtrl())
+    SHIFT = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftShift()) or reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_RightShift())
+end
+
+--endregion
+
+--region GUI ELEMENTS -------------------------------------------------
+-----------------------------------------------------------------------
+-----------------------------------------------------------------------
 
 -- GUI Top Bar
 local function TopBarDisplay()
@@ -130,12 +239,138 @@ end
 
 -- All GUI elements
 local function ElementsDisplay()
-    if reaper.ImGui_BeginListBox(ctx, "##project_listbox") then
+    -- Search bar
+    reaper.ImGui_Text(ctx, "Search:")
+
+    reaper.ImGui_SameLine(ctx)
+
+    reaper.ImGui_PushItemWidth(ctx, -1 - 70)
+    changed, project_search = reaper.ImGui_InputText(ctx, "##search_bar", project_search)
+
+    reaper.ImGui_SameLine(ctx)
+
+    reaper.ImGui_PushItemWidth(ctx, -1)
+    if reaper.ImGui_BeginCombo(ctx, "##sort_search", Settings.search_type.value) then
+        for _, type in ipairs(search_types) do
+            local is_selected = (type == Settings.search_type.value)
+            if reaper.ImGui_Selectable(ctx, type, is_selected) then
+                Settings.search_type.value = type
+                SetSortingToType(type)
+            end
+        end
+        reaper.ImGui_EndCombo(ctx)
+    end
+
+    -- Listbox of projects
+    if reaper.ImGui_BeginListBox(ctx, "##project_listbox", -1, -1) then
         for i, project in ipairs(project_list) do
-            changed, project.selected = reaper.ImGui_Selectable(ctx, project.name, project.selected)
+            if project_search == "" or MatchesAllWords(SplitIntoWords(project_search), project.name) then
+                -- Favorite start
+                changed, project.stared = reaper.ImGui_Checkbox(ctx, "##star_"..tostring(i), project.stared)
+
+                reaper.ImGui_SameLine(ctx)
+
+                -- Selectable line
+                if not project.exists then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xFF0000A1) end
+                changed, project.selected = reaper.ImGui_Selectable(ctx, project.name, project.selected)
+                if not project.exists then reaper.ImGui_PopStyleColor(ctx) end
+                if changed then
+                    if SHIFT then
+                        if last_project_selected ~= i then
+                            ShiftSelectInTable(i, last_project_selected, project_list)
+                        end
+                    else
+                        if not CTRL then
+                            if not project.selected then project.selected = true end
+                            for j, j_project in ipairs(project_list) do
+                                if j ~= i then j_project.selected = false end
+                            end
+                        end
+                    end
+
+                    last_project_selected = i
+                end
+
+                -- On Double clic
+                if reaper.ImGui_IsItemHovered(ctx) then
+                    if reaper.ImGui_IsMouseClicked(ctx, reaper.ImGui_MouseButton_Right()) then
+                        if project.exists then
+                            if project.selected then
+                                project_already_selected = true
+                            else
+                                project.selected = true
+                            end
+                            popup_x, popup_y = reaper.ImGui_GetMousePos(ctx)
+                            mouse_right_clic_popup = true
+                            current_right_clic_project = project
+                        else
+                            reaper.MB("No file found at path:\n"..project.path, "GASPARD REAPER LAUNCHER ERROR", 0)
+                        end
+                    end
+
+                    if reaper.ImGui_IsMouseDoubleClicked(ctx, reaper.ImGui_MouseButton_Left()) then
+                        if project.exists then
+                            if Settings.default_open_style.value == "new_tab" then
+                                LoadInNewTab(project.path)
+                            elseif Settings.default_open_style.value == "current_tab" then
+                               LoadInCurrentTab(project.path)
+                            end
+
+                            if Settings.close_on_open.value then open = false end
+                        else
+                            reaper.MB("No file found at path:\n"..project.path, "GASPARD REAPER LAUNCHER ERROR", 0)
+                        end
+                    end
+                end
+            end
         end
 
         reaper.ImGui_EndListBox(ctx)
+    end
+
+    if mouse_right_clic_popup then
+        reaper.ImGui_OpenPopup(ctx, "popup_mouse_right_clic")
+        mouse_right_clic_popup = false
+    end
+    reaper.ImGui_SetNextWindowPos(ctx, popup_x, popup_y)
+    if reaper.ImGui_BeginPopup(ctx, "popup_mouse_right_clic") then
+        reaper.ImGui_SetKeyboardFocusHere(ctx)
+        if not current_right_clic_project then
+            reaper.ImGui_CloseCurrentPopup(ctx)
+            return
+        end
+
+        reaper.ImGui_Selectable(ctx, "Load in current tab", false)
+        if reaper.ImGui_IsItemActivated(ctx) then
+            LoadInCurrentTab(current_right_clic_project.path)
+            if Settings.close_on_open.value then open = false end
+        end
+
+        reaper.ImGui_Selectable(ctx, "Load in new tab", false)
+        if reaper.ImGui_IsItemActivated(ctx) then
+            LoadInNewTab(current_right_clic_project.path)
+            if Settings.close_on_open.value then open = false end
+        end
+
+        --[[if not reaper.ImGui_IsWindowHovered(ctx) then
+            if not mouse_right_clic_popup then
+                current_right_clic_project.selected = false
+                current_right_clic_project = nil
+                reaper.ImGui_CloseCurrentPopup(ctx)
+            end
+        else
+            mouse_right_clic_popup = false
+        end]]
+        reaper.ImGui_EndPopup(ctx)
+    else
+        if current_right_clic_project then
+            if not project_already_selected then
+                current_right_clic_project.selected = false
+            else
+                project_already_selected = false
+            end
+            current_right_clic_project = nil
+        end
     end
 
     reaper.ImGui_SameLine(ctx)
@@ -146,6 +381,7 @@ end
 -- Main loop
 local function Gui_Loop()
     -- On tick
+    System_Loop()
 
     -- GUI --------
     Gui_PushTheme()
@@ -178,4 +414,9 @@ local function Gui_Loop()
     end
 end
 
+--endregion
+
+System_Init()
 Gui_Loop()
+
+reaper.atexit(SetButtonState)
