@@ -319,6 +319,7 @@ local function ElementsDisplay()
                             if Settings.close_on_open.value then open = false end
                         else
                             reaper.MB("No file found at path:\n"..project.path, "GASPARD REAPER LAUNCHER ERROR", 0)
+                            project.selected = false
                         end
                     end
                 end
