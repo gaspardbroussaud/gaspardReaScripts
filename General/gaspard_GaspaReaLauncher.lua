@@ -63,10 +63,10 @@ local Settings = {
 -----------------------------------------------------------------------
 -----------------------------------------------------------------------
 -- Window variables
-local og_window_width = 850
-local og_window_height = 300
+local og_window_width = 1000
+local og_window_height = 400
 local min_width, min_height = 500, 201
-local max_width, max_height = 1000, 400
+local max_width, max_height = 1920, 1080
 local window_width, window_height = og_window_width, og_window_height
 local window_x, window_y = 0, 0
 local popup_x, popup_y = 0, 0
@@ -100,8 +100,6 @@ local style_colors = style.colors
 -----------------------------------------------------------------------
 -----------------------------------------------------------------------
 
---local once = true
-
 local project_list = {}
 local project_search = ""
 local search_types = {"A-Z", "Newest", "Oldest"}
@@ -133,9 +131,9 @@ local function GetRecentProjects()
         if path == "noEntry" then break end
         local cur_exists = reaper.file_exists(path)
         local cur_name = path:match("([^\\/]+)$"):gsub("%.rpp$", "")
-        local retval, _, _, modifiedTime, _, _, _, _, _, _, _, _ = reaper.JS_File_Stat(path)
-        if retval ~= 0 then modifiedTime = "" end
-        project_list[i] = {exists = cur_exists, name = cur_name, selected = false, path = path, date = modifiedTime, stared = false}
+        local retval, _, _, modified_time, _, _, _, _, _, _, _, _ = reaper.JS_File_Stat(path)
+        if retval ~= 0 then modified_time = "" end
+        project_list[i] = {exists = cur_exists, name = cur_name, selected = false, path = path, date = modified_time, stared = false, ini_line = i}
         i = i + 1
     end
     if #project_list > 0 then
@@ -308,18 +306,14 @@ local function ElementsDisplay()
                 -- On Double clic
                 if reaper.ImGui_IsItemHovered(ctx) then
                     if reaper.ImGui_IsMouseClicked(ctx, reaper.ImGui_MouseButton_Right()) then
-                        if project.exists then
-                            if project.selected then
-                                project_already_selected = true
-                            else
-                                project.selected = true
-                            end
-                            popup_x, popup_y = reaper.ImGui_GetMousePos(ctx)
-                            mouse_right_clic_popup = true
-                            current_right_clic_project = project
+                        if project.selected then
+                            project_already_selected = true
                         else
-                            reaper.MB("No file found at path:\n"..project.path, "GASPARD REAPER LAUNCHER ERROR", 0)
+                            project.selected = true
                         end
+                        popup_x, popup_y = reaper.ImGui_GetMousePos(ctx)
+                        mouse_right_clic_popup = true
+                        current_right_clic_project = project
                     end
 
                     if reaper.ImGui_IsMouseDoubleClicked(ctx, reaper.ImGui_MouseButton_Left()) then
@@ -391,6 +385,18 @@ local function ElementsDisplay()
                 end
             end
             if Settings.close_on_open.value then open = false end
+        end
+
+        reaper.ImGui_Selectable(ctx, "Remove entry", false)
+        if reaper.ImGui_IsItemActivated(ctx) then
+            if reaper.ShowMessageBox("The selected entries will be removed.", "REMOVE SELECTED ENTRIES", 1) == 1 then
+                for _, j_project in ipairs(project_list) do
+                    if j_project.selected then
+                        reaper.BR_Win32_WritePrivateProfileString("recent", "recent"..string.format("%02d", j_project.ini_line), "", reaper.get_ini_file())
+                    end
+                end
+                GetRecentProjects()
+            end
         end
 
         reaper.ImGui_EndPopup(ctx)
