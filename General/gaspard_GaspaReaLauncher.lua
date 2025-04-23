@@ -37,7 +37,7 @@ local json_file_path = reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/JS
 package.path = package.path .. ';' .. json_file_path .. '/?.lua'
 local gson = require('json_utilities_lib')
 local script_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]
-local settings_path = script_path..'Utilities/gaspard_'..action_name..'_settings.json'
+local settings_path = script_path..'/gaspard_'..action_name..'_settings.json'
 
 local Settings = {
     close_on_open = {
@@ -46,7 +46,7 @@ local Settings = {
         description = "Close launcher window on project open."
     },
     search_type = {
-        value = "A-Z",
+        value = "Newest",
         name = "Search order type",
         description = "Search order alphabetically, by order, by date..."
     },
@@ -80,7 +80,7 @@ local font_size = 16
 local small_font_size = font_size * 0.75
 
 -- ImGui Init
-local ctx = reaper.ImGui_CreateContext('random_play_context')
+local ctx = reaper.ImGui_CreateContext('gaspard_rea_launcher_ctx')
 local font = reaper.ImGui_CreateFont('sans-serif', font_size)
 local italic_font = reaper.ImGui_CreateFont('sans-serif', font_size, reaper.ImGui_FontFlags_Italic())
 local small_font = reaper.ImGui_CreateFont('sans-serif', small_font_size, reaper.ImGui_FontFlags_Italic())
@@ -100,44 +100,51 @@ local style_colors = style.colors
 -----------------------------------------------------------------------
 -----------------------------------------------------------------------
 
+--local once = true
+
 local project_list = {}
 local project_search = ""
-local search_types = {"A-Z", "1-9", "Date"}
+local search_types = {"A-Z", "Newest", "Oldest"}
 
 local current_right_clic_project = nil
 local project_already_selected = false
+
+local function SetSortingToType(type, tab)
+    if type == "A-Z" then
+        table.sort(tab, function(a, b)
+            return a.name:lower() < b.name:lower()
+        end)
+    elseif type == "Newest" then
+        table.sort(project_list, function(a, b)
+            return a.date < b.date
+        end)
+    elseif type == "Oldest" then
+        table.sort(project_list, function(a, b)
+            return a.date > b.date
+        end)
+    end
+end
 
 local function GetRecentProjects()
     local i = 1
     local path = ""
     while path ~= "noEntry" do
         _, path = reaper.BR_Win32_GetPrivateProfileString("recent", "recent" .. string.format("%02d", i), "noEntry", reaper.get_ini_file())
-        if path == "noEntry" then return end
+        if path == "noEntry" then break end
         local cur_exists = reaper.file_exists(path)
         local cur_name = path:match("([^\\/]+)$"):gsub("%.rpp$", "")
-        table.insert(project_list, {exists = cur_exists, name = cur_name, selected = false, path = path, stared = false})
+        local retval, _, _, modifiedTime, _, _, _, _, _, _, _, _ = reaper.JS_File_Stat(path)
+        if retval ~= 0 then modifiedTime = "" end
+        project_list[i] = {exists = cur_exists, name = cur_name, selected = false, path = path, date = modifiedTime, stared = false}
         i = i + 1
+    end
+    if #project_list > 0 then
+        SetSortingToType(Settings.search_type.value, project_list)
     end
 end
 
 local function System_Init()
     GetRecentProjects()
-end
-
-local function SortAtoZ()
-end
-
-local function Sort1to9()
-end
-
-local function SortDate()
-end
-
-local function SetSortingToType(type)
-    if type == "A-Z" then SortAtoZ()
-    elseif type == "1-9" then Sort1to9()
-    elseif type == "Date" then SortDate()
-    end
 end
 
 -- Split input text in multiple words (space between in orginial text)
@@ -183,6 +190,15 @@ end
 local function System_Loop()
     CTRL = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftCtrl()) or reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_RightCtrl())
     SHIFT = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftShift()) or reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_RightShift())
+
+    --[[if math.floor(reaper.ImGui_GetTime(ctx) % 5) == 0 then
+        if not once then
+            GetRecentProjects()
+            once = true
+        end
+    else
+        once = false
+    end]]
 end
 
 --endregion
@@ -237,6 +253,29 @@ local function Gui_PopTheme()
     reaper.ImGui_PopStyleColor(ctx, #style_colors)
 end
 
+local function draw_filled_star(draw_list, cx, cy, outer_r, inner_r, color)
+    local points = {}
+    local num_points = 5
+    local angle_step = math.pi / num_points
+    local start_angle = -math.pi / 2
+
+    -- Generate 10 points (outer + inner alternating)
+    for i = 0, num_points * 2 - 1 do
+        local angle = start_angle + i * angle_step
+        local r = (i % 2 == 0) and outer_r or inner_r
+        local x = cx + math.cos(angle) * r
+        local y = cy + math.sin(angle) * r
+        points[i + 1] = {x = x, y = y}
+    end
+
+    -- Draw filled triangles for each outer star point
+    for i = 1, #points do
+        local a = points[i]
+        local b = points[(i % #points) + 1]
+        reaper.ImGui_DrawList_AddTriangleFilled(draw_list, cx, cy, a.x, a.y, b.x, b.y, color)
+    end
+end
+
 -- All GUI elements
 local function ElementsDisplay()
     -- Search bar
@@ -244,7 +283,7 @@ local function ElementsDisplay()
 
     reaper.ImGui_SameLine(ctx)
 
-    reaper.ImGui_PushItemWidth(ctx, -1 - 70)
+    reaper.ImGui_PushItemWidth(ctx, -1 - 85)
     changed, project_search = reaper.ImGui_InputText(ctx, "##search_bar", project_search)
 
     reaper.ImGui_SameLine(ctx)
@@ -255,7 +294,7 @@ local function ElementsDisplay()
             local is_selected = (type == Settings.search_type.value)
             if reaper.ImGui_Selectable(ctx, type, is_selected) then
                 Settings.search_type.value = type
-                SetSortingToType(type)
+                SetSortingToType(type, project_list)
             end
         end
         reaper.ImGui_EndCombo(ctx)
@@ -263,10 +302,19 @@ local function ElementsDisplay()
 
     -- Listbox of projects
     if reaper.ImGui_BeginListBox(ctx, "##project_listbox", -1, -1) then
+        local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
+
         for i, project in ipairs(project_list) do
             if project_search == "" or MatchesAllWords(SplitIntoWords(project_search), project.name) then
                 -- Favorite start
-                changed, project.stared = reaper.ImGui_Checkbox(ctx, "##star_"..tostring(i), project.stared)
+                --changed, project.stared = reaper.ImGui_Checkbox(ctx, "##star_"..tostring(i), project.stared)
+                local cx, cy = reaper.ImGui_GetCursorScreenPos(ctx)
+                local button_size = 15
+                if reaper.ImGui_InvisibleButton(ctx, "##star_"..tostring(i), button_size, button_size) then
+                    project.stared = not project.stared
+                end
+                local hovered = reaper.ImGui_IsItemHovered(ctx)
+                local activated = reaper.ImGui_IsItemActivated(ctx)
 
                 reaper.ImGui_SameLine(ctx)
 
@@ -309,20 +357,28 @@ local function ElementsDisplay()
                     end
 
                     if reaper.ImGui_IsMouseDoubleClicked(ctx, reaper.ImGui_MouseButton_Left()) then
-                        if project.exists then
-                            if Settings.default_open_style.value == "new_tab" then
-                                LoadInNewTab(project.path)
-                            elseif Settings.default_open_style.value == "current_tab" then
-                               LoadInCurrentTab(project.path)
-                            end
+                        for _, j_project in ipairs(project_list) do
+                            if j_project.selected then
+                                if j_project.exists then
+                                    if Settings.default_open_style.value == "new_tab" then
+                                        LoadInNewTab(j_project.path)
+                                    elseif Settings.default_open_style.value == "current_tab" then
+                                        LoadInCurrentTab(j_project.path)
+                                    end
 
-                            if Settings.close_on_open.value then open = false end
-                        else
-                            reaper.MB("No file found at path:\n"..project.path, "GASPARD REAPER LAUNCHER ERROR", 0)
-                            project.selected = false
+                                    if Settings.close_on_open.value then open = false end
+                                else
+                                    reaper.MB("No file found at path:\n"..j_project.path, "GASPARD REAPER LAUNCHER ERROR", 0)
+                                    j_project.selected = false
+                                end
+                            end
                         end
                     end
                 end
+
+                local outer_r, inner_r = 7, 3.5
+                local color = activated and 0xFFFFFFFF or hovered and 0xFFFFFFF1 or project.stared and 0xFFFFFFFF or 0xAAAAAAFF
+                draw_filled_star(draw_list, cx + (button_size / 2), cy + (button_size / 1.5), outer_r, inner_r, color)
             end
         end
 
@@ -343,25 +399,34 @@ local function ElementsDisplay()
 
         reaper.ImGui_Selectable(ctx, "Load in current tab", false)
         if reaper.ImGui_IsItemActivated(ctx) then
-            LoadInCurrentTab(current_right_clic_project.path)
+            for _, j_project in ipairs(project_list) do
+                if j_project.selected then
+                    if j_project.exists then
+                        LoadInCurrentTab(j_project.path)
+                    else
+                        reaper.MB("No file found at path:\n"..j_project.path, "GASPARD REAPER LAUNCHER ERROR", 0)
+                        j_project.selected = false
+                    end
+                end
+            end
             if Settings.close_on_open.value then open = false end
         end
 
         reaper.ImGui_Selectable(ctx, "Load in new tab", false)
         if reaper.ImGui_IsItemActivated(ctx) then
-            LoadInNewTab(current_right_clic_project.path)
+            for _, j_project in ipairs(project_list) do
+                if j_project.selected then
+                    if j_project.exists then
+                        LoadInNewTab(j_project.path)
+                    else
+                        reaper.MB("No file found at path:\n"..j_project.path, "GASPARD REAPER LAUNCHER ERROR", 0)
+                        j_project.selected = false
+                    end
+                end
+            end
             if Settings.close_on_open.value then open = false end
         end
 
-        --[[if not reaper.ImGui_IsWindowHovered(ctx) then
-            if not mouse_right_clic_popup then
-                current_right_clic_project.selected = false
-                current_right_clic_project = nil
-                reaper.ImGui_CloseCurrentPopup(ctx)
-            end
-        else
-            mouse_right_clic_popup = false
-        end]]
         reaper.ImGui_EndPopup(ctx)
     else
         if current_right_clic_project then
@@ -373,10 +438,6 @@ local function ElementsDisplay()
             current_right_clic_project = nil
         end
     end
-
-    reaper.ImGui_SameLine(ctx)
-
-    reaper.ImGui_Button(ctx, "Add to favorites")
 end
 
 -- Main loop
