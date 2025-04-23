@@ -190,15 +190,6 @@ end
 local function System_Loop()
     CTRL = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftCtrl()) or reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_RightCtrl())
     SHIFT = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftShift()) or reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_RightShift())
-
-    --[[if math.floor(reaper.ImGui_GetTime(ctx) % 5) == 0 then
-        if not once then
-            GetRecentProjects()
-            once = true
-        end
-    else
-        once = false
-    end]]
 end
 
 --endregion
@@ -253,29 +244,6 @@ local function Gui_PopTheme()
     reaper.ImGui_PopStyleColor(ctx, #style_colors)
 end
 
-local function draw_filled_star(draw_list, cx, cy, outer_r, inner_r, color)
-    local points = {}
-    local num_points = 5
-    local angle_step = math.pi / num_points
-    local start_angle = -math.pi / 2
-
-    -- Generate 10 points (outer + inner alternating)
-    for i = 0, num_points * 2 - 1 do
-        local angle = start_angle + i * angle_step
-        local r = (i % 2 == 0) and outer_r or inner_r
-        local x = cx + math.cos(angle) * r
-        local y = cy + math.sin(angle) * r
-        points[i + 1] = {x = x, y = y}
-    end
-
-    -- Draw filled triangles for each outer star point
-    for i = 1, #points do
-        local a = points[i]
-        local b = points[(i % #points) + 1]
-        reaper.ImGui_DrawList_AddTriangleFilled(draw_list, cx, cy, a.x, a.y, b.x, b.y, color)
-    end
-end
-
 -- All GUI elements
 local function ElementsDisplay()
     -- Search bar
@@ -307,14 +275,12 @@ local function ElementsDisplay()
         for i, project in ipairs(project_list) do
             if project_search == "" or MatchesAllWords(SplitIntoWords(project_search), project.name) then
                 -- Favorite start
-                --changed, project.stared = reaper.ImGui_Checkbox(ctx, "##star_"..tostring(i), project.stared)
                 local cx, cy = reaper.ImGui_GetCursorScreenPos(ctx)
                 local button_size = 15
                 if reaper.ImGui_InvisibleButton(ctx, "##star_"..tostring(i), button_size, button_size) then
                     project.stared = not project.stared
                 end
                 local hovered = reaper.ImGui_IsItemHovered(ctx)
-                local activated = reaper.ImGui_IsItemActivated(ctx)
 
                 reaper.ImGui_SameLine(ctx)
 
@@ -376,9 +342,9 @@ local function ElementsDisplay()
                     end
                 end
 
-                local outer_r, inner_r = 7, 3.5
-                local color = activated and 0xFFFFFFFF or hovered and 0xFFFFFFF1 or project.stared and 0xFFFFFFFF or 0xAAAAAAFF
-                draw_filled_star(draw_list, cx + (button_size / 2), cy + (button_size / 1.5), outer_r, inner_r, color)
+                local outer_r = 6
+                local color = project.stared and 0xFFFFFFFF or hovered and 0xFFFFFFA1 or 0x00000000
+                reaper.ImGui_DrawList_AddCircleFilled(draw_list, cx + (button_size / 2), cy + (button_size / 2), outer_r, color)
             end
         end
 
