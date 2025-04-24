@@ -1,7 +1,6 @@
---@noindex
 --@description Pattern Manipulator
 --@author gaspard
---@version 0.0.1b
+--@version 0.0.1
 --@changelog
 --  Initial commit
 --@about
@@ -13,7 +12,7 @@
 -----------------------------------------------------------------------
 -- Toggle button state in Reaper
 local action_name = ""
-local version = "0.0"
+local version = "0.0.1"
 function SetButtonState(set)
     local _, name, sec, cmd, _, _, _ = reaper.get_action_context()
     if set == 1 then
@@ -39,7 +38,10 @@ local gson = require('json_utilities_lib')
 local script_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]
 local settings_path = script_path..'/gaspard_'..action_name..'_settings.json'
 
-local Settings = {
+local settings_version = "0.0.1"
+local default_settings = {
+    version = settings_version,
+    order = {"close_on_open", "default_open_style"},
     close_on_open = {
         value = true,
         name = "Close on project open",
@@ -47,15 +49,26 @@ local Settings = {
     },
     search_type = {
         value = "Newest",
+        list = {"A-Z", "Newest", "Oldest", "Favorites"},
         name = "Search order type",
         description = "Search order alphabetically, by order, by date..."
     },
     default_open_style = {
         value = "new_tab",
+        list = {"current_tab", "new_tab"},
         name = "Default project openning style",
         description = "Open project in current tab or in new tab as default behaviour."
     }
 }
+
+Settings = gson.LoadJSON(settings_path, default_settings)
+if settings_version ~= Settings.version then
+    reaper.ShowConsoleMsg("\n!!! WARNING !!! (gaspard_GaspaReaLauncher.lua)\n")
+    reaper.ShowConsoleMsg("Settings are erased due to updates in settings file.\nPlease excuse this behaviour.\n")
+    reaper.ShowConsoleMsg("Now in version: "..settings_version.."\n")
+    Settings = gson.SaveJSON(settings_path, default_settings)
+    Settings = gson.LoadJSON(settings_path, Settings)
+end
 
 --#endregion
 
@@ -88,6 +101,7 @@ reaper.ImGui_Attach(ctx, font)
 reaper.ImGui_Attach(ctx, italic_font)
 reaper.ImGui_Attach(ctx, small_font)
 local global_spacing = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing())
+local show_settings = false
 
 -- Get GUI style from file
 local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
@@ -102,10 +116,33 @@ local style_colors = style.colors
 
 local project_list = {}
 local project_search = ""
-local search_types = {"A-Z", "Newest", "Oldest"}
-
 local current_right_clic_project = nil
 local project_already_selected = false
+
+local function SortFavorites()
+    local favorites = {}
+    local not_favs = {}
+    for _, project in ipairs(project_list) do
+        if project.stared then
+            favorites[#favorites+1] = project
+        else
+            not_favs[#not_favs+1] = project
+        end
+    end
+    table.sort(favorites, function(a, b)
+        return a.name:lower() < b.name:lower()
+    end)
+    table.sort(not_favs, function(a, b)
+        return a.name:lower() < b.name:lower()
+    end)
+    project_list = {}
+    for _, fav in ipairs(favorites) do
+        project_list[#project_list+1] = fav
+    end
+    for _, not_fav in ipairs(not_favs) do
+        project_list[#project_list+1] = not_fav
+    end
+end
 
 local function SetSortingToType(type, tab)
     if type == "A-Z" then
@@ -120,6 +157,8 @@ local function SetSortingToType(type, tab)
         table.sort(project_list, function(a, b)
             return a.date > b.date
         end)
+    elseif type == "Favorites" then
+        SortFavorites()
     end
 end
 
@@ -190,6 +229,14 @@ local function System_Loop()
     SHIFT = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftShift()) or reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_RightShift())
 end
 
+local function LoadSettings()
+    gson.LoadJSON(settings_path, Settings)
+end
+
+local function SaveSettings()
+    gson.SaveJSON(settings_path, Settings)
+end
+
 --endregion
 
 --region GUI ELEMENTS -------------------------------------------------
@@ -209,10 +256,19 @@ local function TopBarDisplay()
         reaper.ImGui_Dummy(ctx, 3, 1)
         reaper.ImGui_SameLine(ctx)
 
-        local spacing_x_2 = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing()) * 2
-        local quit_w = 10 + spacing_x_2
+        local spacing_x = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing())
+        local settings_w = reaper.ImGui_CalcTextSize(ctx, "Settings") + 5 + spacing_x * 2
+        local quit_w = 10 + spacing_x * 2
         local y_pos = 0
-        reaper.ImGui_SetCursorPos(ctx, child_width - quit_w - spacing_x_2, y_pos)
+        reaper.ImGui_SetCursorPos(ctx, child_width + 1 - settings_w - quit_w - spacing_x * 3, y_pos)
+        reaper.ImGui_SetCursorPosY(ctx, y_pos)
+        if reaper.ImGui_Button(ctx, 'Settings##settings_button', settings_w) then
+            show_settings = not show_settings
+            if not show_settings then SaveSettings() end
+        end
+
+        reaper.ImGui_SameLine(ctx)
+
         reaper.ImGui_SetCursorPosY(ctx, y_pos)
         if reaper.ImGui_Button(ctx, 'X##quit_button', quit_w) then
             open = false
@@ -256,7 +312,7 @@ local function ElementsDisplay()
 
     reaper.ImGui_PushItemWidth(ctx, -1)
     if reaper.ImGui_BeginCombo(ctx, "##sort_search", Settings.search_type.value) then
-        for _, type in ipairs(search_types) do
+        for _, type in ipairs(Settings.search_type.list) do
             local is_selected = (type == Settings.search_type.value)
             if reaper.ImGui_Selectable(ctx, type, is_selected) then
                 Settings.search_type.value = type
@@ -277,15 +333,29 @@ local function ElementsDisplay()
                 local button_size = 15
                 if reaper.ImGui_InvisibleButton(ctx, "##star_"..tostring(i), button_size, button_size) then
                     project.stared = not project.stared
+                    SetSortingToType(Settings.search_type.value, project_list)
                 end
                 local hovered = reaper.ImGui_IsItemHovered(ctx)
 
                 reaper.ImGui_SameLine(ctx)
 
+                if hovered then
+                    local col_header = reaper.ImGui_GetStyleColor(ctx, reaper.ImGui_Col_HeaderHovered())
+                    local content_x, _ = reaper.ImGui_GetContentRegionMax(ctx)
+                    local padding_x, _ = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding())
+                    reaper.ImGui_DrawList_AddRectFilled(draw_list, cx, cy - 2, cx + content_x - padding_x, cy + 18, col_header)
+                end
+
                 -- Selectable line
+                local hovered_and_selected = hovered and project.selected
+                if hovered_and_selected then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Header(), 0x00000000) end
                 if not project.exists then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xFF0000A1) end
-                changed, project.selected = reaper.ImGui_Selectable(ctx, project.name, project.selected)
-                if not project.exists then reaper.ImGui_PopStyleColor(ctx) end
+                changed, project.selected = reaper.ImGui_Selectable(ctx, project.name, project.selected, reaper.ImGui_SelectableFlags_SpanAllColumns())
+                if not project.exists then reaper.ImGui_PopStyleColor(ctx, 1) end
+                if hovered_and_selected then reaper.ImGui_PopStyleColor(ctx, 1) end
+
+                local selectable_hovered = reaper.ImGui_IsItemHovered(ctx)
+
                 if changed then
                     if SHIFT then
                         if last_project_selected ~= i then
@@ -337,8 +407,8 @@ local function ElementsDisplay()
                 end
 
                 local outer_r = 6
-                local color = project.stared and 0xFFFFFFFF or hovered and 0xFFFFFFA1 or 0x00000000
-                reaper.ImGui_DrawList_AddCircleFilled(draw_list, cx + (button_size / 2), cy + (button_size / 2), outer_r, color)
+                local color = project.stared and 0xFFFFFFFF or hovered and 0xCCCCCCFF or selectable_hovered and 0xAAAAAAAA or 0x00000000
+                reaper.ImGui_DrawList_AddCircleFilled(draw_list, cx + (button_size / 1.6), cy + (button_size / 2), outer_r, color)
             end
         end
 
@@ -412,6 +482,46 @@ local function ElementsDisplay()
     end
 end
 
+-- All Settings
+local function ElementsSettings()
+    local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoResize()
+    local settings_width = og_window_width - 80
+    local settings_height = og_window_height * 0.7
+    reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
+    reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
+    local settings_visible, settings_open = reaper.ImGui_Begin(ctx, "SETTINGS", true, settings_flags)
+    if settings_visible then
+        local one_changed = false
+
+        changed, Settings.close_on_open.value = reaper.ImGui_Checkbox(ctx, Settings.close_on_open.name, Settings.close_on_open.value)
+        if changed then one_changed = true end
+        reaper.ImGui_SetItemTooltip(ctx, Settings.close_on_open.description)
+
+        local display = (Settings.default_open_style.value:sub(1,1):upper()..Settings.default_open_style.value:sub(2)):gsub("_", " ")
+        reaper.ImGui_PushItemWidth(ctx, 110)
+        if reaper.ImGui_BeginCombo(ctx, Settings.default_open_style.name, display) then
+            for _, type in ipairs(Settings.default_open_style.list) do
+                local is_selected = (type == Settings.default_open_style.value)
+                local type_display = (type:sub(1,1):upper()..type:sub(2)):gsub("_", " ")
+                if reaper.ImGui_Selectable(ctx, type_display, is_selected) then
+                    Settings.default_open_style.value = type
+                end
+            end
+            reaper.ImGui_EndCombo(ctx)
+        end
+        reaper.ImGui_SetItemTooltip(ctx, Settings.default_open_style.description)
+
+        if one_changed then SaveSettings() end
+
+        reaper.ImGui_End(ctx)
+    else
+        settings_open = false
+    end
+    if not settings_open then
+        show_settings = false
+    end
+end
+
 -- Main loop
 local function Gui_Loop()
     -- On tick
@@ -437,6 +547,8 @@ local function Gui_Loop()
         TopBarDisplay()
 
         ElementsDisplay()
+
+        if show_settings then ElementsSettings() end
 
         reaper.ImGui_End(ctx)
     end
