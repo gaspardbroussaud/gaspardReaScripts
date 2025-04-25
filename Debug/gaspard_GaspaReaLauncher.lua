@@ -1,4 +1,5 @@
---@description Pattern Manipulator
+--@noindex
+--@description GaspaReaLauncher
 --@author gaspard
 --@version 0.0.1
 --@changelog
