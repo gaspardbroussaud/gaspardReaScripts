@@ -1,8 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 0.0.1
+--@version 0.0.2
 --@changelog
---  Initial commit
+--  Initial commit 2
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -38,7 +38,7 @@ local gson = require('json_utilities_lib')
 local script_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]
 local settings_path = script_path..'/gaspard_'..action_name..'_settings.json'
 
-local settings_version = "0.0.1"
+local settings_version = "0.0.2"
 local default_settings = {
     version = settings_version,
     order = {"close_on_open", "default_open_style"},
@@ -49,7 +49,7 @@ local default_settings = {
     },
     search_type = {
         value = "Newest",
-        list = {"A-Z", "Newest", "Oldest", "Favorites"},
+        list = {"A-Z", "Z-A", "Newest", "Oldest", "Favorites"},
         name = "Search order type",
         description = "Search order alphabetically, by order, by date..."
     },
@@ -149,6 +149,10 @@ local function SetSortingToType(type, tab)
         table.sort(tab, function(a, b)
             return a.name:lower() < b.name:lower()
         end)
+    elseif type == "Z-A" then
+        table.sort(tab, function(a, b)
+            return a.name:lower() > b.name:lower()
+        end)
     elseif type == "Newest" then
         table.sort(project_list, function(a, b)
             return a.date > b.date
@@ -222,6 +226,25 @@ end
 local function LoadInNewTab(path)
     reaper.Main_OnCommand(41929, 0) -- New project tab (ignore default template)
     reaper.Main_openProject(path)
+end
+
+local function ProjectLoading()
+    for _, j_project in ipairs(project_list) do
+        if j_project.selected then
+            if j_project.exists then
+                if Settings.default_open_style.value == "new_tab" then
+                    LoadInNewTab(j_project.path)
+                elseif Settings.default_open_style.value == "current_tab" then
+                    LoadInCurrentTab(j_project.path)
+                end
+
+                if Settings.close_on_open.value then open = false end
+            else
+                reaper.MB("No file found at path:\n"..j_project.path, "GASPARD REAPER LAUNCHER ERROR", 0)
+                j_project.selected = false
+            end
+        end
+    end
 end
 
 local function System_Loop()
@@ -350,7 +373,8 @@ local function ElementsDisplay()
                 local hovered_and_selected = hovered and project.selected
                 if hovered_and_selected then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Header(), 0x00000000) end
                 if not project.exists then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xFF0000A1) end
-                changed, project.selected = reaper.ImGui_Selectable(ctx, project.name, project.selected, reaper.ImGui_SelectableFlags_SpanAllColumns())
+                local selectable_flags = reaper.ImGui_SelectableFlags_SpanAllColumns() | reaper.ImGui_SelectableFlags_AllowDoubleClick()
+                changed, project.selected = reaper.ImGui_Selectable(ctx, project.name, project.selected, selectable_flags)
                 if not project.exists then reaper.ImGui_PopStyleColor(ctx, 1) end
                 if hovered_and_selected then reaper.ImGui_PopStyleColor(ctx, 1) end
 
@@ -387,7 +411,7 @@ local function ElementsDisplay()
                     end
 
                     if reaper.ImGui_IsMouseDoubleClicked(ctx, reaper.ImGui_MouseButton_Left()) then
-                        for _, j_project in ipairs(project_list) do
+                        --[[for _, j_project in ipairs(project_list) do
                             if j_project.selected then
                                 if j_project.exists then
                                     if Settings.default_open_style.value == "new_tab" then
@@ -402,7 +426,8 @@ local function ElementsDisplay()
                                     j_project.selected = false
                                 end
                             end
-                        end
+                        end]]
+                        ProjectLoading(Settings.default_open_style.value)
                     end
                 end
 
@@ -434,7 +459,7 @@ local function ElementsDisplay()
                     if j_project.exists then
                         LoadInCurrentTab(j_project.path)
                     else
-                        reaper.MB("No file found at path:\n"..j_project.path, "GASPARD REAPER LAUNCHER ERROR", 0)
+                        reaper.MB("No file found at path:\n"..j_project.path.."\nRemove path?", "GASPARD REAPER LAUNCHER ERROR", 0)
                         j_project.selected = false
                     end
                 end
