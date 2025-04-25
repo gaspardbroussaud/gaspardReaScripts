@@ -1,4 +1,3 @@
---@noindex
 --@description GaspaReaLauncher
 --@author gaspard
 --@version 0.0.1
@@ -152,11 +151,11 @@ local function SetSortingToType(type, tab)
         end)
     elseif type == "Newest" then
         table.sort(project_list, function(a, b)
-            return a.date < b.date
+            return a.date > b.date
         end)
     elseif type == "Oldest" then
         table.sort(project_list, function(a, b)
-            return a.date > b.date
+            return a.date < b.date
         end)
     elseif type == "Favorites" then
         SortFavorites()
