@@ -1,8 +1,10 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 0.0.2
+--@version 0.0.3
 --@changelog
---  Initial commit 2
+--  - Added new project open
+--  - Added multi-open support and fixes
+--  - Optimisation and bug fix
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -12,7 +14,7 @@
 -----------------------------------------------------------------------
 -- Toggle button state in Reaper
 local action_name = ""
-local version = "0.0.1"
+local version = ""
 function SetButtonState(set)
     local _, name, sec, cmd, _, _, _ = reaper.get_action_context()
     if set == 1 then
@@ -38,7 +40,7 @@ local gson = require('json_utilities_lib')
 local script_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]
 local settings_path = script_path..'/gaspard_'..action_name..'_settings.json'
 
-local settings_version = "0.0.2"
+local settings_version = "0.0.1"
 local default_settings = {
     version = settings_version,
     order = {"close_on_open", "default_open_style"},
@@ -228,23 +230,37 @@ local function LoadInNewTab(path)
     reaper.Main_openProject(path)
 end
 
-local function ProjectLoading()
+local function ProjectLoading(search_type)
+    local retval, current_project = reaper.GetSetProjectInfo_String(0, "PROJECT_NAME", "", false)
+    if not retval then current_project = "" end
+    if current_project == "" then search_type = "current_tab" end
     for _, j_project in ipairs(project_list) do
         if j_project.selected then
             if j_project.exists then
-                if Settings.default_open_style.value == "new_tab" then
+                if search_type == "new_tab" then
                     LoadInNewTab(j_project.path)
-                elseif Settings.default_open_style.value == "current_tab" then
+                elseif search_type == "current_tab" then
                     LoadInCurrentTab(j_project.path)
+                    search_type = "new_tab"
                 end
-
-                if Settings.close_on_open.value then open = false end
             else
                 reaper.MB("No file found at path:\n"..j_project.path, "GASPARD REAPER LAUNCHER ERROR", 0)
                 j_project.selected = false
             end
         end
     end
+
+    if Settings.close_on_open.value then open = false end
+end
+
+local function NewProjectOpen(search_type)
+    if search_type == "new_tab" then
+        reaper.Main_OnCommand(41929, 0) -- New project tab (ignore default template)
+    elseif search_type == "current_tab" then
+        reaper.Main_OnCommand(40023, 0) -- New project
+    end
+
+    if Settings.close_on_open.value then open = false end
 end
 
 local function System_Loop()
@@ -280,10 +296,25 @@ local function TopBarDisplay()
         reaper.ImGui_SameLine(ctx)
 
         local spacing_x = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing())
+        local new_project_w = reaper.ImGui_CalcTextSize(ctx, "New project") + 5 + spacing_x * 2
         local settings_w = reaper.ImGui_CalcTextSize(ctx, "Settings") + 5 + spacing_x * 2
         local quit_w = 10 + spacing_x * 2
         local y_pos = 0
-        reaper.ImGui_SetCursorPos(ctx, child_width + 1 - settings_w - quit_w - spacing_x * 3, y_pos)
+
+        reaper.ImGui_SetCursorPos(ctx, child_width + 1 - new_project_w - settings_w - quit_w - spacing_x * 4, y_pos)
+        reaper.ImGui_SetCursorPosY(ctx, y_pos)
+        if reaper.ImGui_Button(ctx, 'New project##new_project_button', new_project_w) then
+            NewProjectOpen(Settings.default_open_style.value)
+        end
+        if reaper.ImGui_IsItemHovered(ctx) then
+            if reaper.ImGui_IsMouseClicked(ctx, reaper.ImGui_MouseButton_Right()) then
+                popup_x, popup_y = reaper.ImGui_GetMousePos(ctx)
+                mouse_right_clic_popup = true
+            end
+        end
+
+        reaper.ImGui_SameLine(ctx)
+
         reaper.ImGui_SetCursorPosY(ctx, y_pos)
         if reaper.ImGui_Button(ctx, 'Settings##settings_button', settings_w) then
             show_settings = not show_settings
@@ -298,6 +329,28 @@ local function TopBarDisplay()
         end
 
         reaper.ImGui_PopStyleVar(ctx, 1)
+
+        if mouse_right_clic_popup then
+            reaper.ImGui_OpenPopup(ctx, "popup_mouse_rc_topbar")
+            mouse_right_clic_popup = false
+        end
+        reaper.ImGui_SetNextWindowPos(ctx, popup_x, popup_y)
+        if reaper.ImGui_BeginPopup(ctx, "popup_mouse_rc_topbar") then
+            reaper.ImGui_SetKeyboardFocusHere(ctx)
+
+            reaper.ImGui_Selectable(ctx, "Create in current tab", false)
+            if reaper.ImGui_IsItemActivated(ctx) then
+                NewProjectOpen("current_tab")
+            end
+
+            reaper.ImGui_Selectable(ctx, "Create in new tab", false)
+            if reaper.ImGui_IsItemActivated(ctx) then
+                NewProjectOpen("new_tab")
+            end
+
+            reaper.ImGui_EndPopup(ctx)
+        end
+
         reaper.ImGui_EndChild(ctx)
     end
 end
@@ -328,7 +381,7 @@ local function ElementsDisplay()
 
     reaper.ImGui_SameLine(ctx)
 
-    reaper.ImGui_PushItemWidth(ctx, -1 - 85)
+    reaper.ImGui_PushItemWidth(ctx, -1 - 100)
     changed, project_search = reaper.ImGui_InputText(ctx, "##search_bar", project_search)
 
     reaper.ImGui_SameLine(ctx)
@@ -454,7 +507,7 @@ local function ElementsDisplay()
 
         reaper.ImGui_Selectable(ctx, "Load in current tab", false)
         if reaper.ImGui_IsItemActivated(ctx) then
-            for _, j_project in ipairs(project_list) do
+            --[[for _, j_project in ipairs(project_list) do
                 if j_project.selected then
                     if j_project.exists then
                         LoadInCurrentTab(j_project.path)
@@ -464,12 +517,13 @@ local function ElementsDisplay()
                     end
                 end
             end
-            if Settings.close_on_open.value then open = false end
+            if Settings.close_on_open.value then open = false end]]
+            ProjectLoading("current_tab")
         end
 
         reaper.ImGui_Selectable(ctx, "Load in new tab", false)
         if reaper.ImGui_IsItemActivated(ctx) then
-            for _, j_project in ipairs(project_list) do
+            --[[for _, j_project in ipairs(project_list) do
                 if j_project.selected then
                     if j_project.exists then
                         LoadInNewTab(j_project.path)
@@ -479,7 +533,8 @@ local function ElementsDisplay()
                     end
                 end
             end
-            if Settings.close_on_open.value then open = false end
+            if Settings.close_on_open.value then open = false end]]
+            ProjectLoading("new_tab")
         end
 
         reaper.ImGui_Selectable(ctx, "Remove entry", false)
