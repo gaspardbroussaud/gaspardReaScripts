@@ -1,8 +1,9 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 0.0.4
+--@version 0.0.5
 --@changelog
---  - Added open project at path
+--  - Added refresh project list
+--  - Button size auto adjust
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -262,7 +263,7 @@ local function NewProjectOpen(search_type)
     if Settings.close_on_open.value then open = false end
 end
 
-local function OpenProjectSelected(search_type)
+local function OpenProjectSelect(search_type)
     local retval, filepath = reaper.JS_Dialog_BrowseForOpenFiles("Select a project to open", "", "*.rpp", "", false)
     if retval and filepath ~= "" then
         if search_type == "new_tab" then
@@ -309,15 +310,20 @@ local function TopBarDisplay()
         reaper.ImGui_SameLine(ctx)
 
         local spacing_x = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing())
-        local new_project_w = reaper.ImGui_CalcTextSize(ctx, "New project") + 5 + spacing_x * 2
-        local open_project_w = reaper.ImGui_CalcTextSize(ctx, "Open project") + 5 + spacing_x * 2
+        local text_new_project = window_width > 650 and "New project" or "New"
+        local text_open_project = window_width > 600 and "Open project" or "Open"
+        local text_refresh = window_width > 550 and "Refresh" or "R"
+        local new_project_w = reaper.ImGui_CalcTextSize(ctx, text_new_project) + 5 + spacing_x * 2
+        local open_project_w = reaper.ImGui_CalcTextSize(ctx, text_open_project) + 5 + spacing_x * 2
+        local refresh_w = reaper.ImGui_CalcTextSize(ctx, text_refresh) + 5 + spacing_x * 2
         local settings_w = reaper.ImGui_CalcTextSize(ctx, "Settings") + 5 + spacing_x * 2
         local quit_w = 10 + spacing_x * 2
+        local x_pos = child_width + 1 - new_project_w - open_project_w - refresh_w - settings_w - quit_w - spacing_x * 6
         local y_pos = 0
 
-        reaper.ImGui_SetCursorPos(ctx, child_width + 1 - new_project_w - open_project_w - settings_w - quit_w - spacing_x * 5, y_pos)
+        reaper.ImGui_SetCursorPos(ctx, x_pos, y_pos)
         reaper.ImGui_SetCursorPosY(ctx, y_pos)
-        if reaper.ImGui_Button(ctx, 'New project##new_project_button', new_project_w) then
+        if reaper.ImGui_Button(ctx, text_new_project..'##new_project_button', new_project_w) then
             NewProjectOpen(Settings.default_open_style.value)
         end
         if reaper.ImGui_IsItemHovered(ctx) then
@@ -331,8 +337,8 @@ local function TopBarDisplay()
         reaper.ImGui_SameLine(ctx)
 
         reaper.ImGui_SetCursorPosY(ctx, y_pos)
-        if reaper.ImGui_Button(ctx, 'Open project##open_project_button', open_project_w) then
-            OpenProjectSelected(Settings.default_open_style.value)
+        if reaper.ImGui_Button(ctx, text_open_project..'##open_project_button', open_project_w) then
+            OpenProjectSelect(Settings.default_open_style.value)
         end
         if reaper.ImGui_IsItemHovered(ctx) then
             if reaper.ImGui_IsMouseClicked(ctx, reaper.ImGui_MouseButton_Right()) then
@@ -340,6 +346,13 @@ local function TopBarDisplay()
                 popup_x, popup_y = reaper.ImGui_GetMousePos(ctx)
                 mouse_right_clic_popup = true
             end
+        end
+
+        reaper.ImGui_SameLine(ctx)
+
+        reaper.ImGui_SetCursorPosY(ctx, y_pos)
+        if reaper.ImGui_Button(ctx, text_refresh..'##refresh_button', refresh_w) then
+            GetRecentProjects()
         end
 
         reaper.ImGui_SameLine(ctx)
@@ -373,7 +386,7 @@ local function TopBarDisplay()
                 if create_open == "open" then
                     NewProjectOpen("current_tab")
                 else
-                    OpenProjectSelected("current_tab")
+                    OpenProjectSelect("current_tab")
                 end
             end
 
@@ -382,7 +395,7 @@ local function TopBarDisplay()
                 if create_open == "create" then
                     NewProjectOpen("new_tab")
                 else
-                    OpenProjectSelected("new_tab")
+                    OpenProjectSelect("new_tab")
                 end
             end
 
