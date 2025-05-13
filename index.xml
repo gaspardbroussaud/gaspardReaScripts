@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="19cf16b33cdb08e446171e793a59134ff7cb00f5">
+<index version="1" name="Gaspard ReaScripts" commit="3475236a2bf123b061f2b149afc9c4e01458ef78">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -906,97 +906,6 @@
       <version name="1.0.0" author="gaspard" time="2025-01-13T09:08:53Z">
         <changelog><![CDATA[Initial release]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/43a842bd93571bf89ed7b014676e48a9b80fba3b/Marker/gaspard_Set%20marker%20to%20first%20transient%20in%20selected%20items.lua</source>
-      </version>
-    </reapack>
-  </category>
-  <category name="MIDI/PatternGenerator">
-    <reapack name="gaspard_Pattern generator.lua" type="script" desc="Pattern generator">
-      <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
-{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
-\widowctrl\hyphauto
-
-{\pard \ql \f0 \sa180 \li0 \fi0 \outlinelevel2 \b \fs28 Pattern generator\par}
-{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab A MIDI pattern generator.\sa180\par}
-}
-]]></description>
-      </metadata>
-      <version name="0.0.1b" author="gaspard" time="2025-03-03T13:59:02Z">
-        <changelog><![CDATA[- Add script]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4c1d018c59527eba37b3870cb5a32ec2591c0829/MIDI/PatternGenerator/gaspard_Pattern%20generator.lua</source>
-        <source file="Utilities/ReadMidiFile.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4c1d018c59527eba37b3870cb5a32ec2591c0829/MIDI/PatternGenerator/Utilities/ReadMidiFile.lua</source>
-        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4c1d018c59527eba37b3870cb5a32ec2591c0829/MIDI/PatternGenerator/Utilities/System.lua</source>
-        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4c1d018c59527eba37b3870cb5a32ec2591c0829/MIDI/PatternGenerator/Utilities/UserInterface.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_PatternZone.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4c1d018c59527eba37b3870cb5a32ec2591c0829/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_PatternZone.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_PianoRoll.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4c1d018c59527eba37b3870cb5a32ec2591c0829/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_PianoRoll.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_Presets.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4c1d018c59527eba37b3870cb5a32ec2591c0829/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_Presets.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_SampleZone.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4c1d018c59527eba37b3870cb5a32ec2591c0829/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_SampleZone.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_Settings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4c1d018c59527eba37b3870cb5a32ec2591c0829/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_Settings.lua</source>
-      </version>
-      <version name="0.0.2b" author="gaspard" time="2025-03-03T14:20:03Z">
-        <changelog><![CDATA[- Remove auto add sample at script start (used only for debug by dev)]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/83437052ba20b2b5a96eb5d318e414a57f701488/MIDI/PatternGenerator/gaspard_Pattern%20generator.lua</source>
-        <source file="Utilities/ReadMidiFile.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/83437052ba20b2b5a96eb5d318e414a57f701488/MIDI/PatternGenerator/Utilities/ReadMidiFile.lua</source>
-        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/83437052ba20b2b5a96eb5d318e414a57f701488/MIDI/PatternGenerator/Utilities/System.lua</source>
-        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/83437052ba20b2b5a96eb5d318e414a57f701488/MIDI/PatternGenerator/Utilities/UserInterface.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_PatternZone.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/83437052ba20b2b5a96eb5d318e414a57f701488/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_PatternZone.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_PianoRoll.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/83437052ba20b2b5a96eb5d318e414a57f701488/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_PianoRoll.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_Presets.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/83437052ba20b2b5a96eb5d318e414a57f701488/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_Presets.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_SampleZone.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/83437052ba20b2b5a96eb5d318e414a57f701488/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_SampleZone.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_Settings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/83437052ba20b2b5a96eb5d318e414a57f701488/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_Settings.lua</source>
-      </version>
-      <version name="0.0.3b" author="gaspard" time="2025-03-04T16:35:19Z">
-        <changelog><![CDATA[- Update payload text for midi files
-- Added scroll in pianoroll
-- Update name DRUMPADS to PADS
-- Added folder path setting for pattern files
-- Fixes]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0ac6a684f72b71fdcae9c58566d350e6c4d41667/MIDI/PatternGenerator/gaspard_Pattern%20generator.lua</source>
-        <source file="Utilities/ReadMidiFile.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0ac6a684f72b71fdcae9c58566d350e6c4d41667/MIDI/PatternGenerator/Utilities/ReadMidiFile.lua</source>
-        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0ac6a684f72b71fdcae9c58566d350e6c4d41667/MIDI/PatternGenerator/Utilities/System.lua</source>
-        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0ac6a684f72b71fdcae9c58566d350e6c4d41667/MIDI/PatternGenerator/Utilities/UserInterface.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_PatternZone.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0ac6a684f72b71fdcae9c58566d350e6c4d41667/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_PatternZone.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_PianoRoll.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0ac6a684f72b71fdcae9c58566d350e6c4d41667/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_PianoRoll.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_Presets.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0ac6a684f72b71fdcae9c58566d350e6c4d41667/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_Presets.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_SampleZone.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0ac6a684f72b71fdcae9c58566d350e6c4d41667/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_SampleZone.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_Settings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0ac6a684f72b71fdcae9c58566d350e6c4d41667/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_Settings.lua</source>
-      </version>
-      <version name="0.0.4b" author="gaspard" time="2025-03-04T16:50:32Z">
-        <changelog><![CDATA[- Adaptative scroll in pianoroll]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b5fba405770803e3f39d68f5b4bfb16a7caffbf9/MIDI/PatternGenerator/gaspard_Pattern%20generator.lua</source>
-        <source file="Utilities/ReadMidiFile.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b5fba405770803e3f39d68f5b4bfb16a7caffbf9/MIDI/PatternGenerator/Utilities/ReadMidiFile.lua</source>
-        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b5fba405770803e3f39d68f5b4bfb16a7caffbf9/MIDI/PatternGenerator/Utilities/System.lua</source>
-        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b5fba405770803e3f39d68f5b4bfb16a7caffbf9/MIDI/PatternGenerator/Utilities/UserInterface.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_PatternZone.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b5fba405770803e3f39d68f5b4bfb16a7caffbf9/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_PatternZone.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_PianoRoll.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b5fba405770803e3f39d68f5b4bfb16a7caffbf9/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_PianoRoll.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_Presets.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b5fba405770803e3f39d68f5b4bfb16a7caffbf9/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_Presets.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_SampleZone.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b5fba405770803e3f39d68f5b4bfb16a7caffbf9/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_SampleZone.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_Settings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b5fba405770803e3f39d68f5b4bfb16a7caffbf9/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_Settings.lua</source>
-      </version>
-      <version name="0.0.5b" author="gaspard" time="2025-03-05T08:57:15Z">
-        <changelog><![CDATA[- Fix Patterns folder creation if not exist
-- Rescan patterns on pattern file path invalid]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/57072c9ee3dbe4f55c329624e7084650eab42fde/MIDI/PatternGenerator/gaspard_Pattern%20generator.lua</source>
-        <source file="Utilities/ReadMidiFile.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/57072c9ee3dbe4f55c329624e7084650eab42fde/MIDI/PatternGenerator/Utilities/ReadMidiFile.lua</source>
-        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/57072c9ee3dbe4f55c329624e7084650eab42fde/MIDI/PatternGenerator/Utilities/System.lua</source>
-        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/57072c9ee3dbe4f55c329624e7084650eab42fde/MIDI/PatternGenerator/Utilities/UserInterface.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_PatternZone.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/57072c9ee3dbe4f55c329624e7084650eab42fde/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_PatternZone.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_PianoRoll.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/57072c9ee3dbe4f55c329624e7084650eab42fde/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_PianoRoll.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_Presets.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/57072c9ee3dbe4f55c329624e7084650eab42fde/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_Presets.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_SampleZone.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/57072c9ee3dbe4f55c329624e7084650eab42fde/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_SampleZone.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_Settings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/57072c9ee3dbe4f55c329624e7084650eab42fde/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_Settings.lua</source>
-      </version>
-      <version name="0.0.6b" author="gaspard" time="2025-03-05T16:23:36Z">
-        <changelog><![CDATA[- Pianoroll scrollbar not always visible]]></changelog>
-        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0bda627b325795d729a7869d838f3bebda6cc4f7/MIDI/PatternGenerator/gaspard_Pattern%20generator.lua</source>
-        <source file="Utilities/ReadMidiFile.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0bda627b325795d729a7869d838f3bebda6cc4f7/MIDI/PatternGenerator/Utilities/ReadMidiFile.lua</source>
-        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0bda627b325795d729a7869d838f3bebda6cc4f7/MIDI/PatternGenerator/Utilities/System.lua</source>
-        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0bda627b325795d729a7869d838f3bebda6cc4f7/MIDI/PatternGenerator/Utilities/UserInterface.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_PatternZone.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0bda627b325795d729a7869d838f3bebda6cc4f7/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_PatternZone.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_PianoRoll.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0bda627b325795d729a7869d838f3bebda6cc4f7/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_PianoRoll.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_Presets.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0bda627b325795d729a7869d838f3bebda6cc4f7/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_Presets.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_SampleZone.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0bda627b325795d729a7869d838f3bebda6cc4f7/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_SampleZone.lua</source>
-        <source file="Utilities/Gui_Elements/Gui_Settings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0bda627b325795d729a7869d838f3bebda6cc4f7/MIDI/PatternGenerator/Utilities/Gui_Elements/Gui_Settings.lua</source>
       </version>
     </reapack>
   </category>
