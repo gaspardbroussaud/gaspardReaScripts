@@ -1,9 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 0.0.5
+--@version 0.0.6
 --@changelog
---  - Added refresh project list
---  - Button size auto adjust
+--  - Fix crash on project path empty
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -173,7 +172,7 @@ local function GetRecentProjects()
     local path = ""
     while path ~= "noEntry" do
         _, path = reaper.BR_Win32_GetPrivateProfileString("recent", "recent" .. string.format("%02d", i), "noEntry", reaper.get_ini_file())
-        if path == "noEntry" then break end
+        if path == "noEntry" or path == "" then break end
         local cur_exists = reaper.file_exists(path)
         local cur_name = path:match("([^\\/]+)$"):gsub("%.rpp$", "")
         local retval, _, _, modified_time, _, _, _, _, _, _, _, _ = reaper.JS_File_Stat(path)
