@@ -1,11 +1,12 @@
+--@noindex
 --@description Pattern generator
 --@author gaspard
---@version 0.0.6b
+--@version 0.0.7b
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/Gui_Elements/*.lua
 --@changelog
---  - Pianoroll scrollbar not always visible
+--  - Remove from ReaPack
 --@about
 --  ### Pattern generator
 --  - A MIDI pattern generator.
