@@ -1,8 +1,8 @@
 -- @description Region generation and render matrix Tool
 -- @author gaspard
--- @version 1.0.9
+-- @version 1.0.10
 -- @changelog
---  - Update settings system base file
+--  - No blank name used in cascade
 -- @about
 --  - Retrives clusters of selected items depending on selected tracks.
 --  - How to use:
@@ -87,7 +87,9 @@ function GetConcatenatedParentNames(track)
         if parent then
             track = parent
             local _, parent_name = reaper.GetSetMediaTrackInfo_String(parent, "P_NAME", "", false)
-            name = parent_name.."_"..name
+            if parent_name ~= "" then
+                name = parent_name.."_"..name
+            end
         else
             return name
         end
@@ -121,11 +123,6 @@ function GetSelectedTracksTab()
             local track = reaper.GetSelectedTrack(0, i)
             table.insert(render_tracks, track)
             table.insert(render_folders, {})
-
-            --[[local _, track_name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
-            if track_name == "" then
-                track_name = "Track "..tostring(reaper.GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")):sub(1, -3)
-            end]]
             table.insert(render_tracks_name, GetRegionNaming(track))
         end
     else
