@@ -1,8 +1,11 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 0.0.6
+--@version 0.0.7
 --@changelog
---  - Fix crash on project path empty
+--  - Remove entry for all selected projects
+--  - Fix project files not found reorder on refresh
+--  - Update settings window and added full path display
+--  - Prevent close on open if project file not found
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -38,10 +41,10 @@ local gson = require('json_utilities_lib')
 local script_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]
 local settings_path = script_path..'/gaspard_'..action_name..'_settings.json'
 
-local settings_version = "0.0.1"
+local settings_version = "0.0.3"
 local default_settings = {
     version = settings_version,
-    order = {"close_on_open", "default_open_style"},
+    order = {"close_on_open", "search_type", "default_open_style", "display_full_path"},
     close_on_open = {
         value = true,
         name = "Close on project open",
@@ -58,6 +61,11 @@ local default_settings = {
         list = {"current_tab", "new_tab"},
         name = "Default project openning style",
         description = "Open project in current tab or in new tab as default behaviour."
+    },
+    display_full_path = {
+        value = false,
+        name = "Display full path",
+        description = "Display full path in list view."
     }
 }
 
@@ -113,6 +121,8 @@ local style_colors = style.colors
 --region SCRIPT ELEMENTS ----------------------------------------------
 -----------------------------------------------------------------------
 -----------------------------------------------------------------------
+
+local os_is_windows = reaper.GetOS():find("Win")
 
 local project_list = {}
 local project_search = ""
@@ -176,7 +186,8 @@ local function GetRecentProjects()
         local cur_exists = reaper.file_exists(path)
         local cur_name = path:match("([^\\/]+)$"):gsub("%.rpp$", "")
         local retval, _, _, modified_time, _, _, _, _, _, _, _, _ = reaper.JS_File_Stat(path)
-        if retval ~= 0 then modified_time = "" end
+        if retval ~= 0 or not cur_exists then modified_time = "00"..tostring(i) end--os.date("%Y-%m-%d %H:%M:%S") end
+        --reaper.ShowConsoleMsg(tostring(modified_time).."\n")
         project_list[i] = {exists = cur_exists, name = cur_name, selected = false, path = path, date = modified_time, stared = false, ini_line = i}
         i = i + 1
     end
@@ -229,27 +240,44 @@ local function LoadInNewTab(path)
     reaper.Main_openProject(path)
 end
 
-local function ProjectLoading(search_type)
+local function ProjectLoading(search_type, already_selected, current_project_selected)
+    local shoud_close = false
     local retval, current_project = reaper.GetSetProjectInfo_String(0, "PROJECT_NAME", "", false)
     if not retval then current_project = "" end
     if current_project == "" then search_type = "current_tab" end
-    for _, j_project in ipairs(project_list) do
-        if j_project.selected then
-            if j_project.exists then
-                if search_type == "new_tab" then
-                    LoadInNewTab(j_project.path)
-                elseif search_type == "current_tab" then
-                    LoadInCurrentTab(j_project.path)
-                    search_type = "new_tab"
+    if not already_selected then
+        if current_project_selected.exists then
+            if search_type == "new_tab" then
+                LoadInNewTab(current_project_selected.path)
+            elseif search_type == "current_tab" then
+                LoadInCurrentTab(current_project_selected.path)
+                search_type = "new_tab"
+            end
+            shoud_close = Settings.close_on_open.value
+        else
+            reaper.MB("No file found at path:\n"..current_project_selected.path, "GASPARD REAPER LAUNCHER ERROR", 0)
+            current_project_selected.selected = false
+        end
+    else
+        for _, j_project in ipairs(project_list) do
+            if j_project.selected then
+                if j_project.exists then
+                    if search_type == "new_tab" then
+                        LoadInNewTab(j_project.path)
+                    elseif search_type == "current_tab" then
+                        LoadInCurrentTab(j_project.path)
+                        search_type = "new_tab"
+                    end
+                    shoud_close = Settings.close_on_open.value
+                else
+                    reaper.MB("No file found at path:\n"..j_project.path, "GASPARD REAPER LAUNCHER ERROR", 0)
+                    j_project.selected = false
                 end
-            else
-                reaper.MB("No file found at path:\n"..j_project.path, "GASPARD REAPER LAUNCHER ERROR", 0)
-                j_project.selected = false
             end
         end
     end
 
-    if Settings.close_on_open.value then open = false end
+    if shoud_close then open = false end
 end
 
 local function NewProjectOpen(search_type)
@@ -276,6 +304,14 @@ local function OpenProjectSelect(search_type)
     end
 end
 
+--[[local function ShowFileInExplorer(path)
+    if os_is_windows then
+        os.execute('start "" "' .. path .. '"')
+    else
+        os.execute('open "' .. path .. '"')
+    end
+end]]
+
 local function System_Loop()
     CTRL = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftCtrl()) or reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_RightCtrl())
     SHIFT = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftShift()) or reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_RightShift())
@@ -287,6 +323,7 @@ end
 
 local function SaveSettings()
     gson.SaveJSON(settings_path, Settings)
+    Settings = gson.LoadJSON(settings_path, Settings)
 end
 
 --endregion
@@ -437,7 +474,7 @@ local function ElementsDisplay()
     reaper.ImGui_SameLine(ctx)
 
     reaper.ImGui_PushItemWidth(ctx, -1)
-    if reaper.ImGui_BeginCombo(ctx, "##sort_search", Settings.search_type.value) then
+    if reaper.ImGui_BeginCombo(ctx, "##sort_search", tostring(Settings.search_type.value)) then
         for _, type in ipairs(Settings.search_type.list) do
             local is_selected = (type == Settings.search_type.value)
             if reaper.ImGui_Selectable(ctx, type, is_selected) then
@@ -477,7 +514,8 @@ local function ElementsDisplay()
                 if hovered_and_selected then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Header(), 0x00000000) end
                 if not project.exists then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xFF0000A1) end
                 local selectable_flags = reaper.ImGui_SelectableFlags_SpanAllColumns() | reaper.ImGui_SelectableFlags_AllowDoubleClick()
-                changed, project.selected = reaper.ImGui_Selectable(ctx, project.name, project.selected, selectable_flags)
+                local display_name = Settings.display_full_path.value and project.path or project.name
+                changed, project.selected = reaper.ImGui_Selectable(ctx, display_name, project.selected, selectable_flags)
                 if not project.exists then reaper.ImGui_PopStyleColor(ctx, 1) end
                 if hovered_and_selected then reaper.ImGui_PopStyleColor(ctx, 1) end
 
@@ -514,23 +552,7 @@ local function ElementsDisplay()
                     end
 
                     if reaper.ImGui_IsMouseDoubleClicked(ctx, reaper.ImGui_MouseButton_Left()) then
-                        --[[for _, j_project in ipairs(project_list) do
-                            if j_project.selected then
-                                if j_project.exists then
-                                    if Settings.default_open_style.value == "new_tab" then
-                                        LoadInNewTab(j_project.path)
-                                    elseif Settings.default_open_style.value == "current_tab" then
-                                        LoadInCurrentTab(j_project.path)
-                                    end
-
-                                    if Settings.close_on_open.value then open = false end
-                                else
-                                    reaper.MB("No file found at path:\n"..j_project.path, "GASPARD REAPER LAUNCHER ERROR", 0)
-                                    j_project.selected = false
-                                end
-                            end
-                        end]]
-                        ProjectLoading(Settings.default_open_style.value)
+                        ProjectLoading(Settings.default_open_style.value, false, project)
                     end
                 end
 
@@ -555,44 +577,48 @@ local function ElementsDisplay()
             return
         end
 
+        if not current_right_clic_project.exists then reaper.ImGui_BeginDisabled(ctx) end
         reaper.ImGui_Selectable(ctx, "Load in current tab", false)
         if reaper.ImGui_IsItemActivated(ctx) then
-            --[[for _, j_project in ipairs(project_list) do
-                if j_project.selected then
-                    if j_project.exists then
-                        LoadInCurrentTab(j_project.path)
-                    else
-                        reaper.MB("No file found at path:\n"..j_project.path.."\nRemove path?", "GASPARD REAPER LAUNCHER ERROR", 0)
-                        j_project.selected = false
-                    end
-                end
-            end
-            if Settings.close_on_open.value then open = false end]]
-            ProjectLoading("current_tab")
+            ProjectLoading("current_tab", project_already_selected, current_right_clic_project)
         end
+        if not current_right_clic_project.exists then reaper.ImGui_EndDisabled(ctx) end
 
+        if not current_right_clic_project.exists then reaper.ImGui_BeginDisabled(ctx) end
         reaper.ImGui_Selectable(ctx, "Load in new tab", false)
         if reaper.ImGui_IsItemActivated(ctx) then
-            --[[for _, j_project in ipairs(project_list) do
-                if j_project.selected then
-                    if j_project.exists then
-                        LoadInNewTab(j_project.path)
-                    else
-                        reaper.MB("No file found at path:\n"..j_project.path, "GASPARD REAPER LAUNCHER ERROR", 0)
-                        j_project.selected = false
+            ProjectLoading("new_tab", project_already_selected, current_right_clic_project)
+        end
+        if not current_right_clic_project.exists then reaper.ImGui_EndDisabled(ctx) end
+
+        if not current_right_clic_project.exists then reaper.ImGui_BeginDisabled(ctx) end
+        local text_explorer = os_is_windows and "explorer" or "finder"
+        reaper.ImGui_Selectable(ctx, "Show in "..text_explorer, false)
+        if reaper.ImGui_IsItemActive(ctx) then
+            if not project_already_selected then
+                local folder = current_right_clic_project.path:match("^(.*)[/\\]")
+                reaper.CF_ShellExecute(folder)
+            else
+                for _, j_project in ipairs(project_list) do
+                    if j_project.selected and j_project.exists then
+                        local folder = j_project.path:match("^(.*)[/\\]")
+                        reaper.CF_ShellExecute(folder)
                     end
                 end
             end
-            if Settings.close_on_open.value then open = false end]]
-            ProjectLoading("new_tab")
         end
+        if not current_right_clic_project.exists then reaper.ImGui_EndDisabled(ctx) end
 
         reaper.ImGui_Selectable(ctx, "Remove entry", false)
         if reaper.ImGui_IsItemActivated(ctx) then
             if reaper.ShowMessageBox("The selected entries will be removed.", "REMOVE SELECTED ENTRIES", 1) == 1 then
-                for _, j_project in ipairs(project_list) do
-                    if j_project.selected then
-                        reaper.BR_Win32_WritePrivateProfileString("recent", "recent"..string.format("%02d", j_project.ini_line), "", reaper.get_ini_file())
+                if not project_already_selected then
+                    reaper.BR_Win32_WritePrivateProfileString("recent", "recent"..string.format("%02d", current_right_clic_project.ini_line), "", reaper.get_ini_file())
+                else
+                    for _, j_project in ipairs(project_list) do
+                        if j_project.selected then
+                            reaper.BR_Win32_WritePrivateProfileString("recent", "recent"..string.format("%02d", j_project.ini_line), "", reaper.get_ini_file())
+                        end
                     end
                 end
                 GetRecentProjects()
@@ -614,18 +640,24 @@ end
 
 -- All Settings
 local function ElementsSettings()
-    local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoResize()
-    local settings_width = og_window_width - 80
-    local settings_height = og_window_height * 0.7
+    local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoResize() | reaper.ImGui_WindowFlags_TopMost()
+    local settings_width = 350 --og_window_width - 80
+    local settings_height = 120 --og_window_height * 0.7
+    local settings_x = window_x + window_width - 102
     reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
-    reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
-    local settings_visible, settings_open = reaper.ImGui_Begin(ctx, "SETTINGS", true, settings_flags)
+    reaper.ImGui_SetNextWindowPos(ctx, settings_x, window_y + 32) --, reaper.ImGui_Cond_Appearing())
+    --reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
+    local settings_visible, settings_open = reaper.ImGui_Begin(ctx, "##SETTINGS", true, settings_flags)
     if settings_visible then
         local one_changed = false
 
         changed, Settings.close_on_open.value = reaper.ImGui_Checkbox(ctx, Settings.close_on_open.name, Settings.close_on_open.value)
         if changed then one_changed = true end
         reaper.ImGui_SetItemTooltip(ctx, Settings.close_on_open.description)
+
+        changed, Settings.display_full_path.value = reaper.ImGui_Checkbox(ctx, Settings.display_full_path.name, Settings.display_full_path.value)
+        if changed then one_changed = true end
+        reaper.ImGui_SetItemTooltip(ctx, Settings.display_full_path.description)
 
         local display = (Settings.default_open_style.value:sub(1,1):upper()..Settings.default_open_style.value:sub(2)):gsub("_", " ")
         reaper.ImGui_PushItemWidth(ctx, 110)
