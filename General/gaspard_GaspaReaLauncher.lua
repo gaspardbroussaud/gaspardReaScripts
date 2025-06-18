@@ -1,11 +1,9 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 0.0.7
+--@version 0.0.8
 --@changelog
---  - Remove entry for all selected projects
---  - Fix project files not found reorder on refresh
---  - Update settings window and added full path display
---  - Prevent close on open if project file not found
+--  - Update default min size on open
+--  - Fix double entries
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -85,7 +83,7 @@ end
 -----------------------------------------------------------------------
 -- Window variables
 local og_window_width = 1000
-local og_window_height = 400
+local og_window_height = 500
 local min_width, min_height = 500, 201
 local max_width, max_height = 1920, 1080
 local window_width, window_height = og_window_width, og_window_height
@@ -182,6 +180,9 @@ local function GetRecentProjects()
     local path = ""
     while path ~= "noEntry" do
         _, path = reaper.BR_Win32_GetPrivateProfileString("recent", "recent" .. string.format("%02d", i), "noEntry", reaper.get_ini_file())
+
+        for _, proj in ipairs(project_list) do if proj.path == path then goto skip_entry end end
+
         if path == "noEntry" or path == "" then break end
         local cur_exists = reaper.file_exists(path)
         local cur_name = path:match("([^\\/]+)$"):gsub("%.rpp$", "")
@@ -189,6 +190,9 @@ local function GetRecentProjects()
         if retval ~= 0 or not cur_exists then modified_time = "00"..tostring(i) end--os.date("%Y-%m-%d %H:%M:%S") end
         --reaper.ShowConsoleMsg(tostring(modified_time).."\n")
         project_list[i] = {exists = cur_exists, name = cur_name, selected = false, path = path, date = modified_time, stared = false, ini_line = i}
+
+        ::skip_entry::
+
         i = i + 1
     end
     if #project_list > 0 then
