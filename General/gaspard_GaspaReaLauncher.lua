@@ -1,9 +1,9 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 0.0.8
+--@version 0.0.9
 --@changelog
---  - Update default min size on open
---  - Fix double entries
+--  - Fix crash on refresh
+--  - Fix crahs on open
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -178,12 +178,13 @@ end
 local function GetRecentProjects()
     local i = 1
     local path = ""
+    project_list = {}
     while path ~= "noEntry" do
         _, path = reaper.BR_Win32_GetPrivateProfileString("recent", "recent" .. string.format("%02d", i), "noEntry", reaper.get_ini_file())
+        if path == "noEntry" or path == "" then break end
 
         for _, proj in ipairs(project_list) do if proj.path == path then goto skip_entry end end
 
-        if path == "noEntry" or path == "" then break end
         local cur_exists = reaper.file_exists(path)
         local cur_name = path:match("([^\\/]+)$"):gsub("%.rpp$", "")
         local retval, _, _, modified_time, _, _, _, _, _, _, _, _ = reaper.JS_File_Stat(path)
@@ -191,9 +192,8 @@ local function GetRecentProjects()
         --reaper.ShowConsoleMsg(tostring(modified_time).."\n")
         project_list[i] = {exists = cur_exists, name = cur_name, selected = false, path = path, date = modified_time, stared = false, ini_line = i}
 
-        ::skip_entry::
-
         i = i + 1
+        ::skip_entry::
     end
     if #project_list > 0 then
         SetSortingToType(Settings.search_type.value, project_list)
