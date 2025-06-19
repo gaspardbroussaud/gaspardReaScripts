@@ -1,8 +1,10 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 0.0.10
+--@version 0.0.11
 --@changelog
---  - Fix crash on shift select first entry
+--  - Update Newest and Oldest to reflect Reaper internal classification
+--  - Update and fix removing entries with right clic
+--  - Add Ctrl + A to select all shortcut
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -123,8 +125,9 @@ local os_is_windows = reaper.GetOS():find("Win")
 
 local project_list = {}
 local project_search = ""
-local current_right_clic_project = nil
+local curr_right_clc_proj = nil
 local project_already_selected = false
+local proj_sel_num = 0
 local open_create = "create"
 
 local function SortFavorites()
@@ -163,11 +166,11 @@ local function SetSortingToType(type, tab)
         end)
     elseif type == "Newest" then
         table.sort(project_list, function(a, b)
-            return a.date > b.date
+            return a.ini_line > b.ini_line --Formerly by .date
         end)
     elseif type == "Oldest" then
         table.sort(project_list, function(a, b)
-            return a.date < b.date
+            return a.ini_line < b.ini_line --Formerly by .date
         end)
     elseif type == "Favorites" then
         SortFavorites()
@@ -179,7 +182,7 @@ local function GetRecentProjects()
     local path = ""
     project_list = {}
     while path ~= "noEntry" do
-        _, path = reaper.BR_Win32_GetPrivateProfileString("recent", "recent" .. string.format("%02d", i), "noEntry", reaper.get_ini_file())
+        _, path = reaper.BR_Win32_GetPrivateProfileString("Recent", string.format("recent%02d", i), "noEntry", reaper.get_ini_file())
         if path == "noEntry" or path == "" then break end
 
         for _, proj in ipairs(project_list) do if proj.path == path then goto skip_entry end end
@@ -187,8 +190,7 @@ local function GetRecentProjects()
         local cur_exists = reaper.file_exists(path)
         local cur_name = path:match("([^\\/]+)$"):gsub("%.rpp$", "")
         local retval, _, _, modified_time, _, _, _, _, _, _, _, _ = reaper.JS_File_Stat(path)
-        if retval ~= 0 or not cur_exists then modified_time = "00"..tostring(i) end--os.date("%Y-%m-%d %H:%M:%S") end
-        --reaper.ShowConsoleMsg(tostring(modified_time).."\n")
+        if retval ~= 0 or not cur_exists then modified_time = "00"..tostring(i) end
         project_list[i] = {exists = cur_exists, name = cur_name, selected = false, path = path, date = modified_time, stared = false, ini_line = i}
 
         i = i + 1
@@ -225,13 +227,21 @@ end
 local function ShiftSelectInTable(i_one, i_two, tab)
     local first = 0
     local last = 0
-    if not i_one or not i_two then return end
+    if not i_one or not i_two then return nil end
     if i_one < i_two then first, last = i_one, i_two
     else first, last = i_two, i_one end
 
     for i = first, #tab do
         tab[i].selected = true
-        if i == last then return end
+        if i == last then return last - first end
+    end
+end
+
+local function SelectAllCtrlA(tab)
+    proj_sel_num = 0
+    for _, element in ipairs(tab) do
+        element.selected = true
+        proj_sel_num = proj_sel_num + 1
     end
 end
 
@@ -493,6 +503,8 @@ local function ElementsDisplay()
     if reaper.ImGui_BeginListBox(ctx, "##project_listbox", -1, -1) then
         local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
 
+        if CTRL and reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_A()) then SelectAllCtrlA(project_list) end
+
         for i, project in ipairs(project_list) do
             if project_search == "" or MatchesAllWords(SplitIntoWords(project_search), project.name) then
                 -- Favorite start
@@ -528,22 +540,31 @@ local function ElementsDisplay()
                 if changed then
                     if SHIFT then
                         if last_project_selected ~= i then
-                            ShiftSelectInTable(i, last_project_selected, project_list)
+                            local shift_count = ShiftSelectInTable(i, last_project_selected, project_list)
+                            if shift_count then proj_sel_num = proj_sel_num + shift_count end
                         end
                     else
-                        if not CTRL then
+                        if CTRL then
+                            if project.selected then
+                                proj_sel_num = proj_sel_num + 1
+                            else
+                                proj_sel_num = proj_sel_num - 1
+                            end
+                        else
                             if not project.selected then project.selected = true end
                             for j, j_project in ipairs(project_list) do
                                 if j ~= i then j_project.selected = false end
                             end
+                            proj_sel_num = 1
                         end
                     end
 
                     last_project_selected = i
                 end
 
-                -- On Double clic
+                -- On Double clic and right clic
                 if reaper.ImGui_IsItemHovered(ctx) then
+                    -- Right clic
                     if reaper.ImGui_IsMouseClicked(ctx, reaper.ImGui_MouseButton_Right()) then
                         if project.selected then
                             project_already_selected = true
@@ -552,9 +573,10 @@ local function ElementsDisplay()
                         end
                         popup_x, popup_y = reaper.ImGui_GetMousePos(ctx)
                         mouse_right_clic_popup = true
-                        current_right_clic_project = project
+                        curr_right_clc_proj = project
                     end
 
+                    -- Double clic
                     if reaper.ImGui_IsMouseDoubleClicked(ctx, reaper.ImGui_MouseButton_Left()) then
                         ProjectLoading(Settings.default_open_style.value, false, project)
                     end
@@ -576,31 +598,27 @@ local function ElementsDisplay()
     reaper.ImGui_SetNextWindowPos(ctx, popup_x, popup_y)
     if reaper.ImGui_BeginPopup(ctx, "popup_mouse_right_clic") then
         reaper.ImGui_SetKeyboardFocusHere(ctx)
-        if not current_right_clic_project then
+        if not curr_right_clc_proj then
             reaper.ImGui_CloseCurrentPopup(ctx)
             return
         end
 
-        if not current_right_clic_project.exists then reaper.ImGui_BeginDisabled(ctx) end
-        reaper.ImGui_Selectable(ctx, "Load in current tab", false)
+        if not curr_right_clc_proj.exists then reaper.ImGui_BeginDisabled(ctx) end
+        reaper.ImGui_Selectable(ctx, "Open in current tab", false)
         if reaper.ImGui_IsItemActivated(ctx) then
-            ProjectLoading("current_tab", project_already_selected, current_right_clic_project)
+            ProjectLoading("current_tab", project_already_selected, curr_right_clc_proj)
         end
-        if not current_right_clic_project.exists then reaper.ImGui_EndDisabled(ctx) end
 
-        if not current_right_clic_project.exists then reaper.ImGui_BeginDisabled(ctx) end
-        reaper.ImGui_Selectable(ctx, "Load in new tab", false)
+        reaper.ImGui_Selectable(ctx, "Open in new tab", false)
         if reaper.ImGui_IsItemActivated(ctx) then
-            ProjectLoading("new_tab", project_already_selected, current_right_clic_project)
+            ProjectLoading("new_tab", project_already_selected, curr_right_clc_proj)
         end
-        if not current_right_clic_project.exists then reaper.ImGui_EndDisabled(ctx) end
 
-        if not current_right_clic_project.exists then reaper.ImGui_BeginDisabled(ctx) end
         local text_explorer = os_is_windows and "explorer" or "finder"
         reaper.ImGui_Selectable(ctx, "Show in "..text_explorer, false)
         if reaper.ImGui_IsItemActive(ctx) then
             if not project_already_selected then
-                local folder = current_right_clic_project.path:match("^(.*)[/\\]")
+                local folder = curr_right_clc_proj.path:match("^(.*)[/\\]")
                 reaper.CF_ShellExecute(folder)
             else
                 for _, j_project in ipairs(project_list) do
@@ -611,17 +629,21 @@ local function ElementsDisplay()
                 end
             end
         end
-        if not current_right_clic_project.exists then reaper.ImGui_EndDisabled(ctx) end
+        if not curr_right_clc_proj.exists then reaper.ImGui_EndDisabled(ctx) end
 
-        reaper.ImGui_Selectable(ctx, "Remove entry", false)
+        --local msg_text = proj_sel_num > 0 and "ies" or "y"
+        local msg_text = not project_already_selected and "y" or proj_sel_num > 1 and "ies" or "y"
+        reaper.ImGui_Selectable(ctx, "Remove entr"..msg_text, false)
         if reaper.ImGui_IsItemActivated(ctx) then
-            if reaper.ShowMessageBox("The selected entries will be removed.", "REMOVE SELECTED ENTRIES", 1) == 1 then
+            if reaper.ShowMessageBox("The selected entr"..msg_text.." will be removed.", "REMOVE SELECTED ENTR"..string.upper(msg_text), 1) == 1 then
                 if not project_already_selected then
-                    reaper.BR_Win32_WritePrivateProfileString("recent", "recent"..string.format("%02d", current_right_clic_project.ini_line), "", reaper.get_ini_file())
+                    if curr_right_clc_proj.exists then
+                        reaper.BR_Win32_WritePrivateProfileString("Recent", string.format("recent%02d", curr_right_clc_proj.ini_line), "", reaper.get_ini_file())
+                    end
                 else
                     for _, j_project in ipairs(project_list) do
                         if j_project.selected then
-                            reaper.BR_Win32_WritePrivateProfileString("recent", "recent"..string.format("%02d", j_project.ini_line), "", reaper.get_ini_file())
+                            reaper.BR_Win32_WritePrivateProfileString("Recent", string.format("recent%02d", j_project.ini_line), "", reaper.get_ini_file())
                         end
                     end
                 end
@@ -631,13 +653,13 @@ local function ElementsDisplay()
 
         reaper.ImGui_EndPopup(ctx)
     else
-        if current_right_clic_project then
+        if curr_right_clc_proj then
             if not project_already_selected then
-                current_right_clic_project.selected = false
+                curr_right_clc_proj.selected = false
             else
                 project_already_selected = false
             end
-            current_right_clic_project = nil
+            curr_right_clc_proj = nil
         end
     end
 end
