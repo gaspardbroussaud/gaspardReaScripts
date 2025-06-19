@@ -1,9 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 0.0.9
+--@version 0.0.10
 --@changelog
---  - Fix crash on refresh
---  - Fix crahs on open
+--  - Fix crash on shift select first entry
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -226,6 +225,7 @@ end
 local function ShiftSelectInTable(i_one, i_two, tab)
     local first = 0
     local last = 0
+    if not i_one or not i_two then return end
     if i_one < i_two then first, last = i_one, i_two
     else first, last = i_two, i_one end
 
