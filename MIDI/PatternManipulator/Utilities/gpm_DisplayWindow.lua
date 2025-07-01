@@ -45,8 +45,8 @@ local function TopBarDisplay()
     local child_width = window_width - global_spacing
     if reaper.ImGui_BeginChild(ctx, "child_top_bar", child_width, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
         reaper.ImGui_Text(ctx, window_name)
-        reaper.ImGui_SameLine(ctx)
-        reaper.ImGui_Text(ctx, "x="..window_x.." ; y="..window_y.." / w="..window_width.." ; h="..window_height)
+        --reaper.ImGui_SameLine(ctx)
+        --reaper.ImGui_Text(ctx, "x="..window_x.." ; y="..window_y.." / w="..window_width.." ; h="..window_height)
 
         reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing(), 5, 0)
 
@@ -117,10 +117,51 @@ local function Gui_PopTheme()
     reaper.ImGui_PopStyleColor(ctx, #style_colors)
 end
 
+local function Draw(draw_list)
+    local radius = 5
+
+    local win_x, win_y = reaper.ImGui_GetWindowPos(ctx)
+    local win_w, win_h = reaper.ImGui_GetWindowSize(ctx)
+
+    local x = win_x + win_w - radius
+    local y = win_y + win_h - radius
+
+    local start_angle = math.rad(-45)
+    local end_angle = math.rad(135)
+
+    reaper.ImGui_DrawList_PathLineTo(draw_list, x, y)
+    reaper.ImGui_DrawList_PathArcTo(draw_list, x, y, radius, start_angle, end_angle, 12)
+    reaper.ImGui_DrawList_PathFillConvex(draw_list, 0xFFFFFFAA)
+end
+
 -- Main loop
 function gpmgui.Loop()
-    -- On tick
+    -- On tick samples check
+    local old_sample_list = gpmsys.sample_list and gpmsys.sample_list or nil
     gpmsys.sample_list = gpmsys_samples.CheckForSampleTracks()
+    if not gpmsys.app_init then
+        if gpmsys.sample_list and old_sample_list then
+            if #gpmsys.sample_list ~= #old_sample_list then
+                gpmsys_samples.SetNotesInMidiTrackPianoRoll()
+            else
+                for i, cur_track in ipairs(gpmsys.sample_list) do
+                    local cur_guid = reaper.GetTrackGUID(cur_track)
+                    if old_sample_list[i] then
+                        local old_guid = reaper.GetTrackGUID(old_sample_list[i])
+                        if cur_guid ~= old_guid then
+                            gpmsys_samples.SetNotesInMidiTrackPianoRoll()
+                            break
+                        end
+                    else
+                        gpmsys_samples.SetNotesInMidiTrackPianoRoll()
+                    end
+                end
+            end
+        end
+    else
+        gpmsys_samples.SetNotesInMidiTrackPianoRoll()
+        gpmsys.app_init = false
+    end
 
     -- GUI --------
     Gui_PushTheme()
@@ -139,15 +180,30 @@ function gpmgui.Loop()
     global_spacing = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing())
 
     if visible then
+        shortcut_activated = true
+
         TopBarDisplay()
         ElementsDisplay()
         VersionDisplay()
+
+        local draw_list = reaper.ImGui_GetForegroundDrawList(ctx)
+        Draw(draw_list) -- Draw resize handle
+
+        if shortcut_activated and reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Space()) then
+            reaper.CF_SendActionShortcut(reaper.GetMainHwnd(), 0, 0x20)
+        end
 
         reaper.ImGui_End(ctx)
     end
 
     Gui_PopTheme()
     reaper.ImGui_PopFont(ctx)
+
+    -- Quit app window on Escape key pressed
+    if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Escape()) then open = false end
+    -- Delete selected track(s)
+    if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Delete()) then reaper.Main_OnCommand(40005, 0) end
+
     if open then
       reaper.defer(gpmgui.Loop)
     end

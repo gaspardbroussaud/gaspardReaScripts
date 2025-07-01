@@ -6,6 +6,7 @@
 local gpmsys = {}
 
 -- Global variables
+gpmsys.app_init = true
 gpmsys.separator = reaper.GetOS():match('Win') and '\\' or '/'
 extname_global = "g_PGM_"
 extkey_parent_track = "PARENT_TRACK_GUID"
@@ -78,6 +79,11 @@ local function SettingsInit()
             value = true,
             name = 'Display ADSR',
             description = 'Display ADSR curves on sample waveform.'
+        },
+        open_shortcut_key = {
+            value = nil,
+            name = 'Script shortcut key',
+            description = 'Script shortcut key in REAPER.'
         }
     }
     Settings = gson.LoadJSON(settings_path, default_settings)

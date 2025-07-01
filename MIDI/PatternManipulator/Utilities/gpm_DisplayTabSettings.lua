@@ -55,6 +55,7 @@ function tab_settings.Show()
         local Adsr_x = reaper.ImGui_GetCursorPosX(ctx)
         reaper.ImGui_PushItemWidth(ctx, item_width)
         changed, Settings.attack_amount.value = reaper.ImGui_DragDouble(ctx, "##drag_attack", Settings.attack_amount.value, 0.01, 0, 2000, "%.2f ms")
+        if reaper.ImGui_IsItemActive(ctx) then shortcut_activated = false end
         reaper.ImGui_SetItemTooltip(ctx, Settings.attack_amount.description)
         if changed then one_changed = true end
 
@@ -62,6 +63,7 @@ function tab_settings.Show()
         local aDsr_x = reaper.ImGui_GetCursorPosX(ctx)
         reaper.ImGui_PushItemWidth(ctx, item_width)
         changed, Settings.decay_amount.value = reaper.ImGui_DragDouble(ctx, "##drag_decay", Settings.decay_amount.value, 1, 10, 15000, "%.0f ms")
+        if reaper.ImGui_IsItemActive(ctx) then shortcut_activated = false end
         reaper.ImGui_SetItemTooltip(ctx, Settings.decay_amount.description)
         if changed then one_changed = true end
 
@@ -70,6 +72,7 @@ function tab_settings.Show()
         reaper.ImGui_PushItemWidth(ctx, item_width)
         local sign = Settings.sustain_amount.value >= 0 and "+" or ""
         changed, Settings.sustain_amount.value = reaper.ImGui_DragDouble(ctx, "##drag_sustain", Settings.sustain_amount.value, 0.1, -120, 12, sign.."%.1f dB")
+        if reaper.ImGui_IsItemActive(ctx) then shortcut_activated = false end
         reaper.ImGui_SetItemTooltip(ctx, Settings.sustain_amount.description)
         if changed then one_changed = true end
 
@@ -77,6 +80,7 @@ function tab_settings.Show()
         local adsR_x = reaper.ImGui_GetCursorPosX(ctx)
         reaper.ImGui_PushItemWidth(ctx, item_width)
         changed, Settings.release_amount.value = reaper.ImGui_DragDouble(ctx, "##drag_release", Settings.release_amount.value, 1, 0, 2000, "%.0f ms")
+        if reaper.ImGui_IsItemActive(ctx) then shortcut_activated = false end
         reaper.ImGui_SetItemTooltip(ctx, Settings.release_amount.description)
         if changed then one_changed = true end
 
@@ -119,6 +123,7 @@ function tab_settings.Show()
 
         reaper.ImGui_PushItemWidth(ctx, 100)
         changed, multiline_concat = reaper.ImGui_InputTextMultiline(ctx, "input_paths", table.concat(Settings.pattern_folder_paths.value, "\n"), -1)
+        if reaper.ImGui_IsItemActive(ctx) then shortcut_activated = false end
         reaper.ImGui_SetItemTooltip(ctx, Settings.pattern_folder_paths.description)
         if changed then
             one_changed = true

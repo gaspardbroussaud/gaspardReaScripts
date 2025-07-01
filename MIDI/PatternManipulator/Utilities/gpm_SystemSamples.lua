@@ -38,6 +38,16 @@ local function GetParentTrack()
     return parent_track
 end
 
+function gpmsys_samples.GetMidiInputsTrack()
+    local parent = GetParentTrack()
+    local retval, midi_GUID = reaper.GetSetMediaTrackInfo_String(parent, "P_EXT:"..extname_midi_track_GUID, "", false)
+    if retval then
+        return reaper.BR_GetMediaTrackByGUID(0, midi_GUID)
+    else
+        return nil
+    end
+end
+
 local function GetSampleTracks(parent_track)
     if not parent_track then return nil end
     local parent_index = reaper.GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER")
@@ -75,6 +85,47 @@ function gpmsys_samples.CheckForSampleTracks()
         gpmsys.selected_sample_index = tonumber(index)
     end
     return GetSampleTracks(gpmsys.parent_track)
+end
+
+function gpmsys_samples.SetNotesInMidiTrackPianoRoll()
+    local midi_track = gpmsys_samples.GetMidiInputsTrack()
+
+    if midi_track then
+        local retval, chunk = reaper.GetTrackStateChunk(midi_track, "", false)
+        if retval then
+            --local clean_name = name:gsub("([^%w%s])", "%%%1")
+            --local cleaned_chunk = chunk:gsub("[ \t]*%-1%s+" .. previous_note .. "%s+" .. clean_name .. "%s+0%s+" .. previous_note .. "\r?\n", "")
+            local cleaned_chunk = chunk:gsub("MIDINOTENAMES[^\r\n]*\r?\n", "")
+            reaper.SetTrackStateChunk(midi_track, cleaned_chunk, false)
+
+            local note_list = {}
+            local index = 1
+
+            for _, track in ipairs(gpmsys.sample_list) do
+                local _, note = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_note, "", false)
+                note = math.floor(note)
+
+                local _, name = reaper.GetTrackName(track)
+                local found = false
+
+                for _, cur_note in ipairs(note_list) do
+                    if cur_note.note == note then
+                        cur_note.name = cur_note.name..", "..name
+                        name = cur_note.name
+                        found = true
+                        break
+                    end
+                end
+
+                if not found then
+                    note_list[index] = {name = name, note = note}
+                    index = index + 1
+                end
+
+                reaper.SetTrackMIDINoteNameEx(0, midi_track, note, -1, name)
+            end
+        end
+    end
 end
 
 --------------
@@ -234,7 +285,7 @@ function gpmsys_samples.InsertSampleTrack(name, filepath)
 
     reaper.GetSetMediaTrackInfo_String(gpmsys.parent_track, "P_EXT:"..extname_track_selected_index, last_sample_index + 1, true)
 
-    GetSampleTracks(gpmsys.parent_track)
+    --GetSampleTracks(gpmsys.parent_track)
 
     reaper.Undo_EndBlock('gaspard_Pattern manipulator_Add track', -1)
     reaper.PreventUIRefresh(-1)

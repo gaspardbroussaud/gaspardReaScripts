@@ -112,6 +112,9 @@ function window_samples.Show()
 
                         gpmsys.selected_sample_index = i
 
+                        --gpmsys.sample_list = gpmsys_samples.CheckForSampleTracks()
+                        --gpmsys_samples.SetNotesInMidiTrackPianoRoll()
+
                         if Settings.selection_link.value and count_sel_tracks > 0 then
                             for j = 0, count_sel_tracks - 1 do
                                 reaper.SetTrackSelected(sel_tracks[j], true)
