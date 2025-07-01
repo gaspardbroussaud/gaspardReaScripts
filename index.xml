@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="56cedf17be61abaa3b3caa6ad2a5c730b815bf49">
+<index version="1" name="Gaspard ReaScripts" commit="ffb0cee49923c0fcd43d6577c94b8cf7c8131a1d">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -201,6 +201,10 @@
 - Update and fix removing entries with right clic
 - Add Ctrl + A to select all shortcut]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/56cedf17be61abaa3b3caa6ad2a5c730b815bf49/General/gaspard_GaspaReaLauncher.lua</source>
+      </version>
+      <version name="0.0.12" author="gaspard" time="2025-07-01T10:42:07Z">
+        <changelog><![CDATA[- Add close on escape key pressed]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/ffb0cee49923c0fcd43d6577c94b8cf7c8131a1d/General/gaspard_GaspaReaLauncher.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Master settings.lua" type="script" desc="Master settings">
