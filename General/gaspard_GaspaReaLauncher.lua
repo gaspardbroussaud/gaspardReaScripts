@@ -1,10 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 0.0.11
+--@version 0.0.12
 --@changelog
---  - Update Newest and Oldest to reflect Reaper internal classification
---  - Update and fix removing entries with right clic
---  - Add Ctrl + A to select all shortcut
+--  - Add close on escape key pressed
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -40,7 +38,7 @@ local gson = require('json_utilities_lib')
 local script_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]
 local settings_path = script_path..'/gaspard_'..action_name..'_settings.json'
 
-local settings_version = "0.0.3"
+local settings_version = "0.0.4"
 local default_settings = {
     version = settings_version,
     order = {"close_on_open", "search_type", "default_open_style", "display_full_path"},
@@ -65,6 +63,11 @@ local default_settings = {
         value = false,
         name = "Display full path",
         description = "Display full path in list view."
+    },
+    close_on_escape = {
+        value = false,
+        name = "Close on escape",
+        description = "Close launcher on Escape key pressed."
     }
 }
 
@@ -685,6 +688,10 @@ local function ElementsSettings()
         if changed then one_changed = true end
         reaper.ImGui_SetItemTooltip(ctx, Settings.display_full_path.description)
 
+        changed, Settings.close_on_escape.value = reaper.ImGui_Checkbox(ctx, Settings.close_on_escape.name, Settings.close_on_escape.value)
+        if changed then one_changed = true end
+        reaper.ImGui_SetItemTooltip(ctx, Settings.close_on_escape.description)
+
         local display = (Settings.default_open_style.value:sub(1,1):upper()..Settings.default_open_style.value:sub(2)):gsub("_", " ")
         reaper.ImGui_PushItemWidth(ctx, 110)
         if reaper.ImGui_BeginCombo(ctx, Settings.default_open_style.name, display) then
@@ -738,11 +745,18 @@ local function Gui_Loop()
 
         if show_settings then ElementsSettings() end
 
+        if Settings.close_on_escape.value then
+            if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Escape()) then --or reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_F1()) then
+                open = false
+            end
+        end
+
         reaper.ImGui_End(ctx)
     end
 
     Gui_PopTheme()
     reaper.ImGui_PopFont(ctx)
+
     if open then
       reaper.defer(Gui_Loop)
     end
