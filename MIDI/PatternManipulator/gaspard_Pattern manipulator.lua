@@ -1,11 +1,10 @@
 --@description Pattern Manipulator
 --@author gaspard
---@version 0.1.0b
+--@version 0.1.1b
 --@provides
 --    [nomain] Utilities/*.lua
 --@changelog
---  - Add midi patterns play/pause and stop
---  - Update GUI elements
+--  - Fix crash on start without tracks selected
 --@about
 --  # Pattern manipulator
 --  Set racks of samples to manipulate using midi patterns.

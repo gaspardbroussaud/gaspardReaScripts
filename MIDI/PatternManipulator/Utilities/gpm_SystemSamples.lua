@@ -40,6 +40,7 @@ end
 
 function gpmsys_samples.GetMidiInputsTrack()
     local parent = GetParentTrack()
+    if not parent then return nil end
     local retval, midi_GUID = reaper.GetSetMediaTrackInfo_String(parent, "P_EXT:"..extname_midi_track_GUID, "", false)
     if retval then
         return reaper.BR_GetMediaTrackByGUID(0, midi_GUID)
