@@ -64,6 +64,7 @@ function tab_patterns.Show()
                 reaper.ImGui_SetItemTooltip(ctx, pattern.name)
             end
             if changed then
+                if gpmsys_patterns.is_playing then gpmsys_patterns.stop_play = true end
                 -- Unselect other patterns
                 for j, other_pattern in ipairs(gpmsys_patterns.file_list) do
                     if j ~= i and other_pattern.selected then
@@ -97,6 +98,9 @@ function tab_patterns.Show()
 
     -- PIANOROLL
     reaper.ImGui_SameLine(ctx)
+    local button_x = reaper.ImGui_GetCursorPosX(ctx)
+    local button_y = reaper.ImGui_GetCursorPosY(ctx)
+    reaper.ImGui_SetCursorPosY(ctx, reaper.ImGui_GetCursorPosY(ctx) + 27)
     if reaper.ImGui_BeginChild(ctx, 'child_piano_roll', -1, -1, reaper.ImGui_ChildFlags_Border()) then
         local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
 
@@ -141,11 +145,90 @@ function tab_patterns.Show()
                 reaper.ImGui_Text(ctx, '')
             end
 
+            -- Timeline bar
+            local timeline = gpmsys_patterns.timeline and gpmsys_patterns.timeline or 0
+            local pos_x = start_x + ((timeline / PPQ_one_mesure) * pianoroll_length)
+            local timeline_color = gpmsys_patterns.is_playing and 0xFF0000FF or 0xFF0000AA
+            reaper.ImGui_DrawList_AddLine(draw_list, pos_x, start_y, pos_x, start_y + grid_line_height, timeline_color, 1)
+
             reaper.ImGui_EndChild(ctx)
         end
 
         reaper.ImGui_EndChild(ctx)
     end
+
+    -- Transport buttons (play/pause, stop/return start)
+    reaper.ImGui_SetCursorPos(ctx, button_x, button_y)
+    local button_width = 80
+
+    local disabled = true
+    if gpmsys_patterns.pianoroll.params.end_pos and gpmsys_patterns.pianoroll.notes and gpmsys_patterns.pianoroll.range.min then
+        disabled = false
+    end
+    if disabled then reaper.ImGui_BeginDisabled(ctx) end
+    local play_x, play_y = reaper.ImGui_GetCursorScreenPos(ctx)
+
+    -- PLAY
+    if reaper.ImGui_Button(ctx, "##play_pause_button", button_width) then
+        if gpmsys_patterns.is_playing then
+            if gpmsys_patterns.paused == 1 then
+                gpmsys_patterns.paused = 0
+            else
+                gpmsys_patterns.paused = 1
+            end
+        else
+            gpmsys_patterns.stop_play = false
+            gpmsys_patterns.is_playing = true
+            gpmsys_patterns.timeline = 0
+            gpmsys_patterns.PlayMidiPattern()
+        end
+    end
+
+    reaper.ImGui_SameLine(ctx)
+    local stop_x, stop_y = reaper.ImGui_GetCursorScreenPos(ctx)
+
+    -- STOP
+    if reaper.ImGui_Button(ctx, "##stop_button", button_width) then
+        gpmsys_patterns.stop_play = true
+        --gpmsys_patterns.is_playing = false
+        --gpmsys_patterns.timeline = 0
+    end
+    local _, button_height = reaper.ImGui_GetItemRectSize(ctx)
+
+    reaper.ImGui_SameLine(ctx)
+
+    changed, Settings.pattern_looping.value = reaper.ImGui_Checkbox(ctx, "Looping", Settings.pattern_looping.value)
+
+    if disabled then reaper.ImGui_EndDisabled(ctx) end
+
+    -- PLAY
+    local draw_list = reaper.ImGui_GetForegroundDrawList(ctx)
+    play_x = play_x + button_width / 3
+    play_y = play_y + 6
+    local a = 10
+    local b = a * math.sqrt(3) / 2
+    local s1 = {x = play_x, y = play_y}
+    local s2 = {x = play_x + b, y = play_y + a / 2}
+    local s3 = {x = play_x, y = play_y + a}
+    local color = disabled and 0xFFFFFFA1 or 0xFFFFFFFF
+    reaper.ImGui_DrawList_AddTriangleFilled(draw_list, s1.x, s1.y, s2.x, s2.y, s3.x, s3.y, color)
+
+    -- PAUSE
+    local pause_x = play_x + 13
+    local pause_y = play_y
+    local rounding = 3
+    local width = 5
+    local height = 10
+    reaper.ImGui_DrawList_AddRectFilled(draw_list, pause_x, pause_y, pause_x + width, pause_y + height, color, rounding)
+    pause_x = pause_x + 6
+    reaper.ImGui_DrawList_AddRectFilled(draw_list, pause_x, pause_y, pause_x + width, pause_y + height, color, rounding)
+
+    -- STOP
+    local stop_side = 10
+    stop_x = stop_x + button_width / 2 - stop_side / 2
+    stop_y = stop_y + button_height / 2 - stop_side / 2
+    reaper.ImGui_DrawList_AddRectFilled(draw_list, stop_x, stop_y, stop_x + stop_side, stop_y + stop_side, color, 1)
+
 end
 
 return tab_patterns

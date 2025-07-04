@@ -7,6 +7,9 @@ local gpmsys_patterns = {}
 
 gpmsys_patterns.file_list = {}
 gpmsys_patterns.pianoroll = {notes = {}, range = {min = nil, max = nil}, params = {ppq = nil, bpm = nil, bpi = nil, bpl = nil, end_pos = nil}}
+gpmsys_patterns.stop_play = false
+gpmsys_patterns.is_playing = false
+gpmsys_patterns.paused = 1
 
 -- Function to read a variable length number from MIDI data
 local function ReadVarLen(data, pos)
@@ -94,7 +97,7 @@ function gpmsys_patterns.GetMidiInfoFromFile(filepath)
                             local length = time - start_time
                             if not gpmsys_patterns.pianoroll.range.min or pitch <= gpmsys_patterns.pianoroll.range.min then gpmsys_patterns.pianoroll.range.min = pitch end
                             if not gpmsys_patterns.pianoroll.range.max or pitch >= gpmsys_patterns.pianoroll.range.max then gpmsys_patterns.pianoroll.range.max = pitch end
-                            table.insert(gpmsys_patterns.pianoroll.notes, {pitch = pitch, start = start_time, length = length})
+                            table.insert(gpmsys_patterns.pianoroll.notes, {pitch = pitch, velocity = velocity, start = start_time, length = length})
                             if start_time + length > furthest_pos then furthest_pos = start_time + length end
                             active_notes[pitch] = nil
                         end
@@ -155,6 +158,129 @@ function gpmsys_patterns.ScanPatternFiles()
     end
 
     gpmsys_patterns.file_list = SortByName(files)
+end
+
+--[[local function PlayNotesLive()
+    local track = gpmsys.midi_track
+    local notes = gpmsys_patterns.pianoroll.notes
+    local interval_sec = 0.5
+    local velocity = 100
+    local length_ppq = gpmsys_patterns.pianoroll.params.ppq
+
+    local i, t0 = 1, reaper.time_precise()
+    interval_sec = interval_sec or 0.5
+    velocity = velocity or 100
+    length_ppq = length_ppq or 480
+
+    local function play()
+        if i > #notes then return end
+        if reaper.time_precise() - t0 >= (i - 1) * interval_sec then
+            reaper.StuffMIDIMessage(0, 0x90, notes[i].pitch, velocity) -- Note On (MIDI note, Vel 100)
+            i = i + 1
+        end
+        if i <= #notes then reaper.defer(play) end
+    end
+
+    play()
+end]]
+
+function gpmsys_patterns.PlayMidiPattern()
+    -- Create groups of notes using start position
+    local times = {}
+    local group_list = {}
+    local group_index = 1
+    local note_index = 1
+    local prev_note = nil
+
+    for i, note in ipairs(gpmsys_patterns.pianoroll.notes) do
+        prev_note = prev_note and prev_note or note
+
+        if note.start ~= prev_note.start then
+            group_index = group_index + 1
+            group_list[group_index] = {}
+            note_index = 1
+            times[group_index] = {start = note.start, index = group_index}
+        end
+
+        if i == 1 then
+            group_list[group_index] = {}
+            times[group_index] = {start = note.start, index = group_index}
+        end
+
+        group_list[group_index][note_index] = note
+
+        note_index = note_index + 1
+
+        prev_note = note
+    end
+
+    local function SortOnValue(t,...)
+        local a = {...}
+        table.sort(t, function (u,v)
+            for i in pairs(a) do
+                if u[a[i]] > v[a[i]] then return false end
+                if u[a[i]] < v[a[i]] then return true end
+            end
+            return false
+        end)
+    end
+
+    SortOnValue(times, "start")
+
+    -- Play groups of notes
+    gpmsys_patterns.timeline = 0
+    group_index = 1
+
+    local function play()
+        local bpm = reaper.Master_GetTempo()
+        local speed = math.floor(bpm / 60 * gpmsys_patterns.pianoroll.params.ppq / 30) * gpmsys_patterns.paused
+        gpmsys_patterns.timeline = gpmsys_patterns.timeline + speed
+
+        if times and times[group_index] and times[group_index].start <= gpmsys_patterns.timeline then
+            for i = 1, #group_list[times[group_index].index] do
+                local note = group_list[times[group_index].index][i]
+                reaper.StuffMIDIMessage(0, 0x90, note.pitch, note.velocity)
+            end
+            group_index = group_index + 1
+        end
+
+        if not gpmsys_patterns.stop_play and gpmsys_patterns.timeline < gpmsys_patterns.pianoroll.params.end_pos then
+            gpmsys_patterns.is_playing = true
+            reaper.defer(play)
+        else
+            if Settings.pattern_looping.value and not gpmsys_patterns.stop_play and gpmsys_patterns.is_playing then
+                gpmsys_patterns.timeline = 0
+                group_index = 1
+                note_index = 1
+                prev_note = nil
+                reaper.defer(play)
+            else
+                if gpmsys_patterns.stop_play then
+                    for _, group in ipairs(group_list) do
+                        for _, note in ipairs(group) do
+                            reaper.StuffMIDIMessage(0, 0x80, note.pitch, 0)
+                        end
+                    end
+                    --[[for i = 1, #group_list[group_index] do
+                        local note = group_list[group_index][i]
+                        reaper.StuffMIDIMessage(0, 0x80, note.pitch, 0)
+                    end]]
+                end
+
+                gpmsys_patterns.stop_play = false
+                gpmsys_patterns.is_playing = false
+                gpmsys_patterns.timeline = 0
+                gpmsys_patterns.paused = 1
+                group_index = 1
+                note_index = 1
+                times = {}
+                group_list = {}
+                prev_note = nil
+            end
+        end
+    end
+
+    play()
 end
 
 return gpmsys_patterns

@@ -206,6 +206,8 @@ function gpmgui.Loop()
 
     if open then
       reaper.defer(gpmgui.Loop)
+    else
+        gpmsys_patterns.stop_play = true
     end
 end
 

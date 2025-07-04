@@ -25,7 +25,7 @@ local_pattern_path = string.gsub(local_pattern_path, '/', gpmsys.separator)
 local_pattern_path = string.gsub(local_pattern_path, 'Utilities', 'Patterns')
 
 local function SettingsInit()
-    local settings_version = '0.0.4b'
+    local settings_version = '0.0.5b'
     local default_settings = {
         version = settings_version,
         order = {'project_based_parent', 'obey_note_off', 'attack_amount', 'decay_amount', 'sustain_amount', 'release_amount', 'selection_link', 'pattern_folder_paths', 'note_nomenclature', 'show_adsr'},
@@ -84,6 +84,11 @@ local function SettingsInit()
             value = nil,
             name = 'Script shortcut key',
             description = 'Script shortcut key in REAPER.'
+        },
+        pattern_looping = {
+            value = true,
+            name = "Looping pattern",
+            description = "Looping patterns, check to enable."
         }
     }
     Settings = gson.LoadJSON(settings_path, default_settings)

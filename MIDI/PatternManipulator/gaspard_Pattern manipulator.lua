@@ -1,23 +1,11 @@
 --@description Pattern Manipulator
 --@author gaspard
---@version 0.0.5b
+--@version 0.1.0b
 --@provides
 --    [nomain] Utilities/*.lua
 --@changelog
---  - ADSR:
---    - Sliders
---    - Display on waveform
---  - Sample offset start and end:
---    - Sliders
---    - Display on waveform
---  - Note and PianoRoll System:
---    - Note names displayed in MIDI inputs track's PianoRoll
---    - Fix numerous crashes
---    - Upgrade note selection system
---  - Other:
---    - Fix numerous crashes
---    - Add Escape key quit app window
---    - Update GUI elements
+--  - Add midi patterns play/pause and stop
+--  - Update GUI elements
 --@about
 --  # Pattern manipulator
 --  Set racks of samples to manipulate using midi patterns.
