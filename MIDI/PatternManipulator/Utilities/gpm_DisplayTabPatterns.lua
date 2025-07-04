@@ -198,6 +198,7 @@ function tab_patterns.Show()
     reaper.ImGui_SameLine(ctx)
 
     changed, Settings.pattern_looping.value = reaper.ImGui_Checkbox(ctx, "Looping", Settings.pattern_looping.value)
+    if changed then gson.SaveJSON(settings_path, Settings) end
 
     if disabled then reaper.ImGui_EndDisabled(ctx) end
 

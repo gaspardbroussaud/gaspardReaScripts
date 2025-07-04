@@ -231,6 +231,21 @@ function gpmsys_patterns.PlayMidiPattern()
     gpmsys_patterns.timeline = 0
     group_index = 1
 
+    local function stop(note)
+        if gpmsys_patterns.timeline >= gpmsys_patterns.pianoroll.params.end_pos then
+            reaper.StuffMIDIMessage(0, 0x80, note.pitch, 0)
+        end
+
+        local note_end = note.start + note.length
+        if note_end <= gpmsys_patterns.timeline then
+            reaper.StuffMIDIMessage(0, 0x80, note.pitch, 0)
+        else
+            if not gpmsys_patterns.stop_play then
+                reaper.defer(function() stop(note) end)
+            end
+        end
+    end
+
     local function play()
         local bpm = reaper.Master_GetTempo()
         local speed = math.floor(bpm / 60 * gpmsys_patterns.pianoroll.params.ppq / 30) * gpmsys_patterns.paused
@@ -240,6 +255,7 @@ function gpmsys_patterns.PlayMidiPattern()
             for i = 1, #group_list[times[group_index].index] do
                 local note = group_list[times[group_index].index][i]
                 reaper.StuffMIDIMessage(0, 0x90, note.pitch, note.velocity)
+                stop(note)
             end
             group_index = group_index + 1
         end
