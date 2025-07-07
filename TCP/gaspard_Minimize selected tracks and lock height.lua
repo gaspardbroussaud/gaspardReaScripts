@@ -1,3 +1,4 @@
+-- @noindex
 -- @description Minimize selected tracks and lock height
 -- @author gaspard
 -- @version 1.1.0
@@ -13,14 +14,16 @@ if sel_track_count > 0 then
     -- Get all seleceted tracks
     local tracks = {}
     for i = 0, sel_track_count - 1 do
-        table.insert(tracks, reaper.GetSelectedTrack(0, i))
+        local pos = #tracks < 1 and 1 or #tracks
+        table.insert(tracks, pos, reaper.GetSelectedTrack(0, i))
     end
 
-    reaper.PreventUIRefresh(1)
     reaper.Undo_BeginBlock()
+    reaper.PreventUIRefresh(1)
 
     -- Set height and lock
-    for _, track in ipairs(tracks) do
+    for i = 1, #tracks do
+        local track = tracks[i]
         local locked = reaper.GetMediaTrackInfo_Value(track, "B_HEIGHTLOCK")
         reaper.SetOnlyTrackSelected(track)
         if locked == 1 then
@@ -59,8 +62,8 @@ if sel_track_count > 0 then
         reaper.SetTrackSelected(track, true)
     end
 
-    reaper.Undo_EndBlock("Minimize selected tracks and lock height.", -1)
     reaper.PreventUIRefresh(-1)
+    reaper.Undo_EndBlock("Minimize selected tracks and lock height.", -1)
     reaper.UpdateArrange()
     reaper.TrackList_AdjustWindows(true)
 end
