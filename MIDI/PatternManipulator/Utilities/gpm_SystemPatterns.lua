@@ -9,6 +9,7 @@ gpmsys_patterns.file_list = {}
 gpmsys_patterns.pianoroll = {notes = {}, range = {min = nil, max = nil}, params = {ppq = nil, bpm = nil, bpi = nil, bpl = nil, end_pos = nil}}
 gpmsys_patterns.stop_play = false
 gpmsys_patterns.is_playing = false
+gpmsys_patterns.has_looped = false
 gpmsys_patterns.paused = 1
 
 -- Function to read a variable length number from MIDI data
@@ -240,8 +241,10 @@ function gpmsys_patterns.PlayMidiPattern()
         if note_end <= gpmsys_patterns.timeline then
             reaper.StuffMIDIMessage(0, 0x80, note.pitch, 0)
         else
-            if not gpmsys_patterns.stop_play then
+            if not gpmsys_patterns.stop_play and gpmsys_patterns.is_playing and not gpmsys_patterns.has_looped then
                 reaper.defer(function() stop(note) end)
+            else
+                reaper.StuffMIDIMessage(0, 0x80, note.pitch, 0)
             end
         end
     end
@@ -262,6 +265,7 @@ function gpmsys_patterns.PlayMidiPattern()
 
         if not gpmsys_patterns.stop_play and gpmsys_patterns.timeline < gpmsys_patterns.pianoroll.params.end_pos then
             gpmsys_patterns.is_playing = true
+            gpmsys_patterns.has_looped = false
             reaper.defer(play)
         else
             if Settings.pattern_looping.value and not gpmsys_patterns.stop_play and gpmsys_patterns.is_playing then
@@ -269,6 +273,7 @@ function gpmsys_patterns.PlayMidiPattern()
                 group_index = 1
                 note_index = 1
                 prev_note = nil
+                gpmsys_patterns.has_looped = true
                 reaper.defer(play)
             else
                 if gpmsys_patterns.stop_play then
@@ -277,10 +282,6 @@ function gpmsys_patterns.PlayMidiPattern()
                             reaper.StuffMIDIMessage(0, 0x80, note.pitch, 0)
                         end
                     end
-                    --[[for i = 1, #group_list[group_index] do
-                        local note = group_list[group_index][i]
-                        reaper.StuffMIDIMessage(0, 0x80, note.pitch, 0)
-                    end]]
                 end
 
                 gpmsys_patterns.stop_play = false

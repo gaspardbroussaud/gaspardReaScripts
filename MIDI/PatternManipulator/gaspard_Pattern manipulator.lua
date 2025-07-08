@@ -1,10 +1,12 @@
 --@description Pattern Manipulator
 --@author gaspard
---@version 0.1.1b
+--@version 0.1.2b
 --@provides
 --    [nomain] Utilities/*.lua
 --@changelog
---  - Fix crash on start without tracks selected
+--  - Add note end behaviour to pattern play
+--  - Fix note end on pattern play
+--  - Fix looping setting not saved on exit
 --@about
 --  # Pattern manipulator
 --  Set racks of samples to manipulate using midi patterns.

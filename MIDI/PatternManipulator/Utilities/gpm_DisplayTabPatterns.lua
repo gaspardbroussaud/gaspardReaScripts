@@ -190,8 +190,6 @@ function tab_patterns.Show()
     -- STOP
     if reaper.ImGui_Button(ctx, "##stop_button", button_width) then
         gpmsys_patterns.stop_play = true
-        --gpmsys_patterns.is_playing = false
-        --gpmsys_patterns.timeline = 0
     end
     local _, button_height = reaper.ImGui_GetItemRectSize(ctx)
 
