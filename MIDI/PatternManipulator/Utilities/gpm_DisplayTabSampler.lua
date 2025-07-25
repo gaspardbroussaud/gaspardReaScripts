@@ -312,7 +312,6 @@ function tab_sampler.Show()
         reaper.TrackFX_SetParam(track, fx_index, 14, end_offset) -- Parameter index for "End offset" is 14
     end]]
 
-
     local start_offset = reaper.TrackFX_GetParam(track, fx_index, 13)
     start_offset = start_offset * sample_len / 1000
     local display_start_offset = string.format("%.2f", start_offset)
@@ -347,6 +346,13 @@ function tab_sampler.Show()
     reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_display_sample_length, display_sample_len, true)
     --reaper.ImGui_Text(ctx, display_sample_len)
 
+    -- Obey note off
+    local obey_note_off = reaper.TrackFX_GetParam(track, fx_index, 11)
+    changed, obey_note_off = reaper.ImGui_Checkbox(ctx, "Obey note off", obey_note_off)
+    if changed then
+        local num = obey_note_off and 1 or 0
+        reaper.TrackFX_SetParam(track, fx_index, 11, num)
+    end
 
     -- WAVEFORM DISPLAY -----------------------------------------------------------------
     win_x = win_x + item_w + global_spacing

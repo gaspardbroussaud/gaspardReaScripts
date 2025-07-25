@@ -1,12 +1,10 @@
 --@description Pattern Manipulator
 --@author gaspard
---@version 0.1.2b
+--@version 0.1.3b
 --@provides
 --    [nomain] Utilities/*.lua
 --@changelog
---  - Add note end behaviour to pattern play
---  - Fix note end on pattern play
---  - Fix looping setting not saved on exit
+--  - Add Obey note off in sample window
 --@about
 --  # Pattern manipulator
 --  Set racks of samples to manipulate using midi patterns.
