@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="689f86cbd2e53d874ea24dd8f48b595b7d6566ce">
+<index version="1" name="Gaspard ReaScripts" commit="a683bcd968ae9592ae6fbb508ffcdd55349d2642">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -239,6 +239,10 @@
 - Update Settings window size]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/689f86cbd2e53d874ea24dd8f48b595b7d6566ce/General/gaspard_GaspaReaLauncher.lua</source>
       </version>
+      <version name="0.0.16" author="gaspard" time="2025-08-18T13:15:53Z">
+        <changelog><![CDATA[- ReaImGui version update]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/General/gaspard_GaspaReaLauncher.lua</source>
+      </version>
     </reapack>
     <reapack name="gaspard_Master settings.lua" type="script" desc="Master settings">
       <metadata>
@@ -344,6 +348,10 @@
       <version name="1.0.5" author="gaspard" time="2025-08-18T12:11:07Z">
         <changelog><![CDATA[- Fix font crash]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/12abf47b96a50b4e7d83a80e95ef96f96baed6dc/General/gaspard_Simple%20renamer.lua</source>
+      </version>
+      <version name="1.0.6" author="gaspard" time="2025-08-18T13:15:53Z">
+        <changelog><![CDATA[- Fix font size]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/General/gaspard_Simple%20renamer.lua</source>
       </version>
     </reapack>
   </category>
@@ -601,6 +609,17 @@
         <source file="Utilities/GUI_Elements/Gui_Settings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/689f86cbd2e53d874ea24dd8f48b595b7d6566ce/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Settings.lua</source>
         <source file="Utilities/GUI_Elements/Gui_Userdata.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/689f86cbd2e53d874ea24dd8f48b595b7d6566ce/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Userdata.lua</source>
       </version>
+      <version name="1.0.10" author="gaspard" time="2025-08-18T13:15:53Z">
+        <changelog><![CDATA[- Update ReaImGui version]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/General/Complete%20Renamer/gaspard_Complete%20renamer.lua</source>
+        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/General/Complete%20Renamer/Utilities/System.lua</source>
+        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/General/Complete%20Renamer/Utilities/UserInterface.lua</source>
+        <source file="Utilities/GUI_Elements/GUI_Presets.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/General/Complete%20Renamer/Utilities/GUI_Elements/GUI_Presets.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Rules.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Rules.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Rules_Popup.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Rules_Popup.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Settings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Settings.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Userdata.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Userdata.lua</source>
+      </version>
     </reapack>
   </category>
   <category name="General/TrackVisibilityManager">
@@ -824,6 +843,12 @@
         <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/689f86cbd2e53d874ea24dd8f48b595b7d6566ce/General/TrackVisibilityManager/Utilities/System.lua</source>
         <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/689f86cbd2e53d874ea24dd8f48b595b7d6566ce/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
       </version>
+      <version name="1.3.11" author="gaspard" time="2025-08-18T13:15:53Z">
+        <changelog><![CDATA[- Update ReaImGui version]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/General/TrackVisibilityManager/gaspard_Track%20Visibility%20Manager.lua</source>
+        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/General/TrackVisibilityManager/Utilities/System.lua</source>
+        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
+      </version>
     </reapack>
   </category>
   <category name="GUI">
@@ -1030,6 +1055,10 @@
         <changelog><![CDATA[- Update font]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/12abf47b96a50b4e7d83a80e95ef96f96baed6dc/Marker/gaspard_Set%20marker%20to%20first%20transient%20in%20selected%20items%20using%20name%20pattern.lua</source>
       </version>
+      <version name="1.0.3" author="gaspard" time="2025-08-18T13:15:53Z">
+        <changelog><![CDATA[- Fix font size]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/Marker/gaspard_Set%20marker%20to%20first%20transient%20in%20selected%20items%20using%20name%20pattern.lua</source>
+      </version>
     </reapack>
     <reapack name="gaspard_Set marker to first transient in selected items.lua" type="script" desc="Set marker to first transient in selected items">
       <metadata>
@@ -1230,6 +1259,19 @@
         <source file="Utilities/gpm_System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/12abf47b96a50b4e7d83a80e95ef96f96baed6dc/MIDI/PatternManipulator/Utilities/gpm_System.lua</source>
         <source file="Utilities/gpm_SystemPatterns.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/12abf47b96a50b4e7d83a80e95ef96f96baed6dc/MIDI/PatternManipulator/Utilities/gpm_SystemPatterns.lua</source>
         <source file="Utilities/gpm_SystemSamples.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/12abf47b96a50b4e7d83a80e95ef96f96baed6dc/MIDI/PatternManipulator/Utilities/gpm_SystemSamples.lua</source>
+      </version>
+      <version name="0.1.6b" author="gaspard" time="2025-08-18T13:15:53Z">
+        <changelog><![CDATA[- Update ReaImGui version]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/MIDI/PatternManipulator/gaspard_Pattern%20manipulator.lua</source>
+        <source file="Utilities/gpm_DisplaySamples.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/MIDI/PatternManipulator/Utilities/gpm_DisplaySamples.lua</source>
+        <source file="Utilities/gpm_DisplayTab.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/MIDI/PatternManipulator/Utilities/gpm_DisplayTab.lua</source>
+        <source file="Utilities/gpm_DisplayTabPatterns.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/MIDI/PatternManipulator/Utilities/gpm_DisplayTabPatterns.lua</source>
+        <source file="Utilities/gpm_DisplayTabSampler.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/MIDI/PatternManipulator/Utilities/gpm_DisplayTabSampler.lua</source>
+        <source file="Utilities/gpm_DisplayTabSettings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/MIDI/PatternManipulator/Utilities/gpm_DisplayTabSettings.lua</source>
+        <source file="Utilities/gpm_DisplayWindow.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/MIDI/PatternManipulator/Utilities/gpm_DisplayWindow.lua</source>
+        <source file="Utilities/gpm_System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/MIDI/PatternManipulator/Utilities/gpm_System.lua</source>
+        <source file="Utilities/gpm_SystemPatterns.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/MIDI/PatternManipulator/Utilities/gpm_SystemPatterns.lua</source>
+        <source file="Utilities/gpm_SystemSamples.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a683bcd968ae9592ae6fbb508ffcdd55349d2642/MIDI/PatternManipulator/Utilities/gpm_SystemSamples.lua</source>
       </version>
     </reapack>
   </category>
