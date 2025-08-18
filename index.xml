@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="43a65ff610794f8ec346eee684fe8570b865b887">
+<index version="1" name="Gaspard ReaScripts" commit="1781cafb5a8bb8d12c5db1f16deb3578360c36a8">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -49,6 +49,10 @@
         <changelog><![CDATA[- Add script]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7014e9458122d9e2074c2ef6b117af44b6fcfe3e/Debug/gaspard_Get%20userdata%20from%20GUID.lua</source>
       </version>
+      <version name="1.0.1" author="gaspard" time="2025-08-18T10:43:37Z">
+        <changelog><![CDATA[- Update font]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/Debug/gaspard_Get%20userdata%20from%20GUID.lua</source>
+      </version>
     </reapack>
     <reapack name="gaspard_Show control ID of top level window under mouse.lua" type="script" desc="Show control ID of top level window under mouse">
       <metadata>
@@ -85,11 +89,11 @@
   <category name="General">
     <reapack name="gaspard_Complete selection.lua" type="script" desc="Complete selection">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs28 Complete selection\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \outlinelevel2 \b \fs28 Complete selection\par}
 {\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab A simple and quick selction tool for tracks, regions, markers, items (may add others later).\sa180\par}
 }
 ]]></description>
@@ -120,6 +124,10 @@
       <version name="0.1.5b" author="gaspard" time="2025-01-15T13:44:23Z">
         <changelog><![CDATA[- Fix crash on empty items (only notes) in project]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/78ac7cc825a3e4c69315273186238654fd9cccd5/General/gaspard_Complete%20selection.lua</source>
+      </version>
+      <version name="0.1.6b" author="gaspard" time="2025-08-18T10:43:37Z">
+        <changelog><![CDATA[- Update font]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/General/gaspard_Complete%20selection.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Detect keyboard input to VKB and set state to on.lua" type="script" desc="Detect keyboard input to VKB and set state to on">
@@ -206,14 +214,18 @@
         <changelog><![CDATA[- Add close on escape key pressed]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/ffb0cee49923c0fcd43d6577c94b8cf7c8131a1d/General/gaspard_GaspaReaLauncher.lua</source>
       </version>
+      <version name="0.0.13" author="gaspard" time="2025-08-18T10:43:37Z">
+        <changelog><![CDATA[- Update font]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/General/gaspard_GaspaReaLauncher.lua</source>
+      </version>
     </reapack>
     <reapack name="gaspard_Master settings.lua" type="script" desc="Master settings">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs28 Master settings\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \outlinelevel2 \b \fs28 Master settings\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 All settings for all gaspard's scripts How to: - Choose a script (type or scroll) - Set your settings - Apply changes\par}
 }
 ]]></description>
@@ -268,14 +280,18 @@
         <changelog><![CDATA[- Add tooltip for script names]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a4371d366bf17bb58b75ed6ca95dfd5708ca9610/General/gaspard_Master%20settings.lua</source>
       </version>
+      <version name="1.1.7" author="gaspard" time="2025-08-18T10:43:37Z">
+        <changelog><![CDATA[- Update font]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/General/gaspard_Master%20settings.lua</source>
+      </version>
     </reapack>
     <reapack name="gaspard_Simple renamer.lua" type="script" desc="Simple renamer">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs28 Simple renamer\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \outlinelevel2 \b \fs28 Simple renamer\par}
 {\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab A simple and quick renamer via text replace for tracks, regions, markers, items (may add others later).\sa180\par}
 }
 ]]></description>
@@ -295,6 +311,10 @@
       <version name="1.0.3" author="gaspard" time="2025-01-15T13:44:23Z">
         <changelog><![CDATA[- Fix crash on empty items (only notes) in project]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/78ac7cc825a3e4c69315273186238654fd9cccd5/General/gaspard_Simple%20renamer.lua</source>
+      </version>
+      <version name="1.0.4" author="gaspard" time="2025-08-18T10:43:37Z">
+        <changelog><![CDATA[- Update font]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/General/gaspard_Simple%20renamer.lua</source>
       </version>
     </reapack>
   </category>
@@ -519,12 +539,23 @@
         <source file="Utilities/GUI_Elements/Gui_Settings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/6ec4eb5bfefca1626aaa86d825ebdf8f7e4e0113/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Settings.lua</source>
         <source file="Utilities/GUI_Elements/Gui_Userdata.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/6ec4eb5bfefca1626aaa86d825ebdf8f7e4e0113/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Userdata.lua</source>
       </version>
+      <version name="1.0.7" author="gaspard" time="2025-08-18T10:43:37Z">
+        <changelog><![CDATA[- Update font]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/General/Complete%20Renamer/gaspard_Complete%20renamer.lua</source>
+        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/General/Complete%20Renamer/Utilities/System.lua</source>
+        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/General/Complete%20Renamer/Utilities/UserInterface.lua</source>
+        <source file="Utilities/GUI_Elements/GUI_Presets.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/General/Complete%20Renamer/Utilities/GUI_Elements/GUI_Presets.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Rules.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Rules.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Rules_Popup.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Rules_Popup.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Settings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Settings.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Userdata.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Userdata.lua</source>
+      </version>
     </reapack>
   </category>
   <category name="General/TrackVisibilityManager">
     <reapack name="gaspard_Track Visibility Manager.lua" type="script" desc="Track Visibility Manager">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
@@ -724,6 +755,12 @@
         <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4dee797896dea2ae238d3a774b2f01089876dfd0/General/TrackVisibilityManager/Utilities/System.lua</source>
         <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4dee797896dea2ae238d3a774b2f01089876dfd0/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
       </version>
+      <version name="1.3.8" author="gaspard" time="2025-08-18T10:43:37Z">
+        <changelog><![CDATA[- Updated font]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/General/TrackVisibilityManager/gaspard_Track%20Visibility%20Manager.lua</source>
+        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/General/TrackVisibilityManager/Utilities/System.lua</source>
+        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
+      </version>
     </reapack>
   </category>
   <category name="GUI">
@@ -745,6 +782,9 @@
       </version>
       <version name="1.0.2" author="gaspard" time="2025-03-06T14:35:27Z">
         <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/f8608809c9b98770e6e886265842592ac45a81d4/GUI/GUI_Style_Settings.lua</source>
+      </version>
+      <version name="1.0.3" author="gaspard" time="2025-08-18T10:43:37Z">
+        <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/GUI/GUI_Style_Settings.lua</source>
       </version>
     </reapack>
   </category>
@@ -1098,6 +1138,19 @@
         <source file="Utilities/gpm_SystemPatterns.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/43a65ff610794f8ec346eee684fe8570b865b887/MIDI/PatternManipulator/Utilities/gpm_SystemPatterns.lua</source>
         <source file="Utilities/gpm_SystemSamples.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/43a65ff610794f8ec346eee684fe8570b865b887/MIDI/PatternManipulator/Utilities/gpm_SystemSamples.lua</source>
       </version>
+      <version name="0.1.4b" author="gaspard" time="2025-08-18T10:43:37Z">
+        <changelog><![CDATA[- Update font]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/MIDI/PatternManipulator/gaspard_Pattern%20manipulator.lua</source>
+        <source file="Utilities/gpm_DisplaySamples.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/MIDI/PatternManipulator/Utilities/gpm_DisplaySamples.lua</source>
+        <source file="Utilities/gpm_DisplayTab.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/MIDI/PatternManipulator/Utilities/gpm_DisplayTab.lua</source>
+        <source file="Utilities/gpm_DisplayTabPatterns.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/MIDI/PatternManipulator/Utilities/gpm_DisplayTabPatterns.lua</source>
+        <source file="Utilities/gpm_DisplayTabSampler.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/MIDI/PatternManipulator/Utilities/gpm_DisplayTabSampler.lua</source>
+        <source file="Utilities/gpm_DisplayTabSettings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/MIDI/PatternManipulator/Utilities/gpm_DisplayTabSettings.lua</source>
+        <source file="Utilities/gpm_DisplayWindow.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/MIDI/PatternManipulator/Utilities/gpm_DisplayWindow.lua</source>
+        <source file="Utilities/gpm_System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/MIDI/PatternManipulator/Utilities/gpm_System.lua</source>
+        <source file="Utilities/gpm_SystemPatterns.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/MIDI/PatternManipulator/Utilities/gpm_SystemPatterns.lua</source>
+        <source file="Utilities/gpm_SystemSamples.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/MIDI/PatternManipulator/Utilities/gpm_SystemSamples.lua</source>
+      </version>
     </reapack>
   </category>
   <category name="Region">
@@ -1379,11 +1432,11 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
     </reapack>
     <reapack name="gaspard_Random play point and time selection size.lua" type="script" desc="Random play point and time selection size">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs28 How to:\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \outlinelevel2 \b \fs28 How to:\par}
 {\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab Set a time selection in your project, start and end position will be used.\par}
 {\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab Start script, it will play project and:\par}
 {\pard \ql \f0 \sa0 \li720 \fi-360 \endash \tx360\tab Set a random playhead position between start and end position selected by user.\par}
@@ -1452,6 +1505,10 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       <version name="1.0.5" author="gaspard" time="2024-12-16T14:21:21Z">
         <changelog><![CDATA[- Fix variables miss-assign]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/28cd10252344277e32fc602e9ced8d0836dffc83/Timeline/gaspard_Random%20play%20point%20and%20time%20selection%20size.lua</source>
+      </version>
+      <version name="1.0.6" author="gaspard" time="2025-08-18T10:43:37Z">
+        <changelog><![CDATA[- Update font]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1781cafb5a8bb8d12c5db1f16deb3578360c36a8/Timeline/gaspard_Random%20play%20point%20and%20time%20selection%20size.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Remove selected even items in timeline order on multiple tracks.lua" type="script" desc="Remove selected even items in timeline order on multiple tracks">
