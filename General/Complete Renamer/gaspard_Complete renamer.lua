@@ -1,11 +1,11 @@
 --@description Complete renamer
 --@author gaspard
---@version 1.0.9
+--@version 1.0.10
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/GUI_Elements/*.lua
 --@changelog
---  - Fix font size
+--  - Update ReaImGui version
 --@about
 --  ### Complete renamer
 --  - A complete renamer with selectable and editable rule blocks for items, tracks, markers and regions (may evolve).
@@ -30,7 +30,7 @@ SetButtonState(1)
 -- Load Utilities
 dofile(reaper.GetResourcePath() ..
        '/Scripts/ReaTeam Extensions/API/imgui.lua')
-  ('0.9.0.2') -- current version at the time of writing the script
+  ('0.10.0.1') -- current version at the time of writing the script
 
 package.path = package.path..';'..debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]] .. "?.lua" -- GET DIRECTORY FOR REQUIRE
 System = require('Utilities/System')

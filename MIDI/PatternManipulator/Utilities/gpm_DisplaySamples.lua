@@ -45,7 +45,7 @@ function window_samples.Show()
             local text_insert = "Drop sample file here."
             local selected_tracks = reaper.CountSelectedTracks(0) > 0
             if not selected_tracks then text_insert = "Please select one track." end
-            reaper.ImGui_PushFont(ctx, small_font)
+            reaper.ImGui_PushFont(ctx, italic_font, small_font_size)
             reaper.ImGui_TextWrapped(ctx, text_insert)
             reaper.ImGui_PopFont(ctx)
             if not selected_tracks then

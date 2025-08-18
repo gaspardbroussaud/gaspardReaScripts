@@ -175,7 +175,7 @@ end
 function Gui_Init()
     InitialVariables()
     ctx = reaper.ImGui_CreateContext('random_play_context')
-    font = reaper.ImGui_CreateFont(style_font.style, style_font.size)
+    font = reaper.ImGui_CreateFont(style_font.style)
     small_font = reaper.ImGui_CreateFont(style_font.style, style_font.size * 0.75, reaper.ImGui_FontFlags_Italic())
     reaper.ImGui_Attach(ctx, font)
     reaper.ImGui_Attach(ctx, small_font)

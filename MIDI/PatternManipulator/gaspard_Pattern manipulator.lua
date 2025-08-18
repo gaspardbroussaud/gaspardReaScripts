@@ -1,10 +1,10 @@
 --@description Pattern Manipulator
 --@author gaspard
---@version 0.1.5b
+--@version 0.1.6b
 --@provides
 --    [nomain] Utilities/*.lua
 --@changelog
---  - Fix font crash
+--  - Update ReaImGui version
 --@about
 --  # Pattern manipulator
 --  Set racks of samples to manipulate using midi patterns.
@@ -102,7 +102,7 @@ SetButtonState(1)
 -- Load Utilities
 dofile(reaper.GetResourcePath() ..
        '/Scripts/ReaTeam Extensions/API/imgui.lua')
-  ('0.9.3.2') -- current version at the time of writing the script
+  ('0.10.0.1') -- current version at the time of writing the script
 
 script_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]
 package.path = package.path..';'..script_path .. '?.lua' -- GET DIRECTORY FOR REQUIRE

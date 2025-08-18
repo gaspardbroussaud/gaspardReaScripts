@@ -1,24 +1,24 @@
 -- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.3.10
+-- @version 1.3.11
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  - Fix font size
+--  - Update ReaImGui version
 -- @about
 --  - GUI to hide and show tracks in TCP and mixer with mute and locking.
 --  - You can change settings for links between manager and TCP to control selection, mute, solo, and hide/show tracks.
 --  - Set an action ID in settings to use with F key while in manager window's focus.
 
 -- Global Variables
-version = "1.3.9"
+version = "1.3.11"
 window_name = 'TRACK VISIBILITY MANAGER'
 
 ------
 -- Load Utilities
 dofile(reaper.GetResourcePath() ..
        '/Scripts/ReaTeam Extensions/API/imgui.lua')
-  ('0.9.0.2') -- current version at the time of writing the script
+  ('0.10.0.1') -- current version at the time of writing the script
 
 package.path = package.path..';'..debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]] .. "?.lua" -- GET DIRECTORY FOR REQUIRE
 require('Utilities/UserInterface')

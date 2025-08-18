@@ -31,12 +31,10 @@ small_font_size = style_font.size * 0.75
 
 -- ImGui Init
 ctx = reaper.ImGui_CreateContext('random_play_context')
-font = reaper.ImGui_CreateFont(style_font.style, style_font.size)
-italic_font = reaper.ImGui_CreateFont(style_font.style, style_font.size, reaper.ImGui_FontFlags_Italic())
-small_font = reaper.ImGui_CreateFont(style_font.style, small_font_size, reaper.ImGui_FontFlags_Italic())
+font = reaper.ImGui_CreateFont(style_font.style)
+italic_font = reaper.ImGui_CreateFont(style_font.style, reaper.ImGui_FontFlags_Italic())
 reaper.ImGui_Attach(ctx, font)
 reaper.ImGui_Attach(ctx, italic_font)
-reaper.ImGui_Attach(ctx, small_font)
 global_spacing = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing())
 
 -- GUI Top Bar
@@ -70,7 +68,7 @@ end
 
 -- Gui Version on bottom right
 local function VersionDisplay()
-    reaper.ImGui_PushFont(ctx, small_font)
+    reaper.ImGui_PushFont(ctx, italic_font, small_font_size)
     local w, h = reaper.ImGui_CalcTextSize(ctx, "v"..version)
     reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
     reaper.ImGui_SetCursorPosY(ctx, window_height - h - 10)
@@ -171,7 +169,7 @@ function gpmgui.Loop()
     reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowSizeConstraints(ctx, min_width, min_height, max_width, max_height)
     -- Font
-    reaper.ImGui_PushFont(ctx, font)
+    reaper.ImGui_PushFont(ctx, font, style_font.size)
     -- Begin
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)

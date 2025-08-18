@@ -1,9 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 0.0.15
+--@version 0.0.16
 --@changelog
---  - Fix font size
---  - Update Settings window size
+--  - ReaImGui version update
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -31,7 +30,7 @@ SetButtonState(1)
 -- Load Utilities
 dofile(reaper.GetResourcePath() ..
        '/Scripts/ReaTeam Extensions/API/imgui.lua')
-  ('0.9.3.2') -- current version at the time of writing the script
+  ('0.10.0.1') -- current version at the time of writing the script
 
 local json_file_path = reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/JSON'
 package.path = package.path .. ';' .. json_file_path .. '/?.lua'
@@ -111,12 +110,10 @@ local small_font_size = style_font.size * 0.75
 
 -- ImGui Init
 local ctx = reaper.ImGui_CreateContext('gaspard_rea_launcher_ctx')
-local font = reaper.ImGui_CreateFont(style_font.style)
+local font = reaper.ImGui_CreateFont(style_font.style, 0)
 local italic_font = reaper.ImGui_CreateFont(style_font.style, reaper.ImGui_FontFlags_Italic())
-local small_font = reaper.ImGui_CreateFont(style_font.style, reaper.ImGui_FontFlags_Italic())
 reaper.ImGui_Attach(ctx, font)
 reaper.ImGui_Attach(ctx, italic_font)
-reaper.ImGui_Attach(ctx, small_font)
 local global_spacing = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing())
 local show_settings = false
 --#endregion
