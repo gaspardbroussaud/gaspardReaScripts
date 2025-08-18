@@ -1,10 +1,10 @@
 -- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.3.9
+-- @version 1.3.10
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  - Fix font crash
+--  - Fix font size
 -- @about
 --  - GUI to hide and show tracks in TCP and mixer with mute and locking.
 --  - You can change settings for links between manager and TCP to control selection, mute, solo, and hide/show tracks.

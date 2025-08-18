@@ -1,8 +1,9 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 0.0.14
+--@version 0.0.15
 --@changelog
---  - Fix font crash
+--  - Fix font size
+--  - Update Settings window size
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -110,9 +111,9 @@ local small_font_size = style_font.size * 0.75
 
 -- ImGui Init
 local ctx = reaper.ImGui_CreateContext('gaspard_rea_launcher_ctx')
-local font = reaper.ImGui_CreateFont(style_font.style, style_font.size)
-local italic_font = reaper.ImGui_CreateFont(style_font.style, style_font.size, reaper.ImGui_FontFlags_Italic())
-local small_font = reaper.ImGui_CreateFont(style_font.style, small_font_size, reaper.ImGui_FontFlags_Italic())
+local font = reaper.ImGui_CreateFont(style_font.style)
+local italic_font = reaper.ImGui_CreateFont(style_font.style, reaper.ImGui_FontFlags_Italic())
+local small_font = reaper.ImGui_CreateFont(style_font.style, reaper.ImGui_FontFlags_Italic())
 reaper.ImGui_Attach(ctx, font)
 reaper.ImGui_Attach(ctx, italic_font)
 reaper.ImGui_Attach(ctx, small_font)
@@ -671,7 +672,7 @@ end
 local function ElementsSettings()
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoResize() | reaper.ImGui_WindowFlags_TopMost()
     local settings_width = 350 --og_window_width - 80
-    local settings_height = 120 --og_window_height * 0.7
+    local settings_height = 150 --og_window_height * 0.7
     local settings_x = window_x + window_width - 102
     reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowPos(ctx, settings_x, window_y + 32) --, reaper.ImGui_Cond_Appearing())
@@ -730,7 +731,7 @@ local function Gui_Loop()
     reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowSizeConstraints(ctx, min_width, min_height, max_width, max_height)
     -- Font
-    reaper.ImGui_PushFont(ctx, font)
+    reaper.ImGui_PushFont(ctx, font, style_font.size)
     -- Begin
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)

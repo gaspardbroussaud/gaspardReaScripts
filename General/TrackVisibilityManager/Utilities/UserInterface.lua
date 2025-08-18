@@ -8,8 +8,8 @@ local window_width = 550
 local window_height = 350
 local gui_W = window_width
 local gui_H = window_height
-local font = reaper.ImGui_CreateFont(style_font.style, style_font.size)
-local small_font = reaper.ImGui_CreateFont(style_font.style, style_font.size * 0.75, reaper.ImGui_FontFlags_Italic())
+local font = reaper.ImGui_CreateFont(style_font.style)
+local small_font = reaper.ImGui_CreateFont(style_font.style, reaper.ImGui_FontFlags_Italic())
 local last_selected = -1
 local show_settings = false
 local changed = false
@@ -30,7 +30,7 @@ function Gui_Loop()
     local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | reaper.ImGui_WindowFlags_NoScrollWithMouse()
     reaper.ImGui_SetNextWindowSize(ctx, gui_W, gui_H, reaper.ImGui_Cond_Once())
     -- Font
-    reaper.ImGui_PushFont(ctx, font)
+    reaper.ImGui_PushFont(ctx, font, style_font.size)
     -- Begin
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
@@ -589,7 +589,7 @@ end
 -- Gui Version on bottom right
 function Gui_Version()
     local text = "gaspard v"..version
-    reaper.ImGui_PushFont(ctx, small_font)
+    reaper.ImGui_PushFont(ctx, small_font, style_font.size * 0.75)
     local w, h = reaper.ImGui_CalcTextSize(ctx, text)
     reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
     reaper.ImGui_SetCursorPosY(ctx, window_height - h - 10)

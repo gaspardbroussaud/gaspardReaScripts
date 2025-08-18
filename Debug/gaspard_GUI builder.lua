@@ -1,13 +1,13 @@
 --@noindex
 --@description GUI builder
 --@author gaspard
---@version 1.0.2
---@changelog WIP changes in positions
+--@version 1.0.3
+--@changelog Update font
 --@about WIP GUI construction for another script
 
 function GuiInit()
     ctx = reaper.ImGui_CreateContext('Region Tool')
-    FONT = reaper.ImGui_CreateFont('sans-serif', 15)
+    FONT = reaper.ImGui_CreateFont('arial')
     reaper.ImGui_Attach(ctx, FONT)
     winW, winH = 400, 350
     isClosed = false
@@ -95,7 +95,7 @@ end
 function GuiLoop()
     local window_flags = reaper.ImGui_WindowFlags_NoCollapse()
     reaper.ImGui_SetNextWindowSize(ctx, winW, winH, reaper.ImGui_Cond_Once())
-    reaper.ImGui_PushFont(ctx, FONT)
+    reaper.ImGui_PushFont(ctx, FONT, 16)
     reaper.ImGui_SetConfigVar(ctx, reaper.ImGui_ConfigVar_ViewportsNoDecoration(), 0)
     
     local visible, open = reaper.ImGui_Begin(ctx, 'Region Renaming Tool', true, window_flags)
