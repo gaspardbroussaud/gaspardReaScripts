@@ -1,8 +1,8 @@
 --@description Simple renamer
 --@author gaspard
---@version 1.0.3
+--@version 1.0.4
 --@changelog
---  - Fix crash on empty items (only notes) in project
+--  - Update font
 --@about
 --  ### Simple renamer
 --  - A simple and quick renamer via text replace for tracks, regions, markers, items (may add others later).
@@ -19,6 +19,7 @@ end
 function GetGuiStylesFromFile()
     local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
     local style = dofile(gui_style_settings_path)
+    font = style.font
     style_vars = style.vars
     style_colors = style.colors
 end
@@ -87,8 +88,7 @@ function InitialVariables()
     window_height = og_window_height
     settings_amount_height = 0.6
     topbar_height = 30
-    font_size = 16
-    small_font_size = font_size * 0.75
+    small_font_size = font.size * 0.75
     window_name = "SIMPLE RENAMER"
     project_name = reaper.GetProjectName(0)
     project_path = reaper.GetProjectPath()
@@ -109,8 +109,8 @@ end
 function Gui_Init()
     InitialVariables()
     ctx = reaper.ImGui_CreateContext('random_play_context')
-    font = reaper.ImGui_CreateFont('sans-serif', 16)
-    small_font = reaper.ImGui_CreateFont('sans-serif', 16 * 0.75, reaper.ImGui_FontFlags_Italic())
+    font = reaper.ImGui_CreateFont(font.style, font.size)
+    small_font = reaper.ImGui_CreateFont(font.style, small_font_size, reaper.ImGui_FontFlags_Italic())
     reaper.ImGui_Attach(ctx, font)
     reaper.ImGui_Attach(ctx, small_font)
 end

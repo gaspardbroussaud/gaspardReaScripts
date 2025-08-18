@@ -1,8 +1,8 @@
 --@description Get userdata from GUID
 --@author gaspard
---@version 1.0
+--@version 1.0.1
 --@changelog
---  - Add script
+--  - Update font
 --@about
 --  - Get any REAPER userdata from GUID input if found.
 
@@ -18,6 +18,7 @@ end
 function GetGuiStylesFromFile()
     local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
     local style = dofile(gui_style_settings_path)
+    font = style.font
     style_vars = style.vars
     style_colors = style.colors
 end
@@ -51,8 +52,7 @@ function InitialVariables()
     window_width = og_window_width
     window_height = og_window_height
     topbar_height = 30
-    font_size = 16
-    small_font_size = font_size * 0.75
+    small_font_size = font.size * 0.75
     window_name = "DEBUG GUID TO USERDATA"
     project_name = reaper.GetProjectName(0)
     project_path = reaper.GetProjectPath()
@@ -154,8 +154,8 @@ end
 function Gui_Init()
     InitialVariables()
     ctx = reaper.ImGui_CreateContext('random_play_context')
-    font = reaper.ImGui_CreateFont('sans-serif', font_size)
-    small_font = reaper.ImGui_CreateFont('sans-serif', small_font_size, reaper.ImGui_FontFlags_Italic())
+    font = reaper.ImGui_CreateFont(font.style, font.size)
+    small_font = reaper.ImGui_CreateFont(font.style, small_font_size, reaper.ImGui_FontFlags_Italic())
     reaper.ImGui_Attach(ctx, font)
     reaper.ImGui_Attach(ctx, small_font)
 end

@@ -1,8 +1,8 @@
 --@description Random play point and time selection size
 --@author gaspard
---@version 1.0.5
+--@version 1.0.6
 --@changelog
---  - Fix variables miss-assign
+--  - Update font
 --@about
 --  ### How to:
 --  - Set a time selection in your project, start and end position will be used.
@@ -23,6 +23,7 @@ end
 function GetGuiStylesFromFile()
     gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
     local style = dofile(gui_style_settings_path)
+    font = style.font
     style_vars = style.vars
     style_colors = style.colors
 end
@@ -73,8 +74,8 @@ end
 -- GUI Initialize function
 function Gui_Init()
     ctx = reaper.ImGui_CreateContext('random_play_context')
-    font = reaper.ImGui_CreateFont('sans-serif', font_size)
-    small_font = reaper.ImGui_CreateFont('sans-serif', font_size * 0.75, reaper.ImGui_FontFlags_Italic())
+    font = reaper.ImGui_CreateFont(font.style, font.size)
+    small_font = reaper.ImGui_CreateFont(font.style, font.size * 0.75, reaper.ImGui_FontFlags_Italic())
     reaper.ImGui_Attach(ctx, font)
     reaper.ImGui_Attach(ctx, small_font)
     window_name = "RANDOMIZED LOOPING"

@@ -1,8 +1,13 @@
 --@description Gui Settings for all gaspard's scripts
 --@author gaspard
---@version 1.0.2
+--@version 1.0.3
 --@provides [nomain] .
 --@about Gui Settings for all gaspard's scripts, called at frame 1 on each GUI script.
+
+local font = {
+    size = 16,
+    style = 'arial'
+}
 
 local grey_bg = 0x2B2B2BFF
 local black_bg = 0x14141BFF
@@ -81,4 +86,4 @@ local style_colors = {
     {col = reaper.ImGui_Col_DockingPreview(), value = 0x796BB6FF}
 }
 
-return { vars = style_vars, colors = style_colors }
+return { font = font, vars = style_vars, colors = style_colors }

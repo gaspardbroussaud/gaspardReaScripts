@@ -1,18 +1,17 @@
 -- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.3.7
+-- @version 1.3.8
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
---  - Updated settings GUI background
---  - Updated GUI layout
+--  - Updated font
 -- @about
 --  - GUI to hide and show tracks in TCP and mixer with mute and locking.
 --  - You can change settings for links between manager and TCP to control selection, mute, solo, and hide/show tracks.
 --  - Set an action ID in settings to use with F key while in manager window's focus.
 
 -- Global Variables
-version = "1.3.7"
+version = "1.3.8"
 window_name = 'TRACK VISIBILITY MANAGER'
 
 ------

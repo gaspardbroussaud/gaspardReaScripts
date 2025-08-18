@@ -18,26 +18,26 @@ window_x, window_y = 0, 0
 local no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
 local window_name = "PATTERN MANIPULATOR"
 
+-- Get GUI style from file
+local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
+local style = dofile(gui_style_settings_path)
+local font = style.font
+local style_vars = style.vars
+local style_colors = style.colors
+
 -- Sizing variables
 topbar_height = 30
-font_size = 16
-small_font_size = font_size * 0.75
+small_font_size = font.size * 0.75
 
 -- ImGui Init
 ctx = reaper.ImGui_CreateContext('random_play_context')
-font = reaper.ImGui_CreateFont('sans-serif', font_size)
-italic_font = reaper.ImGui_CreateFont('sans-serif', font_size, reaper.ImGui_FontFlags_Italic())
-small_font = reaper.ImGui_CreateFont('sans-serif', small_font_size, reaper.ImGui_FontFlags_Italic())
+font = reaper.ImGui_CreateFont(font.style, font.size)
+italic_font = reaper.ImGui_CreateFont(font.style, font.size, reaper.ImGui_FontFlags_Italic())
+small_font = reaper.ImGui_CreateFont(font.style, small_font_size, reaper.ImGui_FontFlags_Italic())
 reaper.ImGui_Attach(ctx, font)
 reaper.ImGui_Attach(ctx, italic_font)
 reaper.ImGui_Attach(ctx, small_font)
 global_spacing = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing())
-
--- Get GUI style from file
-local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
-local style = dofile(gui_style_settings_path)
-local style_vars = style.vars
-local style_colors = style.colors
 
 -- GUI Top Bar
 local function TopBarDisplay()

@@ -1,8 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 0.0.12
+--@version 0.0.13
 --@changelog
---  - Add close on escape key pressed
+--  - Update font
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -85,6 +85,13 @@ end
 --#region GUI VARIABLES -----------------------------------------------
 -----------------------------------------------------------------------
 -----------------------------------------------------------------------
+-- Get GUI style from file
+local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
+local style = dofile(gui_style_settings_path)
+local font = style.font
+local style_vars = style.vars
+local style_colors = style.colors
+
 -- Window variables
 local og_window_width = 1000
 local og_window_height = 500
@@ -99,25 +106,18 @@ local window_name = "GASPARD REAPER LAUNCHER"
 
 -- Sizing variables
 local topbar_height = 30
-local font_size = 16
-local small_font_size = font_size * 0.75
+local small_font_size = font.size * 0.75
 
 -- ImGui Init
 local ctx = reaper.ImGui_CreateContext('gaspard_rea_launcher_ctx')
-local font = reaper.ImGui_CreateFont('sans-serif', font_size)
-local italic_font = reaper.ImGui_CreateFont('sans-serif', font_size, reaper.ImGui_FontFlags_Italic())
-local small_font = reaper.ImGui_CreateFont('sans-serif', small_font_size, reaper.ImGui_FontFlags_Italic())
+local font = reaper.ImGui_CreateFont(font.style, font.size)
+local italic_font = reaper.ImGui_CreateFont(font.style, font.size, reaper.ImGui_FontFlags_Italic())
+local small_font = reaper.ImGui_CreateFont(font.style, small_font_size, reaper.ImGui_FontFlags_Italic())
 reaper.ImGui_Attach(ctx, font)
 reaper.ImGui_Attach(ctx, italic_font)
 reaper.ImGui_Attach(ctx, small_font)
 local global_spacing = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing())
 local show_settings = false
-
--- Get GUI style from file
-local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
-local style = dofile(gui_style_settings_path)
-local style_vars = style.vars
-local style_colors = style.colors
 --#endregion
 
 --region SCRIPT ELEMENTS ----------------------------------------------

@@ -1,8 +1,8 @@
 --@description Master settings
 --@author gaspard
---@version 1.1.6
+--@version 1.1.7
 --@changelog
---  - Add tooltip for script names
+--  - Update font
 --@about
 --  ### Master settings
 --  All settings for all gaspard's scripts
@@ -30,6 +30,7 @@ end
 function GetGuiStylesFromFile()
     local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
     local style = dofile(gui_style_settings_path)
+    font = style.font
     style_vars = style.vars
     style_colors = style.colors
 end
@@ -98,7 +99,6 @@ function InitialVariables()
     window_width = og_window_width
     window_height = og_window_height
     topbar_height = 30
-    font_size = 16
     window_name = "MASTER SETTINGS"
     project_name = reaper.GetProjectName(0)
     project_path = reaper.GetProjectPath()
@@ -183,8 +183,8 @@ end
 function Gui_Init()
     InitialVariables()
     ctx = reaper.ImGui_CreateContext('random_play_context')
-    font = reaper.ImGui_CreateFont('sans-serif', font_size)
-    small_font = reaper.ImGui_CreateFont('sans-serif', font_size * 0.75, reaper.ImGui_FontFlags_Italic())
+    font = reaper.ImGui_CreateFont(font.style, font.size)
+    small_font = reaper.ImGui_CreateFont(font.style, font.size * 0.75, reaper.ImGui_FontFlags_Italic())
     reaper.ImGui_Attach(ctx, font)
     reaper.ImGui_Attach(ctx, small_font)
 end
@@ -251,7 +251,7 @@ end
 -- Gui Elements
 function Gui_Elements()
     local child_main_x = window_width - 20
-    local child_main_y = window_height - topbar_height - (font_size * 0.75) - 30
+    local child_main_y = window_height - topbar_height - (font.size * 0.75) - 30
     reaper.ImGui_SetCursorPosX(ctx, 10)
     if reaper.ImGui_BeginChild(ctx, "child_main_elements", child_main_x, child_main_y, reaper.ImGui_ChildFlags_Border(), no_scrollbar_flags) then
         reaper.ImGui_PushItemWidth(ctx, -1)

@@ -1,10 +1,10 @@
 --@description Pattern Manipulator
 --@author gaspard
---@version 0.1.3b
+--@version 0.1.4b
 --@provides
 --    [nomain] Utilities/*.lua
 --@changelog
---  - Add Obey note off in sample window
+--  - Update font
 --@about
 --  # Pattern manipulator
 --  Set racks of samples to manipulate using midi patterns.
