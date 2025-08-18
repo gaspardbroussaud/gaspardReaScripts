@@ -1,8 +1,8 @@
 --@description Insert tracks with name inputs
 --@author gaspard
---@version 1.0
+--@version 1.0.1
 --@changelog
---  - Add script
+--  - Update font
 --@about
 --  ###Insert tracks with name inputs
 --  - How to use:
@@ -40,8 +40,7 @@ function InitialVariables()
     window_width = og_window_width
     window_height = og_window_height
     topbar_height = 30
-    font_size = 16
-    small_font_size = font_size * 0.75
+    small_font_size = style_font.size * 0.75
     window_name = "TRACK INSERTOR"
     project_name = reaper.GetProjectName(0)
     project_path = reaper.GetProjectPath()
@@ -78,8 +77,8 @@ end
 function Gui_Init()
     InitialVariables()
     ctx = reaper.ImGui_CreateContext('random_play_context')
-    font = reaper.ImGui_CreateFont('sans-serif', font_size)
-    small_font = reaper.ImGui_CreateFont('sans-serif', small_font_size, reaper.ImGui_FontFlags_Italic())
+    font = reaper.ImGui_CreateFont(style_font.style, style_font.size)
+    small_font = reaper.ImGui_CreateFont(style_font.style, small_font_size, reaper.ImGui_FontFlags_Italic())
     reaper.ImGui_Attach(ctx, font)
     reaper.ImGui_Attach(ctx, small_font)
 end

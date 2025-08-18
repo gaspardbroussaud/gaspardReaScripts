@@ -15,7 +15,7 @@ local settings_window = require('Utilities/GUI_Elements/Gui_Settings')
 local function GetGuiStylesFromFile()
     local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
     local style = dofile(gui_style_settings_path)
-    font = style.font
+    style_font = style.font
     style_vars = style.vars
     style_colors = style.colors
 end
@@ -25,7 +25,7 @@ local og_window_height = 650
 window_width = og_window_width
 window_height = og_window_height
 local topbar_height = 30
-local small_font_size = font.size * 0.75
+local small_font_size = style_font.size * 0.75
 local window_name = "COMPLETE RENAMER"
 local no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
 local top_height_ratio = 0.3
@@ -35,8 +35,8 @@ local is_resizing = false
 -- Init ImGui
 local function WindowInit()
     ctx = reaper.ImGui_CreateContext('random_play_context')
-    font = reaper.ImGui_CreateFont(font.style, font.size)
-    small_font = reaper.ImGui_CreateFont(font.style, small_font_size, reaper.ImGui_FontFlags_Italic())
+    font = reaper.ImGui_CreateFont(style_font.style, style_font.size)
+    small_font = reaper.ImGui_CreateFont(style_font.style, small_font_size, reaper.ImGui_FontFlags_Italic())
     reaper.ImGui_Attach(ctx, font)
     reaper.ImGui_Attach(ctx, small_font)
 end

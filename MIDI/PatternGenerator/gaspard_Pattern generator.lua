@@ -1,12 +1,12 @@
 --@noindex
 --@description Pattern generator
 --@author gaspard
---@version 0.0.7b
+--@version 0.0.8b
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/Gui_Elements/*.lua
 --@changelog
---  - Remove from ReaPack
+--  - Update font
 --@about
 --  ### Pattern generator
 --  - A MIDI pattern generator.

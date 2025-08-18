@@ -1,8 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 0.0.13
+--@version 0.0.14
 --@changelog
---  - Update font
+--  - Fix font crash
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -88,7 +88,7 @@ end
 -- Get GUI style from file
 local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
 local style = dofile(gui_style_settings_path)
-local font = style.font
+local style_font = style.font
 local style_vars = style.vars
 local style_colors = style.colors
 
@@ -106,13 +106,13 @@ local window_name = "GASPARD REAPER LAUNCHER"
 
 -- Sizing variables
 local topbar_height = 30
-local small_font_size = font.size * 0.75
+local small_font_size = style_font.size * 0.75
 
 -- ImGui Init
 local ctx = reaper.ImGui_CreateContext('gaspard_rea_launcher_ctx')
-local font = reaper.ImGui_CreateFont(font.style, font.size)
-local italic_font = reaper.ImGui_CreateFont(font.style, font.size, reaper.ImGui_FontFlags_Italic())
-local small_font = reaper.ImGui_CreateFont(font.style, small_font_size, reaper.ImGui_FontFlags_Italic())
+local font = reaper.ImGui_CreateFont(style_font.style, style_font.size)
+local italic_font = reaper.ImGui_CreateFont(style_font.style, style_font.size, reaper.ImGui_FontFlags_Italic())
+local small_font = reaper.ImGui_CreateFont(style_font.style, small_font_size, reaper.ImGui_FontFlags_Italic())
 reaper.ImGui_Attach(ctx, font)
 reaper.ImGui_Attach(ctx, italic_font)
 reaper.ImGui_Attach(ctx, small_font)
