@@ -34,7 +34,7 @@ function presets_window.Show()
         reaper.ImGui_PushItemWidth(ctx, -1)
         _, preset_search = reaper.ImGui_InputText(ctx, "##inputtext_search", preset_search)
         reaper.ImGui_SetItemTooltip(ctx, "Enter preset name to search or to save new.\nIf a preset exists with this name, it will be erased on SAVE.")
-        if reaper.ImGui_BeginChild(ctx, "child_presets_window", presets_width - 16, presets_height - 100, reaper.ImGui_ChildFlags_Border()) then
+        if reaper.ImGui_BeginChild(ctx, "child_presets_window", presets_width - 16, presets_height - 100, reaper.ImGui_ChildFlags_Borders()) then
             if reaper.ImGui_BeginListBox(ctx, "##listbox_presets", -1, -1) then
                 for i, preset in ipairs(System.presets) do
                     if preset_search == "" or preset.name:lower():find(preset_search:lower(), 1, true) then

@@ -1,11 +1,11 @@
 --@description Complete renamer
 --@author gaspard
---@version 1.0.10
+--@version 1.0.11
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/GUI_Elements/*.lua
 --@changelog
---  - Update ReaImGui version
+--  - Update values for new ReaImGui version
 --@about
 --  ### Complete renamer
 --  - A complete renamer with selectable and editable rule blocks for items, tracks, markers and regions (may evolve).

@@ -1,8 +1,8 @@
 -- @description Set region render matrix to same named track
 -- @author gaspard
--- @version 1.0.3
+-- @version 1.0.4
 -- @changelog
---  - Update font
+--  - Update for new ReaImGui version
 -- @about
 --  - Set region's render matrix track to track with same name.
 
@@ -217,7 +217,7 @@ end
 function Gui_Elements()
     -- Set child section size (can use PushItemWidth for items without this setting) and center in window_width
     reaper.ImGui_SetCursorPosX(ctx, 10)
-    if reaper.ImGui_BeginChild(ctx, "child_example_elements", window_width - 20, window_height - 75, reaper.ImGui_ChildFlags_Border()) then
+    if reaper.ImGui_BeginChild(ctx, "child_example_elements", window_width - 20, window_height - 75, reaper.ImGui_ChildFlags_Borders()) then
         if reaper.ImGui_BeginTable(ctx, "table_selectable_missing", 1, reaper.ImGui_TableFlags_BordersInner()) then
             reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_CellPadding(), 1, 5)
             for i = 1, #missing do

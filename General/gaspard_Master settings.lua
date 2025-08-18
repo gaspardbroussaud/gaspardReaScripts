@@ -1,8 +1,8 @@
 --@description Master settings
 --@author gaspard
---@version 1.1.8
+--@version 1.1.9
 --@changelog
---  - Fix font crash
+--  - Update for new ReaImGui version
 --@about
 --  ### Master settings
 --  All settings for all gaspard's scripts
@@ -254,7 +254,7 @@ function Gui_Elements()
     local child_main_x = window_width - 20
     local child_main_y = window_height - topbar_height - (style_font.size * 0.75) - 30
     reaper.ImGui_SetCursorPosX(ctx, 10)
-    if reaper.ImGui_BeginChild(ctx, "child_main_elements", child_main_x, child_main_y, reaper.ImGui_ChildFlags_Border(), no_scrollbar_flags) then
+    if reaper.ImGui_BeginChild(ctx, "child_main_elements", child_main_x, child_main_y, reaper.ImGui_ChildFlags_Borders(), no_scrollbar_flags) then
         reaper.ImGui_PushItemWidth(ctx, -1)
         -- Input search text
         if was_opened then
@@ -453,7 +453,7 @@ function Gui_More()
             end
         end
 
-        if reaper.ImGui_BeginChild(ctx, "##child_scripts_delete", rect_w, rect_h, reaper.ImGui_ChildFlags_Border()) then
+        if reaper.ImGui_BeginChild(ctx, "##child_scripts_delete", rect_w, rect_h, reaper.ImGui_ChildFlags_Borders()) then
             -- Split text input into words
             local input_words = SplitIntoWords(script_name_more)
 

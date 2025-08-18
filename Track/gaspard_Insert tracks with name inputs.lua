@@ -1,8 +1,8 @@
 --@description Insert tracks with name inputs
 --@author gaspard
---@version 1.0.1
+--@version 1.0.2
 --@changelog
---  - Update font
+--  - Fix font crash
 --@about
 --  ###Insert tracks with name inputs
 --  - How to use:
@@ -22,6 +22,7 @@ end
 function GetGuiStylesFromFile()
     local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
     local style = dofile(gui_style_settings_path)
+    style_font = style.font
     style_vars = style.vars
     style_colors = style.colors
 end

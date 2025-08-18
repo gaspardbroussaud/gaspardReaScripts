@@ -96,17 +96,17 @@ end
 local function VisualElements()
     local child_width = 600 - 16 - 8
     local child_height = 330 - topbar_height - 40
-    if reaper.ImGui_BeginChild(ctx, 'child_sample_zone', child_width * 0.5, child_height, reaper.ImGui_ChildFlags_Border()) then
+    if reaper.ImGui_BeginChild(ctx, 'child_sample_zone', child_width * 0.5, child_height, reaper.ImGui_ChildFlags_Borders()) then
         sample_window.Show()
         reaper.ImGui_EndChild(ctx)
     end
     reaper.ImGui_SameLine(ctx)
-    if reaper.ImGui_BeginChild(ctx, 'child_patterns_zone', child_width * 0.4, child_height, reaper.ImGui_ChildFlags_Border()) then
+    if reaper.ImGui_BeginChild(ctx, 'child_patterns_zone', child_width * 0.4, child_height, reaper.ImGui_ChildFlags_Borders()) then
         pattern_window.Show()
         reaper.ImGui_EndChild(ctx)
     end
     reaper.ImGui_SameLine(ctx)
-    if reaper.ImGui_BeginChild(ctx, 'child_piano_roll', 308, child_height, reaper.ImGui_ChildFlags_Border()) then
+    if reaper.ImGui_BeginChild(ctx, 'child_piano_roll', 308, child_height, reaper.ImGui_ChildFlags_Borders()) then
         piano_roll.Show()
         reaper.ImGui_EndChild(ctx)
     end

@@ -47,7 +47,7 @@ function settings_window.Show()
 
     local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
     if settings_visible then
-        if reaper.ImGui_BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, reaper.ImGui_ChildFlags_Border()) then
+        if reaper.ImGui_BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, reaper.ImGui_ChildFlags_Borders()) then
             reaper.ImGui_Text(ctx, Settings.obey_note_off.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, obey_note_off = reaper.ImGui_Checkbox(ctx, "##settings_obey_note_off", obey_note_off)

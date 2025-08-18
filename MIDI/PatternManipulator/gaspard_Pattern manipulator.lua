@@ -1,10 +1,10 @@
 --@description Pattern Manipulator
 --@author gaspard
---@version 0.1.6b
+--@version 0.1.7b
 --@provides
 --    [nomain] Utilities/*.lua
 --@changelog
---  - Update ReaImGui version
+--  - Update for new ReaImGui version
 --@about
 --  # Pattern manipulator
 --  Set racks of samples to manipulate using midi patterns.

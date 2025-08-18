@@ -1,8 +1,8 @@
 --@description Complete selection
 --@author gaspard
---@version 0.1.8b
+--@version 0.1.9b
 --@changelog
---  - Fix font size
+--  - Update for new ReaImGui version
 --@about
 --  ### Complete selection
 --  - A simple and quick selction tool for tracks, regions, markers, items (may add others later).
@@ -141,7 +141,7 @@ function Gui_Elements()
     local child_width = window_width - 20
     local child_height = window_height - topbar_height - small_font_size - 30
     reaper.ImGui_SetCursorPosX(ctx, 10)
-    if reaper.ImGui_BeginChild(ctx, "child_all_elements", child_width, child_height, reaper.ImGui_ChildFlags_Border(), no_scrollbar_flags) then
+    if reaper.ImGui_BeginChild(ctx, "child_all_elements", child_width, child_height, reaper.ImGui_ChildFlags_Borders(), no_scrollbar_flags) then
         local inner_child_width = child_width - 15
         if reaper.ImGui_BeginChild(ctx, "child_target_settings", inner_child_width, 24, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
             reaper.ImGui_SetCursorPosX(ctx, -30)
@@ -234,7 +234,7 @@ function Gui_Settings()
 
     local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
     if settings_visible then
-        if reaper.ImGui_BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, reaper.ImGui_ChildFlags_Border()) then
+        if reaper.ImGui_BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, reaper.ImGui_ChildFlags_Borders()) then
             reaper.ImGui_Text(ctx, Settings.show_items.name..":")
             reaper.ImGui_SameLine(ctx)
             changed, settings_show_items = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_show_items", settings_show_items)

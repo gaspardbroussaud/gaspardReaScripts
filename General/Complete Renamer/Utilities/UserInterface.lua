@@ -52,7 +52,7 @@ local function VisualTopBar()
 
         reaper.ImGui_SameLine(ctx)
 
-        local button_w = 80
+        local button_w = 95
         local small_button_w = 18
         local presets_width = window_width > 369 and button_w or small_button_w
         local settings_width = window_width > 305 and button_w or small_button_w
@@ -61,7 +61,7 @@ local function VisualTopBar()
         local buttons_width = presets_width + settings_width + quit_width + 3 * padding + 2 * spacing
         reaper.ImGui_SetCursorPos(ctx, window_width - buttons_width, 0)
 
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", buttons_width, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
+        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", buttons_width, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
             reaper.ImGui_Dummy(ctx, 3, 1)
             reaper.ImGui_SameLine(ctx)
             local text = presets_width == button_w and 'PRESETS' or 'P'
@@ -99,7 +99,7 @@ local function VisualElements(child_width, child_height)
 
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) - 8)
     reaper.ImGui_SetCursorPosY(ctx, reaper.ImGui_GetCursorPosY(ctx) - 8)
-    if reaper.ImGui_BeginChild(ctx, "child_top_ruleset", child_width, top_height, reaper.ImGui_ChildFlags_Border()) then
+    if reaper.ImGui_BeginChild(ctx, "child_top_ruleset", child_width, top_height, reaper.ImGui_ChildFlags_Borders()) then
         rules_window.Show()
         reaper.ImGui_EndChild(ctx)
     end
@@ -124,7 +124,7 @@ local function VisualElements(child_width, child_height)
 
     reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) - 8)
     reaper.ImGui_SetCursorPosY(ctx, top_height + splitter_size)
-    if reaper.ImGui_BeginChild(ctx, "child_bottom_userdata", child_width, bottom_height, reaper.ImGui_ChildFlags_Border()) then
+    if reaper.ImGui_BeginChild(ctx, "child_bottom_userdata", child_width, bottom_height, reaper.ImGui_ChildFlags_Borders()) then
         userdata_window.ShowVisuals()
         reaper.ImGui_EndChild(ctx)
     end
@@ -222,7 +222,7 @@ function Gui.Loop()
         -- Script GUI Elements
         local child_width = window_width - 16
         local child_height = window_height - topbar_height - 40
-        if reaper.ImGui_BeginChild(ctx, "child_global", child_width, child_height, reaper.ImGui_ChildFlags_Border()) then
+        if reaper.ImGui_BeginChild(ctx, "child_global", child_width, child_height, reaper.ImGui_ChildFlags_Borders()) then
             VisualElements(child_width, child_height)
             reaper.ImGui_EndChild(ctx)
         end

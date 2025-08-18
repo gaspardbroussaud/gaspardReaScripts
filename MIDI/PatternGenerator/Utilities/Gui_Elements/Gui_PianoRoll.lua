@@ -15,7 +15,7 @@ function piano_roll.Show()
 
     local flags = reaper.ImGui_WindowFlags_HorizontalScrollbar()
     reaper.ImGui_WindowFlags_AlwaysHorizontalScrollbar()
-    if reaper.ImGui_BeginChild(ctx, 'child_piano_roll_display', child_width, child_height, reaper.ImGui_ChildFlags_Border(), flags) then
+    if reaper.ImGui_BeginChild(ctx, 'child_piano_roll_display', child_width, child_height, reaper.ImGui_ChildFlags_Borders(), flags) then
         local start_x, start_y = reaper.ImGui_GetCursorScreenPos(ctx)
         local pianoroll_length, grid_line_height = reaper.ImGui_GetContentRegionAvail(ctx)
 

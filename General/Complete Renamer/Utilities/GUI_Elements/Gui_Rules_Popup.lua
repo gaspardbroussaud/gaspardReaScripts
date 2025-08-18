@@ -68,7 +68,7 @@ end
 local function VisualRulePopupElements(width, height)
     local child_width = width - 10
     local child_height = height - 75
-    if reaper.ImGui_BeginChild(ctx, "child_rule_popup", child_width, child_height, reaper.ImGui_ChildFlags_Border()) then
+    if reaper.ImGui_BeginChild(ctx, "child_rule_popup", child_width, child_height, reaper.ImGui_ChildFlags_Borders()) then
         if reaper.ImGui_BeginListBox(ctx, "##listbox_rule_popup_types", 100, child_height - 16) then
             for i, rule_type in ipairs(rule_types) do
                 rule_type.selected = popup_rule.type_selected == rule_type.type

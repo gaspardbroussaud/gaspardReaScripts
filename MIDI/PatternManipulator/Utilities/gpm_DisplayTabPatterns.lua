@@ -101,12 +101,12 @@ function tab_patterns.Show()
     local button_x = reaper.ImGui_GetCursorPosX(ctx)
     local button_y = reaper.ImGui_GetCursorPosY(ctx)
     reaper.ImGui_SetCursorPosY(ctx, reaper.ImGui_GetCursorPosY(ctx) + 27)
-    if reaper.ImGui_BeginChild(ctx, 'child_piano_roll', -1, -1, reaper.ImGui_ChildFlags_Border()) then
+    if reaper.ImGui_BeginChild(ctx, 'child_piano_roll', -1, -1, reaper.ImGui_ChildFlags_Borders()) then
         local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
 
         local flags = reaper.ImGui_WindowFlags_HorizontalScrollbar()
         reaper.ImGui_WindowFlags_AlwaysHorizontalScrollbar()
-        if reaper.ImGui_BeginChild(ctx, 'child_piano_roll_display', -1, -1, reaper.ImGui_ChildFlags_Border(), flags) then
+        if reaper.ImGui_BeginChild(ctx, 'child_piano_roll_display', -1, -1, reaper.ImGui_ChildFlags_Borders(), flags) then
             local start_x, start_y = reaper.ImGui_GetCursorScreenPos(ctx)
             local pianoroll_length, grid_line_height = reaper.ImGui_GetContentRegionAvail(ctx)
 

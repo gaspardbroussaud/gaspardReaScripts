@@ -1,8 +1,8 @@
 --@description Set marker to first transient in selected items using name pattern
 --@author gaspard
---@version 1.0.3
+--@version 1.0.4
 --@changelog
---  - Fix font size
+--  - Update for new ReaImGui version
 --@about
 --  - Set marker to first transient in selected items using name pattern
 --  - How to use:
@@ -211,7 +211,7 @@ function Gui_Settings()
 
     local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
     if settings_visible then
-        if reaper.ImGui_BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, reaper.ImGui_ChildFlags_Border()) then
+        if reaper.ImGui_BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, reaper.ImGui_ChildFlags_Borders()) then
             reaper.ImGui_Text(ctx, Settings.loop_on_pattern.name)
             reaper.ImGui_SameLine(ctx)
             _, settings_loop_on_pattern = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_loop_on_pattern", settings_loop_on_pattern)

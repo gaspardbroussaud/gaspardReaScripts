@@ -1,9 +1,9 @@
 --@noindex
 --@description ImGui Template
 --@author gaspard
---@version 1.0.3
+--@version 1.0.4
 --@changelog
---  - Fix font size
+--  - Update for new ReaImGui version
 --@about
 --  ### Title
 --  - All infos for user
@@ -130,7 +130,7 @@ function Gui_Settings()
 
     local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
     if settings_visible then
-        if reaper.ImGui_BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, reaper.ImGui_ChildFlags_Border()) then
+        if reaper.ImGui_BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, reaper.ImGui_ChildFlags_Borders()) then
 
             reaper.ImGui_EndChild(ctx)
         end
