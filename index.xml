@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="dfe46c75070e8ecb5202cb1018c2ad1ca1467c61">
+<index version="1" name="Gaspard ReaScripts" commit="7415377a5164cac677b30fb8ad68d128ffd13408">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -1893,6 +1893,10 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       <version name="1.0.2" author="gaspard" time="2025-08-18T14:47:30Z">
         <changelog><![CDATA[- Fix font crash]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/dfe46c75070e8ecb5202cb1018c2ad1ca1467c61/Track/gaspard_Insert%20tracks%20with%20name%20inputs.lua</source>
+      </version>
+      <version name="1.0.3" author="gaspard" time="2025-08-18T15:15:25Z">
+        <changelog><![CDATA[- Fix font crash]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7415377a5164cac677b30fb8ad68d128ffd13408/Track/gaspard_Insert%20tracks%20with%20name%20inputs.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Invert selected tracks phase, add 'inv phase' in name and change color.lua" type="script" desc="Invert selected tracks phase, add 'inv phase' in name and change color">
