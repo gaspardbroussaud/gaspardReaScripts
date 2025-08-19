@@ -1,8 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 0.0.16
+--@version 0.0.17
 --@changelog
---  - ReaImGui version update
+--  - Fix ID duplicated in list
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -532,7 +532,8 @@ local function ElementsDisplay()
                 if not project.exists then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xFF0000A1) end
                 local selectable_flags = reaper.ImGui_SelectableFlags_SpanAllColumns() | reaper.ImGui_SelectableFlags_AllowDoubleClick()
                 local display_name = Settings.display_full_path.value and project.path or project.name
-                changed, project.selected = reaper.ImGui_Selectable(ctx, display_name, project.selected, selectable_flags)
+                local display_id = display_name..tostring(i)
+                changed, project.selected = reaper.ImGui_Selectable(ctx, display_name..'##'..display_id, project.selected, selectable_flags)
                 if not project.exists then reaper.ImGui_PopStyleColor(ctx, 1) end
                 if hovered_and_selected then reaper.ImGui_PopStyleColor(ctx, 1) end
 

@@ -1,8 +1,8 @@
 --@description Master settings
 --@author gaspard
---@version 1.1.9
+--@version 1.1.10
 --@changelog
---  - Update for new ReaImGui version
+--  - Fix crash
 --@about
 --  ### Master settings
 --  All settings for all gaspard's scripts
@@ -516,7 +516,7 @@ end
 -- Gui Version on bottom right
 function Gui_Version()
     local text = "gaspard v"..version
-    reaper.ImGui_PushFont(ctx, small_font)
+    reaper.ImGui_PushFont(ctx, small_font, style_font.size * 0.75)
     local w, h = reaper.ImGui_CalcTextSize(ctx, text)
     reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
     reaper.ImGui_SetCursorPosY(ctx, window_height - h - 10)
@@ -531,7 +531,7 @@ function Gui_Loop()
     local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | reaper.ImGui_WindowFlags_NoScrollWithMouse()
     reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
     -- Font
-    reaper.ImGui_PushFont(ctx, font)
+    reaper.ImGui_PushFont(ctx, font, style_font.size)
     -- Begin
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
