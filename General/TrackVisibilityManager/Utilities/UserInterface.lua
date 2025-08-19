@@ -3,6 +3,12 @@
 -- @author gaspard
 -- @about Complete user interface used in gaspard_Track Visibility Manager.lua script
 
+local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
+local style = dofile(gui_style_settings_path)
+local style_font = style.font
+local style_vars = style.vars
+local style_colors = style.colors
+
 local ctx = reaper.ImGui_CreateContext('track_manager_context')
 local window_width = 550
 local window_height = 350

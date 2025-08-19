@@ -470,12 +470,3 @@ function System_StringToBool(str)
         end
     end
 end
-
--- GET GUI STYLES
-function System_GetGuiStylesFromFile()
-    local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
-    local style = dofile(gui_style_settings_path)
-    style_font = style.font
-    style_vars = style.vars
-    style_colors = style.colors
-end
