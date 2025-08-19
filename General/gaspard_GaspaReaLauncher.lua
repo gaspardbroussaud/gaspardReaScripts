@@ -1,8 +1,10 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 0.0.17
+--@version 0.0.18
 --@changelog
---  - Fix ID duplicated in list
+--  - Fix crash on favorite hover
+--  - Add show full path on hover
+--  - Fix ImGui 10 elements
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -38,7 +40,7 @@ local gson = require('json_utilities_lib')
 local script_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]
 local settings_path = script_path..'/gaspard_'..action_name..'_settings.json'
 
-local settings_version = "0.0.4"
+local settings_version = "0.0.5"
 local default_settings = {
     version = settings_version,
     order = {"close_on_open", "search_type", "default_open_style", "display_full_path"},
@@ -68,13 +70,18 @@ local default_settings = {
         value = false,
         name = "Close on escape",
         description = "Close launcher on Escape key pressed."
+    },
+    show_path_hovered = {
+        value = false,
+        name = "Show path on hover",
+        description = "Show full project path on hovered in list."
     }
 }
 
 Settings = gson.LoadJSON(settings_path, default_settings)
 if settings_version ~= Settings.version then
     reaper.ShowConsoleMsg("\n!!! WARNING !!! (gaspard_GaspaReaLauncher.lua)\n")
-    reaper.ShowConsoleMsg("Settings are erased due to updates in settings file.\nPlease excuse this behaviour.\n")
+    reaper.ShowConsoleMsg("Settings are erased due to updates in default settings file.\nPlease excuse this behaviour.\n")
     reaper.ShowConsoleMsg("Now in version: "..settings_version.."\n")
     Settings = gson.SaveJSON(settings_path, default_settings)
     Settings = gson.LoadJSON(settings_path, Settings)
@@ -95,7 +102,7 @@ local style_colors = style.colors
 -- Window variables
 local og_window_width = 1000
 local og_window_height = 500
-local min_width, min_height = 500, 201
+local min_width, min_height = 510, 201
 local max_width, max_height = 1920, 1080
 local window_width, window_height = og_window_width, og_window_height
 local window_x, window_y = 0, 0
@@ -516,15 +523,13 @@ local function ElementsDisplay()
                     SetSortingToType(Settings.search_type.value, project_list)
                 end
                 local hovered = reaper.ImGui_IsItemHovered(ctx)
-
-                reaper.ImGui_SameLine(ctx)
-
                 if hovered then
                     local col_header = reaper.ImGui_GetStyleColor(ctx, reaper.ImGui_Col_HeaderHovered())
-                    local content_x, _ = reaper.ImGui_GetContentRegionMax(ctx)
-                    local padding_x, _ = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding())
-                    reaper.ImGui_DrawList_AddRectFilled(draw_list, cx, cy - 2, cx + content_x - padding_x, cy + 18, col_header)
+                    local content_x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
+                    reaper.ImGui_DrawList_AddRectFilled(draw_list, cx, cy - 2, cx + content_x, cy + 21, col_header)
                 end
+
+                reaper.ImGui_SameLine(ctx)
 
                 -- Selectable line
                 local hovered_and_selected = hovered and project.selected
@@ -533,11 +538,16 @@ local function ElementsDisplay()
                 local selectable_flags = reaper.ImGui_SelectableFlags_SpanAllColumns() | reaper.ImGui_SelectableFlags_AllowDoubleClick()
                 local display_name = Settings.display_full_path.value and project.path or project.name
                 local display_id = display_name..tostring(i)
-                changed, project.selected = reaper.ImGui_Selectable(ctx, display_name..'##'..display_id, project.selected, selectable_flags)
+                changed, project.selected = reaper.ImGui_Selectable(ctx, display_name.."##"..display_id, project.selected, selectable_flags)
                 if not project.exists then reaper.ImGui_PopStyleColor(ctx, 1) end
                 if hovered_and_selected then reaper.ImGui_PopStyleColor(ctx, 1) end
 
                 local selectable_hovered = reaper.ImGui_IsItemHovered(ctx)
+                if Settings.show_path_hovered.value and reaper.ImGui_IsItemHovered(ctx, reaper.ImGui_HoveredFlags_Stationary()) then
+                    if not project.exists then reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xFF0000FA) end
+                    reaper.ImGui_SetItemTooltip(ctx, project.path)
+                    if not project.exists then reaper.ImGui_PopStyleColor(ctx, 1) end
+                end
 
                 if changed then
                     if SHIFT then
@@ -565,7 +575,7 @@ local function ElementsDisplay()
                 end
 
                 -- On Double clic and right clic
-                if reaper.ImGui_IsItemHovered(ctx) then
+                if selectable_hovered then
                     -- Right clic
                     if reaper.ImGui_IsMouseClicked(ctx, reaper.ImGui_MouseButton_Right()) then
                         if project.selected then
@@ -670,7 +680,7 @@ end
 local function ElementsSettings()
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoResize() | reaper.ImGui_WindowFlags_TopMost()
     local settings_width = 350 --og_window_width - 80
-    local settings_height = 150 --og_window_height * 0.7
+    local settings_height = 170 --og_window_height * 0.7
     local settings_x = window_x + window_width - 102
     reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowPos(ctx, settings_x, window_y + 32) --, reaper.ImGui_Cond_Appearing())
@@ -690,6 +700,10 @@ local function ElementsSettings()
         changed, Settings.close_on_escape.value = reaper.ImGui_Checkbox(ctx, Settings.close_on_escape.name, Settings.close_on_escape.value)
         if changed then one_changed = true end
         reaper.ImGui_SetItemTooltip(ctx, Settings.close_on_escape.description)
+
+        changed, Settings.show_path_hovered.value = reaper.ImGui_Checkbox(ctx, Settings.show_path_hovered.name, Settings.show_path_hovered.value)
+        if changed then one_changed = true end
+        reaper.ImGui_SetItemTooltip(ctx, Settings.show_path_hovered.description)
 
         local display = (Settings.default_open_style.value:sub(1,1):upper()..Settings.default_open_style.value:sub(2)):gsub("_", " ")
         reaper.ImGui_PushItemWidth(ctx, 110)

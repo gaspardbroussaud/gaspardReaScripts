@@ -1,8 +1,9 @@
 --@description Master settings
 --@author gaspard
---@version 1.1.10
+--@version 1.1.11
 --@changelog
---  - Fix crash
+--  - Fix topbar mask
+--  - Add window size constrains
 --@about
 --  ### Master settings
 --  All settings for all gaspard's scripts
@@ -96,8 +97,9 @@ function InitialVariables()
     script_version = ""
     og_window_width = 500
     og_window_height = 400
-    window_width = og_window_width
-    window_height = og_window_height
+    min_width, min_height = 320, 250
+    max_width, max_height = 1920, 1080
+    window_width, window_height = og_window_width, og_window_height
     topbar_height = 30
     window_name = "MASTER SETTINGS"
     project_name = reaper.GetProjectName(0)
@@ -208,7 +210,7 @@ function Gui_TopBar()
         local w, _ = reaper.ImGui_CalcTextSize(ctx, "Refresh More X")
         reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 55, 0)
 
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 55, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
+        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 55, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
             reaper.ImGui_Dummy(ctx, 3, 1)
 
             reaper.ImGui_SameLine(ctx)
@@ -530,6 +532,7 @@ function Gui_Loop()
     -- Window Settings
     local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | reaper.ImGui_WindowFlags_NoScrollWithMouse()
     reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
+    reaper.ImGui_SetNextWindowSizeConstraints(ctx, min_width, min_height, max_width, max_height)
     -- Font
     reaper.ImGui_PushFont(ctx, font, style_font.size)
     -- Begin

@@ -1,8 +1,8 @@
 --@description Insert tracks with name inputs
 --@author gaspard
---@version 1.0.3
+--@version 1.0.4
 --@changelog
---  - Fix font crash
+--  - Fix topbar mask
 --@about
 --  ###Insert tracks with name inputs
 --  - How to use:
@@ -97,7 +97,7 @@ function Gui_TopBar()
         local w, _ = reaper.ImGui_CalcTextSize(ctx, "X")
         reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 35, 0)
 
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 35, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
+        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 35, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
             reaper.ImGui_Dummy(ctx, 3, 1)
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'X##quit_button') then
