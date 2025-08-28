@@ -1,8 +1,8 @@
 --@description Random play point and time selection size
 --@author gaspard
---@version 1.0.7
+--@version 1.0.8
 --@changelog
---  - Fix font crash
+--  - Fix another font crash
 --@about
 --  ### How to:
 --  - Set a time selection in your project, start and end position will be used.
@@ -23,7 +23,7 @@ end
 function GetGuiStylesFromFile()
     gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
     local style = dofile(gui_style_settings_path)
-    style_fonts = style.font
+    style_font = style.font
     style_vars = style.vars
     style_colors = style.colors
 end
@@ -74,10 +74,10 @@ end
 -- GUI Initialize function
 function Gui_Init()
     ctx = reaper.ImGui_CreateContext('random_play_context')
-    font = reaper.ImGui_CreateFont(style_font.style, style_font.size)
-    small_font = reaper.ImGui_CreateFont(style_font.style, style_font.size * 0.75, reaper.ImGui_FontFlags_Italic())
+    font = reaper.ImGui_CreateFont(style_font.style)
+    italic_font = reaper.ImGui_CreateFont(style_font.style, reaper.ImGui_FontFlags_Italic())
     reaper.ImGui_Attach(ctx, font)
-    reaper.ImGui_Attach(ctx, small_font)
+    reaper.ImGui_Attach(ctx, italic_font)
     window_name = "RANDOMIZED LOOPING"
 end
 
@@ -203,7 +203,7 @@ end
 
 -- Display version
 function Gui_Version()
-    reaper.ImGui_PushFont(ctx, small_font)
+    reaper.ImGui_PushFont(ctx, italic_font, style_font.size * 0.75)
     w, h = reaper.ImGui_CalcTextSize(ctx, "v"..version)
     reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
     reaper.ImGui_SetCursorPosY(ctx, window_height - h - 10)
@@ -218,7 +218,7 @@ function Gui_Loop()
     local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | reaper.ImGui_WindowFlags_NoScrollWithMouse()
     reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
     -- Font
-    reaper.ImGui_PushFont(ctx, font)
+    reaper.ImGui_PushFont(ctx, font, style_font.size)
     -- Begin
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
