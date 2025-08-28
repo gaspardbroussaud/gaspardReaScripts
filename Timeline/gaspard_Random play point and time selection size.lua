@@ -1,8 +1,8 @@
 --@description Random play point and time selection size
 --@author gaspard
---@version 1.0.8
+--@version 1.0.9
 --@changelog
---  - Fix another font crash
+--  - Fix topbar height
 --@about
 --  ### How to:
 --  - Set a time selection in your project, start and end position will be used.
@@ -57,10 +57,9 @@ end
 function InitialVariables()
     InitSystemVariables()
     GetGuiStylesFromFile()
-    version = "1.0.5"
+    version = "1.0.9"
     window_width = 250
-    window_height = 235
-    font_size = 16
+    window_height = 245
     playing = false
     timer = 1
     temp_length = 0
@@ -94,7 +93,7 @@ function Gui_TopBar()
         local w, _ = reaper.ImGui_CalcTextSize(ctx, "X")
         reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 30, 0)
 
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 30, 22) then
+        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 30, 30) then
             reaper.ImGui_Dummy(ctx, 3, 1)
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'X##quit_button') then
@@ -111,9 +110,9 @@ end
 
 -- Gui Elements
 function Gui_Elements()
-    item_size = 165
+    item_size = 185
     reaper.ImGui_SetCursorPosX(ctx, (window_width - item_size) * 0.5)
-    if reaper.ImGui_BeginChild(ctx, "child_length_elements", item_size, reaper.ImGui_GetFontSize(ctx)) then
+    if reaper.ImGui_BeginChild(ctx, "child_length_elements", item_size, reaper.ImGui_GetFontSize(ctx) + 5) then
         reaper.ImGui_Text(ctx, "Set length in seconds")
         reaper.ImGui_SameLine(ctx)
         reaper.ImGui_TextDisabled(ctx, "(?)")
@@ -146,9 +145,9 @@ function Gui_Elements()
 
     reaper.ImGui_Dummy(ctx, 10, 10)
 
-    item_size = 175
+    item_size = 205
     reaper.ImGui_SetCursorPosX(ctx, (window_width - item_size) * 0.5)
-    if reaper.ImGui_BeginChild(ctx, "child_frequency_elements", item_size, reaper.ImGui_GetFontSize(ctx)) then
+    if reaper.ImGui_BeginChild(ctx, "child_frequency_elements", item_size, reaper.ImGui_GetFontSize(ctx) + 5) then
         reaper.ImGui_Text(ctx, "Frequency per seconds")
         reaper.ImGui_SameLine(ctx)
         reaper.ImGui_TextDisabled(ctx, "(?)")
@@ -215,14 +214,14 @@ end
 function Gui_Loop()
     Gui_PushTheme()
     -- Window Settings
-    local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | reaper.ImGui_WindowFlags_NoScrollWithMouse()
-    reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
+    local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoResize()
+    reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height)--, reaper.ImGui_Cond_Once())
     -- Font
     reaper.ImGui_PushFont(ctx, font, style_font.size)
     -- Begin
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
-    window_width, window_height = reaper.ImGui_GetWindowSize(ctx)
+    --window_width, window_height = reaper.ImGui_GetWindowSize(ctx)
 
     current_time = reaper.ImGui_GetTime(ctx)
     show_elements = true
