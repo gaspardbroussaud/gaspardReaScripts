@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="d74fc18514caa48d6476080858c54ffead53c592">
+<index version="1" name="Gaspard ReaScripts" commit="94dc865f54163fbc84ab3d1d782b0f8ca6c02ae7">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -1708,6 +1708,10 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       <version name="1.0.7" author="gaspard" time="2025-08-18T12:11:07Z">
         <changelog><![CDATA[- Fix font crash]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/12abf47b96a50b4e7d83a80e95ef96f96baed6dc/Timeline/gaspard_Random%20play%20point%20and%20time%20selection%20size.lua</source>
+      </version>
+      <version name="1.0.8" author="gaspard" time="2025-08-28T08:37:39Z">
+        <changelog><![CDATA[- Fix another font crash]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/94dc865f54163fbc84ab3d1d782b0f8ca6c02ae7/Timeline/gaspard_Random%20play%20point%20and%20time%20selection%20size.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Remove selected even items in timeline order on multiple tracks.lua" type="script" desc="Remove selected even items in timeline order on multiple tracks">
