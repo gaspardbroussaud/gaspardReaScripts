@@ -1,8 +1,8 @@
 -- @description Set region render matrix to same named track
 -- @author gaspard
--- @version 1.0.5
+-- @version 1.0.6
 -- @changelog
---  - Fix font crash
+--  - Fix region not set if numbered
 -- @about
 --  - Set region's render matrix track to track with same name.
 
@@ -71,11 +71,11 @@ function SetRenderMatrixTracks()
         local tracks = GetTracks()
         if tracks then
             missing = {}
+            local patterns = SplitIntoLines(Settings.region_naming_pattern.value)
             for i = 0, num_regions - 1 do
                 local _, isrgn, _, _, name, index = reaper.EnumProjectMarkers2(0, i)
                 if isrgn then
                     local should_look = true
-                    local patterns = SplitIntoLines(Settings.region_naming_pattern.value)
                     if Settings.look_for_patterns.value and Settings.region_naming_pattern.value then
                         -- Go through splited lines of patterns
                         for _, pattern in ipairs(patterns) do
@@ -88,7 +88,7 @@ function SetRenderMatrixTracks()
                     if should_look then
                         table.insert(missing, { name = name, index = index })
                         for j = 0, #tracks do
-                            if tracks[j].name == name then
+                            if tracks[j].name == name:gsub("_(%d+)$", "") then
                                 reaper.SetRegionRenderMatrix(0, index, tracks[j].track, 1)
                                 table.remove(missing, #missing)
                                 break
