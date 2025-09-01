@@ -1,8 +1,8 @@
 -- @description Set region render matrix to same named track
 -- @author gaspard
--- @version 1.0.4
+-- @version 1.0.5
 -- @changelog
---  - Update for new ReaImGui version
+--  - Fix font crash
 -- @about
 --  - Set region's render matrix track to track with same name.
 
@@ -176,9 +176,9 @@ function Gui_Init()
     InitialVariables()
     ctx = reaper.ImGui_CreateContext('random_play_context')
     font = reaper.ImGui_CreateFont(style_font.style)
-    small_font = reaper.ImGui_CreateFont(style_font.style, style_font.size * 0.75, reaper.ImGui_FontFlags_Italic())
+    italic_font = reaper.ImGui_CreateFont(style_font.style, reaper.ImGui_FontFlags_Italic())
     reaper.ImGui_Attach(ctx, font)
-    reaper.ImGui_Attach(ctx, small_font)
+    reaper.ImGui_Attach(ctx, italic_font)
 end
 
 -- GUI Top Bar
@@ -195,7 +195,7 @@ function Gui_TopBar()
         local w, _ = reaper.ImGui_CalcTextSize(ctx, "Settings X")
         reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 40, 0)
 
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 30, 22, reaper.ImGui_ChildFlags_None(), child_flags) then
+        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 30, 30, reaper.ImGui_ChildFlags_None(), child_flags) then
             reaper.ImGui_Dummy(ctx, 3, 1)
             reaper.ImGui_SameLine(ctx)
             if reaper.ImGui_Button(ctx, 'Settings##settings_button') then
@@ -239,7 +239,7 @@ end
 
 -- Gui Version on bottom right
 function Gui_Version()
-    reaper.ImGui_PushFont(ctx, small_font)
+    reaper.ImGui_PushFont(ctx, italic_font, style_font.size * 0.75)
     local w, h = reaper.ImGui_CalcTextSize(ctx, "v"..version)
     reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
     reaper.ImGui_SetCursorPosY(ctx, window_height - h - 10)
@@ -252,7 +252,7 @@ function Gui_SettingsWindow()
     -- Set Settings Window visibility and settings
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar()
     local settings_width = og_window_width - 20
-    local settings_height = og_window_height * 0.6
+    local settings_height = og_window_height * 0.9
     reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
 
@@ -299,7 +299,7 @@ function Gui_Loop()
     local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
     reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
     -- Font
-    reaper.ImGui_PushFont(ctx, font)
+    reaper.ImGui_PushFont(ctx, font, style_font.size)
     -- Begin
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
