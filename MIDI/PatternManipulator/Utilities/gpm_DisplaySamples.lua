@@ -15,7 +15,7 @@ local function TextButton(text, i)
     reaper.ImGui_SetNextItemAllowOverlap(ctx)
     reaper.ImGui_SetCursorPos(ctx, x, y)
     av_x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
-    reaper.ImGui_InvisibleButton(ctx, "##"..text..i, av_x, font_size)
+    reaper.ImGui_InvisibleButton(ctx, "##"..text..i, av_x, style_font.size)
     if reaper.ImGui_IsItemActivated(ctx) then return true end
     return false
 end
@@ -132,7 +132,7 @@ function window_samples.Show()
                 local x, y = reaper.ImGui_GetCursorPos(ctx)
                 local play_x, play_y = reaper.ImGui_GetCursorScreenPos(ctx)
                 play_x = play_x + play_len / 3
-                play_y = play_y + 3
+                play_y = play_y + style_font.size / 3
                 local a = 10
                 local b = a * math.sqrt(3) / 2
                 local s1 = {x = play_x, y = play_y}
@@ -143,7 +143,7 @@ function window_samples.Show()
                 reaper.ImGui_SetNextItemAllowOverlap(ctx)
                 reaper.ImGui_SetCursorPos(ctx, x, y)
                 local av_x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
-                reaper.ImGui_InvisibleButton(ctx, "##play"..i, av_x, font_size)
+                reaper.ImGui_InvisibleButton(ctx, "##play"..i, av_x, style_font.size)
                 if reaper.ImGui_IsItemActivated(ctx) then
                     local retnote, note = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_note, "", false)
                     if retnote then
@@ -187,7 +187,7 @@ function window_samples.Show()
                     local thickness = 1
                     local col_line = 0x7C71C2FF
                     if hovered and not selected then col_line = 0xFFFFFF55 end
-                    reaper.ImGui_DrawList_AddRect(draw_list, left_x - 5, upper_y - 2, right_x - 5, lower_y - 2, col_line, thickness)
+                    reaper.ImGui_DrawList_AddRect(draw_list, left_x - 5, upper_y - 2, right_x - 5, lower_y + 1, col_line, thickness)
                 end
 
                 ::continue::

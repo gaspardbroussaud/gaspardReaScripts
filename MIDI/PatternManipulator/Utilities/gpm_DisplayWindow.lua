@@ -21,7 +21,7 @@ local window_name = "PATTERN MANIPULATOR"
 -- Get GUI style from file
 local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
 local style = dofile(gui_style_settings_path)
-local style_font = style.font
+style_font = style.font
 local style_vars = style.vars
 local style_colors = style.colors
 
