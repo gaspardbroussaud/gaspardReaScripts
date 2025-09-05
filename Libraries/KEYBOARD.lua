@@ -1,4 +1,7 @@
--- @noindex
+--@noindex
+--@author gaspard
+--@version 1.0
+--@provides [nomain] .
 
 -- TEMPLATE IN SCRIPT:
 --package.path = package.path .. ';' .. reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/Libraries' .. '/?.lua'
