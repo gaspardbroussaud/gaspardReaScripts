@@ -5,10 +5,25 @@
 
 -- TEMPLATE IN SCRIPT:
 --package.path = package.path .. ';' .. reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/Libraries' .. '/?.lua'
---local KEYS = require('GUI_STYLE')
+--local GUI_STYLE = require('GUI_STYLE')
 
 local _FONT = {
+    ICONS = reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/Libraries/Icons_Solid.ttf',
     ARIAL = 'arial'
+}
+
+local _ICONS = {
+    ['QUIT'] = '9',
+    ['GEAR'] = 'A',
+    ['NEW_FILE'] = 'P',
+    ['IMPORT_FILE'] = 'M',
+    ['UPLOAD'] = 'I',
+    ['NUM_SORT_UP'] = 'r',
+    ['NUM_SORT_DOWN'] = 'q',
+    ['ALPHABETICAL_SORT_UP'] = 't',
+    ['ALPHABETICAL_SORT_DOWN'] = 's',
+    ['FAVORITE'] = 'S',
+    ['REFRESH_ARROW'] = 'J'
 }
 
 local _VAR = {
@@ -108,4 +123,4 @@ local _COL = {
     {col = reaper.ImGui_Col_DockingPreview(), value = _COLORS.LIGHT_PURPLE}--LIGHTER_PURPLE
 }
 
-return {FONTS = _FONT, VARS = _VAR, COLORS = _COL}
+return {FONTS = _FONT, ICONS = _ICONS, VARS = _VAR, COLORS = _COL}

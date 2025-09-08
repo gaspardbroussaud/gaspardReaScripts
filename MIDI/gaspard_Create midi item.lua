@@ -9,6 +9,27 @@
 --  - Create MIDI item on new track with ReaSamplOmatic5000
 
 
+function IconButton(icon)
+    local x, y = reaper.ImGui_GetCursorPos(ctx)
+    local w = select(1, reaper.ImGui_CalcTextSize(ctx, ICONS[(icon):upper()])) +
+        reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()) * 2
+    local clicked = reaper.ImGui_InvisibleButton(ctx, '##menuBtn' .. icon, w, reaper.ImGui_GetTextLineHeightWithSpacing(ctx))
+    if reaper.ImGui_IsItemHovered(ctx) and not reaper.ImGui_IsItemActive(ctx) then
+        reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), reaper.ImGui_GetStyleColor(ctx, reaper.ImGui_Col_ButtonHovered()))
+    elseif reaper.ImGui_IsItemActive(ctx) then
+        reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), reaper.ImGui_GetStyleColor(ctx, reaper.ImGui_Col_ButtonActive()))
+    else
+        reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), reaper.ImGui_GetStyleColor(ctx, reaper.ImGui_Col_Button()))
+    end
+    reaper.ImGui_SetCursorPos(ctx, x + reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()),
+        y + select(2, reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding())))
+    reaper.ImGui_Text(ctx, icon)
+    reaper.ImGui_PopStyleColor(ctx, 1)
+    reaper.ImGui_SetCursorPos(ctx, x + w, y)
+    return clicked
+end
+
+
 function DrawTopBar()
     local function beginRightIconMenu(ctx, buttons)
         local windowEnd = app.gui.mainWindow.size[1] - ImGui.GetStyleVar(ctx, ImGui.StyleVar_WindowPadding) -

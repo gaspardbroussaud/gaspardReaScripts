@@ -22,6 +22,7 @@ function SetButtonState(set)
       -- Get version from ReaPack
       local pkg = reaper.ReaPack_GetOwner(name)
       version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
+      version = version ~= "" and version or "1.0.0"
       reaper.ReaPack_FreeEntry(pkg)
     end
     reaper.SetToggleCommandState(sec, cmd, set or 0)
@@ -93,11 +94,9 @@ end
 -----------------------------------------------------------------------
 -----------------------------------------------------------------------
 -- Get GUI style from file
-local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
-local style = dofile(gui_style_settings_path)
-local style_font = style.font
-local style_vars = style.vars
-local style_colors = style.colors
+local GUI_STYLE = dofile("C:/Users/Gaspard/Documents/gaspardReaScripts/Libraries/GUI_STYLE.lua")
+--reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/GUI_STYLE.lua")
+local GUI_SYS = dofile("C:/Users/Gaspard/Documents/gaspardReaScripts/Libraries/GUI_SYS.lua")
 
 -- Window variables
 local og_window_width = 1000
@@ -113,14 +112,16 @@ local window_name = "GASPARD REAPER LAUNCHER"
 
 -- Sizing variables
 local topbar_height = 30
-local small_font_size = style_font.size * 0.75
+local font_size = 16
 
 -- ImGui Init
 local ctx = reaper.ImGui_CreateContext('gaspard_rea_launcher_ctx')
-local font = reaper.ImGui_CreateFont(style_font.style, 0)
-local italic_font = reaper.ImGui_CreateFont(style_font.style, reaper.ImGui_FontFlags_Italic())
-reaper.ImGui_Attach(ctx, font)
-reaper.ImGui_Attach(ctx, italic_font)
+local arial_font = reaper.ImGui_CreateFont(GUI_STYLE.FONTS.ARIAL)
+local italic_arial_font = reaper.ImGui_CreateFont(GUI_STYLE.FONTS.ARIAL, reaper.ImGui_FontFlags_Italic())
+local icon_font = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ICONS)
+reaper.ImGui_Attach(ctx, arial_font)
+reaper.ImGui_Attach(ctx, italic_arial_font)
+reaper.ImGui_Attach(ctx, icon_font)
 local global_spacing = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing())
 local show_settings = false
 --#endregion
@@ -356,31 +357,7 @@ end
 
 -- GUI Top Bar
 local function TopBarDisplay()
-    -- GUI Menu Bar
-    local child_width = window_width - global_spacing
-    if reaper.ImGui_BeginChild(ctx, "child_top_bar", child_width, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
-        reaper.ImGui_Text(ctx, window_name)
-
-        reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing(), 5, 0)
-
-        reaper.ImGui_SameLine(ctx)
-        reaper.ImGui_Dummy(ctx, 3, 1)
-        reaper.ImGui_SameLine(ctx)
-
-        local spacing_x = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing())
-        local text_new_project = window_width > 650 and "New project" or "New"
-        local text_open_project = window_width > 600 and "Open project" or "Open"
-        local text_refresh = window_width > 550 and "Refresh" or "R"
-        local new_project_w = reaper.ImGui_CalcTextSize(ctx, text_new_project) + 5 + spacing_x * 2
-        local open_project_w = reaper.ImGui_CalcTextSize(ctx, text_open_project) + 5 + spacing_x * 2
-        local refresh_w = reaper.ImGui_CalcTextSize(ctx, text_refresh) + 5 + spacing_x * 2
-        local settings_w = reaper.ImGui_CalcTextSize(ctx, "Settings") + 5 + spacing_x * 2
-        local quit_w = 10 + spacing_x * 2
-        local x_pos = child_width + 1 - new_project_w - open_project_w - refresh_w - settings_w - quit_w - spacing_x * 6
-        local y_pos = 0
-
-        reaper.ImGui_SetCursorPos(ctx, x_pos, y_pos)
-        reaper.ImGui_SetCursorPosY(ctx, y_pos)
+    --[[ GUI Menu Bar
         if reaper.ImGui_Button(ctx, text_new_project..'##new_project_button', new_project_w) then
             NewProjectOpen(Settings.default_open_style.value)
         end
@@ -461,26 +438,104 @@ local function TopBarDisplay()
         end
 
         reaper.ImGui_EndChild(ctx)
+    end]]
+
+    -- OTHER GUI TOPBAR
+    reaper.ImGui_BeginGroup(ctx)
+    -- Name
+    reaper.ImGui_Text(ctx, window_name)
+    reaper.ImGui_SameLine(ctx)
+    reaper.ImGui_PushFont(ctx, italic_arial_font, font_size * 0.75)
+    reaper.ImGui_Text(ctx, "v"..version)
+    reaper.ImGui_PopFont(ctx)
+
+    -- Buttons
+    reaper.ImGui_PushFont(ctx, icon_font, 22)
+    local menu = {}
+    table.insert(menu, {icon = 'QUIT', hint = 'Close', right_click = false})
+    table.insert(menu, {icon = 'GEAR', hint = 'Settings', right_click = false})
+    table.insert(menu, {icon = 'REFRESH_ARROW', hint = 'Refresh', right_click = false})
+    table.insert(menu, {icon = 'IMPORT_FILE', hint = 'Open project', right_click = true})
+    table.insert(menu, {icon = 'NEW_FILE', hint = 'New project', right_click = true})
+    local rv, button = GUI_SYS.IconButtonRight(ctx, menu, window_width)
+    if rv then
+        local right_click = reaper.ImGui_IsMouseClicked(ctx, reaper.ImGui_MouseButton_Right())
+        if button == 'QUIT' then
+            open = false
+        elseif button == 'GEAR' then
+            show_settings = not show_settings
+            if not show_settings then SaveSettings() end
+        elseif button == 'REFRESH_ARROW' then
+            GetRecentProjects()
+        elseif button == 'IMPORT_FILE' then
+            if right_click then
+                open_create = "open"
+                popup_x, popup_y = reaper.ImGui_GetMousePos(ctx)
+                mouse_right_clic_popup = true
+            else
+                OpenProjectSelect(Settings.default_open_style.value)
+            end
+        elseif button == 'NEW_FILE' then
+            if right_click then
+                open_create = "create"
+                popup_x, popup_y = reaper.ImGui_GetMousePos(ctx)
+                mouse_right_clic_popup = true
+            else
+                NewProjectOpen(Settings.default_open_style.value)
+            end
+        end
+    end
+    reaper.ImGui_PopFont(ctx)
+    reaper.ImGui_EndGroup(ctx)
+
+    if mouse_right_clic_popup then
+        reaper.ImGui_OpenPopup(ctx, "popup_mouse_rc_topbar")
+        mouse_right_clic_popup = false
+    end
+    reaper.ImGui_SetNextWindowPos(ctx, popup_x, popup_y)
+    if reaper.ImGui_BeginPopup(ctx, "popup_mouse_rc_topbar") then
+        reaper.ImGui_SetKeyboardFocusHere(ctx)
+        local text = open_create == "create" and "Create" or "Open"
+
+        reaper.ImGui_Selectable(ctx, text.." in current tab", false)
+        if reaper.ImGui_IsItemActivated(ctx) then
+            if create_open == "open" then
+                NewProjectOpen("current_tab")
+            else
+                OpenProjectSelect("current_tab")
+            end
+        end
+
+        reaper.ImGui_Selectable(ctx, text.." in new tab", false)
+        if reaper.ImGui_IsItemActivated(ctx) then
+            if create_open == "create" then
+                NewProjectOpen("new_tab")
+            else
+                OpenProjectSelect("new_tab")
+            end
+        end
+
+        reaper.ImGui_EndPopup(ctx)
     end
 end
 
 -- Push all GUI style settings
 local function Gui_PushTheme()
     -- Style Vars
-    for i = 1, #style_vars do
-        reaper.ImGui_PushStyleVar(ctx, style_vars[i].var, style_vars[i].value)
+    for i = 1, #GUI_STYLE.VARS do
+        reaper.ImGui_PushStyleVar(ctx, GUI_STYLE.VARS[i].var, GUI_STYLE.VARS[i].value)
     end
 
     -- Style Colors
-    for i = 1, #style_colors do
-        reaper.ImGui_PushStyleColor(ctx, style_colors[i].col, style_colors[i].value)
+    for i = 1, #GUI_STYLE.COLORS do
+        reaper.ImGui_PushStyleColor(ctx, GUI_STYLE.COLORS[i].col, GUI_STYLE.COLORS[i].value)
     end
 end
 
 -- Pop all GUI style settings
 local function Gui_PopTheme()
-    reaper.ImGui_PopStyleVar(ctx, #style_vars)
-    reaper.ImGui_PopStyleColor(ctx, #style_colors)
+    reaper.ImGui_PopStyleVar(ctx, #GUI_STYLE.VARS)
+    reaper.ImGui_PopStyleColor(ctx, #GUI_STYLE.COLORS)
 end
 
 -- All GUI elements
@@ -683,9 +738,9 @@ local function ElementsSettings()
     local settings_height = 170 --og_window_height * 0.7
     local settings_x = window_x + window_width - 102
     reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
-    reaper.ImGui_SetNextWindowPos(ctx, settings_x, window_y + 32) --, reaper.ImGui_Cond_Appearing())
+    reaper.ImGui_SetNextWindowPos(ctx, settings_x, window_y + topbar_height + 5) --, reaper.ImGui_Cond_Appearing())
     --reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
-    local settings_visible, settings_open = reaper.ImGui_Begin(ctx, "##SETTINGS", true, settings_flags)
+    local settings_visible, settings_open = reaper.ImGui_Begin(ctx, "SETTINGS", true, settings_flags)
     if settings_visible then
         local one_changed = false
 
@@ -743,7 +798,7 @@ local function Gui_Loop()
     reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowSizeConstraints(ctx, min_width, min_height, max_width, max_height)
     -- Font
-    reaper.ImGui_PushFont(ctx, font, style_font.size)
+    reaper.ImGui_PushFont(ctx, arial_font, font_size)
     -- Begin
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
