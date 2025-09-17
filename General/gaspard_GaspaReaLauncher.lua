@@ -1,9 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 1.0
+--@version 1.0.1
 --@changelog
---  - Update buttons to new icon style
---  - Various modifications in performance and visuals
+--  - Fix crash path GUI file
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -94,7 +93,7 @@ end
 -----------------------------------------------------------------------
 -- Get GUI style from file
 local GUI_STYLE = dofile(reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/GUI_STYLE.lua")
-local GUI_SYS = dofile("C:/Users/Gaspard/Documents/gaspardReaScripts/Libraries/GUI_SYS.lua")
+local GUI_SYS = dofile(reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/GUI_SYS.lua")
 
 -- Window variables
 local og_window_width = 1000
