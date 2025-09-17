@@ -1,10 +1,9 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 0.0.18
+--@version 1.0
 --@changelog
---  - Fix crash on favorite hover
---  - Add show full path on hover
---  - Fix ImGui 10 elements
+--  - Update buttons to new icon style
+--  - Various modifications in performance and visuals
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -41,7 +40,7 @@ local gson = require('json_utilities_lib')
 local script_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]
 local settings_path = script_path..'/gaspard_'..action_name..'_settings.json'
 
-local settings_version = "0.0.5"
+local settings_version = "0.0.6"
 local default_settings = {
     version = settings_version,
     order = {"close_on_open", "search_type", "default_open_style", "display_full_path"},
@@ -52,7 +51,7 @@ local default_settings = {
     },
     search_type = {
         value = "Newest",
-        list = {"A-Z", "Z-A", "Newest", "Oldest", "Favorites"},
+        list = {"A-Z", "Z-A", "Newest", "Oldest", "Favorites_Down", "Favorites_Up"},
         name = "Search order type",
         description = "Search order alphabetically, by order, by date..."
     },
@@ -94,8 +93,7 @@ end
 -----------------------------------------------------------------------
 -----------------------------------------------------------------------
 -- Get GUI style from file
-local GUI_STYLE = dofile("C:/Users/Gaspard/Documents/gaspardReaScripts/Libraries/GUI_STYLE.lua")
---reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/GUI_STYLE.lua")
+local GUI_STYLE = dofile(reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/GUI_STYLE.lua")
 local GUI_SYS = dofile("C:/Users/Gaspard/Documents/gaspardReaScripts/Libraries/GUI_SYS.lua")
 
 -- Window variables
@@ -122,7 +120,6 @@ local icon_font = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ICONS)
 reaper.ImGui_Attach(ctx, arial_font)
 reaper.ImGui_Attach(ctx, italic_arial_font)
 reaper.ImGui_Attach(ctx, icon_font)
-local global_spacing = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing())
 local show_settings = false
 --#endregion
 
@@ -139,7 +136,7 @@ local project_already_selected = false
 local proj_sel_num = 0
 local open_create = "create"
 
-local function SortFavorites()
+local function SortFavorites(order)
     local favorites = {}
     local not_favs = {}
     for _, project in ipairs(project_list) do
@@ -156,11 +153,17 @@ local function SortFavorites()
         return a.name:lower() < b.name:lower()
     end)
     project_list = {}
-    for _, fav in ipairs(favorites) do
-        project_list[#project_list+1] = fav
+    local list1, list2 = {}, {}
+    if order == 'DOWN' then
+        list1, list2 = favorites, not_favs
+    elseif order == 'UP' then
+        list1, list2 = not_favs, favorites
     end
-    for _, not_fav in ipairs(not_favs) do
-        project_list[#project_list+1] = not_fav
+    for _, proj in ipairs(list1) do
+        project_list[#project_list+1] = proj
+    end
+    for _, proj in ipairs(list2) do
+        project_list[#project_list+1] = proj
     end
 end
 
@@ -181,8 +184,10 @@ local function SetSortingToType(type, tab)
         table.sort(project_list, function(a, b)
             return a.ini_line < b.ini_line --Formerly by .date
         end)
-    elseif type == "Favorites" then
-        SortFavorites()
+    elseif type == "Favorites_Down" then
+        SortFavorites('DOWN')
+    elseif type == "Favorites_Up" then
+        SortFavorites('UP')
     end
 end
 
@@ -327,14 +332,6 @@ local function OpenProjectSelect(search_type)
     end
 end
 
---[[local function ShowFileInExplorer(path)
-    if os_is_windows then
-        os.execute('start "" "' .. path .. '"')
-    else
-        os.execute('open "' .. path .. '"')
-    end
-end]]
-
 local function System_Loop()
     CTRL = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftCtrl()) or reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_RightCtrl())
     SHIFT = reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_LeftShift()) or reaper.ImGui_IsKeyDown(ctx, reaper.ImGui_Key_RightShift())
@@ -357,89 +354,6 @@ end
 
 -- GUI Top Bar
 local function TopBarDisplay()
-    --[[ GUI Menu Bar
-        if reaper.ImGui_Button(ctx, text_new_project..'##new_project_button', new_project_w) then
-            NewProjectOpen(Settings.default_open_style.value)
-        end
-        if reaper.ImGui_IsItemHovered(ctx) then
-            if reaper.ImGui_IsMouseClicked(ctx, reaper.ImGui_MouseButton_Right()) then
-                open_create = "create"
-                popup_x, popup_y = reaper.ImGui_GetMousePos(ctx)
-                mouse_right_clic_popup = true
-            end
-        end
-
-        reaper.ImGui_SameLine(ctx)
-
-        reaper.ImGui_SetCursorPosY(ctx, y_pos)
-        if reaper.ImGui_Button(ctx, text_open_project..'##open_project_button', open_project_w) then
-            OpenProjectSelect(Settings.default_open_style.value)
-        end
-        if reaper.ImGui_IsItemHovered(ctx) then
-            if reaper.ImGui_IsMouseClicked(ctx, reaper.ImGui_MouseButton_Right()) then
-                open_create = "open"
-                popup_x, popup_y = reaper.ImGui_GetMousePos(ctx)
-                mouse_right_clic_popup = true
-            end
-        end
-
-        reaper.ImGui_SameLine(ctx)
-
-        reaper.ImGui_SetCursorPosY(ctx, y_pos)
-        if reaper.ImGui_Button(ctx, text_refresh..'##refresh_button', refresh_w) then
-            GetRecentProjects()
-        end
-
-        reaper.ImGui_SameLine(ctx)
-
-        reaper.ImGui_SetCursorPosY(ctx, y_pos)
-        if reaper.ImGui_Button(ctx, 'Settings##settings_button', settings_w) then
-            show_settings = not show_settings
-            if not show_settings then SaveSettings() end
-        end
-
-        reaper.ImGui_SameLine(ctx)
-
-        reaper.ImGui_SetCursorPosY(ctx, y_pos)
-        if reaper.ImGui_Button(ctx, 'X##quit_button', quit_w) then
-            open = false
-        end
-
-        reaper.ImGui_PopStyleVar(ctx, 1)
-
-        if mouse_right_clic_popup then
-            reaper.ImGui_OpenPopup(ctx, "popup_mouse_rc_topbar")
-            mouse_right_clic_popup = false
-        end
-        reaper.ImGui_SetNextWindowPos(ctx, popup_x, popup_y)
-        if reaper.ImGui_BeginPopup(ctx, "popup_mouse_rc_topbar") then
-            reaper.ImGui_SetKeyboardFocusHere(ctx)
-            local text = open_create == "create" and "Create" or "Open"
-
-            reaper.ImGui_Selectable(ctx, text.." in current tab", false)
-            if reaper.ImGui_IsItemActivated(ctx) then
-                if create_open == "open" then
-                    NewProjectOpen("current_tab")
-                else
-                    OpenProjectSelect("current_tab")
-                end
-            end
-
-            reaper.ImGui_Selectable(ctx, text.." in new tab", false)
-            if reaper.ImGui_IsItemActivated(ctx) then
-                if create_open == "create" then
-                    NewProjectOpen("new_tab")
-                else
-                    OpenProjectSelect("new_tab")
-                end
-            end
-
-            reaper.ImGui_EndPopup(ctx)
-        end
-
-        reaper.ImGui_EndChild(ctx)
-    end]]
-
     -- OTHER GUI TOPBAR
     reaper.ImGui_BeginGroup(ctx)
     -- Name
@@ -450,13 +364,12 @@ local function TopBarDisplay()
     reaper.ImGui_PopFont(ctx)
 
     -- Buttons
-    reaper.ImGui_PushFont(ctx, icon_font, 22)
     local menu = {}
-    table.insert(menu, {icon = 'QUIT', hint = 'Close', right_click = false})
-    table.insert(menu, {icon = 'GEAR', hint = 'Settings', right_click = false})
-    table.insert(menu, {icon = 'REFRESH_ARROW', hint = 'Refresh', right_click = false})
-    table.insert(menu, {icon = 'IMPORT_FILE', hint = 'Open project', right_click = true})
-    table.insert(menu, {icon = 'NEW_FILE', hint = 'New project', right_click = true})
+    table.insert(menu, {icon = 'QUIT', hint = 'Close', font = icon_font, size = 22, right_click = false})
+    table.insert(menu, {icon = 'GEAR', hint = 'Settings', font = icon_font, size = 22, right_click = false})
+    table.insert(menu, {icon = 'REFRESH_ARROW', hint = 'Refresh', font = icon_font, size = 22, right_click = false})
+    table.insert(menu, {icon = 'IMPORT_FILE', hint = 'Open project', font = icon_font, size = 22, right_click = true})
+    table.insert(menu, {icon = 'NEW_FILE', hint = 'New project', font = icon_font, size = 22, right_click = true})
     local rv, button = GUI_SYS.IconButtonRight(ctx, menu, window_width)
     if rv then
         local right_click = reaper.ImGui_IsMouseClicked(ctx, reaper.ImGui_MouseButton_Right())
@@ -485,7 +398,6 @@ local function TopBarDisplay()
             end
         end
     end
-    reaper.ImGui_PopFont(ctx)
     reaper.ImGui_EndGroup(ctx)
 
     if mouse_right_clic_popup then
@@ -545,22 +457,37 @@ local function ElementsDisplay()
 
     reaper.ImGui_SameLine(ctx)
 
-    reaper.ImGui_PushItemWidth(ctx, -1 - 100)
+    reaper.ImGui_PushItemWidth(ctx, -1 - 65)
     changed, project_search = reaper.ImGui_InputText(ctx, "##search_bar", project_search)
 
     reaper.ImGui_SameLine(ctx)
 
     reaper.ImGui_PushItemWidth(ctx, -1)
-    if reaper.ImGui_BeginCombo(ctx, "##sort_search", tostring(Settings.search_type.value)) then
+    local icons = {
+        ["A-Z"] = "ALPHABETICAL_SORT_DOWN",
+        ["Z-A"] = "ALPHABETICAL_SORT_UP",
+        ["Newest"] = "NUM_SORT_DOWN",
+        ["Oldest"] = "NUM_SORT_UP",
+        ["Favorites_Up"] = "FAVORITE_SORT_UP",
+        ["Favorites_Down"] = "FAVORITE_SORT_DOWN"
+    }
+    local display = GUI_STYLE.ICONS[icons[Settings.search_type.value]]
+    reaper.ImGui_PushFont(ctx, icon_font, 20)
+    reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), 0xFFFFFFDF)
+    if reaper.ImGui_BeginCombo(ctx, "##sort_search", display) then
         for _, type in ipairs(Settings.search_type.list) do
             local is_selected = (type == Settings.search_type.value)
-            if reaper.ImGui_Selectable(ctx, type, is_selected) then
+            local display_type = GUI_STYLE.ICONS[icons[type]]
+            if reaper.ImGui_Selectable(ctx, display_type, is_selected) then
                 Settings.search_type.value = type
+                SaveSettings()
                 SetSortingToType(type, project_list)
             end
         end
         reaper.ImGui_EndCombo(ctx)
     end
+    reaper.ImGui_PopStyleColor(ctx)
+    reaper.ImGui_PopFont(ctx)
 
     -- Listbox of projects
     if reaper.ImGui_BeginListBox(ctx, "##project_listbox", -1, -1) then
@@ -649,9 +576,14 @@ local function ElementsDisplay()
                     end
                 end
 
-                local outer_r = 6
+                --local outer_r = 6
                 local color = project.stared and 0xFFFFFFFF or hovered and 0xCCCCCCFF or selectable_hovered and 0xAAAAAAAA or 0x00000000
-                reaper.ImGui_DrawList_AddCircleFilled(draw_list, cx + (button_size / 1.6), cy + (button_size / 2), outer_r, color)
+                reaper.ImGui_PushFont(ctx, icon_font, 16)
+                reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), color)
+                reaper.ImGui_SetCursorScreenPos(ctx, cx + 2, cy + 2)
+                reaper.ImGui_Text(ctx, GUI_STYLE.ICONS["FAVORITE"])
+                reaper.ImGui_PopStyleColor(ctx)
+                reaper.ImGui_PopFont(ctx)
             end
         end
 

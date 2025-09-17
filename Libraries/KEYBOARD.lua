@@ -1,4 +1,3 @@
---@noindex
 --@author gaspard
 --@version 1.0
 --@provides [nomain] .
@@ -6,6 +5,10 @@
 -- TEMPLATE IN SCRIPT:
 --package.path = package.path .. ';' .. reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/Libraries' .. '/?.lua'
 --local KEYS = require('KEYBOARD')
+--
+--or
+--
+--local KEYS = dofile("C:/Users/Gaspard/Documents/gaspardReaScripts/Libraries/KEYBOARD.lua")
 
 local keys = {}
 

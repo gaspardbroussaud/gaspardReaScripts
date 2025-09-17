@@ -1,11 +1,16 @@
---@noindex
 --@author gaspard
 --@version 1.0
---@provides [nomain] .
+--@provides
+--  [nomain] .
+--  Icons_Solid.ttf
 
 -- TEMPLATE IN SCRIPT:
 --package.path = package.path .. ';' .. reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/Libraries' .. '/?.lua'
 --local GUI_STYLE = require('GUI_STYLE')
+--
+--or
+--
+--local GUI_STYLE = dofile(reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/GUI_STYLE.lua")
 
 local _FONT = {
     ICONS = reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/Libraries/Icons_Solid.ttf',
@@ -22,7 +27,10 @@ local _ICONS = {
     ['NUM_SORT_DOWN'] = 'q',
     ['ALPHABETICAL_SORT_UP'] = 't',
     ['ALPHABETICAL_SORT_DOWN'] = 's',
+    ['FAVORITE_SORT_UP'] = '&',
+    ['FAVORITE_SORT_DOWN'] = '%',
     ['FAVORITE'] = 'S',
+    ['BOOKMARK'] = 'a',
     ['REFRESH_ARROW'] = 'J'
 }
 

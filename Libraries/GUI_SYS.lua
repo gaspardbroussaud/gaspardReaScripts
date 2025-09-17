@@ -1,4 +1,3 @@
---@noindex
 --@author gaspard
 --@version 1.0
 --@provides [nomain] .
@@ -6,15 +5,21 @@
 -- TEMPLATE IN SCRIPT:
 --package.path = package.path .. ';' .. reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/Libraries' .. '/?.lua'
 --local GUI_SYS = require('GUI_SYS')
-local GUI_STYLE = dofile("C:/Users/Gaspard/Documents/gaspardReaScripts/Libraries/GUI_STYLE.lua")
---reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/GUI_STYLE.lua")
+--
+--or
+--
+--local GUI_SYS = dofile("C:/Users/Gaspard/Documents/gaspardReaScripts/Libraries/GUI_SYS.lua")
+
+local GUI_STYLE = dofile(reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/GUI_STYLE.lua")
 
 local _gui_sys = {}
 
-_gui_sys.IconButton = function(ctx, icon, right_click)
+_gui_sys.IconButton = function(ctx, button, right_click)
+    local icon = GUI_STYLE.ICONS[button.icon]
     local x, y = reaper.ImGui_GetCursorPos(ctx)
     local w = select(1, reaper.ImGui_CalcTextSize(ctx, icon)) + (reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()) * 2)
     local clicked = reaper.ImGui_InvisibleButton(ctx, '##menuBtn' .. icon, w, reaper.ImGui_GetTextLineHeightWithSpacing(ctx))
+    reaper.ImGui_SetItemTooltip(ctx, button.hint)
     if right_click then
         clicked = clicked and clicked or reaper.ImGui_IsItemHovered(ctx) and reaper.ImGui_IsMouseClicked(ctx, reaper.ImGui_MouseButton_Right()) or false
     end
@@ -27,7 +32,9 @@ _gui_sys.IconButton = function(ctx, icon, right_click)
     end
     reaper.ImGui_SetCursorPos(ctx, x + reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()),
         y + select(2, reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding())))
+    reaper.ImGui_PushFont(ctx, button.font, button.size)
     reaper.ImGui_Text(ctx, icon)
+    reaper.ImGui_PopFont(ctx)
     reaper.ImGui_PopStyleColor(ctx, 1)
     reaper.ImGui_SetCursorPos(ctx, x + w, y)
     return clicked
@@ -44,7 +51,7 @@ _gui_sys.IconButtonRight = function(ctx, buttons, window_width)
         local x = prevX - w - (reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing()) * 3)
         prevX = x
         reaper.ImGui_SetCursorPosX(ctx, x)
-        if _gui_sys.IconButton(ctx, GUI_STYLE.ICONS[button.icon], button.right_click) then clicked = button.icon end
+        if _gui_sys.IconButton(ctx, button, button.right_click) then clicked = button.icon end
     end
     return clicked ~= nil, clicked
 end
