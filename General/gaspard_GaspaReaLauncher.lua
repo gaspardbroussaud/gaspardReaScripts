@@ -1,8 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 1.0.1
+--@version 1.0.2
 --@changelog
---  - Fix crash path GUI file
+--  - Fix aligned buttons
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -664,15 +664,19 @@ end
 
 -- All Settings
 local function ElementsSettings()
-    local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoResize() | reaper.ImGui_WindowFlags_TopMost()
+    local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoResize()
+        | reaper.ImGui_WindowFlags_TopMost() | reaper.ImGui_WindowFlags_NoDecoration()
     local settings_width = 350 --og_window_width - 80
-    local settings_height = 170 --og_window_height * 0.7
+    local settings_height = 175 --og_window_height * 0.7
     local settings_x = window_x + window_width - 102
     reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowPos(ctx, settings_x, window_y + topbar_height + 5) --, reaper.ImGui_Cond_Appearing())
     --reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
-    local settings_visible, settings_open = reaper.ImGui_Begin(ctx, "SETTINGS", true, settings_flags)
+    local settings_visible, settings_open = reaper.ImGui_Begin(ctx, "##settings_window", true, settings_flags)
     if settings_visible then
+        reaper.ImGui_Text(ctx, "SETTINGS")
+        reaper.ImGui_Separator(ctx)
+
         local one_changed = false
 
         changed, Settings.close_on_open.value = reaper.ImGui_Checkbox(ctx, Settings.close_on_open.name, Settings.close_on_open.value)

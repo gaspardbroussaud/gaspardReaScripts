@@ -1,5 +1,5 @@
 --@author gaspard
---@version 1.0
+--@version 1.0.1
 --@provides [nomain] .
 
 -- TEMPLATE IN SCRIPT:
@@ -8,7 +8,7 @@
 --
 --or
 --
---local GUI_SYS = dofile("C:/Users/Gaspard/Documents/gaspardReaScripts/Libraries/GUI_SYS.lua")
+--local GUI_SYS = dofile(reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/GUI_SYS.lua")
 
 local GUI_STYLE = dofile(reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/GUI_STYLE.lua")
 
@@ -17,7 +17,7 @@ local _gui_sys = {}
 _gui_sys.IconButton = function(ctx, button, right_click)
     local icon = GUI_STYLE.ICONS[button.icon]
     local x, y = reaper.ImGui_GetCursorPos(ctx)
-    local w = select(1, reaper.ImGui_CalcTextSize(ctx, icon)) + (reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()) * 2)
+    local w = select(1, reaper.ImGui_CalcTextSize(ctx, icon)) + (reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()) * 2.75)
     local clicked = reaper.ImGui_InvisibleButton(ctx, '##menuBtn' .. icon, w, reaper.ImGui_GetTextLineHeightWithSpacing(ctx))
     reaper.ImGui_SetItemTooltip(ctx, button.hint)
     if right_click then
@@ -30,7 +30,7 @@ _gui_sys.IconButton = function(ctx, button, right_click)
     else
         reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), reaper.ImGui_GetStyleColor(ctx, reaper.ImGui_Col_Button()))
     end
-    reaper.ImGui_SetCursorPos(ctx, x + reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()),
+    reaper.ImGui_SetCursorPos(ctx, x,-- + reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()),
         y + select(2, reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding())))
     reaper.ImGui_PushFont(ctx, button.font, button.size)
     reaper.ImGui_Text(ctx, icon)
@@ -41,7 +41,7 @@ _gui_sys.IconButton = function(ctx, button, right_click)
 end
 
 _gui_sys.IconButtonRight = function(ctx, buttons, window_width)
-    local windowEnd = window_width - reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_WindowPadding())
+    local windowEnd = window_width - reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_WindowPadding()) * 0.25
     -- - ((reaper.ImGui_GetScrollMaxY(ctx) > 0) and reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ScrollbarSize()) or 0)
     reaper.ImGui_SameLine(ctx, windowEnd)
     local clicked = nil

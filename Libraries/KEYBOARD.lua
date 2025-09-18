@@ -1,5 +1,5 @@
 --@author gaspard
---@version 1.0
+--@version 1.0.1
 --@provides [nomain] .
 
 -- TEMPLATE IN SCRIPT:
@@ -8,9 +8,11 @@
 --
 --or
 --
---local KEYS = dofile("C:/Users/Gaspard/Documents/gaspardReaScripts/Libraries/KEYBOARD.lua")
+--local KEYS = dofile(reaper.GetResourcePath().."Scripts/Gaspard ReaScripts/Libraries/KEYBOARD.lua")
 
 local keys = {}
+
+local _ISMAC = (reaper.GetOS():match("OSX") ~= nil)
 
 local _KEYS = {}
 local _KEYS_CUTOFF = -2

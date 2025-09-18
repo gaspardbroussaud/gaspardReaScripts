@@ -1,5 +1,5 @@
 --@author gaspard
---@version 1.0
+--@version 1.0.1
 --@provides
 --  [nomain] .
 --  Icons_Solid.ttf
@@ -12,7 +12,7 @@
 --
 --local GUI_STYLE = dofile(reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/GUI_STYLE.lua")
 
-local _FONT = {
+local _STYLE_FONT = {
     ICONS = reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/Libraries/Icons_Solid.ttf',
     ARIAL = 'arial'
 }
@@ -34,7 +34,7 @@ local _ICONS = {
     ['REFRESH_ARROW'] = 'J'
 }
 
-local _VAR = {
+local _STYLE_VAR = {
     {var = reaper.ImGui_StyleVar_WindowRounding(), value = 6},
     {var = reaper.ImGui_StyleVar_ChildRounding(), value = 6},
     {var = reaper.ImGui_StyleVar_PopupRounding(), value = 6},
@@ -64,7 +64,7 @@ local _COLORS = {
     PURPLE_NAVY = 0x594A8CFF
 }
 
-local _COL = {
+local _STYLE_COL = {
     -- Backgrounds
     {col = reaper.ImGui_Col_WindowBg(), value = _COLORS.BLACK_BG},
     {col = reaper.ImGui_Col_ChildBg(), value = _COLORS.BLACK_BG},
@@ -131,4 +131,4 @@ local _COL = {
     {col = reaper.ImGui_Col_DockingPreview(), value = _COLORS.LIGHT_PURPLE}--LIGHTER_PURPLE
 }
 
-return {FONTS = _FONT, ICONS = _ICONS, VARS = _VAR, COLORS = _COL}
+return {FONTS = _STYLE_FONT, ICONS = _ICONS, VARS = _STYLE_VAR, COLORS = _STYLE_COL}
