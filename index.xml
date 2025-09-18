@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="743bd9e1f1b9d7234c413834d09aa0ab07ba8b0e">
+<index version="1" name="Gaspard ReaScripts" commit="b313072451a26f22e5f660182e056cf1494d27fb">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -265,6 +265,10 @@
       <version name="1.0.1" author="gaspard" time="2025-09-17T15:30:14Z">
         <changelog><![CDATA[- Fix crash path GUI file]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/743bd9e1f1b9d7234c413834d09aa0ab07ba8b0e/General/gaspard_GaspaReaLauncher.lua</source>
+      </version>
+      <version name="1.0.2" author="gaspard" time="2025-09-18T11:50:57Z">
+        <changelog><![CDATA[- Fix aligned buttons]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b313072451a26f22e5f660182e056cf1494d27fb/General/gaspard_GaspaReaLauncher.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Master settings.lua" type="script" desc="Master settings">
@@ -1091,15 +1095,25 @@
         <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/5aa7f8a332e02ba2c841f3105763e7f565b7f676/Libraries/GUI_STYLE.lua</source>
         <source file="Icons_Solid.ttf">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/5aa7f8a332e02ba2c841f3105763e7f565b7f676/Libraries/Icons_Solid.ttf</source>
       </version>
+      <version name="1.0.1" author="gaspard" time="2025-09-18T11:50:57Z">
+        <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b313072451a26f22e5f660182e056cf1494d27fb/Libraries/GUI_STYLE.lua</source>
+        <source file="Icons_Solid.ttf">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b313072451a26f22e5f660182e056cf1494d27fb/Libraries/Icons_Solid.ttf</source>
+      </version>
     </reapack>
     <reapack name="GUI_SYS.lua" type="script">
       <version name="1.0" author="gaspard" time="2025-09-17T15:24:27Z">
         <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/5aa7f8a332e02ba2c841f3105763e7f565b7f676/Libraries/GUI_SYS.lua</source>
       </version>
+      <version name="1.0.1" author="gaspard" time="2025-09-18T11:50:57Z">
+        <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b313072451a26f22e5f660182e056cf1494d27fb/Libraries/GUI_SYS.lua</source>
+      </version>
     </reapack>
     <reapack name="KEYBOARD.lua" type="script">
       <version name="1.0" author="gaspard" time="2025-09-17T15:24:27Z">
         <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/5aa7f8a332e02ba2c841f3105763e7f565b7f676/Libraries/KEYBOARD.lua</source>
+      </version>
+      <version name="1.0.1" author="gaspard" time="2025-09-18T11:50:57Z">
+        <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b313072451a26f22e5f660182e056cf1494d27fb/Libraries/KEYBOARD.lua</source>
       </version>
     </reapack>
   </category>
