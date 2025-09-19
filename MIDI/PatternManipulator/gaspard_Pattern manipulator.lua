@@ -91,6 +91,7 @@ function SetButtonState(set)
       -- Get version from ReaPack
       local pkg = reaper.ReaPack_GetOwner(name)
       version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
+      version = version == '' and '0.wip' or version
       reaper.ReaPack_FreeEntry(pkg)
       shortcut_activated = true
     end

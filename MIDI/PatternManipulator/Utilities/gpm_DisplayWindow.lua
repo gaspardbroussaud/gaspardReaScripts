@@ -19,56 +19,47 @@ local no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper
 local window_name = "PATTERN MANIPULATOR"
 
 -- Get GUI style from file
-local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
-local style = dofile(gui_style_settings_path)
-style_font = style.font
-local style_vars = style.vars
-local style_colors = style.colors
+local GUI_STYLE = dofile(reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/GUI_STYLE.lua")
+local GUI_SYS = dofile("C:/Users/Gaspard/Documents/gaspardReaScripts/Libraries/GUI_SYS.lua")--reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/GUI_SYS.lua")
 
 -- Sizing variables
 topbar_height = 30
-small_font_size = style_font.size * 0.75
+font_size = 16
+small_font_size = font_size * 0.75
 
 -- ImGui Init
 ctx = reaper.ImGui_CreateContext('random_play_context')
-font = reaper.ImGui_CreateFont(style_font.style)
-italic_font = reaper.ImGui_CreateFont(style_font.style, reaper.ImGui_FontFlags_Italic())
-reaper.ImGui_Attach(ctx, font)
-reaper.ImGui_Attach(ctx, italic_font)
+arial_font = reaper.ImGui_CreateFont(GUI_STYLE.FONTS.ARIAL)
+italic_arial_font = reaper.ImGui_CreateFont(GUI_STYLE.FONTS.ARIAL, reaper.ImGui_FontFlags_Italic())
+icon_font = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ICONS)
+reaper.ImGui_Attach(ctx, arial_font)
+reaper.ImGui_Attach(ctx, italic_arial_font)
+reaper.ImGui_Attach(ctx, icon_font)
 global_spacing = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing())
 
 -- GUI Top Bar
 local function TopBarDisplay()
-    -- GUI Menu Bar
-    local child_width = window_width - global_spacing
-    if reaper.ImGui_BeginChild(ctx, "child_top_bar", child_width, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
-        reaper.ImGui_Text(ctx, window_name)
-        --reaper.ImGui_SameLine(ctx)
-        --reaper.ImGui_Text(ctx, "x="..window_x.." ; y="..window_y.." / w="..window_width.." ; h="..window_height)
+    -- OTHER GUI TOPBAR
+    reaper.ImGui_BeginGroup(ctx)
+    -- Name
+    reaper.ImGui_Text(ctx, window_name)
 
-        reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing(), 5, 0)
-
-        reaper.ImGui_SameLine(ctx)
-        reaper.ImGui_Dummy(ctx, 3, 1)
-        reaper.ImGui_SameLine(ctx)
-
-        local spacing_x_2 = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing()) * 2
-        local quit_w = 10 + spacing_x_2
-        local y_pos = 0
-        reaper.ImGui_SetCursorPos(ctx, child_width - quit_w - spacing_x_2, y_pos)
-        reaper.ImGui_SetCursorPosY(ctx, y_pos)
-        if reaper.ImGui_Button(ctx, 'X##quit_button', quit_w) then
+    -- Buttons
+    local menu = {}
+    table.insert(menu, {icon = 'QUIT', hint = 'Close', font = icon_font, size = 22, right_click = false})
+    local rv, button = GUI_SYS.IconButtonRight(ctx, menu, window_width)
+    if rv then
+        --local right_click = reaper.ImGui_IsMouseClicked(ctx, reaper.ImGui_MouseButton_Right())
+        if button == 'QUIT' then
             open = false
         end
-
-        reaper.ImGui_PopStyleVar(ctx, 1)
-        reaper.ImGui_EndChild(ctx)
     end
+    reaper.ImGui_EndGroup(ctx)
 end
 
 -- Gui Version on bottom right
 local function VersionDisplay()
-    reaper.ImGui_PushFont(ctx, italic_font, small_font_size)
+    reaper.ImGui_PushFont(ctx, italic_arial_font, small_font_size)
     local w, h = reaper.ImGui_CalcTextSize(ctx, "v"..version)
     reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
     reaper.ImGui_SetCursorPosY(ctx, window_height - h - 10)
@@ -99,20 +90,20 @@ end
 -- Push all GUI style settings
 local function Gui_PushTheme()
     -- Style Vars
-    for i = 1, #style_vars do
-        reaper.ImGui_PushStyleVar(ctx, style_vars[i].var, style_vars[i].value)
+    for i = 1, #GUI_STYLE.VARS do
+        reaper.ImGui_PushStyleVar(ctx, GUI_STYLE.VARS[i].var, GUI_STYLE.VARS[i].value)
     end
 
     -- Style Colors
-    for i = 1, #style_colors do
-        reaper.ImGui_PushStyleColor(ctx, style_colors[i].col, style_colors[i].value)
+    for i = 1, #GUI_STYLE.COLORS do
+        reaper.ImGui_PushStyleColor(ctx, GUI_STYLE.COLORS[i].col, GUI_STYLE.COLORS[i].value)
     end
 end
 
 -- Pop all GUI style settings
 local function Gui_PopTheme()
-    reaper.ImGui_PopStyleVar(ctx, #style_vars)
-    reaper.ImGui_PopStyleColor(ctx, #style_colors)
+    reaper.ImGui_PopStyleVar(ctx, #GUI_STYLE.VARS)
+    reaper.ImGui_PopStyleColor(ctx, #GUI_STYLE.COLORS)
 end
 
 local function Draw(draw_list)
@@ -169,7 +160,7 @@ function gpmgui.Loop()
     reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
     reaper.ImGui_SetNextWindowSizeConstraints(ctx, min_width, min_height, max_width, max_height)
     -- Font
-    reaper.ImGui_PushFont(ctx, font, style_font.size)
+    reaper.ImGui_PushFont(ctx, arial_font, font_size)
     -- Begin
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)

@@ -15,7 +15,7 @@ local function TextButton(text, i)
     reaper.ImGui_SetNextItemAllowOverlap(ctx)
     reaper.ImGui_SetCursorPos(ctx, x, y)
     av_x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
-    reaper.ImGui_InvisibleButton(ctx, "##"..text..i, av_x, style_font.size)
+    reaper.ImGui_InvisibleButton(ctx, "##"..text..i, av_x, reaper.ImGui_GetFontSize(ctx))
     if reaper.ImGui_IsItemActivated(ctx) then return true end
     return false
 end
@@ -132,7 +132,7 @@ function window_samples.Show()
                 local x, y = reaper.ImGui_GetCursorPos(ctx)
                 local play_x, play_y = reaper.ImGui_GetCursorScreenPos(ctx)
                 play_x = play_x + play_len / 3
-                play_y = play_y + style_font.size / 3
+                play_y = play_y + reaper.ImGui_GetFontSize(ctx) / 3
                 local a = 10
                 local b = a * math.sqrt(3) / 2
                 local s1 = {x = play_x, y = play_y}
@@ -143,7 +143,7 @@ function window_samples.Show()
                 reaper.ImGui_SetNextItemAllowOverlap(ctx)
                 reaper.ImGui_SetCursorPos(ctx, x, y)
                 local av_x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
-                reaper.ImGui_InvisibleButton(ctx, "##play"..i, av_x, style_font.size)
+                reaper.ImGui_InvisibleButton(ctx, "##play"..i, av_x, reaper.ImGui_GetFontSize(ctx))
                 if reaper.ImGui_IsItemActivated(ctx) then
                     local retnote, note = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..extname_sample_note, "", false)
                     if retnote then

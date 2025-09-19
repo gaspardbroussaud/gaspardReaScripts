@@ -19,7 +19,7 @@ _gui_sys.IconButton = function(ctx, button, right_click)
     local x, y = reaper.ImGui_GetCursorPos(ctx)
     local w = select(1, reaper.ImGui_CalcTextSize(ctx, icon)) + (reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()) * 2.75)
     local clicked = reaper.ImGui_InvisibleButton(ctx, '##menuBtn' .. icon, w, reaper.ImGui_GetTextLineHeightWithSpacing(ctx))
-    reaper.ImGui_SetItemTooltip(ctx, button.hint)
+    if reaper.ImGui_IsItemHovered(ctx, reaper.ImGui_HoveredFlags_Stationary()) then reaper.ImGui_SetTooltip(ctx, button.hint) end
     if right_click then
         clicked = clicked and clicked or reaper.ImGui_IsItemHovered(ctx) and reaper.ImGui_IsMouseClicked(ctx, reaper.ImGui_MouseButton_Right()) or false
     end
