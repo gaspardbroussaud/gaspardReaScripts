@@ -141,9 +141,9 @@ function gpmsys_patterns.ScanPatternFiles()
     gpmsys_patterns.file_list = {}
     local files = {}
 
-    for i = 1, #Settings.pattern_folder_paths.value do
+    for i = 1, #Settings.pattern_folder_paths.list do
         local index = 0
-        local pattern = Settings.pattern_folder_paths.value[i]
+        local pattern = Settings.pattern_folder_paths.list[i]
         CreateDirectoryIfNotExists(pattern)
         local file = reaper.EnumerateFiles(pattern, index)
 

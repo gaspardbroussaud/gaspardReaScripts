@@ -109,30 +109,61 @@ function tab_settings.Show()
 
         -- Pattern paths
         reaper.ImGui_Text(ctx, Settings.pattern_folder_paths.name..":")
+        reaper.ImGui_SetItemTooltip(ctx, Settings.pattern_folder_paths.description)
+
         reaper.ImGui_SameLine(ctx)
-        local disable = not Settings.pattern_folder_paths.value[1]
+        local button_w = reaper.ImGui_CalcTextSize(ctx, "Add pattern path")
+        if reaper.ImGui_Button(ctx, "Add pattern path", button_w) then
+            if added then
+                one_changed = true
+                gpmsys_patterns.ScanPatternFiles()
+            end
+        end
+
+        reaper.ImGui_SameLine(ctx)
+        local disable = not Settings.pattern_folder_paths.list[1]
         if disable then reaper.ImGui_BeginDisabled(ctx) end
         local button_x, button_y = reaper.ImGui_GetCursorScreenPos(ctx)
         local avail_x = reaper.ImGui_GetContentRegionAvail(ctx)
-        reaper.ImGui_SetCursorScreenPos(ctx, button_x + avail_x - 140 -2, button_y)
+        reaper.ImGui_SetCursorScreenPos(ctx, button_x + avail_x - 140 - 2, button_y)
         if reaper.ImGui_Button(ctx, "Force pattern scan", 140) then
             gpmsys_patterns.ScanPatternFiles()
         end
         reaper.ImGui_SetItemTooltip(ctx, "Force pattern scan (automatic rescan on paths update).")
         if disable then reaper.ImGui_EndDisabled(ctx) end
 
-        reaper.ImGui_PushItemWidth(ctx, 100)
-        changed, multiline_concat = reaper.ImGui_InputTextMultiline(ctx, "input_paths", table.concat(Settings.pattern_folder_paths.value, "\n"), -1)
-        if reaper.ImGui_IsItemActive(ctx) then shortcut_activated = false end
-        reaper.ImGui_SetItemTooltip(ctx, Settings.pattern_folder_paths.description)
-        if changed then
-            one_changed = true
-            Settings.pattern_folder_paths.value = {}
-            if multiline_concat ~= "" then
-                for line in multiline_concat:gmatch("[^\n]+") do
-                    table.insert(Settings.pattern_folder_paths.value, line)
+        if reaper.ImGui_BeginListBox(ctx, "##pattern_paths", -1, (select(2, reaper.ImGui_CalcTextSize(ctx, "A")) * 2) * #Settings.pattern_folder_paths.list) then
+            local max_width = reaper.ImGui_GetContentRegionAvail(ctx) - (reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()) * 4)
+            for i, pattern in ipairs(Settings.pattern_folder_paths.list) do
+                local display = tostring(pattern)
+                if reaper.ImGui_CalcTextSize(ctx, display) > max_width then
+                    local ellipsis = "..."
+                    local left, right = 1, #display
+                    local left_str, right_str = "", ""
+
+                    while left < right do
+                        left_str = display:sub(1, left)
+                        right_str = display:sub(right)
+
+                        local test_str = left_str .. ellipsis .. right_str
+                        local w = reaper.ImGui_CalcTextSize(ctx, test_str)
+                        if w > max_width then
+                            break
+                        end
+
+                        left = left + 1
+                        right = right - 1
+                    end
+
+                    display = left_str .. ellipsis .. right_str
                 end
+                reaper.ImGui_Text(ctx, display)
+                reaper.ImGui_SetItemTooltip(ctx, tostring(pattern))
             end
+            reaper.ImGui_EndListBox(ctx)
+        end
+        if changed and 1 > 2 then
+            one_changed = true
             gpmsys_patterns.ScanPatternFiles()
         end
 

@@ -167,6 +167,7 @@ end
 local function GetWaveForm(filepath)
     local pcm_source = reaper.PCM_Source_CreateFromFileEx(filepath, true)
     local length = reaper.GetMediaSourceLength(pcm_source)
+    reaper.ShowConsoleMsg("\nlength: "..length)
     local peakrate = 500
     local num_channels = 1--reaper.GetMediaSourceNumChannels(pcm_source)
     local want_extra_type = 0

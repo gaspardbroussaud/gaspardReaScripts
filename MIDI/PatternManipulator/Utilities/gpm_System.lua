@@ -25,7 +25,7 @@ local_pattern_path = string.gsub(local_pattern_path, '/', gpmsys.separator)
 local_pattern_path = string.gsub(local_pattern_path, 'Utilities', 'Patterns')
 
 local function SettingsInit()
-    local settings_version = '0.0.5b'
+    local settings_version = '0.0.6b'
     local default_settings = {
         version = settings_version,
         order = {'project_based_parent', 'obey_note_off', 'attack_amount', 'decay_amount', 'sustain_amount', 'release_amount', 'selection_link', 'pattern_folder_paths', 'note_nomenclature', 'show_adsr'},
@@ -65,7 +65,8 @@ local function SettingsInit()
             description = 'Link track and GUI selection on GUI selected (not track selected).'
         },
         pattern_folder_paths = {
-            value = {local_pattern_path},
+            value = 0,
+            list = {local_pattern_path},
             name = 'Patterns folder',
             description = 'Patterns folders OS location path.'
         },
