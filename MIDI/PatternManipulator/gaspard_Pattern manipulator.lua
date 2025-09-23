@@ -1,10 +1,11 @@
 --@description Pattern Manipulator
 --@author gaspard
---@version 0.1.8b
+--@version 0.1.9b
 --@provides
 --    [nomain] Utilities/*.lua
 --@changelog
---  - Fix GUI crash
+--  - Update pattern folders system in Settings
+--  - GUI update buttons
 --@about
 --  # Pattern manipulator
 --  Set racks of samples to manipulate using midi patterns.

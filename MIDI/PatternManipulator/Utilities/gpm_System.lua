@@ -7,7 +7,8 @@ local gpmsys = {}
 
 -- Global variables
 gpmsys.app_init = true
-gpmsys.separator = reaper.GetOS():match('Win') and '\\' or '/'
+gpmsys.is_macOS = not reaper.GetOS():match('Win')
+gpmsys.separator = gpmsys.is_macOS and '/' or '\\'
 extname_global = "g_PGM_"
 extkey_parent_track = "PARENT_TRACK_GUID"
 gpmsys.parent_track = nil
@@ -65,8 +66,8 @@ local function SettingsInit()
             description = 'Link track and GUI selection on GUI selected (not track selected).'
         },
         pattern_folder_paths = {
-            value = 0,
-            list = {local_pattern_path},
+            value = 1,
+            list = {{path = local_pattern_path, selected = false}},
             name = 'Patterns folder',
             description = 'Patterns folders OS location path.'
         },

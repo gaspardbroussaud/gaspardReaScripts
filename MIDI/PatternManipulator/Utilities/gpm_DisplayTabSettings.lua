@@ -112,30 +112,46 @@ function tab_settings.Show()
         reaper.ImGui_SetItemTooltip(ctx, Settings.pattern_folder_paths.description)
 
         reaper.ImGui_SameLine(ctx)
-        local button_w = reaper.ImGui_CalcTextSize(ctx, "Add pattern path")
-        if reaper.ImGui_Button(ctx, "Add pattern path", button_w) then
+        local button_w = reaper.ImGui_CalcTextSize(ctx, "Add") + (reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()) * 2)
+        if reaper.ImGui_Button(ctx, "Add", button_w) then
+            local added, path = reaper.JS_Dialog_BrowseForFolder("Choose a folder", "")
             if added then
                 one_changed = true
+                table.insert(Settings.pattern_folder_paths.list, {path = path:gsub("\\", "\\\\"), selected = false})
                 gpmsys_patterns.ScanPatternFiles()
             end
         end
+        reaper.ImGui_SetItemTooltip(ctx, "Add pattern folder paths to list from "..(gpmsys.is_macOS and "finder" or "explorer")..".")
 
         reaper.ImGui_SameLine(ctx)
         local disable = not Settings.pattern_folder_paths.list[1]
         if disable then reaper.ImGui_BeginDisabled(ctx) end
-        local button_x, button_y = reaper.ImGui_GetCursorScreenPos(ctx)
-        local avail_x = reaper.ImGui_GetContentRegionAvail(ctx)
-        reaper.ImGui_SetCursorScreenPos(ctx, button_x + avail_x - 140 - 2, button_y)
-        if reaper.ImGui_Button(ctx, "Force pattern scan", 140) then
+        button_w = reaper.ImGui_CalcTextSize(ctx, "Remove") + (reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()) * 2)
+        if reaper.ImGui_Button(ctx, "Remove", button_w) then
+            for i, pattern in ipairs(Settings.pattern_folder_paths.list) do
+                if pattern.selected then
+                    one_changed = true
+                    table.remove(Settings.pattern_folder_paths.list, i)
+                end
+                if one_changed then gpmsys_patterns.ScanPatternFiles() end
+            end
+        end
+        reaper.ImGui_SetItemTooltip(ctx, "Remove selected pattern folder paths from list.")
+
+        reaper.ImGui_SameLine(ctx)
+        button_w = reaper.ImGui_CalcTextSize(ctx, "Force scan") + (reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()) * 2)
+        if reaper.ImGui_Button(ctx, "Force scan", button_w) then
             gpmsys_patterns.ScanPatternFiles()
         end
         reaper.ImGui_SetItemTooltip(ctx, "Force pattern scan (automatic rescan on paths update).")
         if disable then reaper.ImGui_EndDisabled(ctx) end
 
-        if reaper.ImGui_BeginListBox(ctx, "##pattern_paths", -1, (select(2, reaper.ImGui_CalcTextSize(ctx, "A")) * 2) * #Settings.pattern_folder_paths.list) then
+        local box_w = select(2, reaper.ImGui_CalcTextSize(ctx, "A")) * #Settings.pattern_folder_paths.list
+            + (reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()) * 2)
+        if reaper.ImGui_BeginListBox(ctx, "##pattern_paths", -1, box_w) then
             local max_width = reaper.ImGui_GetContentRegionAvail(ctx) - (reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()) * 4)
             for i, pattern in ipairs(Settings.pattern_folder_paths.list) do
-                local display = tostring(pattern)
+                local display = tostring(pattern.path)
                 if reaper.ImGui_CalcTextSize(ctx, display) > max_width then
                     local ellipsis = "..."
                     local left, right = 1, #display
@@ -157,8 +173,8 @@ function tab_settings.Show()
 
                     display = left_str .. ellipsis .. right_str
                 end
-                reaper.ImGui_Text(ctx, display)
-                reaper.ImGui_SetItemTooltip(ctx, tostring(pattern))
+                _, pattern.selected = reaper.ImGui_Selectable(ctx, display.."##pattern"..tostring(i), pattern.selected)
+                reaper.ImGui_SetItemTooltip(ctx, tostring(pattern.path))
             end
             reaper.ImGui_EndListBox(ctx)
         end
