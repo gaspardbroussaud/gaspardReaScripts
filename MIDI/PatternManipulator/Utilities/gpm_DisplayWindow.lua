@@ -20,7 +20,7 @@ local window_name = "PATTERN MANIPULATOR"
 
 -- Get GUI style from file
 local GUI_STYLE = dofile(reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/GUI_STYLE.lua")
-local GUI_SYS = dofile("C:/Users/Gaspard/Documents/gaspardReaScripts/Libraries/GUI_SYS.lua")--reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/GUI_SYS.lua")
+local GUI_SYS = dofile(reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/GUI_SYS.lua")
 
 -- Sizing variables
 topbar_height = 30
