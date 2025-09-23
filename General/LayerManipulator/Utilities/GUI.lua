@@ -2,9 +2,7 @@
 --@description Layer manipulator GUI
 --@author gaspard
 
-local _GUI = {}
-
-_GUI.MATRIX = require("Utilities/GUI_MATRIX")
+local GUI = {}
 
 -- Window variables
 local window_name = "LAYER MANIPULATOR"
@@ -21,15 +19,15 @@ local default_font_size = 16
 
 -- ImGui Init
 ctx = reaper.ImGui_CreateContext('layer_manipulator_context')
-_GUI.fonts = {}
-_GUI.fonts.arial = {}
-_GUI.fonts.arial.classic = reaper.ImGui_CreateFont(GUI_STYLE.FONTS.ARIAL)
-_GUI.fonts.arial.italic = reaper.ImGui_CreateFont(GUI_STYLE.FONTS.ARIAL, reaper.ImGui_FontFlags_Italic())
-_GUI.fonts.icons = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ICONS)
-_GUI.icon_size = {w = 22, h = 22}
-reaper.ImGui_Attach(ctx, _GUI.fonts.arial.classic)
-reaper.ImGui_Attach(ctx, _GUI.fonts.arial.italic)
-reaper.ImGui_Attach(ctx, _GUI.fonts.icons)
+GUI.fonts = {}
+GUI.fonts.arial = {}
+GUI.fonts.arial.classic = reaper.ImGui_CreateFont(GUI_STYLE.FONTS.ARIAL)
+GUI.fonts.arial.italic = reaper.ImGui_CreateFont(GUI_STYLE.FONTS.ARIAL, reaper.ImGui_FontFlags_Italic())
+GUI.fonts.icons = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ICONS)
+GUI.icon_size = {w = 22, h = 22}
+reaper.ImGui_Attach(ctx, GUI.fonts.arial.classic)
+reaper.ImGui_Attach(ctx, GUI.fonts.arial.italic)
+reaper.ImGui_Attach(ctx, GUI.fonts.icons)
 
 -- Push all GUI style settings
 local function Gui_PushTheme()
@@ -69,7 +67,7 @@ end
 
 -- Gui Version on bottom right
 local function Display_Version()
-    reaper.ImGui_PushFont(ctx, _GUI.fonts.arial.italic, default_font_size * 0.75)
+    reaper.ImGui_PushFont(ctx, GUI.fonts.arial.italic, default_font_size * 0.75)
     local w, h = reaper.ImGui_CalcTextSize(ctx, "v"..version)
     reaper.ImGui_SetCursorPosX(ctx, window_width - w - reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()) * 2)
     reaper.ImGui_SetCursorPosY(ctx, window_height - h - select(2, reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding())) * 2)
@@ -86,14 +84,14 @@ local function Display_TopBar()
 
     --[[reaper.ImGui_SameLine(ctx)
 
-    reaper.ImGui_PushFont(ctx, _GUI.fonts.arial.italic, default_font_size * 0.75)
+    reaper.ImGui_PushFont(ctx, GUI.fonts.arial.italic, default_font_size * 0.75)
     reaper.ImGui_Text(ctx, "v"..version)
     reaper.ImGui_PopFont(ctx)]]
 
     -- Buttons
     local menu = {}
-    table.insert(menu, {icon = 'QUIT', hint = 'Close', font = _GUI.fonts.icons, size = _GUI.icon_size.h, right_click = false})
-    table.insert(menu, {icon = 'GEAR', hint = 'Settings', font = _GUI.fonts.icons, size = _GUI.icon_size.h, right_click = false})
+    table.insert(menu, {icon = 'QUIT', hint = 'Close', font = GUI.fonts.icons, size = GUI.icon_size.h, right_click = false})
+    table.insert(menu, {icon = 'GEAR', hint = 'Settings', font = GUI.fonts.icons, size = GUI.icon_size.h, right_click = false})
     local rv, button = GUI_SYS.IconButtonRight(ctx, menu, window_width)
     if rv then
         --local right_click = reaper.ImGui_IsMouseClicked(ctx, reaper.ImGui_MouseButton_Right())
@@ -108,31 +106,29 @@ end
 
 local function Display_Elements()
     SYS.TRACKS.COUNT = reaper.CountSelectedTracks(-1)
+    SYS.MARKERS.COUNT = select(2, reaper.CountProjectMarkers(-1))
+
     reaper.ImGui_BeginGroup(ctx)
-    if reaper.ImGui_BeginTable(ctx, "##table_matrix", SYS.MARKERS.COUNT + 1) then
-        reaper.ImGui_TableNextRow(ctx)
-        reaper.ImGui_TableNextColumn(ctx)
 
-        for j = 1, SYS.MARKERS.COUNT do
-            reaper.ImGui_TableNextColumn(ctx)
-
-            reaper.ImGui_Text(ctx, "MARKER "..j)
+    if reaper.ImGui_BeginChild(ctx, "##child_track_groups") then
+        for i, group in ipairs(SYS.TRACKS.LIST) do
+            
         end
-
-        for i = 1, SYS.TRACKS.COUNT do
-            reaper.ImGui_TableNextRow(ctx)
-            reaper.ImGui_TableNextColumn(ctx)
-
-            reaper.ImGui_Text(ctx, "TRACK "..i)
-
-            for j = 1, SYS.MARKERS.COUNT do
-                reaper.ImGui_TableNextColumn(ctx)
-
-                reaper.ImGui_Checkbox(ctx, "##checkbox_track"..i.."_marker"..j)
-            end
-        end
-        reaper.ImGui_EndTable(ctx)
     end
+
+    if reaper.ImGui_BeginTabBar(ctx, "tab_controls") then
+        if reaper.ImGui_BeginTabItem(ctx, "Matrix##tab_matrix") then
+            reaper.ImGui_Text(ctx, "Big matrix")
+            reaper.ImGui_EndTabItem(ctx)
+        end
+
+        if reaper.ImGui_BeginTabItem(ctx, "Files##tab_files") then
+            reaper.ImGui_Text(ctx, "Files in group")
+            reaper.ImGui_EndTabItem(ctx)
+        end
+        reaper.ImGui_EndTabBar(ctx)
+    end
+
     reaper.ImGui_EndGroup(ctx)
 end
 
@@ -140,7 +136,7 @@ local function Display_Settings()
     local popup_w, popup_h = 200, 150
     reaper.ImGui_SetNextWindowSize(ctx, popup_w, popup_h)
     local pos_x = window_x + window_width - popup_w * 0.5 - reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding())
-    local pos_y = window_y + _GUI.icon_size.h + select(2, reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding())) * 6
+    local pos_y = window_y + GUI.icon_size.h + select(2, reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding())) * 6
     reaper.ImGui_SetNextWindowPos(ctx, pos_x, pos_y)
     if reaper.ImGui_BeginPopup(ctx, "popup_settings") then
         reaper.ImGui_Text(ctx, "Settings")
@@ -150,7 +146,7 @@ local function Display_Settings()
     end
 end
 
-_GUI.Loop = function()
+GUI.Loop = function()
     -- GUI --------
     Gui_PushTheme()
 
@@ -160,7 +156,7 @@ _GUI.Loop = function()
     reaper.ImGui_SetNextWindowSizeConstraints(ctx, min_width, min_height, max_width, max_height)
 
     -- Font
-    reaper.ImGui_PushFont(ctx, _GUI.fonts.arial.classic, default_font_size)
+    reaper.ImGui_PushFont(ctx, GUI.fonts.arial.classic, default_font_size)
 
     -- Begin
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
@@ -194,8 +190,8 @@ _GUI.Loop = function()
     if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Escape()) then open = false end
 
     if open then
-        reaper.defer(_GUI.Loop)
+        reaper.defer(GUI.Loop)
     end
 end
 
-return _GUI
+return GUI

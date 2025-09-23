@@ -2,17 +2,17 @@
 --@description Layer manipulator SYSTEM
 --@author gaspard
 
-local _SYSTEM = {}
+local SYS = {}
 
-_SYSTEM.is_macOS = not reaper.GetOS():match('Win')
-_SYSTEM.separator = _SYSTEM.is_macOS and '/' or '\\'
+SYS.is_macOS = not reaper.GetOS():match('Win')
+SYS.separator = SYS.is_macOS and '/' or '\\'
 
-_SYSTEM.extname = "g_PGM_"
-_SYSTEM.extkey_parent_track = "PARENT_TRACK_GUID"
-_SYSTEM.parent_track = nil
+SYS.extname = "g_PGM_"
+SYS.extkey_parent_track = "PARENT_TRACK_GUID"
+SYS.parent_track = nil
 
-_SYSTEM.TRACKS = require("Utilities/SYSTEM_TRACKS")
-_SYSTEM.MARKERS = require("Utilities/SYSTEM_MARKERS")
+SYS.TRACKS = require("Utilities/SYSTEM_TRACKS")
+SYS.MARKERS = require("Utilities/SYSTEM_MARKERS")
 
 local function SetupSettings()
     local default_settings = {
@@ -29,20 +29,20 @@ local function SetupSettings()
     end
 end
 
-_SYSTEM.Init = function()
+SYS.Init = function()
     SetupSettings()
 end
 
-_SYSTEM.GetTrackFromExtState = function(extname, extkey)
+SYS.GetTrackFromExtState = function(extname, extkey)
     local retval, GUID = reaper.GetProjExtState(0, extname, extkey)
     return retval and reaper.BR_GetMediaTrackByGUID(0, GUID) or nil
 end
 
-_SYSTEM.SetTrackToExtState = function(track, extname, extkey)
+SYS.SetTrackToExtState = function(track, extname, extkey)
     reaper.SetProjExtState(0, extname, extkey, reaper.GetTrackGUID(track))
 end
 
-_SYSTEM.EncodeToBase64 = function(waveform)
+SYS.EncodeToBase64 = function(waveform)
     local b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
     local function to_binary(num)
         local bin = ""
@@ -76,7 +76,7 @@ _SYSTEM.EncodeToBase64 = function(waveform)
     return encoded
 end
 
-_SYSTEM.DecodeFromBase64 = function(encoded)
+SYS.DecodeFromBase64 = function(encoded)
     local b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
     local binary_data = ""
 
@@ -112,4 +112,4 @@ _SYSTEM.DecodeFromBase64 = function(encoded)
     return waveform
 end
 
-return _SYSTEM
+return SYS

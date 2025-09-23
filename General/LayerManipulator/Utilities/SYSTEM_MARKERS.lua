@@ -2,8 +2,10 @@
 --@description Layer manipulator SYSTEM
 --@author gaspard
 
-local _MARKERS = {}
+local MARKERS = {}
 
-_MARKERS.COUNT = select(2, reaper.CountProjectMarkers(-1))
+MARKERS.COUNT = select(2, reaper.CountProjectMarkers(-1))
 
-return _MARKERS
+MARKERS.marker_list = {}
+
+return MARKERS
