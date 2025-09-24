@@ -6,6 +6,6 @@ local MARKERS = {}
 
 MARKERS.COUNT = select(2, reaper.CountProjectMarkers(-1))
 
-MARKERS.marker_list = {}
+MARKERS.LIST = {1, 2, 3}
 
 return MARKERS

@@ -7,7 +7,7 @@ local SYS = {}
 SYS.is_macOS = not reaper.GetOS():match('Win')
 SYS.separator = SYS.is_macOS and '/' or '\\'
 
-SYS.extname = "g_PGM_"
+SYS.extname = "g_LM_"
 SYS.extkey_parent_track = "PARENT_TRACK_GUID"
 SYS.parent_track = nil
 

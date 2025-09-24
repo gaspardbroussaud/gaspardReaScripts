@@ -105,31 +105,65 @@ local function Display_TopBar()
 end
 
 local function Display_Elements()
-    SYS.TRACKS.COUNT = reaper.CountSelectedTracks(-1)
-    SYS.MARKERS.COUNT = select(2, reaper.CountProjectMarkers(-1))
+    SYS.TRACKS.GROUPS = reaper.CountSelectedTracks(-1) > 0 and SYS.TRACKS.GetTrackGroups(reaper.GetSelectedTrack(-1, 0)) or nil
+    SYS.TRACKS.PARENT = SYS.TRACKS.GROUPS and SYS.TRACKS.PARENT or nil
 
-    reaper.ImGui_BeginGroup(ctx)
+    reaper.ImGui_BeginGroup(ctx) -- GLOBAL
 
-    if reaper.ImGui_BeginChild(ctx, "##child_track_groups") then
-        for i, group in ipairs(SYS.TRACKS.LIST) do
-            
+    local pos_y = reaper.ImGui_GetCursorPosY(ctx)
+    local parent_name = SYS.TRACKS.PARENT and select(2, reaper.GetTrackName(SYS.TRACKS.PARENT)) or ""
+    reaper.ImGui_Text(ctx, parent_name)
+
+    reaper.ImGui_SetCursorPosY(ctx, pos_y + select(2, reaper.ImGui_CalcTextSize(ctx, "A")) + select(2, reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding())))
+    if reaper.ImGui_BeginChild(ctx, "##child_track_groups", 200, -1) then--, reaper.ImGui_ChildFlags_Borders()) then
+        if not SYS.TRACKS.GROUPS then goto skip_groups end
+        reaper.ImGui_Dummy(ctx, -1, select(2, reaper.ImGui_CalcTextSize(ctx, "A")) + select(2, reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding())))
+        for i, group in ipairs(SYS.TRACKS.GROUPS) do
+            if group.name then
+                retval, group.selected = reaper.ImGui_Selectable(ctx, group.name.."##"..group.guid, group.selected)
+                if retval then
+                    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:"..SYS.extname.."SELECTED", tostring(group.selected), true)
+                end
+            end
         end
+        ::skip_groups::
+        reaper.ImGui_EndChild(ctx)
     end
 
+    reaper.ImGui_SameLine(ctx)
+    reaper.ImGui_SetCursorPosY(ctx, pos_y)
+
+    reaper.ImGui_BeginGroup(ctx) -- TABS
     if reaper.ImGui_BeginTabBar(ctx, "tab_controls") then
         if reaper.ImGui_BeginTabItem(ctx, "Matrix##tab_matrix") then
-            reaper.ImGui_Text(ctx, "Big matrix")
+            if reaper.ImGui_BeginTable(ctx, "##table_matrix_markers", SYS.MARKERS.COUNT) then
+                reaper.ImGui_TableNextRow(ctx)
+                for i, marker in ipairs(SYS.MARKERS.LIST) do
+                    reaper.ImGui_TableNextColumn(ctx)
+                    reaper.ImGui_Text(ctx, "Name "..tostring(i))
+                end
+                for i, group in ipairs(SYS.TRACKS.GROUPS) do
+                    reaper.ImGui_TableNextRow(ctx)
+                    for j, marker in ipairs(SYS.MARKERS.LIST) do
+                        reaper.ImGui_TableNextColumn(ctx)
+                        reaper.ImGui_Text(ctx, tostring(i)..", "..tostring(j))
+                    end
+                end
+
+                reaper.ImGui_EndTable(ctx)
+            end
             reaper.ImGui_EndTabItem(ctx)
         end
 
         if reaper.ImGui_BeginTabItem(ctx, "Files##tab_files") then
-            reaper.ImGui_Text(ctx, "Files in group")
+            reaper.ImGui_TextWrapped(ctx, "Files in group, all files can be selected and modified from here.")
             reaper.ImGui_EndTabItem(ctx)
         end
         reaper.ImGui_EndTabBar(ctx)
     end
+    reaper.ImGui_EndGroup(ctx) -- TABS
 
-    reaper.ImGui_EndGroup(ctx)
+    reaper.ImGui_EndGroup(ctx) -- GLOBAL
 end
 
 local function Display_Settings()
