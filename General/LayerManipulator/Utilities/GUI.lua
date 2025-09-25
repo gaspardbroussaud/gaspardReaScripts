@@ -21,11 +21,13 @@ local default_font_size = 16
 ctx = reaper.ImGui_CreateContext('layer_manipulator_context')
 GUI.fonts = {}
 GUI.fonts.arial = {}
-GUI.fonts.arial.classic = reaper.ImGui_CreateFont(GUI_STYLE.FONTS.ARIAL)
-GUI.fonts.arial.italic = reaper.ImGui_CreateFont(GUI_STYLE.FONTS.ARIAL, reaper.ImGui_FontFlags_Italic())
+GUI.fonts.arial.classic = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ARIAL.CLASSIC)
+GUI.fonts.arial.vertical = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ARIAL.VERTICAL)
+GUI.fonts.arial.italic = reaper.ImGui_CreateFont(GUI_STYLE.FONTS.ARIAL.CLASSIC, reaper.ImGui_FontFlags_Italic())
 GUI.fonts.icons = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ICONS)
 GUI.icon_size = {w = 22, h = 22}
 reaper.ImGui_Attach(ctx, GUI.fonts.arial.classic)
+reaper.ImGui_Attach(ctx, GUI.fonts.arial.vertical)
 reaper.ImGui_Attach(ctx, GUI.fonts.arial.italic)
 reaper.ImGui_Attach(ctx, GUI.fonts.icons)
 
@@ -104,9 +106,25 @@ local function Display_TopBar()
     reaper.ImGui_EndGroup(ctx)
 end
 
+local function Draw_VerticalText(text)
+    reaper.ImGui_PushFont(ctx, GUI.fonts.arial.vertical, default_font_size)
+    reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing(), reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing()), 0)
+    local letterspacing = select(2, reaper.ImGui_CalcTextSize(ctx, 'A')) - 2
+    local posX, posY = reaper.ImGui_GetCursorPosX(ctx), reaper.ImGui_GetCursorPosY(ctx) - letterspacing * #text
+    text = text:reverse()
+    for ci = 1, #text do
+        reaper.ImGui_SetCursorPos(ctx, posX, posY + letterspacing * (ci - 1))
+        reaper.ImGui_Text(ctx, text:sub(ci, ci))
+    end
+    reaper.ImGui_PopStyleVar(ctx)
+    reaper.ImGui_PopFont(ctx)
+end
+
+
 local function Display_Elements()
     SYS.TRACKS.GROUPS = reaper.CountSelectedTracks(-1) > 0 and SYS.TRACKS.GetTrackGroups(reaper.GetSelectedTrack(-1, 0)) or nil
     SYS.TRACKS.PARENT = SYS.TRACKS.GROUPS and SYS.TRACKS.PARENT or nil
+    SYS.MARKERS.GetGroupMarkers()
 
     reaper.ImGui_BeginGroup(ctx) -- GLOBAL
 
@@ -136,21 +154,59 @@ local function Display_Elements()
     reaper.ImGui_BeginGroup(ctx) -- TABS
     if reaper.ImGui_BeginTabBar(ctx, "tab_controls") then
         if reaper.ImGui_BeginTabItem(ctx, "Matrix##tab_matrix") then
-            if reaper.ImGui_BeginTable(ctx, "##table_matrix_markers", SYS.MARKERS.COUNT) then
-                reaper.ImGui_TableNextRow(ctx)
-                for i, marker in ipairs(SYS.MARKERS.LIST) do
-                    reaper.ImGui_TableNextColumn(ctx)
-                    reaper.ImGui_Text(ctx, "Name "..tostring(i))
-                end
-                for i, group in ipairs(SYS.TRACKS.GROUPS) do
+            if SYS.MARKERS.COUNT > 0 then
+                if reaper.ImGui_BeginTable(ctx, "##table_matrix_markers", SYS.MARKERS.COUNT) then
                     reaper.ImGui_TableNextRow(ctx)
-                    for j, marker in ipairs(SYS.MARKERS.LIST) do
+                    reaper.ImGui_PushFont(ctx, GUI.fonts.arial.vertical, 12)
+                    local font_width = reaper.ImGui_CalcTextSize(ctx, "A")
+                    reaper.ImGui_PopFont(ctx)
+                    for i, marker in ipairs(SYS.MARKERS.LIST) do
                         reaper.ImGui_TableNextColumn(ctx)
-                        reaper.ImGui_Text(ctx, tostring(i)..", "..tostring(j))
-                    end
-                end
+                        -- Vertical text
+                        local x, y = reaper.ImGui_GetCursorPos(ctx)
+                        local text = marker.name:gsub("_{[%x%-]+}$", "")--:reverse():gsub("(.)", "%1\n") --tostring(marker.pos)
+                        local frame_padding = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding())
+                        local header_h = select(2, reaper.ImGui_CalcTextSize(ctx, text)) * #text-- + frame_padding * 2
+                        reaper.ImGui_SetCursorPos(ctx, x + (reaper.ImGui_GetContentRegionAvail(ctx) - font_width) / 2, y + header_h - frame_padding)
+                        Draw_VerticalText(text)
 
-                reaper.ImGui_EndTable(ctx)
+                        --[[
+                        text = text:reverse():gsub("(.)", "%1\n")
+                        --local draw_list = reaper.ImGui_GetWindowDrawList(ctx)
+                        --pos_x, pos_y = reaper.ImGui_GetCursorScreenPos(ctx)
+                        --
+                            reaper.ImGui_DrawList_AddText(draw_list, text_x, text_y + (i-1)*20, reaper.ImGui_GetStyleColor(ctx, reaper.ImGui_Col_Text()), text)
+                        --draw_list:AddText(arial_font, default_font_size, text_x, text_y + (i-1)*20, 0xFFFFFFFF, text:sub(i,i))
+                        --reaper.ImGui_Text(ctx, tostring(marker.pos))--marker.name:gsub("_{[%x%-]+}$", "").." "..tostring(marker.index))
+                        local font_w = reaper.ImGui_CalcTextSize(ctx, "A") + reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()) * 2
+                        Draw_VerticalText(marker.name:gsub("_{[%x%-]+}$", ""), GUI.fonts.arial.vertical, default_font_size,
+                            text_x, text_y, reaper.ImGui_GetStyleColor(ctx, reaper.ImGui_Col_Text()))
+                        --Draw_VerticalText(tostring(marker.pos), GUI.fonts.arial.vertical, default_font_size,
+                            text_x + font_w * 0.5,
+                            text_y, reaper.ImGui_GetStyleColor(ctx, reaper.ImGui_Col_Text()))
+
+                        --Draw_VerticalText(text, GUI.fonts.arial.vertical, default_font_size, pos_x, pos_y, reaper.ImGui_GetStyleColor(ctx, reaper.ImGui_Col_Text()))
+                        ]]
+                    end
+                    for i, group in ipairs(SYS.TRACKS.GROUPS) do
+                        reaper.ImGui_TableNextRow(ctx)
+                        for j, marker in ipairs(SYS.MARKERS.LIST) do
+                            reaper.ImGui_TableNextColumn(ctx)
+                            local checked = reaper.GetSetMediaTrackInfo_String(group.track, "P_EXT:"..SYS.extname.."MATRIX_"..marker.guid, "", false)
+
+                            --retcheck, checked = reaper.ImGui_Checkbox(ctx, "##checkbox_matrix_"..tostring(i)..tostring(j), checked)
+                            if retcheck then
+                                if checked then
+                                    reaper.GetSetMediaTrackInfo_String(group.track, "P_EXT:"..SYS.extname.."MATRIX_"..marker.guid, "true", true)
+                                else
+                                    reaper.GetSetMediaTrackInfo_String(group.track, "P_EXT:"..SYS.extname.."MATRIX_"..marker.guid, "", true)
+                                end
+                            end
+                        end
+                    end
+
+                    reaper.ImGui_EndTable(ctx)
+                end
             end
             reaper.ImGui_EndTabItem(ctx)
         end

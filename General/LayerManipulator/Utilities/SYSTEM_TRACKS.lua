@@ -33,12 +33,6 @@ TRACKS.GetTrackGroups = function(selected_track)
         if not retval or reaper.BR_GetMediaTrackByGUID(0, parent_GUID) ~= TRACKS.PARENT then break end
 
         table.insert(list, track)
-
-        --[[if reaper.BR_GetMediaTrackByGUID(0, parent_GUID) == TRACKS.PARENT then
-            table.insert(list, track)
-        else
-            break
-        end]]
     end
 
     local groups = {}

@@ -1,5 +1,5 @@
 --@author gaspard
---@version 1.0.1
+--@version 1.0.2
 --@provides
 --  [nomain] .
 --  Icons_Solid.ttf
@@ -14,7 +14,10 @@
 
 local _STYLE_FONT = {
     ICONS = reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/Libraries/Icons_Solid.ttf',
-    ARIAL = 'arial'
+    ARIAL = {
+        CLASSIC = reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/Libraries/Arial.ttf',
+        VERTICAL = reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/Libraries/Arial_Vertical.ttf'
+    }
 }
 
 local _ICONS = {
