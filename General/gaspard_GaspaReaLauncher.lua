@@ -1,8 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 1.0.2
+--@version 1.0.3
 --@changelog
---  - Fix aligned buttons
+--  - Update police path
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -113,8 +113,8 @@ local font_size = 16
 
 -- ImGui Init
 local ctx = reaper.ImGui_CreateContext('gaspard_rea_launcher_ctx')
-local arial_font = reaper.ImGui_CreateFont(GUI_STYLE.FONTS.ARIAL)
-local italic_arial_font = reaper.ImGui_CreateFont(GUI_STYLE.FONTS.ARIAL, reaper.ImGui_FontFlags_Italic())
+local arial_font = reaper.ImGui_CreateFont(GUI_STYLE.FONTS.ARIAL.CLASSIC)
+local italic_arial_font = reaper.ImGui_CreateFont(GUI_STYLE.FONTS.ARIAL.CLASSIC, reaper.ImGui_FontFlags_Italic())
 local icon_font = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ICONS)
 reaper.ImGui_Attach(ctx, arial_font)
 reaper.ImGui_Attach(ctx, italic_arial_font)
