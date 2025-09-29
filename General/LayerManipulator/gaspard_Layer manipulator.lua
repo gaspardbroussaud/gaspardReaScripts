@@ -25,18 +25,18 @@ end
 SetButtonState(1)
 
 -- Load Utilities
-dofile(reaper.GetResourcePath()..'/Scripts/ReaTeam Extensions/API/imgui.lua') ('0.10.0.1') -- current version at the time of writing the script
+dofile(reaper.GetResourcePath() .. '/Scripts/ReaTeam Extensions/API/imgui.lua') ('0.10.0.1') -- current version at the time of writing the script
 
 script_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]
-package.path = package.path..';'..script_path .. '?.lua' -- GET DIRECTORY FOR REQUIRE
+package.path = package.path .. ';' .. script_path .. '?.lua' -- GET DIRECTORY FOR REQUIRE
 SYS = require("Utilities/SYSTEM")
 GUI = require("Utilities/GUI")
 
-local json_file_path = reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/JSON'
+local json_file_path = reaper.GetResourcePath() .. '/Scripts/Gaspard ReaScripts/JSON'
 package.path = package.path .. ';' .. json_file_path .. '/?.lua'
 gson = require('json_utilities_lib')
 
-settings_path = script_path..'Utilities/gaspard_'..action_name..'_settings.json'
+settings_path = script_path .. 'Utilities/gaspard_' .. action_name .. '_settings.json'
 
 SYS.Init()
 

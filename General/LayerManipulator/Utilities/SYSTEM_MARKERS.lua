@@ -22,7 +22,7 @@ MARKERS.GetGroupMarkers = function()
             local retval, isrgn, pos, rgnend, name, markrgnindexnumber = reaper.EnumProjectMarkers2(-1, i-1)
             if retval and not isrgn then
                 if name:match("{[%x%-]+}$") == reaper.GetTrackGUID(SYS.TRACKS.PARENT) then
-                    local _, marker_guid = reaper.GetSetProjectInfo_String(-1, "MARKER_GUID:"..tostring(i-1), "", false)
+                    local _, marker_guid = reaper.GetSetProjectInfo_String(-1, "MARKER_GUID:" .. tostring(i-1), "", false)
                     table.insert(MARKERS.LIST, {guid = marker_guid, pos = pos, name = name, index = markrgnindexnumber})
                     MARKERS.COUNT = MARKERS.COUNT + 1
                 end

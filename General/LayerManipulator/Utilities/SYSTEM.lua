@@ -23,7 +23,7 @@ local function SetupSettings()
     if default_settings.version ~= Settings.version then
         reaper.ShowConsoleMsg("\n!!! WARNING !!! (gaspard_Pattern manipulator.lua)\n")
         reaper.ShowConsoleMsg("Settings are erased due to update in settings file.\nPlease excuse this behaviour.\nThis won't happen once released.\n")
-        reaper.ShowConsoleMsg("Now in version: "..default_settings.version.."\n")
+        reaper.ShowConsoleMsg("Now in version: " .. default_settings.version .. "\n")
         Settings = gson.SaveJSON(settings_path, default_settings)
         Settings = gson.LoadJSON(settings_path, Settings)
     end
