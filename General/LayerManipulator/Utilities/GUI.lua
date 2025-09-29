@@ -7,7 +7,7 @@ local GUI = {}
 -- Window variables
 local window_name = "LAYER MANIPULATOR"
 local window_x, window_y
-local window_width, window_height = 600, 300
+local window_width, window_height = 600, 350
 local min_width, min_height, max_width, max_height = 300, 150, 1200, 600
 local no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
 
@@ -134,10 +134,11 @@ local function Display_Elements()
     local og_x, og_y = reaper.ImGui_GetCursorPos(ctx)
     reaper.ImGui_Text(ctx, parent_name)
 
-    reaper.ImGui_SetCursorPosY(ctx, pos_y + select(2, reaper.ImGui_CalcTextSize(ctx, "A")))-- + select(2, reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding())))
+    reaper.ImGui_SetCursorPosY(ctx, pos_y + select(2, reaper.ImGui_CalcTextSize(ctx, "A")))
 
+    local tabs_offset_width = 200
     reaper.ImGui_BeginGroup(ctx) -- TABS
-    reaper.ImGui_SetCursorPosX(ctx, og_x + 200)
+    reaper.ImGui_SetCursorPosX(ctx, og_x + tabs_offset_width)
     local tabs_x = reaper.ImGui_GetCursorPosX(ctx)
     pos_x, pos_y = og_x, og_y
     local tab_displayed = "Matrix"
@@ -159,18 +160,58 @@ local function Display_Elements()
 
     reaper.ImGui_BeginGroup(ctx) -- TABLE
 
-    if SYS.TRACKS.GROUPS and SYS.MARKERS.COUNT > 0 then
+    if SYS.TRACKS.GROUPS then
         local column_count = tab_displayed == "Matrix" and SYS.MARKERS.COUNT + 1 or 1
-        local table_width = tab_displayed == "Matrix" and -1 or 200 - reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()) * 2
+        reaper.ShowConsoleMsg("\n"..tostring(column_count))
+        local first_col_width = tabs_offset_width - reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()) * 2
+        local table_width = tab_displayed == "Matrix" and -1 or first_col_width
         pos_y = reaper.ImGui_GetCursorPosY(ctx)
+        if tab_displayed == "Files" and SYS.MARKERS.COUNT > 0 then
+            local header_height = 0
+            local length = 0
+            for i, marker in ipairs(SYS.MARKERS.LIST) do
+                local text = tostring(marker.pos)
+                if #text > length then length = #text end
+            end
+            reaper.ImGui_PushFont(ctx, GUI.fonts.arial.vertical, 12)
+            for i = 1, length do
+                header_height = select(2, reaper.ImGui_CalcTextSize(ctx, "1")) + header_height
+            end
+            reaper.ImGui_PopFont(ctx)
+            reaper.ImGui_SetCursorPosY(ctx, pos_y + header_height)
+            pos_y = reaper.ImGui_GetCursorPosY(ctx)
+        end
         if reaper.ImGui_BeginTable(ctx, "table_matrix", column_count, reaper.ImGui_TableFlags_BordersInner(), table_width) then
-            reaper.ImGui_TableSetupColumn(ctx, "", reaper.ImGui_TableColumnFlags_WidthFixed(), 200 - reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()) * 2)
-            if tab_displayed == "Matrix" then
+            reaper.ImGui_TableSetupColumn(ctx, "", reaper.ImGui_TableColumnFlags_WidthFixed(), first_col_width)
+            if tab_displayed == "Matrix" and SYS.MARKERS.COUNT > 0 then
                 for _, marker in ipairs(SYS.MARKERS.LIST) do
                     reaper.ImGui_TableSetupColumn(ctx, tostring(marker.pos), reaper.ImGui_TableColumnFlags_WidthFixed(), 20)
                 end
             end
-            reaper.ImGui_TableHeadersRow(ctx)
+            reaper.ImGui_TableNextRow(ctx)
+            reaper.ImGui_TableSetColumnIndex(ctx, 0)
+            --reaper.ImGui_Text(ctx, "")
+            if tab_displayed == "Matrix" and SYS.MARKERS.COUNT > 0 then
+                for i, marker in ipairs(SYS.MARKERS.LIST) do
+                    reaper.ImGui_TableSetColumnIndex(ctx, i)
+                    reaper.ImGui_PushStyleVarY(ctx, reaper.ImGui_StyleVar_ItemSpacing(), -5)
+                    reaper.ImGui_PushFont(ctx, GUI.fonts.arial.vertical, 12)
+                    local text = tostring(marker.pos)--[[:gsub("_{[%x%-]+}$", "")]]:reverse()
+                    for t = 1, #text do
+                        local displayed = text:sub(t, t)
+                        local cur_x = reaper.ImGui_GetCursorPosX(ctx)
+                        reaper.ImGui_PushFont(ctx, GUI.fonts.arial.classic, 12)
+                        local default_x = reaper.ImGui_CalcTextSize(ctx, "0")
+                        local max_x = default_x - reaper.ImGui_CalcTextSize(ctx, displayed)
+                        reaper.ImGui_PopFont(ctx)
+                        reaper.ImGui_SetCursorPosX(ctx, cur_x + max_x * 2)
+                        reaper.ImGui_Text(ctx, displayed)
+                        reaper.ImGui_SetCursorPosX(ctx, cur_x)
+                    end
+                    reaper.ImGui_PopFont(ctx)
+                    reaper.ImGui_PopStyleVar(ctx)
+                end
+            end
 
             for i, group in ipairs(SYS.TRACKS.GROUPS) do
                 reaper.ImGui_TableNextRow(ctx)
@@ -181,8 +222,8 @@ local function Display_Elements()
                     for j, marker in ipairs(SYS.MARKERS.LIST) do
                         reaper.ImGui_TableSetColumnIndex(ctx, j)
                         local checked = reaper.GetSetMediaTrackInfo_String(group.track, "P_EXT:"..SYS.extname.."MATRIX_"..marker.guid, "", false)
-
-                        retcheck, checked = reaper.ImGui_Selectable(ctx, "##selectable_martrix_"..marker.guid..group.guid, checked)
+                        local text = checked and " X" or ""
+                        retcheck, checked = reaper.ImGui_Selectable(ctx, text.."##selectable_martrix_"..marker.guid..group.guid, checked)
                         if retcheck then
                             if checked then
                                 reaper.GetSetMediaTrackInfo_String(group.track, "P_EXT:"..SYS.extname.."MATRIX_"..marker.guid, "true", true)

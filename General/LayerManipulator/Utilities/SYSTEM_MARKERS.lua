@@ -16,14 +16,15 @@ MARKERS.GetGroupMarkers = function()
     end
     MARKERS.LIST = {}
     local _, marker_count, rgn_count = reaper.CountProjectMarkers(-1)
-    MARKERS.COUNT = marker_count
-    if MARKERS.COUNT > 0 then
-        for i = 1, MARKERS.COUNT + rgn_count do
+    MARKERS.COUNT = 0
+    if marker_count > 0 then
+        for i = 1, marker_count + rgn_count do
             local retval, isrgn, pos, rgnend, name, markrgnindexnumber = reaper.EnumProjectMarkers2(-1, i-1)
             if retval and not isrgn then
                 if name:match("{[%x%-]+}$") == reaper.GetTrackGUID(SYS.TRACKS.PARENT) then
                     local _, marker_guid = reaper.GetSetProjectInfo_String(-1, "MARKER_GUID:"..tostring(i-1), "", false)
                     table.insert(MARKERS.LIST, {guid = marker_guid, pos = pos, name = name, index = markrgnindexnumber})
+                    MARKERS.COUNT = MARKERS.COUNT + 1
                 end
             end
         end
