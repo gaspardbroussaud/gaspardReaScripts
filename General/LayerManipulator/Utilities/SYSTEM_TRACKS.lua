@@ -96,4 +96,33 @@ TRACKS.GetRandomFileFromGroup = function(group)
     end
 end
 
+TRACKS.MakeGroupParentTrack = function(parent_track)
+    local parent_depth = reaper.GetTrackDepth(parent_track)
+    local parent_index = reaper.GetMediaTrackInfo_Value(parent_track, "IP_TRACKNUMBER")
+    local parent_GUID = reaper.GetTrackGUID(parent_track)
+
+    reaper.GetSetMediaTrackInfo_String(parent_track, "P_EXT:" .. SYS.extname .. "PARENT_GUID", parent_GUID, true)
+
+    for i = parent_index, reaper.CountTracks(-1) - 1 do
+        local track = reaper.GetTrack(-1, i)
+        if reaper.GetTrackDepth(track) <= parent_depth then break end
+
+        reaper.GetSetMediaTrackInfo_String(track, "P_EXT:" .. SYS.extname .. "PARENT_GUID", parent_GUID, true)
+    end
+end
+
+TRACKS.RemoveFileFromGroup = function(group, index)
+    table.remove(group.files, index)
+
+    local text = ""
+
+    for i, file in ipairs(group.files) do
+        text = text .. "**" .. file.path
+    end
+
+    text = text:gsub("^**", "")
+
+    reaper.GetSetMediaTrackInfo_String(group.track, "P_EXT:" .. SYS.extname .. "FILES", text, true)
+end
+
 return TRACKS

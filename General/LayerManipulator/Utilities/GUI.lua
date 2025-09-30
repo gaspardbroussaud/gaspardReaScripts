@@ -9,6 +9,8 @@ local window_name = "LAYER MANIPULATOR"
 local window_x, window_y
 local window_width, window_height = 600, 350
 local min_width, min_height, max_width, max_height = 300, 150, 1200, 600
+local popup_x, popup_y = 0, 0
+local index_popup = -1
 local no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
 
 -- Get GUI style from file
@@ -30,6 +32,9 @@ reaper.ImGui_Attach(ctx, GUI.fonts.arial.classic)
 reaper.ImGui_Attach(ctx, GUI.fonts.arial.vertical)
 reaper.ImGui_Attach(ctx, GUI.fonts.arial.italic)
 reaper.ImGui_Attach(ctx, GUI.fonts.icons)
+
+-- Variables
+local checked_state = nil
 
 -- Push all GUI style settings
 local function Gui_PushTheme()
@@ -161,7 +166,8 @@ local function Display_Elements()
     ------
 
     reaper.ImGui_BeginGroup(ctx) -- TABLE
-    if SYS.TRACKS.GROUPS then
+    local test = true
+    if SYS.TRACKS.GROUPS or test then
         local column_count = tab_displayed == "Matrix" and SYS.MARKERS.COUNT + 1 or 1
         local first_col_width = tabs_offset_width - reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()) * 2
         local table_width = tab_displayed == "Matrix" and -1 or first_col_width
@@ -170,8 +176,8 @@ local function Display_Elements()
             local header_height = 0
             local length = 0
             for i, marker in ipairs(SYS.MARKERS.LIST) do
-                local position = math.floor(marker.pos) + (math.floor(100 * (marker.pos - math.floor(marker.pos))) / 100)
-                local text = tostring(position)
+                local text = tostring(math.floor(marker.pos) + (math.floor(100 * (marker.pos - math.floor(marker.pos))) / 100))
+                --local text = tostring(position)
                 if #text > length then length = #text end
             end
             reaper.ImGui_PushFont(ctx, GUI.fonts.arial.vertical, 12)
@@ -182,141 +188,187 @@ local function Display_Elements()
             reaper.ImGui_SetCursorPosY(ctx, pos_y + header_height + 5)
             pos_y = reaper.ImGui_GetCursorPosY(ctx)
         end
-        if reaper.ImGui_BeginTable(ctx, "table_matrix", column_count, reaper.ImGui_TableFlags_BordersInner(), table_width) then
-            reaper.ImGui_TableSetupColumn(ctx, "", reaper.ImGui_TableColumnFlags_WidthFixed(), first_col_width)
-            if tab_displayed == "Matrix" and SYS.MARKERS.COUNT > 0 then
-                for _, marker in ipairs(SYS.MARKERS.LIST) do
-                    local position = math.floor(marker.pos) + (math.floor(100 * (marker.pos - math.floor(marker.pos))) / 100)
-                    reaper.ImGui_TableSetupColumn(ctx, tostring(position), reaper.ImGui_TableColumnFlags_WidthFixed(), 20)
-                end
-            end
-            reaper.ImGui_TableNextRow(ctx)
-            reaper.ImGui_TableSetColumnIndex(ctx, 0)
-            if tab_displayed == "Matrix" and SYS.MARKERS.COUNT > 0 then
-                for i, marker in ipairs(SYS.MARKERS.LIST) do
-                    reaper.ImGui_TableSetColumnIndex(ctx, i)
-                    reaper.ImGui_PushStyleVarY(ctx, reaper.ImGui_StyleVar_ItemSpacing(), -5)
-                    reaper.ImGui_PushFont(ctx, GUI.fonts.arial.vertical, 12)
-                    local position = math.floor(marker.pos) + (math.floor(100 * (marker.pos - math.floor(marker.pos))) / 100)
-                    local text = tostring(position)--[[:gsub("_{[%x%-]+}$", "")]]:reverse()
-                    for t = 1, #text do
-                        local displayed = text:sub(t, t)
-                        local cur_x = reaper.ImGui_GetCursorPosX(ctx)
-                        reaper.ImGui_PushFont(ctx, GUI.fonts.arial.classic, 12)
-                        local default_x = reaper.ImGui_CalcTextSize(ctx, "0")
-                        local max_x = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing()) * 0.5 + default_x - reaper.ImGui_CalcTextSize(ctx, displayed)
-                        reaper.ImGui_PopFont(ctx)
-                        reaper.ImGui_SetCursorPosX(ctx, cur_x + max_x * 2)
-                        reaper.ImGui_Text(ctx, displayed)
-                        reaper.ImGui_SetCursorPosX(ctx, cur_x)
+        if SYS.TRACKS.GROUPS then
+            if reaper.ImGui_BeginTable(ctx, "table_matrix", column_count, reaper.ImGui_TableFlags_BordersInner(), table_width) then
+                reaper.ImGui_TableSetupColumn(ctx, "", reaper.ImGui_TableColumnFlags_WidthFixed(), first_col_width)
+                if tab_displayed == "Matrix" and SYS.MARKERS.COUNT > 0 then
+                    for _, marker in ipairs(SYS.MARKERS.LIST) do
+                        local position = math.floor(marker.pos) + (math.floor(100 * (marker.pos - math.floor(marker.pos))) / 100)
+                        reaper.ImGui_TableSetupColumn(ctx, tostring(position), reaper.ImGui_TableColumnFlags_WidthFixed(), 20)
                     end
-                    reaper.ImGui_PopFont(ctx)
-                    reaper.ImGui_PopStyleVar(ctx)
                 end
-            end
-
-            for i, group in ipairs(SYS.TRACKS.GROUPS) do
                 reaper.ImGui_TableNextRow(ctx)
                 reaper.ImGui_TableSetColumnIndex(ctx, 0)
-                retval, group.selected = reaper.ImGui_Selectable(ctx, group.name .. "##selectable" .. group.guid, group.selected)
-                if retval then
-                    if group.selected then
-                        for g, sub_group in ipairs(SYS.TRACKS.GROUPS) do
-                            if i ~= g then
-                                sub_group.selected = false
-                                reaper.GetSetMediaTrackInfo_String(sub_group.track, "P_EXT:" .. SYS.extname .. "SELECTED", tostring(false), true)
-                            end
+                if tab_displayed == "Matrix" and SYS.MARKERS.COUNT > 0 then
+                    for i, marker in ipairs(SYS.MARKERS.LIST) do
+                        reaper.ImGui_TableSetColumnIndex(ctx, i)
+                        reaper.ImGui_PushStyleVarY(ctx, reaper.ImGui_StyleVar_ItemSpacing(), -5)
+                        reaper.ImGui_PushFont(ctx, GUI.fonts.arial.vertical, 12)
+                        local text = tostring(math.floor(marker.pos) + (math.floor(100 * (marker.pos - math.floor(marker.pos))) / 100)):reverse()
+                        --local text = tostring(position)--[[:gsub("_{[%x%-]+}$", "")]]:reverse()
+                        for t = 1, #text do
+                            local displayed = text:sub(t, t)
+                            local cur_x = reaper.ImGui_GetCursorPosX(ctx)
+                            reaper.ImGui_PushFont(ctx, GUI.fonts.arial.classic, 12)
+                            local default_x = reaper.ImGui_CalcTextSize(ctx, "0")
+                            local max_x = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing()) * 0.5 + default_x - reaper.ImGui_CalcTextSize(ctx, displayed)
+                            reaper.ImGui_PopFont(ctx)
+                            reaper.ImGui_SetCursorPosX(ctx, cur_x + max_x * 2)
+                            reaper.ImGui_Text(ctx, displayed)
+                            reaper.ImGui_SetCursorPosX(ctx, cur_x)
                         end
+                        reaper.ImGui_PopFont(ctx)
+                        reaper.ImGui_PopStyleVar(ctx)
                     end
-
-                    reaper.GetSetMediaTrackInfo_String(group.track, "P_EXT:" .. SYS.extname .. "SELECTED", tostring(group.selected), true)
                 end
 
-                if tab_displayed == "Matrix" then
-                    local draw_list = reaper.ImGui_GetForegroundDrawList(ctx)
-                    for j, marker in ipairs(SYS.MARKERS.LIST) do
-                        reaper.ImGui_TableSetColumnIndex(ctx, j)
-                        local checked = reaper.GetSetMediaTrackInfo_String(group.track, "P_EXT:" .. SYS.extname .. "MATRIX_" .. marker.guid, "", false)
-                        local x, y = reaper.ImGui_GetWindowPos(ctx)
-                        x = x + reaper.ImGui_GetCursorPosX(ctx) - reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding())
-                        y = y + reaper.ImGui_GetCursorPosY(ctx) - select(2, reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()))
-                        retcheck, checked = reaper.ImGui_Selectable(ctx, "##selectable_martrix_" .. marker.guid .. group.guid, checked)
-                        local w, h = reaper.ImGui_GetItemRectSize(ctx)
-                        reaper.ImGui_DrawList_AddRectFilled(draw_list, x, y, x + w, y + h, ((reaper.ImGui_GetStyleColor(ctx, reaper.ImGui_Col_Header()) >> 8) << 8)
-                            | (0x30 & 0xFF))
-                        if retcheck then
-                            if checked then
-                                reaper.GetSetMediaTrackInfo_String(group.track, "P_EXT:" .. SYS.extname .. "MATRIX_" .. marker.guid, "true", true)
+                for i, group in ipairs(SYS.TRACKS.GROUPS) do
+                    reaper.ImGui_TableNextRow(ctx)
+                    reaper.ImGui_TableSetColumnIndex(ctx, 0)
+                    retval, group.selected = reaper.ImGui_Selectable(ctx, group.name .. "##selectable" .. group.guid, group.selected)
+                    if retval then
+                        if group.selected then
+                            for g, sub_group in ipairs(SYS.TRACKS.GROUPS) do
+                                if i ~= g then
+                                    sub_group.selected = false
+                                    reaper.GetSetMediaTrackInfo_String(sub_group.track, "P_EXT:" .. SYS.extname .. "SELECTED", tostring(false), true)
+                                end
+                            end
+                        end
 
-                                local random_file = SYS.TRACKS.GetRandomFileFromGroup(group)
-                                if random_file then
-                                    reaper.PreventUIRefresh(1)
+                        reaper.GetSetMediaTrackInfo_String(group.track, "P_EXT:" .. SYS.extname .. "SELECTED", tostring(group.selected), true)
+                    end
 
-                                    local edit_cursor_pos = reaper.GetCursorPosition()
+                    if tab_displayed == "Matrix" then
+                        local draw_list = reaper.ImGui_GetForegroundDrawList(ctx)
+                        local mouse_left_button = reaper.ImGui_IsMouseDown(ctx, reaper.ImGui_MouseButton_Left())
+                        local mouse_left_drag = reaper.ImGui_IsMouseDragging(ctx, reaper.ImGui_MouseButton_Left())
+                        if not mouse_left_drag then checked_state = nil end
+                        for j, marker in ipairs(SYS.MARKERS.LIST) do
+                            reaper.ImGui_TableSetColumnIndex(ctx, j)
 
-                                    local sel_tracks = {}
-                                    for t = 1, reaper.CountSelectedTracks(-1) do
-                                        table.insert(sel_tracks, reaper.GetSelectedTrack(-1, t - 1))
-                                    end
-                                    reaper.SetOnlyTrackSelected(group.track)
+                            local x, y = reaper.ImGui_GetWindowPos(ctx)
+                            x = x + reaper.ImGui_GetCursorPosX(ctx) - reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding())
+                            y = y + reaper.ImGui_GetCursorPosY(ctx) - select(2, reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()))
 
-                                    local sel_items = {}
-                                    local item_count = reaper.CountSelectedMediaItems(-1)
-                                    if item_count > 0 then
-                                        for it = 1, item_count do
-                                            table.insert(sel_items, reaper.GetSelectedMediaItem(-1, it - 1))
+                            --reaper.ImGui_PushItemFlag(ctx, reaper.ImGui_ItemFlags_NoNav(), false)
+                            --local retcheck, checked = reaper.ImGui_Selectable(ctx, "##selectable_martrix_" .. marker.guid .. group.guid, prev_checked)
+                            --reaper.ImGui_PopItemFlag(ctx)
+                            local prev_checked = reaper.GetSetMediaTrackInfo_String(group.track, "P_EXT:" .. SYS.extname .. "MATRIX_" .. marker.guid, "", false)
+                            local retcheck = false
+                            local checked = false
+
+                            reaper.ImGui_Selectable(ctx, "##selectable_martrix_" .. marker.guid .. group.guid, prev_checked)
+
+                            if reaper.ImGui_IsItemHovered(ctx, reaper.ImGui_HoveredFlags_AllowWhenBlockedByActiveItem()) then
+                                if not mouse_left_drag and reaper.ImGui_IsMouseClicked(ctx, reaper.ImGui_MouseButton_Left()) then
+                                    checked = not prev_checked
+                                    retcheck = true
+                                    checked_state = checked
+                                elseif mouse_left_drag then
+                                    if checked_state == nil then
+                                    else
+                                        reaper.ShowConsoleMsg("\nBefore: " .. marker.pos)
+                                        if checked_state ~= prev_checked then
+                                            checked = checked_state
+                                            retcheck = true
+                                            reaper.ShowConsoleMsg("\nAfter: " .. marker.pos)
                                         end
+                                    end
+                                end
+                            end
+
+                            --[[if mouse_left_button and not retcheck then
+                                if reaper.ImGui_IsItemHovered(ctx, reaper.ImGui_HoveredFlags_AllowWhenBlockedByActiveItem()) then
+                                    --reaper.ImGui_SetKeyboardFocusHere(ctx)
+                                end
+                            end]]
+
+                            --retcheck, checked = false, false
+
+                            local w, h = reaper.ImGui_GetItemRectSize(ctx)
+                            reaper.ImGui_DrawList_AddRectFilled(draw_list, x, y, x + w, y + h, ((reaper.ImGui_GetStyleColor(ctx, reaper.ImGui_Col_Header()) >> 8) << 8)
+                                | (0x30 & 0xFF))
+                            if retcheck then
+                                if checked then
+                                    reaper.GetSetMediaTrackInfo_String(group.track, "P_EXT:" .. SYS.extname .. "MATRIX_" .. marker.guid, "true", true)
+
+                                    local random_file = SYS.TRACKS.GetRandomFileFromGroup(group)
+                                    if random_file then
+                                        reaper.PreventUIRefresh(1)
+
+                                        local edit_cursor_pos = reaper.GetCursorPosition()
+
+                                        local sel_tracks = {}
+                                        for t = 1, reaper.CountSelectedTracks(-1) do
+                                            table.insert(sel_tracks, reaper.GetSelectedTrack(-1, t - 1))
+                                        end
+                                        reaper.SetOnlyTrackSelected(group.track)
+
+                                        local sel_items = {}
+                                        local item_count = reaper.CountSelectedMediaItems(-1)
+                                        if item_count > 0 then
+                                            for it = 1, item_count do
+                                                table.insert(sel_items, reaper.GetSelectedMediaItem(-1, it - 1))
+                                            end
+                                            for it, item in ipairs(sel_items) do
+                                                reaper.SetMediaItemSelected(item, false)
+                                            end
+                                        end
+
+                                        reaper.InsertMedia(random_file.path, 0)
+                                        local new_item = reaper.GetSelectedMediaItem(-1, 0)
+
+                                        reaper.SetMediaItemPosition(new_item, marker.pos, false)
+
+                                        reaper.SetTrackSelected(group.track, false)
+                                        for t, track in ipairs(sel_tracks) do
+                                            reaper.SetTrackSelected(track, true)
+                                        end
+
+                                        reaper.SetMediaItemSelected(new_item, false)
                                         for it, item in ipairs(sel_items) do
-                                            reaper.SetMediaItemSelected(item, false)
+                                            reaper.SetMediaItemSelected(item, true)
                                         end
+
+                                        reaper.SetEditCurPos(edit_cursor_pos, false, false)
+
+                                        reaper.PreventUIRefresh(-1)
+                                        reaper.UpdateArrange()
+                                    else
+                                        reaper.GetSetMediaTrackInfo_String(group.track, "P_EXT:" .. SYS.extname .. "MATRIX_" .. marker.guid, "", true)
                                     end
+                                else
+                                    reaper.GetSetMediaTrackInfo_String(group.track, "P_EXT:" .. SYS.extname .. "MATRIX_" .. marker.guid, "", true)
 
-                                    reaper.InsertMedia(random_file.path, 0)
-                                    local new_item = reaper.GetSelectedMediaItem(-1, 0)
+                                    local track_item_count = reaper.CountTrackMediaItems(group.track)
+                                    if track_item_count > 0 then
+                                        reaper.PreventUIRefresh(1)
 
-                                    reaper.SetMediaItemPosition(new_item, marker.pos, false)
-
-                                    reaper.SetTrackSelected(group.track, false)
-                                    for t, track in ipairs(sel_tracks) do
-                                        reaper.SetTrackSelected(track, true)
-                                    end
-
-                                    reaper.SetMediaItemSelected(new_item, false)
-                                    for it, item in ipairs(sel_items) do
-                                        reaper.SetMediaItemSelected(item, true)
-                                    end
-
-                                    reaper.SetEditCurPos(edit_cursor_pos, false, false)
-
-                                    reaper.PreventUIRefresh(-1)
-                                    reaper.UpdateArrange()
-                                end
-                            else
-                                reaper.GetSetMediaTrackInfo_String(group.track, "P_EXT:" .. SYS.extname .. "MATRIX_" .. marker.guid, "", true)
-
-                                local track_item_count = reaper.CountTrackMediaItems(group.track)
-                                if track_item_count > 0 then
-                                    reaper.PreventUIRefresh(1)
-
-                                    for it = 1, track_item_count do
-                                        local item = reaper.GetTrackMediaItem(group.track, it - 1)
-                                        local pos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-                                        if pos == marker.pos then
-                                            reaper.DeleteTrackMediaItem(group.track, item)
-                                            break
+                                        for it = 1, track_item_count do
+                                            local item = reaper.GetTrackMediaItem(group.track, it - 1)
+                                            local pos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+                                            if pos == marker.pos then
+                                                reaper.DeleteTrackMediaItem(group.track, item)
+                                                break
+                                            end
                                         end
-                                    end
 
-                                    reaper.PreventUIRefresh(-1)
-                                    reaper.UpdateArrange()
+                                        reaper.PreventUIRefresh(-1)
+                                        reaper.UpdateArrange()
+                                    end
                                 end
                             end
                         end
                     end
                 end
-            end
 
-            reaper.ImGui_EndTable(ctx)
+                reaper.ImGui_EndTable(ctx)
+            end
+        else
+            reaper.ImGui_SetCursorPosX(ctx, tabs_x)
+            reaper.ImGui_SetCursorPosY(ctx, tabs_y)
+            reaper.ImGui_TextWrapped(ctx, "Please select a group folder track or create a group in Files tab.")
         end
 
         if tab_displayed == "Files" then
@@ -338,19 +390,80 @@ local function Display_Elements()
                     reaper.ImGui_Separator(ctx)
 
                     if group.files then
-                        for i, file in ipairs(group.files) do
-                            reaper.ImGui_Text(ctx, file.name)
-                            reaper.ImGui_SetItemTooltip(ctx, file.path)
+                        if reaper.ImGui_BeginListBox(ctx, "##listbox_files") then
+                            for i, file in ipairs(group.files) do
+                                reaper.ImGui_Selectable(ctx, file.name .. "##" .. file.path, index_popup == i)
+                                local hovered = reaper.ImGui_IsItemHovered(ctx)
+
+                                reaper.ImGui_SetItemTooltip(ctx, file.path)
+
+                                if hovered and reaper.ImGui_IsMouseClicked(ctx, reaper.ImGui_MouseButton_Right()) then
+                                    index_popup = i
+                                    popup_x, popup_y = reaper.ImGui_GetMousePos(ctx)
+                                    reaper.ImGui_OpenPopup(ctx, "popup_file_context")
+                                end
+                            end
+
+                            local popup_w = reaper.ImGui_CalcTextSize(ctx, "Remove file") + reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_WindowPadding()) * 2
+                            local popup_h = select(2, reaper.ImGui_CalcTextSize(ctx, "Remove file"))
+                                + select(2, reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_WindowPadding())) * 2
+                            reaper.ImGui_SetNextWindowSize(ctx, popup_w, popup_h)
+                            reaper.ImGui_SetNextWindowPos(ctx, popup_x, popup_y)
+                            if reaper.ImGui_BeginPopup(ctx, "popup_file_context") then
+                                if reaper.ImGui_Selectable(ctx, "Remove file") then
+                                    SYS.TRACKS.RemoveFileFromGroup(group, index_popup)
+                                    reaper.ImGui_CloseCurrentPopup(ctx)
+                                    index_popup = -1
+                                end
+
+                                reaper.ImGui_EndPopup(ctx)
+                            end
+                            if not reaper.ImGui_IsPopupOpen(ctx, "popup_file_context") then index_popup = -1 end
+
+                            reaper.ImGui_EndListBox(ctx)
                         end
                     end
                 else
-                    reaper.ImGui_TextWrapped(ctx, "No track group selected.")
+                    if SYS.TRACKS.GROUPS then
+                        reaper.ImGui_TextWrapped(ctx, "No track group selected.")
+                        if reaper.ImGui_Button(ctx, "Add new group track") then
+                            local insert_index = reaper.GetMediaTrackInfo_Value(SYS.TRACKS.GROUPS[#SYS.TRACKS.GROUPS].track, "IP_TRACKNUMBER") + 1
+
+                            reaper.PreventUIRefresh(1)
+
+                            reaper.InsertTrackAtIndex(insert_index, 0)
+                            reaper.SetMediaTrackInfo_Value(SYS.TRACKS.GROUPS[#SYS.TRACKS.GROUPS].track, "I_FOLDERDEPTH", 0)
+
+                            local insert_track = reaper.GetTrack(-1, insert_index - 1)
+                            reaper.SetMediaTrackInfo_Value(insert_track, "I_FOLDERDEPTH", reaper.GetTrackDepth(SYS.TRACKS.PARENT) - 1)
+                            reaper.GetSetMediaTrackInfo_String(insert_track, "P_EXT:" .. SYS.extname .. "PARENT_GUID", reaper.GetTrackGUID(SYS.TRACKS.PARENT), true)
+
+                            reaper.PreventUIRefresh(-1)
+                            reaper.UpdateArrange()
+                        end
+                    else
+                        local sel_track_count = reaper.CountSelectedTracks(-1)
+                        local first_selected = sel_track_count > 0 and reaper.GetSelectedTrack(-1, 0) or nil
+
+                        local text = sel_track_count > 0 and string.format("Selected track: %s.", select(2, reaper.GetTrackName(first_selected))) or "No track selected."
+                        reaper.ImGui_TextWrapped(ctx, text)
+
+                        if sel_track_count <= 0 then reaper.ImGui_BeginDisabled(ctx) end
+                        if reaper.ImGui_Button(ctx, "Make selected track into group parent track") then
+                            SYS.TRACKS.MakeGroupParentTrack(first_selected)
+                            --[[local parent_GUID = reaper.GetTrackGUID(first_selected)
+                            for t = 1, #sel_track_count do
+                                reaper.GetSetMediaTrackInfo_String(reaper.GetSelectedTrack(-1, t - 1), "P_EXT:"..SYS.extname.."PARENT_GUID", parent_GUID, true)
+                            end]]
+                        end
+                        if sel_track_count <= 0 then reaper.ImGui_EndDisabled(ctx) end
+                    end
                 end
 
                 reaper.ImGui_EndChild(ctx)
             end
 
-            if reaper.ImGui_BeginDragDropTarget(ctx) then
+            if reaper.ImGui_BeginDragDropTarget(ctx) and SYS.TRACKS.GROUPS then
                 local retval, data_count = reaper.ImGui_AcceptDragDropPayloadFiles(ctx)
                 if retval then
                     local max_data = data_count - 1
