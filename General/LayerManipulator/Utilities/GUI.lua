@@ -25,7 +25,7 @@ GUI.fonts = {}
 GUI.fonts.arial = {}
 GUI.fonts.arial.classic = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ARIAL.CLASSIC)
 GUI.fonts.arial.vertical = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ARIAL.VERTICAL)
-GUI.fonts.arial.italic = reaper.ImGui_CreateFont(GUI_STYLE.FONTS.ARIAL.CLASSIC, reaper.ImGui_FontFlags_Italic())
+GUI.fonts.arial.italic = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ARIAL.CLASSIC, 0, reaper.ImGui_FontFlags_Italic())
 GUI.fonts.icons = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ICONS)
 GUI.icon_size = {w = 22, h = 22}
 reaper.ImGui_Attach(ctx, GUI.fonts.arial.classic)
