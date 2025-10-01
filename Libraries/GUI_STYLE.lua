@@ -1,8 +1,10 @@
 --@author gaspard
---@version 1.0.2
+--@version 1.0.3
 --@provides
 --  [nomain] .
 --  Icons_Solid.ttf
+--  Arial.ttf
+--  Arial_Vertical.ttf
 
 -- TEMPLATE IN SCRIPT:
 --package.path = package.path .. ';' .. reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/Libraries' .. '/?.lua'
