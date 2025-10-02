@@ -243,7 +243,7 @@ local function Display_Elements()
                         local draw_list = reaper.ImGui_GetForegroundDrawList(ctx)
                         local mouse_left_button = reaper.ImGui_IsMouseDown(ctx, reaper.ImGui_MouseButton_Left())
                         local mouse_left_drag = reaper.ImGui_IsMouseDragging(ctx, reaper.ImGui_MouseButton_Left())
-                        if not mouse_left_drag then checked_state = nil end
+                        if not mouse_left_drag and not mouse_left_button then checked_state = nil end
                         for j, marker in ipairs(SYS.MARKERS.LIST) do
                             reaper.ImGui_TableSetColumnIndex(ctx, j)
 
@@ -267,12 +267,12 @@ local function Display_Elements()
                                     checked_state = checked
                                 elseif mouse_left_drag then
                                     if checked_state == nil then
+                                        checked = checked_state ~= nil and checked_state or not prev_checked
+                                        retcheck = true
                                     else
-                                        reaper.ShowConsoleMsg("\nBefore: " .. marker.pos)
-                                        if checked_state ~= prev_checked then
+                                        if checked_state ~= nil and checked_state ~= prev_checked then
                                             checked = checked_state
                                             retcheck = true
-                                            reaper.ShowConsoleMsg("\nAfter: " .. marker.pos)
                                         end
                                     end
                                 end
