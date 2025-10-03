@@ -251,9 +251,6 @@ local function Display_Elements()
                             x = x + reaper.ImGui_GetCursorPosX(ctx) - reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding())
                             y = y + reaper.ImGui_GetCursorPosY(ctx) - select(2, reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding()))
 
-                            --reaper.ImGui_PushItemFlag(ctx, reaper.ImGui_ItemFlags_NoNav(), false)
-                            --local retcheck, checked = reaper.ImGui_Selectable(ctx, "##selectable_martrix_" .. marker.guid .. group.guid, prev_checked)
-                            --reaper.ImGui_PopItemFlag(ctx)
                             local prev_checked = reaper.GetSetMediaTrackInfo_String(group.track, "P_EXT:" .. SYS.extname .. "MATRIX_" .. marker.guid, "", false)
                             local retcheck = false
                             local checked = false
@@ -277,14 +274,6 @@ local function Display_Elements()
                                     end
                                 end
                             end
-
-                            --[[if mouse_left_button and not retcheck then
-                                if reaper.ImGui_IsItemHovered(ctx, reaper.ImGui_HoveredFlags_AllowWhenBlockedByActiveItem()) then
-                                    --reaper.ImGui_SetKeyboardFocusHere(ctx)
-                                end
-                            end]]
-
-                            --retcheck, checked = false, false
 
                             local w, h = reaper.ImGui_GetItemRectSize(ctx)
                             reaper.ImGui_DrawList_AddRectFilled(draw_list, x, y, x + w, y + h, ((reaper.ImGui_GetStyleColor(ctx, reaper.ImGui_Col_Header()) >> 8) << 8)
