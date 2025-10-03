@@ -1,0 +1,6 @@
+--@noindex
+--@description Create subproject with selected tracks
+--@author gaspard
+--@version 0.0.1b
+--@changelog Init
+--@about Create subproject with selected tracks
