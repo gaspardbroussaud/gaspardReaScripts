@@ -1,10 +1,10 @@
 --@description Pattern Manipulator
 --@author gaspard
---@version 0.1.12b
+--@version 0.1.13b
 --@provides
 --    [nomain] Utilities/*.lua
 --@changelog
---  - Fix GUI libraries load variable
+--  - Fix GUI font italic crash
 --@about
 --  # Pattern manipulator
 --  Set racks of samples to manipulate using midi patterns.
