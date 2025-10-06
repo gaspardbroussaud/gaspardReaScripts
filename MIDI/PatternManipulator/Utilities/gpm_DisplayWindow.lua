@@ -29,8 +29,8 @@ small_font_size = font_size * 0.75
 
 -- ImGui Init
 ctx = reaper.ImGui_CreateContext('random_play_context')
-arial_font = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ARIAL)
-italic_arial_font = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ARIAL, reaper.ImGui_FontFlags_Italic())
+arial_font = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ARIAL.CLASSIC)
+italic_arial_font = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ARIAL.CLASSIC, reaper.ImGui_FontFlags_Italic())
 icon_font = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ICONS)
 reaper.ImGui_Attach(ctx, arial_font)
 reaper.ImGui_Attach(ctx, italic_arial_font)
