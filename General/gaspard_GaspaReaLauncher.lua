@@ -1,8 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 1.0.5
+--@version 1.0.6
 --@changelog
---  - Fix crash
+--  - Fix create new project prompt to open one
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -410,7 +410,7 @@ local function TopBarDisplay()
 
         reaper.ImGui_Selectable(ctx, text.." in current tab", false)
         if reaper.ImGui_IsItemActivated(ctx) then
-            if create_open == "open" then
+            if open_create == "create" then
                 NewProjectOpen("current_tab")
             else
                 OpenProjectSelect("current_tab")
@@ -419,7 +419,7 @@ local function TopBarDisplay()
 
         reaper.ImGui_Selectable(ctx, text.." in new tab", false)
         if reaper.ImGui_IsItemActivated(ctx) then
-            if create_open == "create" then
+            if open_create == "create" then
                 NewProjectOpen("new_tab")
             else
                 OpenProjectSelect("new_tab")
