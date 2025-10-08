@@ -1,8 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 1.0.6
+--@version 1.0.7
 --@changelog
---  - Fix create new project prompt to open one
+--  - Add REAPER shortcut key handling to close app
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -85,6 +85,9 @@ if settings_version ~= Settings.version then
     Settings = gson.SaveJSON(settings_path, default_settings)
     Settings = gson.LoadJSON(settings_path, Settings)
 end
+
+local KEYS = dofile(reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/KEYBOARD.lua")
+local shortcut = KEYS.GetTableOfPressedKeys()
 
 --#endregion
 
@@ -749,9 +752,7 @@ local function Gui_Loop()
         if show_settings then ElementsSettings() end
 
         if Settings.close_on_escape.value then
-            if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Escape()) then --or reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_F1()) then
-                open = false
-            end
+            if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Escape()) or KEYS.CheckShortcutPressed(shortcut) then open = false end
         end
 
         reaper.ImGui_End(ctx)

@@ -189,7 +189,8 @@ function gpmgui.Loop()
     reaper.ImGui_PopFont(ctx)
 
     -- Quit app window on Escape key pressed
-    if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Escape()) then open = false end
+    if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Escape()) or KEYS.CheckShortcutPressed(shortcut) then open = false end
+
     -- Delete selected track(s)
     if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Delete()) then reaper.Main_OnCommand(40005, 0) end
 

@@ -1,5 +1,5 @@
 --@author gaspard
---@version 1.0.1
+--@version 1.0.2
 --@provides [nomain] .
 
 -- TEMPLATE IN SCRIPT:
@@ -12,7 +12,7 @@
 
 local keys = {}
 
-local _ISMAC = (reaper.GetOS():match("OSX") ~= nil)
+keys.IS_MAC = (reaper.GetOS():match("OSX") ~= nil)
 
 local _KEYS = {}
 local _KEYS_CUTOFF = -2
@@ -180,8 +180,8 @@ keys.CODE_NAMES = {
   [keys.CODES.CLEAR]       = 'Clear',
   [keys.CODES.ENTER]       = 'Enter',
   [keys.CODES.SHIFT]       = 'Shift',
-  [keys.CODES.CONTROL]     = _ISMAC and 'Command' or 'Control',
-  [keys.CODES.ALT]         = _ISMAC and 'Option' or 'Alt',
+  [keys.CODES.CONTROL]     = keys.IS_MAC and 'Command' or 'Control',
+  [keys.CODES.ALT]         = keys.IS_MAC and 'Option' or 'Alt',
   [keys.CODES.PAUSE]       = 'Pause',
   [keys.CODES.CAPITAL]     = 'Caps Lock',
   [keys.CODES.ESCAPE]      = 'Escape',
@@ -237,7 +237,7 @@ keys.CODE_NAMES = {
   [keys.CODES.X]           = 'X',
   [keys.CODES.Y]           = 'Y',
   [keys.CODES.Z]           = 'Z',
-  [keys.CODES.STARTKEY]    = _ISMAC and 'Control' or 'Start Menu',
+  [keys.CODES.STARTKEY]    = keys.IS_MAC and 'Control' or 'Start Menu',
   [keys.CODES.CONTEXTKEY]  = 'Context Menu',
   [keys.CODES.NUMPAD0]     = 'Numpad 0',
   [keys.CODES.NUMPAD1]     = 'Numpad 1',
@@ -333,6 +333,36 @@ keys.IsPressed = function(key, cutoff)
     else
         if _KEYS[key] then
             _KEYS[key] = nil
+        end
+    end
+    return false
+end
+
+keys.GetTableOfPressedKeys = function()
+    local shortcut = nil
+
+    for key, _ in pairs(keys.CODES) do
+        if keys.IsPressed(keys.CODES[key]) then
+            if not shortcut then shortcut = {} end
+
+            shortcut[#shortcut + 1] = key
+        end
+    end
+
+    return shortcut
+end
+
+keys.CheckShortcutPressed = function(shortcut)
+    if shortcut then
+        local cur_pressed = keys.GetTableOfPressedKeys()
+        if cur_pressed then
+            if #shortcut ~= #cur_pressed then return false end
+            for i = 1, #shortcut do
+                if shortcut[i] ~= cur_pressed[i] then
+                    return false
+                end
+            end
+            return true
         end
     end
     return false

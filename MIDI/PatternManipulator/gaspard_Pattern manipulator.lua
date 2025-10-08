@@ -1,10 +1,10 @@
 --@description Pattern Manipulator
 --@author gaspard
---@version 0.1.13b
+--@version 0.1.14b
 --@provides
 --    [nomain] Utilities/*.lua
 --@changelog
---  - Fix GUI font italic crash
+--  - Add REAPER shortcut key handling to close app
 --@about
 --  # Pattern manipulator
 --  Set racks of samples to manipulate using midi patterns.
@@ -115,6 +115,10 @@ package.path = package.path .. ';' .. json_file_path .. '/?.lua'
 gson = require('json_utilities_lib')
 
 settings_path = script_path..'Utilities/gaspard_'..action_name..'_settings.json'
+
+KEYS = dofile(reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/KEYBOARD.lua")
+
+shortcut = KEYS.GetTableOfPressedKeys()
 
 gpmsys.Init()
 
