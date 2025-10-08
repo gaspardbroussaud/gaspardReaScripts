@@ -38,7 +38,10 @@ gson = require('json_utilities_lib')
 
 settings_path = script_path .. 'Utilities/gaspard_' .. action_name .. '_settings.json'
 
+KEYS = dofile(reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/KEYBOARD.lua")
+
 SYS.Init()
+SYS.shortcut = KEYS.GetTableOfPressedKeys()
 
 reaper.defer(GUI.Loop)
 reaper.atexit(SetButtonState)

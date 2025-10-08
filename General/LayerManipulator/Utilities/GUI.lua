@@ -520,6 +520,8 @@ GUI.Loop = function()
 
         --Draw_ResizeHandle(reaper.ImGui_GetForegroundDrawList(ctx))
 
+        if KEYS.CheckShortcutPressed(shortcut) then open = false end
+
         reaper.ImGui_End(ctx)
     end
 
