@@ -1,4 +1,3 @@
---@noindex
 --@description Layer manipulator
 --@author gaspard
 --@version 0.0.1b

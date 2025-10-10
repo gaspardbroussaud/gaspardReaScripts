@@ -1,4 +1,3 @@
---@noindex
 --@description Insert marker at edit cursor with layer manipulator tags
 --@author gaspard
 --@version 0.0.1b
@@ -7,7 +6,7 @@
 
 local selected_count = reaper.CountSelectedTracks(-1)
 if selected_count > 0 then
-    local edit_cursor_pos = reaper.GetCursorPosition()
+    local edit_cursor_pos = reaper.GetPlayStateEx(-1) == 2 and reaper.GetCursorPosition() or reaper.GetPlayPosition()
 
     local parent_track = nil
     local parent_guid = nil
