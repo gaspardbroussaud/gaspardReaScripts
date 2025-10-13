@@ -128,7 +128,7 @@ end
 
 
 local function Display_Elements()
-    SYS.TRACKS.GROUPS = reaper.CountSelectedTracks(-1) > 0 and SYS.TRACKS.GetTrackGroups(reaper.GetSelectedTrack(-1, 0)) or nil
+    SYS.TRACKS.GROUPS = reaper.CountSelectedTracks(0) > 0 and SYS.TRACKS.GetTrackGroups(reaper.GetSelectedTrack(0, 0)) or nil
     SYS.TRACKS.PARENT = SYS.TRACKS.GROUPS and SYS.TRACKS.PARENT or nil
     SYS.MARKERS.GetGroupMarkers()
 
@@ -289,16 +289,16 @@ local function Display_Elements()
                                         local edit_cursor_pos = reaper.GetCursorPosition()
 
                                         local sel_tracks = {}
-                                        for t = 1, reaper.CountSelectedTracks(-1) do
-                                            table.insert(sel_tracks, reaper.GetSelectedTrack(-1, t - 1))
+                                        for t = 1, reaper.CountSelectedTracks(0) do
+                                            table.insert(sel_tracks, reaper.GetSelectedTrack(0, t - 1))
                                         end
                                         reaper.SetOnlyTrackSelected(group.track)
 
                                         local sel_items = {}
-                                        local item_count = reaper.CountSelectedMediaItems(-1)
+                                        local item_count = reaper.CountSelectedMediaItems(0)
                                         if item_count > 0 then
                                             for it = 1, item_count do
-                                                table.insert(sel_items, reaper.GetSelectedMediaItem(-1, it - 1))
+                                                table.insert(sel_items, reaper.GetSelectedMediaItem(0, it - 1))
                                             end
                                             for it, item in ipairs(sel_items) do
                                                 reaper.SetMediaItemSelected(item, false)
@@ -306,7 +306,7 @@ local function Display_Elements()
                                         end
 
                                         reaper.InsertMedia(random_file.path, 0)
-                                        local new_item = reaper.GetSelectedMediaItem(-1, 0)
+                                        local new_item = reaper.GetSelectedMediaItem(0, 0)
 
                                         reaper.SetMediaItemPosition(new_item, marker.pos, false)
 
@@ -423,7 +423,7 @@ local function Display_Elements()
                             reaper.InsertTrackAtIndex(insert_index, 0)
                             reaper.SetMediaTrackInfo_Value(SYS.TRACKS.GROUPS[#SYS.TRACKS.GROUPS].track, "I_FOLDERDEPTH", 0)
 
-                            local insert_track = reaper.GetTrack(-1, insert_index - 1)
+                            local insert_track = reaper.GetTrack(0, insert_index - 1)
                             reaper.SetMediaTrackInfo_Value(insert_track, "I_FOLDERDEPTH", reaper.GetTrackDepth(SYS.TRACKS.PARENT) - 1)
                             reaper.GetSetMediaTrackInfo_String(insert_track, "P_EXT:" .. SYS.extname .. "PARENT_GUID", reaper.GetTrackGUID(SYS.TRACKS.PARENT), true)
 
@@ -431,8 +431,8 @@ local function Display_Elements()
                             reaper.UpdateArrange()
                         end
                     else
-                        local sel_track_count = reaper.CountSelectedTracks(-1)
-                        local first_selected = sel_track_count > 0 and reaper.GetSelectedTrack(-1, 0) or nil
+                        local sel_track_count = reaper.CountSelectedTracks(0)
+                        local first_selected = sel_track_count > 0 and reaper.GetSelectedTrack(0, 0) or nil
 
                         local text = sel_track_count > 0 and string.format("Selected track: %s.", select(2, reaper.GetTrackName(first_selected))) or "No track selected."
                         reaper.ImGui_TextWrapped(ctx, text)
@@ -442,7 +442,7 @@ local function Display_Elements()
                             SYS.TRACKS.MakeGroupParentTrack(first_selected)
                             --[[local parent_GUID = reaper.GetTrackGUID(first_selected)
                             for t = 1, #sel_track_count do
-                                reaper.GetSetMediaTrackInfo_String(reaper.GetSelectedTrack(-1, t - 1), "P_EXT:"..SYS.extname.."PARENT_GUID", parent_GUID, true)
+                                reaper.GetSetMediaTrackInfo_String(reaper.GetSelectedTrack(0, t - 1), "P_EXT:"..SYS.extname.."PARENT_GUID", parent_GUID, true)
                             end]]
                         end
                         if sel_track_count <= 0 then reaper.ImGui_EndDisabled(ctx) end
@@ -521,6 +521,13 @@ GUI.Loop = function()
         --Draw_ResizeHandle(reaper.ImGui_GetForegroundDrawList(ctx))
 
         if KEYS.CheckShortcutPressed(shortcut) then open = false end
+
+        local selected_track = reaper.GetSelectedTrack(0, 0)
+        if KEYS.IsPressed(KEYS.CODES.NUMPAD2) and selected_track then
+            SYS.MARKERS.AddMarkerToTrack(selected_track)
+        end
+
+        if KEYS.IsPressed(KEYS.CODES.SPACE) then reaper.Main_OnCommand(40044, 0) end
 
         reaper.ImGui_End(ctx)
     end

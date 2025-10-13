@@ -4,7 +4,7 @@
 
 local TRACKS = {}
 
-TRACKS.COUNT = -1--reaper.CountSelectedTracks(-1)
+TRACKS.COUNT = -1--reaper.CountSelectedTracks(0)
 TRACKS.GROUPS = {}
 TRACKS.PARENT = nil
 
@@ -66,7 +66,11 @@ TRACKS.GetTrackGroups = function(selected_track)
             local retfiles, files_text = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:" .. SYS.extname .. "FILES", "", false)
             if retfiles then file_list = SplitFilesPath(files_text) end
 
-            groups[i] = {track = track, guid = GUID, name = name, parent = parent, selected = selected, files = #file_list > 0 and file_list or nil}
+            local marker_list = {}
+            local retmarker, markers_text = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:" .. SYS.extname .. "MARKERS", "", false)
+            if retmarker then marker_list = SYS.MARKERS.SplitMarkerPos(markers_text) end
+
+            groups[i] = {track = track, guid = GUID, name = name, parent = parent, selected = selected, files = file_list, markers = marker_list}
         end
     end
 
@@ -103,8 +107,8 @@ TRACKS.MakeGroupParentTrack = function(parent_track)
 
     reaper.GetSetMediaTrackInfo_String(parent_track, "P_EXT:" .. SYS.extname .. "PARENT_GUID", parent_GUID, true)
 
-    for i = parent_index, reaper.CountTracks(-1) - 1 do
-        local track = reaper.GetTrack(-1, i)
+    for i = parent_index, reaper.CountTracks(0) - 1 do
+        local track = reaper.GetTrack(0, i)
         if reaper.GetTrackDepth(track) <= parent_depth then break end
 
         reaper.GetSetMediaTrackInfo_String(track, "P_EXT:" .. SYS.extname .. "PARENT_GUID", parent_GUID, true)
