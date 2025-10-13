@@ -29,7 +29,6 @@ MARKERS.ConcatMarkerPos = function(list)
     return table.concat(str_list, "/")
 end
 
-
 MARKERS.GetGroupMarkers = function()
     if not SYS.TRACKS.PARENT then
         MARKERS.LIST = {}
@@ -91,6 +90,23 @@ end
 MARKERS.ShowMarkers = function(group)
     for i, marker in ipairs(group.markers) do
         reaper.ShowConsoleMsg(marker.pos)
+    end
+end
+
+MARKERS.DeleteMarkers = function()
+    local retmarker, markers_text = reaper.GetSetMediaTrackInfo_String(SYS.TRACKS.PARENT, "P_EXT:" .. SYS.extname .. "MARKERS", "", false)
+    if not retmarker then return end
+
+    local list = MAKRERS.SplitMarkerPos(markers_text)
+    for i = 1, reaper.CountProjectMarkers(0) do
+        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = reaper.EnumProjectMarkers(i - 1)
+        if retval and not isrgn then
+            for j, list_pos in ipairs(list) do
+                if list_pos == pos then
+                    reaper.DeleteProjectMarker(0, markrgnindexnumber, false)
+                end
+            end
+        end
     end
 end
 
