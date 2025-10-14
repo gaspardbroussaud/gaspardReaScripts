@@ -25,7 +25,7 @@ local version_less = function(v1,v2)
     for i=1,math.max(#a,#b) do local n1,n2=a[i] or 0,b[i] or 0 if n1~=n2 then return n1<n2 end end
     return false
 end
-if version_less(gson.version, "1.0.4") then
+if not gson.version or version_less(gson.version, "1.0.4") then
     reaper.MB('Please update gaspard "json_utilities_lib" to version 1.0.4 or higher.', "ERROR", 0)
     return
 end
@@ -67,12 +67,12 @@ end
 -- UTILITY FUNCTIONS
 -- MESSAGE BOX ON ERROR
 ---@param message string
-function MessageBox(message)
+local function MessageBox(message)
     reaper.MB(tostring(message), "Message box", 0)
 end
 
 -- SORT VALUES FUNCTION
-function SortOnValue(t,...)
+local function SortOnValue(t,...)
     local a = {...}
     table.sort(t, function (u,v)
         for i in pairs(a) do
@@ -87,7 +87,7 @@ end
 ---@param track any
 ---@param target any
 ---@return boolean is_in_target
-function GetParentTrackMatch(track, target)
+local function GetParentTrackMatch(track, target)
     while true do
         local parent = reaper.GetParentTrack(track)
         if parent then
@@ -106,7 +106,7 @@ end
 ---@param track any
 ---@return string name
 -- GET TOP PARENT TRACK
-function GetConcatenatedParentNames(track)
+local function GetConcatenatedParentNames(track)
     local _, name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
     if Settings.exclude_character.value and Settings.exclude_character.value ~= "" then
         name = name:match("^(.-)" .. Settings.exclude_character.value:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])","%%%1")) or name
@@ -130,7 +130,7 @@ function GetConcatenatedParentNames(track)
 end
 
 -- GET REGION NAME WITH TWO METHODS
-function GetRegionNaming(track)
+local function GetRegionNaming(track)
     local track_name = ""
     if Settings.region_naming_parent_cascade.value then
         track_name = GetConcatenatedParentNames(track)
@@ -148,7 +148,7 @@ end
 
 -- SYSTEM FUNCTIONS
 -- GET SELECTED TRACKS TAB
-function GetSelectedTracksTab()
+local function GetSelectedTracksTab()
     local track_count = reaper.CountSelectedTracks(0)
     render_tracks = {}
     render_tracks_name = {}
@@ -166,47 +166,8 @@ function GetSelectedTracksTab()
     end
 end
 
--- GET ALL ITEMS FROM PROJECT AND ASIGN TO PARENT TABLE
-function GetItemsFromProject()
-    local item_count = reaper.CountSelectedMediaItems(0)
-    if item_count ~= 0 then
-        -- Get all selected tracks
-        GetSelectedTracksTab()
-
-        for i = 0, item_count - 1 do
-            local cur_item = reaper.GetSelectedMediaItem(0, i)
-            local cur_start = reaper.GetMediaItemInfo_Value(cur_item, "D_POSITION")
-            local cur_track = reaper.GetMediaItemTrack(cur_item)
-
-            for j = 1, #render_tracks do
-                if cur_track == render_tracks[j] or GetParentTrackMatch(cur_track, render_tracks[j]) then
-                    table.insert(render_folders[j], { item = cur_item, start = cur_start })
-                end
-            end
-        end
-
-        -- Sort items in parent tables
-        SortItemsInTimelineOrder()
-    else
-        MessageBox("Please select at least one item along with its corresponding track and/or parent track.")
-    end
-end
-
--- SORT ITEMS BY FOLDERS IN TIMELINE ORDER
-function SortItemsInTimelineOrder()
-    for i = 1, #render_folders do
-        SortOnValue(render_folders[i], "start")
-    end
-
-    for i = 1, #render_folders do
-        if #render_folders[i] ~= 0 then
-            FindClusters(render_folders[i], render_tracks_name[i], render_tracks[i])
-        end
-    end
-end
-
 -- FIND CLUSTER BY FOLDERS
-function FindClusters(folder, region_name, render_track)
+local function FindClusters(folder, region_name, render_track)
     local first_start = folder[1].start
     local prev_end = first_start + reaper.GetMediaItemInfo_Value(folder[1].item, "D_LENGTH")
     local last_end = prev_end
@@ -251,6 +212,45 @@ function FindClusters(folder, region_name, render_track)
         if prev_end < cur_end then
             prev_end = cur_end
         end
+    end
+end
+
+-- SORT ITEMS BY FOLDERS IN TIMELINE ORDER
+local function SortItemsInTimelineOrder()
+    for i = 1, #render_folders do
+        SortOnValue(render_folders[i], "start")
+    end
+
+    for i = 1, #render_folders do
+        if #render_folders[i] ~= 0 then
+            FindClusters(render_folders[i], render_tracks_name[i], render_tracks[i])
+        end
+    end
+end
+
+-- GET ALL ITEMS FROM PROJECT AND ASIGN TO PARENT TABLE
+local function GetItemsFromProject()
+    local item_count = reaper.CountSelectedMediaItems(0)
+    if item_count ~= 0 then
+        -- Get all selected tracks
+        GetSelectedTracksTab()
+
+        for i = 0, item_count - 1 do
+            local cur_item = reaper.GetSelectedMediaItem(0, i)
+            local cur_start = reaper.GetMediaItemInfo_Value(cur_item, "D_POSITION")
+            local cur_track = reaper.GetMediaItemTrack(cur_item)
+
+            for j = 1, #render_tracks do
+                if cur_track == render_tracks[j] or GetParentTrackMatch(cur_track, render_tracks[j]) then
+                    table.insert(render_folders[j], { item = cur_item, start = cur_start })
+                end
+            end
+        end
+
+        -- Sort items in parent tables
+        SortItemsInTimelineOrder()
+    else
+        MessageBox("Please select at least one item along with its corresponding track and/or parent track.")
     end
 end
 

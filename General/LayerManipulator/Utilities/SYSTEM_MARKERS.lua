@@ -72,7 +72,8 @@ MARKERS.AddMarkerToTrack = function(track)
     local retmarker, markers_text = reaper.GetSetMediaTrackInfo_String(SYS.TRACKS.PARENT, "P_EXT:" .. SYS.extname .. "MARKERS", "", false)
     if retmarker then
         local list = MARKERS.SplitMarkerPos(markers_text)
-        table.insert(list, edit_cursor_pos)
+        local pos = tonumber(tostring(edit_cursor_pos))
+        table.insert(list, pos)
         table.sort(list, function(a, b) return a < b end)
         local text = MARKERS.ConcatMarkerPos(list)
 
@@ -95,11 +96,15 @@ MARKERS.DeleteMarkers = function(track)
     if not retmarker then return end
 
     local marker_list = MARKERS.SplitMarkerPos(markers_text)
-    for i, guid in ipairs(marker_list) do
-        local retval, index = reaper.GetSetProjectInfo_String(0, "MARKER_INDEX_FROM_GUID:"..tostring(guid), "", false)
-        if retval then
-            reaper.ShowConsoleMsg("msg")
-            reaper.DeleteProjectMarker(0, index, false)
+
+    for i = 1, reaper.CountProjectMarkers(0) do
+        local retval, isrgn, pos, _, _, markrgnindexnumber = reaper.EnumProjectMarkers2(0, i - 1)
+        if retval and not isrgn then
+            for j, marker_pos in ipairs(marker_list) do
+                if marker_pos == pos then
+                    reaper.DeleteProjectMarker(0, markrgnindexnumber, false)
+                end
+            end
         end
     end
 end
