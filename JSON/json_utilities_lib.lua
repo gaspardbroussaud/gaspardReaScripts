@@ -1,10 +1,12 @@
 --@description Json functions for gaspard's scripts
 --@author gaspard
---@version 1.0.4
+--@version 1.0.5
 --@provides [nomain] .
 --@about Json functions for gaspard's scripts
 
 local gson = {}
+
+gson.version = "1.0.5"
 
 -- Get JSON utilities from file
 package.path = package.path..';'..debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]] .. "?.lua" -- GET DIRECTORY FOR REQUIRE
