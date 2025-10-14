@@ -81,10 +81,7 @@ MARKERS.AddMarkerToTrack = function(track)
         reaper.GetSetMediaTrackInfo_String(SYS.TRACKS.PARENT, "P_EXT:" .. SYS.extname .. "MARKERS", tostring(edit_cursor_pos), true)
     end
 
-    return marker_GUID -- Return last marker GUID (aka newly created)
-
-    --[[local _, index = reaper.GetSetProjectInfo_String(0, "MARKER_INDEX_FROM_GUID:"..tostring(GUID), "", false)
-    reaper.SetProjectMarker(index, false, pos, rgnend, name)]]
+    --return marker_GUID -- Return last marker GUID (aka newly created)
 end
 
 MARKERS.ShowMarkers = function(group)
@@ -99,9 +96,9 @@ MARKERS.DeleteMarkers = function(track)
 
     local marker_list = MARKERS.SplitMarkerPos(markers_text)
     for i, guid in ipairs(marker_list) do
-        local retval, index = false, 0
-        reaper.GetSetProjectInfo_String(0, "MARKER_INDEX_FROM_GUID:"..tostring(guid), "", true)
+        local retval, index = reaper.GetSetProjectInfo_String(0, "MARKER_INDEX_FROM_GUID:"..tostring(guid), "", false)
         if retval then
+            reaper.ShowConsoleMsg("msg")
             reaper.DeleteProjectMarker(0, index, false)
         end
     end

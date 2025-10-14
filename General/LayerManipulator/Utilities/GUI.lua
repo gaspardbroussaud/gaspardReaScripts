@@ -540,6 +540,8 @@ GUI.Loop = function()
 
     if open then
         reaper.defer(GUI.Loop)
+    else
+        SYS.MARKERS.DeleteMarkers(SYS.TRACKS.PARENT)
     end
 end
 
