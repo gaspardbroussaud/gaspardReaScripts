@@ -1,8 +1,8 @@
 -- @description Region generation and render matrix Tool
 -- @author gaspard
--- @version 1.0.10
+-- @version 1.0.11
 -- @changelog
---  - No blank name used in cascade
+--  - Added excluding character from name
 -- @about
 --  - Retrives clusters of selected items depending on selected tracks.
 --  - How to use:
@@ -18,24 +18,50 @@ local render_folders = {}
 local json_file_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/JSON"
 package.path = package.path .. ";" .. json_file_path .. "/?.lua"
 local gson = require("json_utilities_lib")
+local version_less = function(v1,v2)
+    local a,b={},{}
+    for n in v1:gmatch("%d+") do table.insert(a,tonumber(n)) end
+    for n in v2:gmatch("%d+") do table.insert(b,tonumber(n)) end
+    for i=1,math.max(#a,#b) do local n1,n2=a[i] or 0,b[i] or 0 if n1~=n2 then return n1<n2 end end
+    return false
+end
+if version_less(gson.version, "1.0.4") then
+    reaper.MB('Please update gaspard "json_utilities_lib" to version 1.0.4 or higher.', "ERROR", 0)
+    return
+end
+
 local _, name, sec, cmd, _, _, _ = reaper.get_action_context()
 local action_name = string.match(name, "gaspard_(.-)%.lua")
 
 local settings_path = debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]]..'/gaspard_'..action_name..'_settings.json'
-local Settings = {
-    order = {"color_regions_with_track_color", "region_naming_parent_casacde"},
+local settings_version = "1.0.1"
+local default_settings = {
+    version = settings_version,
+    order = {"color_regions_with_track_color", "region_naming_parent_cascade", "exclude_character"},
     color_regions_with_track_color = {
         value = true,
         name = "Track color for region",
         description = " Color generated regions with corresponding region render track color."
     },
-    region_naming_parent_casacde = {
+    region_naming_parent_cascade = {
         value = false,
-            name = "Region name from folder cascade",
-            description = "Use cascading track folders to name regions."
+        name = "Region name from folder cascade",
+        description = "Use cascading track folders to name regions."
+    },
+    exclude_character = {
+        value = "--",
+        name = "Exclude characters",
+        description = "Name or part of name with this string on its left will be excluded from final naming."
     }
 }
-Settings = gson.LoadJSON(settings_path, Settings)
+
+Settings = gson.LoadJSON(settings_path, default_settings)
+if not Settings.version or settings_version ~= Settings.version then
+    local keys = {"region_naming_parent_cascade", "exclude_character"}
+    local updated_settings = gson.UpdateSettings(Settings, default_settings, keys)
+    Settings = gson.SaveJSON(settings_path, updated_settings)
+    Settings = gson.LoadJSON(settings_path, Settings)
+end
 -----------------------------------
 
 -- UTILITY FUNCTIONS
@@ -82,11 +108,18 @@ end
 -- GET TOP PARENT TRACK
 function GetConcatenatedParentNames(track)
     local _, name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+    if Settings.exclude_character.value and Settings.exclude_character.value ~= "" then
+        name = name:match("^(.-)" .. Settings.exclude_character.value:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])","%%%1")) or name
+    end
     while true do
         local parent = reaper.GetParentTrack(track)
         if parent then
             track = parent
             local _, parent_name = reaper.GetSetMediaTrackInfo_String(parent, "P_NAME", "", false)
+            if Settings.exclude_character.value and Settings.exclude_character.value ~= "" then
+                parent_name = parent_name:match("^(.-)" .. Settings.exclude_character.value:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])","%%%1")) or parent_name
+            end
+
             if parent_name ~= "" then
                 name = parent_name.."_"..name
             end
@@ -99,10 +132,13 @@ end
 -- GET REGION NAME WITH TWO METHODS
 function GetRegionNaming(track)
     local track_name = ""
-    if Settings.region_naming_parent_casacde.value then
+    if Settings.region_naming_parent_cascade.value then
         track_name = GetConcatenatedParentNames(track)
     else
         _, track_name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+        if Settings.exclude_character.value and Settings.exclude_character.value ~= "" then
+            track_name = track_name:match("^(.-)" .. Settings.exclude_character.value:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])","%%%1")) or track_name
+        end
         if track_name == "" then
             track_name = "Track "..tostring(reaper.GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")):sub(1, -3)
         end
