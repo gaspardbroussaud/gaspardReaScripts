@@ -93,19 +93,16 @@ MARKERS.ShowMarkers = function(group)
     end
 end
 
-MARKERS.DeleteMarkers = function()
-    local retmarker, markers_text = reaper.GetSetMediaTrackInfo_String(SYS.TRACKS.PARENT, "P_EXT:" .. SYS.extname .. "MARKERS", "", false)
+MARKERS.DeleteMarkers = function(track)
+    local retmarker, markers_text = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:" .. SYS.extname .. "MARKERS", "", false)
     if not retmarker then return end
 
-    local list = MAKRERS.SplitMarkerPos(markers_text)
-    for i = 1, reaper.CountProjectMarkers(0) do
-        local retval, isrgn, pos, rgnend, name, markrgnindexnumber = reaper.EnumProjectMarkers(i - 1)
-        if retval and not isrgn then
-            for j, list_pos in ipairs(list) do
-                if list_pos == pos then
-                    reaper.DeleteProjectMarker(0, markrgnindexnumber, false)
-                end
-            end
+    local marker_list = MARKERS.SplitMarkerPos(markers_text)
+    for i, guid in ipairs(marker_list) do
+        local retval, index = false, 0
+        reaper.GetSetProjectInfo_String(0, "MARKER_INDEX_FROM_GUID:"..tostring(guid), "", true)
+        if retval then
+            reaper.DeleteProjectMarker(0, index, false)
         end
     end
 end
