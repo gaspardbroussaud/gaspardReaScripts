@@ -1,3 +1,4 @@
+-- @noindex
 -- @description Insert new track with one less folder depth if available
 -- @author gaspard
 -- @version 1.0
