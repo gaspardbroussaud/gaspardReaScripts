@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="51a95ed4e1b566c39d880f3aea3213d6ef066223">
+<index version="1" name="Gaspard ReaScripts" commit="d3041507a62eaca17756c87c6a28e0669e10359b">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -289,6 +289,10 @@
       <version name="1.0.7" author="gaspard" time="2025-10-08T15:55:24Z">
         <changelog><![CDATA[- Add REAPER shortcut key handling to close app]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/a579ab1a117351b294198995a2e03b2f6933d7ed/General/gaspard_GaspaReaLauncher.lua</source>
+      </version>
+      <version name="1.0.8" author="gaspard" time="2025-10-15T10:58:16Z">
+        <changelog><![CDATA[- Fix json utility loading]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d3041507a62eaca17756c87c6a28e0669e10359b/General/gaspard_GaspaReaLauncher.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Master settings.lua" type="script" desc="Master settings">
@@ -1121,7 +1125,7 @@
         <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/3af568cdca1aae2925818cf1931cee4d2ca720fd/JSON/json.lua</source>
       </version>
     </reapack>
-    <reapack name="json_utilities_lib.lua" type="script" desc="Json functions for gaspard's scripts">
+    <reapack name="json_utilities_lib.lua" type="script" desc="json_utilities_lib">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -1148,6 +1152,9 @@
       </version>
       <version name="1.0.5" author="gaspard" time="2025-10-14T15:26:46Z">
         <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/c8ff06958ce076385eedd928098caa2c566daad6/JSON/json_utilities_lib.lua</source>
+      </version>
+      <version name="1.0.6" author="gaspard" time="2025-10-15T10:58:16Z">
+        <source>https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d3041507a62eaca17756c87c6a28e0669e10359b/JSON/json_utilities_lib.lua</source>
       </version>
     </reapack>
   </category>
@@ -1626,6 +1633,10 @@
         <changelog><![CDATA[- Added excluding character from name]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/61412f0ddadbc501d4bbf8e8f5a69bc456fa2c8e/Region/gaspard_Region%20generation%20and%20render%20matrix%20tool.lua</source>
       </version>
+      <version name="1.0.12" author="gaspard" time="2025-10-15T10:58:16Z">
+        <changelog><![CDATA[- Fix json utilities loading]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d3041507a62eaca17756c87c6a28e0669e10359b/Region/gaspard_Region%20generation%20and%20render%20matrix%20tool.lua</source>
+      </version>
     </reapack>
     <reapack name="gaspard_Rename region with render track name.lua" type="script" desc="Rename region with render track name">
       <metadata>
@@ -1640,6 +1651,10 @@
       <version name="1.0.0" author="gaspard" time="2025-10-14T16:01:03Z">
         <changelog><![CDATA[Init]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/e1ab9fbc5b987014c4e2fb14c9a296589d0870a6/Region/gaspard_Rename%20region%20with%20render%20track%20name.lua</source>
+      </version>
+      <version name="1.0.1" author="gaspard" time="2025-10-15T10:58:16Z">
+        <changelog><![CDATA[Fix json utilities loading]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d3041507a62eaca17756c87c6a28e0669e10359b/Region/gaspard_Rename%20region%20with%20render%20track%20name.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Set all regions numbering with name aware.lua" type="script" desc="Set all regions numbering with name aware">
