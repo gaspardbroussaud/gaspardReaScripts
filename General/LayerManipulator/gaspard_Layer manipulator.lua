@@ -14,9 +14,8 @@ function SetButtonState(set)
       -- Get version from ReaPack
       local pkg = reaper.ReaPack_GetOwner(name)
       version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
-      version = version == '' and '0.wip' or version
+      version = version == '' and '0.0' or version
       reaper.ReaPack_FreeEntry(pkg)
-      shortcut_activated = true
     end
     reaper.SetToggleCommandState(sec, cmd, set or 0)
     reaper.RefreshToolbar2(sec, cmd)
@@ -26,14 +25,19 @@ SetButtonState(1)
 -- Load Utilities
 dofile(reaper.GetResourcePath() .. '/Scripts/ReaTeam Extensions/API/imgui.lua') ('0.10.0.1') -- current version at the time of writing the script
 
+local json_file_path = reaper.GetResourcePath() .. '/Scripts/Gaspard ReaScripts/JSON'
+package.path = package.path .. ';' .. json_file_path .. '/?.lua'
+gson = require('json_utilities_lib')
+local json_version = "1.0.6"
+if not gson.version or gson.version_less(gson.version, json_version) then
+    reaper.MB('Please update gaspard "json_utilities_lib" to version ' .. json_version .. ' or higher.', "ERROR", 0)
+    return
+end
+
 script_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]
 package.path = package.path .. ';' .. script_path .. '?.lua' -- GET DIRECTORY FOR REQUIRE
 SYS = require("Utilities/SYSTEM")
 GUI = require("Utilities/GUI")
-
-local json_file_path = reaper.GetResourcePath() .. '/Scripts/Gaspard ReaScripts/JSON'
-package.path = package.path .. ';' .. json_file_path .. '/?.lua'
-gson = require('json_utilities_lib')
 
 settings_path = script_path .. 'Utilities/gaspard_' .. action_name .. '_settings.json'
 

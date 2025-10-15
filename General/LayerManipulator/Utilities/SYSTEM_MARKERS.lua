@@ -55,7 +55,9 @@ end
 MARKERS.AddMarkerToTrack = function(track)
     local edit_cursor_pos = reaper.GetPlayState() == 1 and reaper.GetPlayPosition() or reaper.GetCursorPosition()
 
-    local marker_name = select(2, reaper.GetTrackName(SYS.TRACKS.PARENT))--.."_"..parent_guid
+    local marker_name = select(2, reaper.GetTrackName(SYS.TRACKS.PARENT)) .. "_" .. parent_guid
+
+    edit_cursor_pos = tonumber(tostring(edit_cursor_pos))
 
     local index = reaper.AddProjectMarker(0, false, edit_cursor_pos, edit_cursor_pos, marker_name, -1) - 1
 
@@ -67,7 +69,7 @@ MARKERS.AddMarkerToTrack = function(track)
         end
     end
 
-    local _, marker_GUID = reaper.GetSetProjectInfo_String(0, "MARKER_GUID:" .. index, "", false)
+    --local _, marker_GUID = reaper.GetSetProjectInfo_String(0, "MARKER_GUID:" .. index, "", false)
 
     local retmarker, markers_text = reaper.GetSetMediaTrackInfo_String(SYS.TRACKS.PARENT, "P_EXT:" .. SYS.extname .. "MARKERS", "", false)
     if retmarker then

@@ -16,17 +16,15 @@ SYS.TRACKS = require("Utilities/SYSTEM_TRACKS")
 SYS.MARKERS = require("Utilities/SYSTEM_MARKERS")
 
 local function SetupSettings()
+    local settings_version = "0.0.0"
     local default_settings = {
-        version = '0.0.1b',
+        version = settings_version,
         order = {}
     }
     Settings = gson.LoadJSON(settings_path, default_settings)
-    if default_settings.version ~= Settings.version then
-        reaper.ShowConsoleMsg("\n!!! WARNING !!! (gaspard_Pattern manipulator.lua)\n")
-        reaper.ShowConsoleMsg("Settings are erased due to update in settings file.\nPlease excuse this behaviour.\nThis won't happen once released.\n")
-        reaper.ShowConsoleMsg("Now in version: " .. default_settings.version .. "\n")
-        Settings = gson.SaveJSON(settings_path, default_settings)
-        Settings = gson.LoadJSON(settings_path, Settings)
+    if not Settings.version or settings_version ~= Settings.version then
+        local keys = {}
+        Settings = gson.CompleteUpdate(settings_path, Settings, default_settings, keys)
     end
 end
 
