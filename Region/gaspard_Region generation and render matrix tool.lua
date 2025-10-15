@@ -1,8 +1,8 @@
 -- @description Region generation and render matrix Tool
 -- @author gaspard
--- @version 1.0.12
+-- @version 1.0.13
 -- @changelog
---  - Fix json utilities loading
+--  - Fix _ at name end if last track empty in concanetaded mode
 -- @about
 --  - Retrives clusters of selected items depending on selected tracks.
 --  - How to use:
@@ -116,7 +116,7 @@ local function GetConcatenatedParentNames(track)
                 name = parent_name.."_"..name
             end
         else
-            return name
+            return name:gsub("_$", "")
         end
     end
 end
