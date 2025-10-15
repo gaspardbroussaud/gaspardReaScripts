@@ -1,8 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 1.0.7
+--@version 1.0.8
 --@changelog
---  - Add REAPER shortcut key handling to close app
+--  - Fix json utility loading
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -16,12 +16,12 @@ local version = ""
 function SetButtonState(set)
     local _, name, sec, cmd, _, _, _ = reaper.get_action_context()
     if set == 1 then
-      action_name = string.match(name, 'gaspard_(.-)%.lua')
-      -- Get version from ReaPack
-      local pkg = reaper.ReaPack_GetOwner(name)
-      version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
-      version = version ~= "" and version or "1.0.0"
-      reaper.ReaPack_FreeEntry(pkg)
+        action_name = string.match(name, 'gaspard_(.-)%.lua')
+        -- Get version from ReaPack
+        local pkg = reaper.ReaPack_GetOwner(name)
+        version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
+        version = version ~= "" and version or "1.0.0"
+        reaper.ReaPack_FreeEntry(pkg)
     end
     reaper.SetToggleCommandState(sec, cmd, set or 0)
     reaper.RefreshToolbar2(sec, cmd)
@@ -33,16 +33,20 @@ dofile(reaper.GetResourcePath() ..
        '/Scripts/ReaTeam Extensions/API/imgui.lua')
   ('0.10.0.1') -- current version at the time of writing the script
 
-local json_file_path = reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/JSON'
+local json_file_path = "C:/Users/Gaspard/Documents/gaspardReaScripts/JSON" --reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/JSON'
 package.path = package.path .. ';' .. json_file_path .. '/?.lua'
 local gson = require('json_utilities_lib')
-local script_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]]
-local settings_path = script_path..'/gaspard_'..action_name..'_settings.json'
+local json_version = "1.0.6"
+if not gson.version or gson.version_less(gson.version, json_version) then
+    reaper.MB('Please update gaspard "json_utilities_lib" to version ' .. json_version .. ' or higher.', "ERROR", 0)
+    return
+end
 
+local settings_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]] .. '/gaspard_'..action_name..'_settings.json'
 local settings_version = "0.0.6"
 local default_settings = {
     version = settings_version,
-    order = {"close_on_open", "search_type", "default_open_style", "display_full_path"},
+    order = {"close_on_open", "search_type", "default_open_style", "display_full_path", "close_on_escape", "show_path_hovered"},
     close_on_open = {
         value = true,
         name = "Close on project open",
@@ -78,12 +82,12 @@ local default_settings = {
 }
 
 Settings = gson.LoadJSON(settings_path, default_settings)
-if settings_version ~= Settings.version then
-    reaper.ShowConsoleMsg("\n!!! WARNING !!! (gaspard_GaspaReaLauncher.lua)\n")
-    reaper.ShowConsoleMsg("Settings are erased due to updates in default settings file.\nPlease excuse this behaviour.\n")
-    reaper.ShowConsoleMsg("Now in version: "..settings_version.."\n")
-    Settings = gson.SaveJSON(settings_path, default_settings)
-    Settings = gson.LoadJSON(settings_path, Settings)
+if not Settings.version or settings_version ~= Settings.version then
+    local keys = {}
+    Settings = gson.CompleteUpdate(settings_path, Settings, default_settings, keys)
+    --local updated_settings = gson.UpdateSettings(Settings, default_settings, keys)
+    --Settings = gson.SaveJSON(settings_path, updated_settings)
+    --Settings = gson.LoadJSON(settings_path, Settings)
 end
 
 local KEYS = dofile(reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/KEYBOARD.lua")

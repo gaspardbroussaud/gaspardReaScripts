@@ -1,8 +1,8 @@
 -- @description Region generation and render matrix Tool
 -- @author gaspard
--- @version 1.0.11
+-- @version 1.0.12
 -- @changelog
---  - Added excluding character from name
+--  - Fix json utilities loading
 -- @about
 --  - Retrives clusters of selected items depending on selected tracks.
 --  - How to use:
@@ -18,15 +18,9 @@ local render_folders = {}
 local json_file_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/JSON"
 package.path = package.path .. ";" .. json_file_path .. "/?.lua"
 local gson = require("json_utilities_lib")
-local version_less = function(v1,v2)
-    local a,b={},{}
-    for n in v1:gmatch("%d+") do table.insert(a,tonumber(n)) end
-    for n in v2:gmatch("%d+") do table.insert(b,tonumber(n)) end
-    for i=1,math.max(#a,#b) do local n1,n2=a[i] or 0,b[i] or 0 if n1~=n2 then return n1<n2 end end
-    return false
-end
-if not gson.version or version_less(gson.version, "1.0.4") then
-    reaper.MB('Please update gaspard "json_utilities_lib" to version 1.0.4 or higher.', "ERROR", 0)
+local json_version = "1.0.6"
+if not gson.version or gson.version_less(gson.version, json_version) then
+    reaper.MB('Please update gaspard "json_utilities_lib" to version ' .. json_version .. ' or higher.', "ERROR", 0)
     return
 end
 
@@ -57,10 +51,8 @@ local default_settings = {
 
 Settings = gson.LoadJSON(settings_path, default_settings)
 if not Settings.version or settings_version ~= Settings.version then
-    local keys = {"region_naming_parent_cascade", "exclude_character"}
-    local updated_settings = gson.UpdateSettings(Settings, default_settings, keys)
-    Settings = gson.SaveJSON(settings_path, updated_settings)
-    Settings = gson.LoadJSON(settings_path, Settings)
+    local keys = {}
+    Settings = gson.CompleteUpdate(settings_path, Settings, default_settings, keys)
 end
 -----------------------------------
 

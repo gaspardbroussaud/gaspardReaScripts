@@ -1,19 +1,19 @@
---@description Json functions for gaspard's scripts
+--@description json_utilities_lib
 --@author gaspard
---@version 1.0.5
+--@version 1.0.6
 --@provides [nomain] .
 --@about Json functions for gaspard's scripts
 
 local gson = {}
 
-gson.version = "1.0.5"
+gson.version = "1.0.6"
 
 -- Get JSON utilities from file
 package.path = package.path..';'..debug.getinfo(1, "S").source:match [[^@?(.*[\/])[^\/]-$]] .. "?.lua" -- GET DIRECTORY FOR REQUIRE
 json = require("json")
 
 -- Save json to file
-function gson.SaveJSON(path, var)
+gson.SaveJSON = function(path, var)
     local filepath = path
     local file = assert(io.open(filepath, "w+"))
 
@@ -25,7 +25,7 @@ function gson.SaveJSON(path, var)
 end
 
 -- Load json from file
-function gson.LoadJSON(path, var)
+gson.LoadJSON = function(path, var)
     local filepath = path
     local settings = var or {}
     local file = io.open(filepath, "rb")
@@ -37,23 +37,35 @@ function gson.LoadJSON(path, var)
     local raw_text = file:read("*all")
     file:close()
 
+    if raw_text == "" then
+        gson.SaveJSON(filepath, settings)
+        return settings
+    end
+
     return json.decode(raw_text)
 end
 
 -- Sync between file and table in script
-function gson.UpdateSettings(settings, default_settings, update_keys)
+gson.UpdateSettings = function(settings, default_settings, update_keys)
     -- Remove keys from settings if missing from default_settings
-    for key, value in pairs(default_settings) do
+    local remove_keys = {}
+    for key, value in pairs(settings) do
         local found = false
-        for sub_key, sub_value in pairs(settings) do
+        for sub_key, sub_value in pairs(default_settings) do
             if key == sub_key then
                 found = true
                 break
             end
         end
-        if not found then settings[key] = nil end
+        if not found then
+            table.insert(remove_keys, key)
+        end
+    end
+    for i, key in ipairs(remove_keys) do
+        settings[key] = nil
     end
 
+    -- Add keys to settings if missing using default_settings
     for key, value in pairs(default_settings) do
         local found = false
         for sub_key, sub_value in pairs(settings) do
@@ -63,14 +75,13 @@ function gson.UpdateSettings(settings, default_settings, update_keys)
             end
         end
         if not found then
-            table.insert(settings, default_settings[key])
+            settings[key] = default_settings[key]
         end
     end
 
-    -- Update order and version
+    -- Update keys
     settings.order = default_settings.order
     settings.version = default_settings.version
-
     for i, key in ipairs(update_keys) do
         settings[key].value = default_settings[key].value
     end
@@ -78,13 +89,17 @@ function gson.UpdateSettings(settings, default_settings, update_keys)
     return settings
 end
 
---[[function gson.UpdateSettingsKeys(settings, default_settings, keys)
-    for i, key in ipairs(keys) do
-        settings[key].value = default_settings[key].value
-    end
+gson.CompleteUpdate = function(path, target, refernce, keys)
+    return gson.LoadJSON(path, gson.SaveJSON(path, gson.UpdateSettings(target, refernce, keys)))
+end
 
-    return settings
-end]]
+gson.version_less = function(v1,v2)
+    local a,b={},{}
+    for n in v1:gmatch("%d+") do table.insert(a,tonumber(n)) end
+    for n in v2:gmatch("%d+") do table.insert(b,tonumber(n)) end
+    for i=1,math.max(#a,#b) do local n1,n2=a[i] or 0,b[i] or 0 if n1~=n2 then return n1<n2 end end
+    return false
+end
 
 return gson
 

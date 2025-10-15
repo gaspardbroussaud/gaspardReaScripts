@@ -1,7 +1,7 @@
 --@description Rename region with render track name
 --@author gaspard
---@version 1.0.0
---@changelog Init
+--@version 1.0.1
+--@changelog Fix json utilities loading
 --@about Rename region using render track name (settings can be edited in gaspard_Master settings)
 
 local markrgncount, _, num_regions = reaper.CountProjectMarkers(0)
@@ -14,19 +14,14 @@ if not reaper.file_exists(settings_path) then return end
 local json_file_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/JSON"
 package.path = package.path .. ";" .. json_file_path .. "/?.lua"
 local gson = require("json_utilities_lib")
-local version_less = function(v1,v2)
-    local a,b={},{}
-    for n in v1:gmatch("%d+") do table.insert(a,tonumber(n)) end
-    for n in v2:gmatch("%d+") do table.insert(b,tonumber(n)) end
-    for i=1,math.max(#a,#b) do local n1,n2=a[i] or 0,b[i] or 0 if n1~=n2 then return n1<n2 end end
-    return false
-end
-if not gson.version or version_less(gson.version, "1.0.4") then
-    reaper.MB('Please update gaspard "json_utilities_lib" to version 1.0.4 or higher.', "ERROR", 0)
+local json_version = "1.0.6"
+if not gson.version or gson.version_less(gson.version, json_version) then
+    reaper.MB('Please update gaspard "json_utilities_lib" to version ' .. json_version .. ' or higher.', "ERROR", 0)
     return
 end
 
 Settings = gson.LoadJSON(settings_path, {"none"})
+if Settings == {"none"} then return end
 
 function GetConcatenatedParentNames(track)
     local _, name = reaper.GetTrackName(track)
