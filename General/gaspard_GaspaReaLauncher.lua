@@ -1,8 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 1.0.8
+--@version 1.0.9
 --@changelog
---  - Fix json utility loading
+--  - Fix utilities path
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -33,7 +33,7 @@ dofile(reaper.GetResourcePath() ..
        '/Scripts/ReaTeam Extensions/API/imgui.lua')
   ('0.10.0.1') -- current version at the time of writing the script
 
-local json_file_path = "C:/Users/Gaspard/Documents/gaspardReaScripts/JSON" --reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/JSON'
+local json_file_path = reaper.GetResourcePath()..'/Scripts/Gaspard ReaScripts/JSON'
 package.path = package.path .. ';' .. json_file_path .. '/?.lua'
 local gson = require('json_utilities_lib')
 local json_version = "1.0.6"
