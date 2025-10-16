@@ -92,7 +92,7 @@ TRACKS.InsertFileInGroup = function(track, path)
 end
 
 TRACKS.GetRandomFileFromGroup = function(group)
-    if group.files then
+    if group.files and #group.files > 0 then
         local random = math.floor(math.random(1, #group.files))
         return group.files[random]
     else
