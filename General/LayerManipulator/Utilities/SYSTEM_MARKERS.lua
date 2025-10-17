@@ -31,6 +31,7 @@ end
 
 MARKERS.GetGroupMarkers = function()
     if not SYS.TRACKS.PARENT then
+        MARKERS.DeleteMarkers(SYS.TRACKS.PARENT)
         MARKERS.LIST = {}
         MARKERS.COUNT = 0
         return
@@ -64,7 +65,7 @@ MARKERS.AddMarkerToTrack = function(track)
 
     local index = reaper.AddProjectMarker(0, false, edit_cursor_pos, edit_cursor_pos, marker_name, -1) - 1
 
-    for i = 1, reaper.CountProjectMarkers(0) do
+    --[[for i = 1, reaper.CountProjectMarkers(0) do
         local retenum, isrgn, pos, _, name = reaper.EnumProjectMarkers(i - 1)
         if retenum and not isrgn and pos == edit_cursor_pos and name == marker_name then
             index = i - 1
@@ -74,7 +75,7 @@ MARKERS.AddMarkerToTrack = function(track)
 
     --local _, marker_GUID = reaper.GetSetProjectInfo_String(0, "MARKER_GUID:" .. index, "", false)
 
-    local retmarker, markers_text = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:" .. SYS.extname .. "MARKERS", "", false)
+    --[[local retmarker, markers_text = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:" .. SYS.extname .. "MARKERS", "", false)
     if retmarker then
         local list = MARKERS.SplitMarkerPos(markers_text)
         local pos = tonumber(tostring(edit_cursor_pos))
@@ -85,33 +86,54 @@ MARKERS.AddMarkerToTrack = function(track)
         reaper.GetSetMediaTrackInfo_String(track, "P_EXT:" .. SYS.extname .. "MARKERS", text, true)
     else
         reaper.GetSetMediaTrackInfo_String(track, "P_EXT:" .. SYS.extname .. "MARKERS", tostring(edit_cursor_pos), true)
-    end
+    end]]
 
     --return marker_GUID -- Return last marker GUID (aka newly created)
 end
 
-MARKERS.ShowMarkers = function(group)
-    for i, marker in ipairs(group.markers) do
-        reaper.ShowConsoleMsg(marker.pos)
+MARKERS.InsertMarkers = function(track)
+    if not track then return end
+
+    -- Get from track ext state
+    local retval, text = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:" .. SYS.extname .. "MARKERS", "", false)
+    if not retval then return end
+
+    local pos_list = MARKERS.SplitMarkerPos(text)
+    if #pos_list < 1 then return end
+
+    local name = select(2, reaper.GetTrackName(track)) .. "_" .. reaper.GetTrackGUID(track)
+
+    for i, pos in ipairs(pos_list) do
+        reaper.AddProjectMarker(0, false, pos, pos, name, 0)
     end
+
+    -- Remove from track ext state
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:" .. SYS.extname .. "MARKERS", "", true)
+end
+
+local function SaveMarkerPos(track)
+    local markers_text = MARKERS.ConcatMarkerPos(MARKERS.LIST)
+
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:" .. SYS.extname .. "MARKERS", markers_text, true)
 end
 
 MARKERS.DeleteMarkers = function(track)
-    local retmarker, markers_text = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:" .. SYS.extname .. "MARKERS", "", false)
-    if not retmarker then return end
+    if not track then return end
 
-    local marker_list = MARKERS.SplitMarkerPos(markers_text)
+    local pos_list = {}
+    for i, marker in ipairs(MARKERS.LIST) do
+        pos_list[i] = marker.pos
+    end
+    if #pos_list < 1 then return end
 
-    local _, rgn_count, mark_count = reaper.CountProjectMarkers(0)
-    for i = 1, rgn_count + mark_count do
-        local retval, isrgn, pos, _, _, markrgnindexnumber = reaper.EnumProjectMarkers2(0, i - 1)
-        if retval and not isrgn then
-            for j, marker_pos in ipairs(marker_list) do
-                if marker_pos == pos then
-                    reaper.DeleteProjectMarker(0, i, false)
-                end
-            end
-        end
+    -- Save markers in track ext state
+    reaper.GetSetMediaTrackInfo_String(track, "P_EXT:" .. SYS.extname .. "MARKERS", MARKERS.ConcatMarkerPos(pos_list), true)
+    local _, text = reaper.GetSetMediaTrackInfo_String(track, "P_EXT:" .. SYS.extname .. "MARKERS", "", false)
+
+    -- Delete markers from project
+    for i, marker in ipairs(MARKERS.LIST) do
+        local _, index = reaper.GetSetProjectInfo_String(0, "MARKER_INDEX_FROM_GUID:"..marker.guid, "", false)
+        reaper.DeleteProjectMarkerByIndex(0, index)
     end
 end
 

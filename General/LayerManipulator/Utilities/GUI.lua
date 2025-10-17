@@ -18,6 +18,7 @@ local GUI_STYLE = dofile(reaper.GetResourcePath() .. "/Scripts/Gaspard ReaScript
 local GUI_SYS = dofile(reaper.GetResourcePath() .. "/Scripts/Gaspard ReaScripts/Libraries/GUI_SYS.lua")
 
 local default_font_size = 16
+local launch = true
 
 -- ImGui Init
 ctx = reaper.ImGui_CreateContext('layer_manipulator_context')
@@ -128,8 +129,20 @@ end
 
 
 local function Display_Elements()
+    local prev_parent = SYS.TRACKS.PARENT
     SYS.TRACKS.GROUPS = reaper.CountSelectedTracks(0) > 0 and SYS.TRACKS.GetTrackGroups(reaper.GetSelectedTrack(0, 0)) or nil
     SYS.TRACKS.PARENT = SYS.TRACKS.GROUPS and SYS.TRACKS.PARENT or nil
+    if SYS.TRACKS.PARENT ~= prev_parent or launch then
+        if SYS.TRACKS.PARENT then
+            SYS.MARKERS.InsertMarkers(SYS.TRACKS.PARENT)
+            launch = false
+            if prev_parent then
+                SYS.MARKERS.DeleteMarkers(prev_parent)
+            end
+        else
+            SYS.MARKERS.DeleteMarkers(prev_parent)
+        end
+    end
     SYS.MARKERS.GetGroupMarkers()
 
     reaper.ImGui_BeginGroup(ctx) -- GLOBAL
