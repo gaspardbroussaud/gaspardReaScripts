@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="d0a9aeb191338d1157b5f741c4173826422d9825">
+<index version="1" name="Gaspard ReaScripts" commit="d2a2b7cf0d88d9ac128967cec326310d2fe4bb68">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -1038,6 +1038,21 @@
       <version name="0.1" author="gaspard" time="2024-08-08T13:47:03Z">
         <changelog><![CDATA[Script creation]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d4f8256f3aea63b9d742aee6713882d719a5f775/Item/gaspard_Crop%20right%20X%20seconds%20of%20selected%20items.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Reverse selected items stereo.lua" type="script" desc="Reverse selected items stereo">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Reverse selected items stereo.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2025-10-29T11:34:53Z">
+        <changelog><![CDATA[Init]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d2a2b7cf0d88d9ac128967cec326310d2fe4bb68/Item/gaspard_Reverse%20selected%20items%20stereo.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Scan for missing source files in Sources folder.lua" type="script" desc="Scan for missing source files in Sources folder">
