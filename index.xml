@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="4b37107c4af98292152e71d6810a98d897eb5642">
+<index version="1" name="Gaspard ReaScripts" commit="13426009b8cef793156c78ee88751240ea640cc1">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -2274,6 +2274,21 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       </metadata>
       <version name="1.0" author="gaspard" time="2024-02-02T15:28:20Z">
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8b159bbf2ea8d52a402520e68e500ec2e49ead73/Track/gaspard_Rename%20track%20with%20selected%20media%20item%20name%20on%20it.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Select only all visible tracks in TCP.lua" type="script" desc="Select only all visible tracks in TCP">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Select only all visible tracks in TCP.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2025-11-03T13:10:21Z">
+        <changelog><![CDATA[Init]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/13426009b8cef793156c78ee88751240ea640cc1/Track/gaspard_Select%20only%20all%20visible%20tracks%20in%20TCP.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Select tracks of selected items.lua" type="script" desc="Select tracks of selected items">
