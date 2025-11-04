@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="13426009b8cef793156c78ee88751240ea640cc1">
+<index version="1" name="Gaspard ReaScripts" commit="567c1f1be46589c9ceefd259f52e8df8834733a4">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -2159,6 +2159,21 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/bad86573c2c7914c0a00128ced4799c7c3402abd/Track/gaspard_Collapse%20and%20uncollapse%20on%20double%20click%20track%20in%20TCP%20via%20mouse%20modifiers.lua</source>
       </version>
     </reapack>
+    <reapack name="gaspard_Collapse selected folder tracks.lua" type="script" desc="Collapse selected folder tracks">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Collapse selected folder tracks.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2025-11-04T10:53:34Z">
+        <changelog><![CDATA[Init]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/567c1f1be46589c9ceefd259f52e8df8834733a4/Track/gaspard_Collapse%20selected%20folder%20tracks.lua</source>
+      </version>
+    </reapack>
     <reapack name="gaspard_Collapse to small track in folder under mouse in TCP.lua" type="script" desc="Collapse to small track in folder under mouse in TCP">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
@@ -2290,6 +2305,10 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
         <changelog><![CDATA[Init]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/13426009b8cef793156c78ee88751240ea640cc1/Track/gaspard_Select%20only%20all%20visible%20tracks%20in%20TCP.lua</source>
       </version>
+      <version name="1.0.1" author="gaspard" time="2025-11-04T10:53:34Z">
+        <changelog><![CDATA[Fix selection of tracks in collapsed folder]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/567c1f1be46589c9ceefd259f52e8df8834733a4/Track/gaspard_Select%20only%20all%20visible%20tracks%20in%20TCP.lua</source>
+      </version>
     </reapack>
     <reapack name="gaspard_Select tracks of selected items.lua" type="script" desc="Select tracks of selected items">
       <metadata>
@@ -2304,6 +2323,21 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       <version name="1.0" author="gaspard" time="2024-03-08T13:44:02Z">
         <changelog><![CDATA[Initial release.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/3a6d4192f46b4be6cd067a4df81bda3c175d9de7/Track/gaspard_Select%20tracks%20of%20selected%20items.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Uncollapse selected folder tracks.lua" type="script" desc="Uncollapse selected folder tracks">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Uncollapse selected folder tracks.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2025-11-04T10:53:34Z">
+        <changelog><![CDATA[Init]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/567c1f1be46589c9ceefd259f52e8df8834733a4/Track/gaspard_Uncollapse%20selected%20folder%20tracks.lua</source>
       </version>
     </reapack>
   </category>
