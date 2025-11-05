@@ -1,7 +1,7 @@
 --@description Collapse selected folder tracks or move selection up one folder
 --@author gaspard
---@version 1.0.0
---@changelog Init
+--@version 1.0.1
+--@changelog Fix max track count
 --@about Collapse selected folder tracks or move selection up one folder.
 
 local track_count = reaper.CountSelectedTracks(0)
@@ -11,7 +11,7 @@ local function UnselectChildren(track)
     local index = reaper.GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
     local max_track = reaper.CountTracks(0)
     local depth = reaper.GetTrackDepth(track)
-    for i = index, max_track do
+    for i = index, max_track - 1 do
         local cur_track = reaper.GetTrack(0, i)
         if not cur_track then break end
         local cur_depth = reaper.GetTrackDepth(cur_track)

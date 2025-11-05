@@ -1,7 +1,7 @@
 --@description Uncollapse selected folder tracks or move selection down to first child of last folder
 --@author gaspard
 --@version 1.0.1
---@changelog Init
+--@changelog Change behaviour to select first parent track in current folder if it exists
 --@about Uncollapse selected folder tracks or move selection down to first child of last folder.
 
 local track_count = reaper.CountSelectedTracks(0)
@@ -39,6 +39,16 @@ else
     end
     if parent then
         local index = reaper.GetMediaTrackInfo_Value(parent, "IP_TRACKNUMBER")
+        local depth = reaper.GetTrackDepth(parent)
+        for i = index, reaper.CountTracks(0) - 1 do
+            local cur_track = reaper.GetTrack(0, i)
+            local cur_depth = reaper.GetTrackDepth(cur_track)
+            if cur_depth <= depth then break end -- Break if no parent track in current folder
+            if reaper.GetMediaTrackInfo_Value(cur_track, "I_FOLDERDEPTH") == 1 then
+                index = i
+                break
+            end
+        end
         local child = reaper.GetTrack(0, index)
         undo_text = "Move selection down to first child of last folder."
         reaper.SetOnlyTrackSelected(child)
