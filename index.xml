@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="0637ebfff5330ae6979b5cd32c932238eaafc5d7">
+<index version="1" name="Gaspard ReaScripts" commit="d55b89955f41919b7263a23b381108fa7c943125">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -2172,6 +2172,10 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       <version name="1.0.0" author="gaspard" time="2025-11-05T08:54:48Z">
         <changelog><![CDATA[Init]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/0637ebfff5330ae6979b5cd32c932238eaafc5d7/Track/gaspard_Collapse%20selected%20folder%20tracks%20or%20move%20selection%20up%20one%20folder.lua</source>
+      </version>
+      <version name="1.0.1" author="gaspard" time="2025-11-05T13:22:08Z">
+        <changelog><![CDATA[Fix max track count]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d55b89955f41919b7263a23b381108fa7c943125/Track/gaspard_Collapse%20selected%20folder%20tracks%20or%20move%20selection%20up%20one%20folder.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Collapse to small track in folder under mouse in TCP.lua" type="script" desc="Collapse to small track in folder under mouse in TCP">
