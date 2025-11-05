@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="d55b89955f41919b7263a23b381108fa7c943125">
+<index version="1" name="Gaspard ReaScripts" commit="6dc1c3e54057fcf3844583fffcd9a77cc931804e">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -2295,6 +2295,21 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/8b159bbf2ea8d52a402520e68e500ec2e49ead73/Track/gaspard_Rename%20track%20with%20selected%20media%20item%20name%20on%20it.lua</source>
       </version>
     </reapack>
+    <reapack name="gaspard_Select next folder track.lua" type="script" desc="Select next folder track">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Select next folder track.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2025-11-05T14:04:14Z">
+        <changelog><![CDATA[Init]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/6dc1c3e54057fcf3844583fffcd9a77cc931804e/Track/gaspard_Select%20next%20folder%20track.lua</source>
+      </version>
+    </reapack>
     <reapack name="gaspard_Select only all visible tracks in TCP.lua" type="script" desc="Select only all visible tracks in TCP">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
@@ -2312,6 +2327,21 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       <version name="1.0.1" author="gaspard" time="2025-11-04T10:53:34Z">
         <changelog><![CDATA[Fix selection of tracks in collapsed folder]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/567c1f1be46589c9ceefd259f52e8df8834733a4/Track/gaspard_Select%20only%20all%20visible%20tracks%20in%20TCP.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Select previous folder track.lua" type="script" desc="Select previous folder track">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Select previous folder track.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2025-11-05T14:04:14Z">
+        <changelog><![CDATA[Init]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/6dc1c3e54057fcf3844583fffcd9a77cc931804e/Track/gaspard_Select%20previous%20folder%20track.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Select tracks of selected items.lua" type="script" desc="Select tracks of selected items">
