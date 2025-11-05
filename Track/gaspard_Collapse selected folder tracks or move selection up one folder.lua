@@ -1,26 +1,11 @@
---@description Collapse selected folder tracks
+--@description Collapse selected folder tracks or move selection up one folder
 --@author gaspard
 --@version 1.0.0
 --@changelog Init
---@about Collapse selected folder tracks.
+--@about Collapse selected folder tracks or move selection up one folder.
 
 local track_count = reaper.CountSelectedTracks(0)
 if track_count < 1 then return end
-
---[[reaper.Undo_BeginBlock()
-reaper.PreventUIRefresh(1)
-
-for i = 1, track_count do
-    local track = reaper.GetSelectedTrack(0, i - 1)
-    if reaper.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-        reaper.SetMediaTrackInfo_Value(track, "I_FOLDERCOMPACT", 2)
-    end
-end
-
-reaper.PreventUIRefresh(-1)
-reaper.Undo_EndBlock("Uncollapsed all selected tracks.", -1)
-reaper.UpdateArrange()
-]]
 
 local function UnselectChildren(track)
     local index = reaper.GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
@@ -35,6 +20,10 @@ local function UnselectChildren(track)
         reaper.SetTrackSelected(cur_track, false)
     end
 end
+
+reaper.Undo_BeginBlock()
+reaper.PreventUIRefresh(1)
+local undo_text = "Collapsed selected folder tracks."
 
 local tracks = {}
 local folders = {}
@@ -61,8 +50,11 @@ else
     local track = tracks[#tracks]
     local parent = reaper.GetParentTrack(track)
     if parent then
+        undo_text = "Move selection up one folder."
         reaper.SetOnlyTrackSelected(parent)
     end
 end
 
+reaper.PreventUIRefresh(-1)
+reaper.Undo_EndBlock(undo_text, -1)
 reaper.UpdateArrange()
