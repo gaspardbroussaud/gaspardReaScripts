@@ -1,8 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 1.0.9
+--@version 1.1.0
 --@changelog
---  - Fix utilities path
+--  - Added automatic Reaper ini file recent project list cleaning
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -141,6 +141,7 @@ local curr_right_clc_proj = nil
 local project_already_selected = false
 local proj_sel_num = 0
 local open_create = "create"
+local ini_file = reaper.get_ini_file()
 
 local function SortFavorites(order)
     local favorites = {}
@@ -197,12 +198,44 @@ local function SetSortingToType(type, tab)
     end
 end
 
+local function CleanRecentProjects()
+    local retval, max_recent = reaper.BR_Win32_GetPrivateProfileString("Reaper", "maxrecent", "", ini_file)
+    if retval ~= 0 then max_recent = tonumber(max_recent) else max_recent = 50 end
+
+    -- Check if there is a missmatch
+    local found = false
+    local _, prev = reaper.BR_Win32_GetPrivateProfileString("Recent", string.format("recent%02d", 1), "noEntry", ini_file)
+    for i = 2, max_recent do
+        local _, current = reaper.BR_Win32_GetPrivateProfileString("Recent", string.format("recent%02d", i), "noEntry", ini_file)
+        if prev == "noEntry" and current ~= "noEntry" then
+            found = true
+            break
+        end
+        prev = current
+    end
+    if not found then return end
+
+    local project_paths = {}
+    for i = 1, max_recent do
+        local _, path = reaper.BR_Win32_GetPrivateProfileString("Recent", string.format("recent%02d", i), "noEntry", ini_file)
+        if path ~= "noEntry" then
+            project_paths[#project_paths+1] = path
+            reaper.BR_Win32_WritePrivateProfileString("Recent", string.format("recent%02d", i), "", ini_file)
+        end
+    end
+
+    for i, path in ipairs(project_paths) do
+        reaper.BR_Win32_WritePrivateProfileString("Recent", string.format("recent%02d", i), path, ini_file)
+    end
+end
+
 local function GetRecentProjects()
+    CleanRecentProjects()
     local i = 1
     local path = ""
     project_list = {}
     while path ~= "noEntry" do
-        _, path = reaper.BR_Win32_GetPrivateProfileString("Recent", string.format("recent%02d", i), "noEntry", reaper.get_ini_file())
+        _, path = reaper.BR_Win32_GetPrivateProfileString("Recent", string.format("recent%02d", i), "noEntry", ini_file)
         if path == "noEntry" or path == "" then break end
 
         for _, proj in ipairs(project_list) do if proj.path == path then goto skip_entry end end
