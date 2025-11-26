@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="d88f3fc12d5e0128839da3ceff6c422779b2f999">
+<index version="1" name="Gaspard ReaScripts" commit="f8230530aaeb1975acb1cd4a9a5151c0d1f4913a">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -1819,6 +1819,21 @@
       <version name="1.0.1" author="gaspard" time="2024-11-19T15:03:52Z">
         <changelog><![CDATA[- Update nomenclature]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/68cd257d2176c4bcb9242acb97ada1ebd4a23fd8/TCP/gaspard_Hide%20and%20show%20tracks%20in%20TCP%20and%20MCP.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Move each selected tracks in a new folder track.lua" type="script" desc="Move each selected tracks in a new folder track">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Move each selected tracks in a new folder track\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2025-11-26T16:38:57Z">
+        <changelog><![CDATA[Init]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/f8230530aaeb1975acb1cd4a9a5151c0d1f4913a/TCP/gaspard_Move%20each%20selected%20tracks%20in%20a%20new%20folder%20track.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Solo state follows track selection.lua" type="script" desc="Solo state follows track selection">
