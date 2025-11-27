@@ -4,12 +4,20 @@
 --@changelog Init
 --@about Solo state follows track selection
 
+-- Restoring solos
+local function RestoreSolo()
+    reaper.ShowConsoleMsg("\nEND")
+    reaper.Main_OnCommand(40340, 0) -- Unsolo all tracks
+end
+
 -- Toggle button state in Reaper
 local function SetButtonState(set)
-    local _, name, sec, cmd, _, _, _ = reaper.get_action_context()
+    if set ~= 1 then
+        RestoreSolo()
+    end
+    local _, _, sec, cmd, _, _, _ = reaper.get_action_context()
     reaper.SetToggleCommandState(sec, cmd, set or 0)
     reaper.RefreshToolbar2(sec, cmd)
-    if set ~= 1 then reaper.Main_OnCommand(40340, 0) end
 end
 SetButtonState(1)
 
