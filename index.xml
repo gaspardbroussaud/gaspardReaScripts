@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="7a7bab9cb740b980b882cf4c461633ddf4ad632d">
+<index version="1" name="Gaspard ReaScripts" commit="b4f00879df3ffa5a5f5ccde55db54b5d35461a4c">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -1853,6 +1853,10 @@
       <version name="1.0.0" author="gaspard" time="2025-11-26T10:50:54Z">
         <changelog><![CDATA[Init]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d88f3fc12d5e0128839da3ceff6c422779b2f999/TCP/gaspard_Solo%20state%20follows%20track%20selection.lua</source>
+      </version>
+      <version name="1.0.1" author="gaspard" time="2025-11-28T09:35:12Z">
+        <changelog><![CDATA[Restore solo states when exiting]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/b4f00879df3ffa5a5f5ccde55db54b5d35461a4c/TCP/gaspard_Solo%20state%20follows%20track%20selection.lua</source>
       </version>
     </reapack>
   </category>
