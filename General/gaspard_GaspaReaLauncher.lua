@@ -1,8 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 1.1.1
+--@version 1.1.2
 --@changelog
---  - Added relink option for invalid file paths
+--  - Settings: add option to remove project from list without prompt
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -43,10 +43,10 @@ if not gson.version or gson.version_less(gson.version, json_version) then
 end
 
 local settings_path = debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]] .. '/gaspard_'..action_name..'_settings.json'
-local settings_version = "0.0.6"
+local settings_version = "0.0.7"
 local default_settings = {
     version = settings_version,
-    order = {"close_on_open", "search_type", "default_open_style", "display_full_path", "close_on_escape", "show_path_hovered"},
+    order = {"close_on_open", "search_type", "default_open_style", "display_full_path", "close_on_escape", "show_path_hovered", "no_prompt_to_remove"},
     close_on_open = {
         value = true,
         name = "Close on project open",
@@ -78,6 +78,11 @@ local default_settings = {
         value = false,
         name = "Show path on hover",
         description = "Show full project path on hovered in list."
+    },
+    no_prompt_to_remove = {
+        value = false,
+        name = "Do not prompt to remove",
+        description = "Do not ask before removing projects from list."
     }
 }
 
@@ -85,9 +90,6 @@ Settings = gson.LoadJSON(settings_path, default_settings)
 if not Settings.version or settings_version ~= Settings.version then
     local keys = {}
     Settings = gson.CompleteUpdate(settings_path, Settings, default_settings, keys)
-    --local updated_settings = gson.UpdateSettings(Settings, default_settings, keys)
-    --Settings = gson.SaveJSON(settings_path, updated_settings)
-    --Settings = gson.LoadJSON(settings_path, Settings)
 end
 
 local KEYS = dofile(reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/Libraries/KEYBOARD.lua")
@@ -113,6 +115,9 @@ local popup_x, popup_y = 0, 0
 local mouse_right_clic_popup = false
 local no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
 local window_name = "GASPARD REAPER LAUNCHER"
+
+local settings_width = 350
+local settings_height = 195
 
 -- Sizing variables
 local topbar_height = 30
@@ -683,9 +688,13 @@ local function ElementsDisplay()
         local msg_text = not project_already_selected and "y" or proj_sel_num > 1 and "ies" or "y"
         reaper.ImGui_Selectable(ctx, "Remove entr"..msg_text, false)
         if reaper.ImGui_IsItemActivated(ctx) then
-            if reaper.ShowMessageBox("The selected entr"..msg_text.." will be removed.", "REMOVE SELECTED ENTR"..string.upper(msg_text), 1) == 1 then
+            local msg_box = Settings.no_prompt_to_remove.value
+            if not msg_box then
+                msg_box = reaper.ShowMessageBox("The selected entr"..msg_text.." will be removed.", "REMOVE SELECTED ENTR"..string.upper(msg_text), 1) == 1
+            end
+            if msg_box then
                 if not project_already_selected then
-                    if curr_right_clc_proj.exists then
+                    if curr_right_clc_proj.selected then
                         reaper.BR_Win32_WritePrivateProfileString("Recent", string.format("recent%02d", curr_right_clc_proj.ini_line), "", ini_file)
                     end
                 else
@@ -716,12 +725,12 @@ end
 local function ElementsSettings()
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoResize()
         | reaper.ImGui_WindowFlags_TopMost() | reaper.ImGui_WindowFlags_NoDecoration()
-    local settings_width = 350 --og_window_width - 80
-    local settings_height = 175 --og_window_height * 0.7
-    local settings_x = window_x + window_width - 102
+    --local settings_width = 350 --og_window_width - 80
+    --local settings_height = 175 --og_window_height * 0.7
+    local settings_x = window_x + window_width - (reaper.ImGui_CalcTextSize(ctx, "SETTINGS") +
+        4 * reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_FramePadding())) --102
     reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
-    reaper.ImGui_SetNextWindowPos(ctx, settings_x, window_y + topbar_height + 5) --, reaper.ImGui_Cond_Appearing())
-    --reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
+    reaper.ImGui_SetNextWindowPos(ctx, settings_x, window_y + topbar_height + 5)
     local settings_visible, settings_open = reaper.ImGui_Begin(ctx, "##settings_window", true, settings_flags)
     if settings_visible then
         reaper.ImGui_Text(ctx, "SETTINGS")
@@ -744,6 +753,10 @@ local function ElementsSettings()
         changed, Settings.show_path_hovered.value = reaper.ImGui_Checkbox(ctx, Settings.show_path_hovered.name, Settings.show_path_hovered.value)
         if changed then one_changed = true end
         reaper.ImGui_SetItemTooltip(ctx, Settings.show_path_hovered.description)
+
+        changed, Settings.no_prompt_to_remove.value = reaper.ImGui_Checkbox(ctx, Settings.no_prompt_to_remove.name, Settings.no_prompt_to_remove.value)
+        if changed then one_changed = true end
+        reaper.ImGui_SetItemTooltip(ctx, Settings.no_prompt_to_remove.description)
 
         local display = (Settings.default_open_style.value:sub(1,1):upper()..Settings.default_open_style.value:sub(2)):gsub("_", " ")
         reaper.ImGui_PushItemWidth(ctx, 110)
