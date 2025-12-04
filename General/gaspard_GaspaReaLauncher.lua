@@ -1,8 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 1.1.0
+--@version 1.1.1
 --@changelog
---  - Added automatic Reaper ini file recent project list cleaning
+--  - Added relink option for invalid file paths
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -651,37 +651,47 @@ local function ElementsDisplay()
         if reaper.ImGui_IsItemActivated(ctx) then
             ProjectLoading("new_tab", project_already_selected, curr_right_clc_proj)
         end
+        if not curr_right_clc_proj.exists then reaper.ImGui_EndDisabled(ctx) end
 
-        local text_explorer = os_is_windows and "explorer" or "finder"
-        reaper.ImGui_Selectable(ctx, "Show in "..text_explorer, false)
-        if reaper.ImGui_IsItemActive(ctx) then
-            if not project_already_selected then
-                local folder = curr_right_clc_proj.path:match("^(.*)[/\\]")
-                reaper.CF_ShellExecute(folder)
-            else
-                for _, j_project in ipairs(project_list) do
-                    if j_project.selected and j_project.exists then
-                        local folder = j_project.path:match("^(.*)[/\\]")
-                        reaper.CF_ShellExecute(folder)
+        if curr_right_clc_proj.exists then
+            local text_explorer = os_is_windows and "explorer" or "finder"
+            reaper.ImGui_Selectable(ctx, "Show in "..text_explorer, false)
+            if reaper.ImGui_IsItemActive(ctx) then
+                if not project_already_selected then
+                    local folder = curr_right_clc_proj.path:match("^(.*)[/\\]")
+                    reaper.CF_ShellExecute(folder)
+                else
+                    for _, j_project in ipairs(project_list) do
+                        if j_project.selected and j_project.exists then
+                            local folder = j_project.path:match("^(.*)[/\\]")
+                            reaper.CF_ShellExecute(folder)
+                        end
                     end
                 end
             end
+        else
+            reaper.ImGui_Selectable(ctx, "Relink project path", false)
+            if reaper.ImGui_IsItemActive(ctx) then
+                local retval, selected_path = reaper.GetUserFileNameForRead("", "Select a REAPER project file", ".rpp")
+                if retval and selected_path ~= "" then
+                    reaper.BR_Win32_WritePrivateProfileString("Recent", string.format("recent%02d", curr_right_clc_proj.ini_line), selected_path, ini_file)
+                    GetRecentProjects()
+                end
+            end
         end
-        if not curr_right_clc_proj.exists then reaper.ImGui_EndDisabled(ctx) end
 
-        --local msg_text = proj_sel_num > 0 and "ies" or "y"
         local msg_text = not project_already_selected and "y" or proj_sel_num > 1 and "ies" or "y"
         reaper.ImGui_Selectable(ctx, "Remove entr"..msg_text, false)
         if reaper.ImGui_IsItemActivated(ctx) then
             if reaper.ShowMessageBox("The selected entr"..msg_text.." will be removed.", "REMOVE SELECTED ENTR"..string.upper(msg_text), 1) == 1 then
                 if not project_already_selected then
                     if curr_right_clc_proj.exists then
-                        reaper.BR_Win32_WritePrivateProfileString("Recent", string.format("recent%02d", curr_right_clc_proj.ini_line), "", reaper.get_ini_file())
+                        reaper.BR_Win32_WritePrivateProfileString("Recent", string.format("recent%02d", curr_right_clc_proj.ini_line), "", ini_file)
                     end
                 else
                     for _, j_project in ipairs(project_list) do
                         if j_project.selected then
-                            reaper.BR_Win32_WritePrivateProfileString("Recent", string.format("recent%02d", j_project.ini_line), "", reaper.get_ini_file())
+                            reaper.BR_Win32_WritePrivateProfileString("Recent", string.format("recent%02d", j_project.ini_line), "", ini_file)
                         end
                     end
                 end
