@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="c39e38125074c57586fb2b3e44baaa0ce9a4e65b">
+<index version="1" name="Gaspard ReaScripts" commit="48a0e45c43b1532e7a9889f3c2c2228520f8798a">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -305,6 +305,10 @@
       <version name="1.1.1" author="gaspard" time="2025-12-04T14:24:51Z">
         <changelog><![CDATA[- Added relink option for invalid file paths]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/c39e38125074c57586fb2b3e44baaa0ce9a4e65b/General/gaspard_GaspaReaLauncher.lua</source>
+      </version>
+      <version name="1.1.2" author="gaspard" time="2025-12-04T16:42:38Z">
+        <changelog><![CDATA[- Settings: add option to remove project from list without prompt]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/48a0e45c43b1532e7a9889f3c2c2228520f8798a/General/gaspard_GaspaReaLauncher.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Master settings.lua" type="script" desc="Master settings">
