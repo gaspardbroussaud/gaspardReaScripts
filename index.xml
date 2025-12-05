@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="1504c73cf01aa33f359324b0485000f70d761e18">
+<index version="1" name="Gaspard ReaScripts" commit="6757cd05807a22c0966a643a9811bfdd3ea105f9">
+  <category name="ArrangeView">
+    <reapack name="gaspard_Mouse click in arrange view does not select track.lua" type="script" desc="Mouse click in arrange view does not select track">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Mouse click in arrange view does not select track\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2025-12-05T10:48:00Z">
+        <changelog><![CDATA[Init]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/6757cd05807a22c0966a643a9811bfdd3ea105f9/ArrangeView/gaspard_Mouse%20click%20in%20arrange%20view%20does%20not%20select%20track.lua</source>
+      </version>
+    </reapack>
+  </category>
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
