@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="48a0e45c43b1532e7a9889f3c2c2228520f8798a">
+<index version="1" name="Gaspard ReaScripts" commit="1504c73cf01aa33f359324b0485000f70d761e18">
   <category name="Debug">
     <reapack name="gaspard_Display items count in message box.lua" type="script" desc="Display items count in message box">
       <metadata>
@@ -455,6 +455,36 @@
       <version name="1.0.7" author="gaspard" time="2025-08-18T14:47:30Z">
         <changelog><![CDATA[- Update for new ReaImGui version]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/dfe46c75070e8ecb5202cb1018c2ad1ca1467c61/General/gaspard_Simple%20renamer.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Toggle video window saving state in project.lua" type="script" desc="Toggle video window saving state in project">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Toggle video window saving state in project.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2025-12-05T09:59:05Z">
+        <changelog><![CDATA[Init]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1504c73cf01aa33f359324b0485000f70d761e18/General/gaspard_Toggle%20video%20window%20saving%20state%20in%20project.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Toggle video window with saved state in project and if video item in project.lua" type="script" desc="Toggle video window with saved state in project and if video item in project">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Toggle video window with saved state in project and if video item in project.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2025-12-05T09:59:05Z">
+        <changelog><![CDATA[Init]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/1504c73cf01aa33f359324b0485000f70d761e18/General/gaspard_Toggle%20video%20window%20with%20saved%20state%20in%20project%20and%20if%20video%20item%20in%20project.lua</source>
       </version>
     </reapack>
   </category>
