@@ -1,8 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 1.1.2
+--@version 1.1.3
 --@changelog
---  - Settings: add option to remove project from list without prompt
+--  - Fix favorites not saved on reopen
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -234,6 +234,49 @@ local function CleanRecentProjects()
     end
 end
 
+local function FindRecentFavIni(path)
+    local fav_i = 1
+    local found = false
+    local extstate = true
+    while extstate do
+        extstate = reaper.GetExtState("GRL_RecentFav", string.format("fav%02d", fav_i))
+        if extstate == "" then break end
+        found = extstate == path
+        if found then break end
+        fav_i = fav_i + 1
+    end
+    return found
+end
+
+local function AddRecentFavIni(path)
+    local fav_i = 1
+    local extstate = true
+    while extstate do
+        extstate = reaper.GetExtState("GRL_RecentFav", string.format("fav%02d", fav_i))
+        if extstate == "" then
+            reaper.SetExtState("GRL_RecentFav", string.format("fav%02d", fav_i), path, true)
+            break
+        end
+        fav_i = fav_i + 1
+    end
+end
+
+local function DeleteRecentFavIni(path)
+    local fav_i = 1
+    local found = false
+    local extstate = true
+    while extstate do
+        extstate = reaper.GetExtState("GRL_RecentFav", string.format("fav%02d", fav_i))
+        if extstate == "" then break end
+        found = extstate == path
+        if found then
+            reaper.DeleteExtState("GRL_RecentFav", string.format("fav%02d", fav_i), true)
+            break
+        end
+        fav_i = fav_i + 1
+    end
+end
+
 local function GetRecentProjects()
     CleanRecentProjects()
     local i = 1
@@ -246,10 +289,15 @@ local function GetRecentProjects()
         for _, proj in ipairs(project_list) do if proj.path == path then goto skip_entry end end
 
         local cur_exists = reaper.file_exists(path)
+
         local cur_name = path:match("([^\\/]+)$"):gsub("%.rpp$", "")
+
         local retval, _, _, modified_time, _, _, _, _, _, _, _, _ = reaper.JS_File_Stat(path)
         if retval ~= 0 or not cur_exists then modified_time = "00"..tostring(i) end
-        project_list[i] = {exists = cur_exists, name = cur_name, selected = false, path = path, date = modified_time, stared = false, ini_line = i}
+
+        local cur_stared = FindRecentFavIni(path)
+
+        project_list[i] = {exists = cur_exists, name = cur_name, selected = false, path = path, date = modified_time, stared = cur_stared, ini_line = i}
 
         i = i + 1
         ::skip_entry::
@@ -547,6 +595,11 @@ local function ElementsDisplay()
                 if reaper.ImGui_InvisibleButton(ctx, "##star_"..tostring(i), button_size, button_size) then
                     project.stared = not project.stared
                     SetSortingToType(Settings.search_type.value, project_list)
+                    if project.stared then
+                        AddRecentFavIni(project.path)
+                    else
+                        DeleteRecentFavIni(project.path)
+                    end
                 end
                 local hovered = reaper.ImGui_IsItemHovered(ctx)
                 if hovered then
