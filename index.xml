@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="a9931e0cde7a625b272823094c91576630a8373e">
+<index version="1" name="Gaspard ReaScripts" commit="ba84567da5aa7d98cf5b2ebd91a29dbfc10d2102">
   <category name="ArrangeView">
     <reapack name="gaspard_Mouse click in arrange view does not select track.lua" type="script" desc="Mouse click in arrange view does not select track">
       <metadata>
@@ -2021,6 +2021,21 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       <version name="1.1" author="gaspard" time="2024-03-04T14:53:00Z">
         <changelog><![CDATA[Added user input for interval between items in cluster.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/478f402cf604cec82dd469655be350052a29422c/Timeline/gaspard_Move%20cluster%20of%20items%20with%20space%20between.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Play from start of time selection.lua" type="script" desc="Play from start of time selection">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Play from start of time selection.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2025-12-18T08:23:14Z">
+        <changelog><![CDATA[Init]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/ba84567da5aa7d98cf5b2ebd91a29dbfc10d2102/Timeline/gaspard_Play%20from%20start%20of%20time%20selection.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_ProTools marker go to.lua" type="script" desc="ProTools marker go to">
