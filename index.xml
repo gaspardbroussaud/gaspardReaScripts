@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="3086cc330569564960de1edf7a6feef1aa76dbe4">
+<index version="1" name="Gaspard ReaScripts" commit="6def4f7484d66cb54d61e25326b5469b98d41abe">
   <category name="ArrangeView">
     <reapack name="gaspard_Mouse click in arrange view does not select track.lua" type="script" desc="Mouse click in arrange view does not select track">
       <metadata>
@@ -1768,7 +1768,7 @@
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 Rename region using render track name (settings can be edited in gaspard_Master settings)\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Rename region using render track name (settings can be edited in gaspard_Master settings action)\par}
 }
 ]]></description>
       </metadata>
@@ -1783,6 +1783,10 @@
       <version name="1.0.2" author="gaspard" time="2025-10-15T12:57:47Z">
         <changelog><![CDATA[Fix concatenated name having multiple _ when]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/f2e10fca5273e9f1d0f5773e4d160fbb3289360c/Region/gaspard_Rename%20region%20with%20render%20track%20name.lua</source>
+      </version>
+      <version name="1.0.3" author="gaspard" time="2025-12-18T14:45:57Z">
+        <changelog><![CDATA[Fix crash on invalid track if region render not set]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/6def4f7484d66cb54d61e25326b5469b98d41abe/Region/gaspard_Rename%20region%20with%20render%20track%20name.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Set all regions numbering with name aware.lua" type="script" desc="Set all regions numbering with name aware">
