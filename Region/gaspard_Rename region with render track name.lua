@@ -1,8 +1,8 @@
 --@description Rename region with render track name
 --@author gaspard
---@version 1.0.2
---@changelog Fix concatenated name having multiple _ when 
---@about Rename region using render track name (settings can be edited in gaspard_Master settings)
+--@version 1.0.3
+--@changelog Fix crash on invalid track if region render not set
+--@about Rename region using render track name (settings can be edited in gaspard_Master settings action)
 
 local markrgncount, _, num_regions = reaper.CountProjectMarkers(0)
 if num_regions < 1 then return end
@@ -64,7 +64,7 @@ for i = 1, markrgncount do
     local retval, isrgn, pos, rgnend, _, markrgnindexnumber = reaper.EnumProjectMarkers(i - 1)
     if retval and isrgn then
         local track = reaper.EnumRegionRenderMatrix(0, markrgnindexnumber, 0)
-        if track ~= master_track then
+        if track and track ~= master_track then
             local track_name = GetRegionNaming(track)
             reaper.SetProjectMarker(markrgnindexnumber, isrgn, pos, rgnend, track_name)
         end
