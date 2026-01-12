@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="6def4f7484d66cb54d61e25326b5469b98d41abe">
+<index version="1" name="Gaspard ReaScripts" commit="d5da7e4984db07e4bdc1951fb14aee5a5bf33334">
   <category name="ArrangeView">
     <reapack name="gaspard_Mouse click in arrange view does not select track.lua" type="script" desc="Mouse click in arrange view does not select track">
       <metadata>
@@ -2557,6 +2557,36 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       <version name="1.0" author="gaspard" time="2024-03-08T13:44:02Z">
         <changelog><![CDATA[Initial release.]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/3a6d4192f46b4be6cd067a4df81bda3c175d9de7/Track/gaspard_Select%20tracks%20of%20selected%20items.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Toggle mute on track under mouse cursor.lua" type="script" desc="Toggle mute on track under mouse cursor">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Toggle mute on track under mouse cursor.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2026-01-12T14:33:42Z">
+        <changelog><![CDATA[Init]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d5da7e4984db07e4bdc1951fb14aee5a5bf33334/Track/gaspard_Toggle%20mute%20on%20track%20under%20mouse%20cursor.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Toggle solo on track under mouse cursor.lua" type="script" desc="Toggle solo on track under mouse cursor">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Toggle solo on track under mouse cursor.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2026-01-12T14:33:42Z">
+        <changelog><![CDATA[Init]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d5da7e4984db07e4bdc1951fb14aee5a5bf33334/Track/gaspard_Toggle%20solo%20on%20track%20under%20mouse%20cursor.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Uncollapse selected folder tracks or move selection down to first child of last folder.lua" type="script" desc="Uncollapse selected folder tracks or move selection down to first child of last folder">
