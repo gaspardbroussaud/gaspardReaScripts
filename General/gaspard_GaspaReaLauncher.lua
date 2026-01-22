@@ -1,8 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 1.1.3
+--@version 1.1.4
 --@changelog
---  - Fix favorites not saved on reopen
+--  - Fix favorites path stacking in extstate's file
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -261,6 +261,20 @@ local function AddRecentFavIni(path)
     end
 end
 
+local function ReorderFavExtState(index)
+    local fav_i = index + 1
+    local extstate = true
+    while extstate do
+        extstate = reaper.GetExtState("GRL_RecentFav", string.format("fav%02d", fav_i))
+        if extstate == "" then
+            reaper.DeleteExtState("GRL_RecentFav", string.format("fav%02d", fav_i - 1), true)
+            break
+        end
+        reaper.SetExtState("GRL_RecentFav", string.format("fav%02d", fav_i - 1), extstate, true)
+        fav_i = fav_i + 1
+    end
+end
+
 local function DeleteRecentFavIni(path)
     local fav_i = 1
     local found = false
@@ -271,6 +285,7 @@ local function DeleteRecentFavIni(path)
         found = extstate == path
         if found then
             reaper.DeleteExtState("GRL_RecentFav", string.format("fav%02d", fav_i), true)
+            ReorderFavExtState(fav_i)
             break
         end
         fav_i = fav_i + 1
@@ -749,11 +764,13 @@ local function ElementsDisplay()
                 if not project_already_selected then
                     if curr_right_clc_proj.selected then
                         reaper.BR_Win32_WritePrivateProfileString("Recent", string.format("recent%02d", curr_right_clc_proj.ini_line), "", ini_file)
+                        DeleteRecentFavIni(curr_right_clc_proj.path)
                     end
                 else
                     for _, j_project in ipairs(project_list) do
                         if j_project.selected then
                             reaper.BR_Win32_WritePrivateProfileString("Recent", string.format("recent%02d", j_project.ini_line), "", ini_file)
+                            DeleteRecentFavIni(j_project.path)
                         end
                     end
                 end
