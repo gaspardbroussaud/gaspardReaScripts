@@ -1,8 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 1.1.4
+--@version 1.1.5
 --@changelog
---  - Fix favorites path stacking in extstate's file
+--  - Remove found text for next word from search in entry text
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -341,6 +341,7 @@ local function MatchesAllWords(words, text)
         if not text:lower():find(word:lower(), 1, true) then
             return false
         end
+        text = string.gsub(text:lower(), word:lower(), "")
     end
     return true
 end
@@ -603,7 +604,7 @@ local function ElementsDisplay()
         if CTRL and reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_A()) then SelectAllCtrlA(project_list) end
 
         for i, project in ipairs(project_list) do
-            if project_search == "" or MatchesAllWords(SplitIntoWords(project_search), project.name) then
+            if project_search == "" or MatchesAllWords(SplitIntoWords(project_search), Settings.display_full_path.value and project.path or project.name) then
                 -- Favorite start
                 local cx, cy = reaper.ImGui_GetCursorScreenPos(ctx)
                 local button_size = 15
