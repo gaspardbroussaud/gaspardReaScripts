@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="d5da7e4984db07e4bdc1951fb14aee5a5bf33334">
+<index version="1" name="Gaspard ReaScripts" commit="490b02ab8b5932238c4ffff2b167269d636624db">
   <category name="ArrangeView">
     <reapack name="gaspard_Mouse click in arrange view does not select track.lua" type="script" desc="Mouse click in arrange view does not select track">
       <metadata>
@@ -330,6 +330,10 @@
       <version name="1.1.3" author="gaspard" time="2025-12-18T09:53:17Z">
         <changelog><![CDATA[- Fix favorites not saved on reopen]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/3086cc330569564960de1edf7a6feef1aa76dbe4/General/gaspard_GaspaReaLauncher.lua</source>
+      </version>
+      <version name="1.1.4" author="gaspard" time="2026-01-22T09:16:59Z">
+        <changelog><![CDATA[- Fix favorites path stacking in extstate's file]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/490b02ab8b5932238c4ffff2b167269d636624db/General/gaspard_GaspaReaLauncher.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Master settings.lua" type="script" desc="Master settings">
