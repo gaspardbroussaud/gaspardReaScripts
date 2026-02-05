@@ -1,14 +1,14 @@
 --@description Toggle solo on track under mouse cursor exclusive
 --@author gaspard
---@version 1.0.2
---@changelog Fix unsolo
+--@version 1.0.3
+--@changelog Update solo - unsolo behaviour
 --@about Toggle solo on track under mouse cursor exclusive.
 
 local x, y = reaper.GetMousePosition()
 local track, info = reaper.GetTrackFromPoint(x, y)
 if not track or info ~= 0 then return end
 
-if reaper.CountSelectedTracks(0) == 1 and track == reaper.GetSelectedTrack(0, 0) then
+if reaper.GetMediaTrackInfo_Value(track, "I_SOLO") > 0 then
     reaper.SetMediaTrackInfo_Value(track, "I_SOLO", 0)
     return
 end
