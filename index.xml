@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="ea170cfdf2b45810186c4f05bba38570e0036d4a">
+<index version="1" name="Gaspard ReaScripts" commit="52668ea53e63a0eeb2055927cdc5863b440ae024">
   <category name="ArrangeView">
     <reapack name="gaspard_Mouse click in arrange view does not select track.lua" type="script" desc="Mouse click in arrange view does not select track">
       <metadata>
@@ -2618,6 +2618,10 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       <version name="1.0.1" author="gaspard" time="2026-02-05T11:32:33Z">
         <changelog><![CDATA[UI Refresh upgrade]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/ea170cfdf2b45810186c4f05bba38570e0036d4a/Track/gaspard_Toggle%20solo%20on%20track%20under%20mouse%20cursor%20exclusive.lua</source>
+      </version>
+      <version name="1.0.2" author="gaspard" time="2026-02-05T11:48:02Z">
+        <changelog><![CDATA[Fix unsolo]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/52668ea53e63a0eeb2055927cdc5863b440ae024/Track/gaspard_Toggle%20solo%20on%20track%20under%20mouse%20cursor%20exclusive.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Toggle solo on track under mouse cursor.lua" type="script" desc="Toggle solo on track under mouse cursor">
