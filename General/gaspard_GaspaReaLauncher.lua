@@ -1,8 +1,9 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 1.1.5
+--@version 1.1.6
 --@changelog
---  - Remove found text for next word from search in entry text
+--  - Add remove project from list using Delete key
+--  - Add folder relink for selected projects
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -139,6 +140,7 @@ local show_settings = false
 -----------------------------------------------------------------------
 
 local os_is_windows = reaper.GetOS():find("Win")
+local sep = os_is_windows and "\\" or "/"
 
 local project_list = {}
 local project_search = ""
@@ -292,6 +294,22 @@ local function DeleteRecentFavIni(path)
     end
 end
 
+local function UpdateRecentFavIni(path, new_path)
+    local fav_i = 1
+    local found = false
+    local extstate = true
+    while extstate do
+        extstate = reaper.GetExtState("GRL_RecentFav", string.format("fav%02d", fav_i))
+        if extstate == "" then break end
+        found = extstate == path
+        if found then
+            reaper.SetExtState("GRL_RecentFav", string.format("fav%02d", fav_i), new_path, true)
+            break
+        end
+        fav_i = fav_i + 1
+    end
+end
+
 local function GetRecentProjects()
     CleanRecentProjects()
     local i = 1
@@ -438,6 +456,34 @@ local function OpenProjectSelect(search_type)
 
         if Settings.close_on_open.value then open = false end
     end
+end
+
+local function RemoveProjectsSuppr()
+    local msg_text = proj_sel_num > 1 and "ies" or "y"
+    local msg_box = Settings.no_prompt_to_remove.value
+    if not msg_box then
+        msg_box = reaper.ShowMessageBox("The selected entr"..msg_text.." will be removed.", "REMOVE SELECTED ENTR"..string.upper(msg_text), 1) == 1
+    end
+    if msg_box then
+        for _, j_project in ipairs(project_list) do
+            if j_project.selected then
+                reaper.BR_Win32_WritePrivateProfileString("Recent", string.format("recent%02d", j_project.ini_line), "", ini_file)
+                DeleteRecentFavIni(j_project.path)
+            end
+        end
+        GetRecentProjects()
+    end
+end
+
+local function GetLastExistingFolder(path)
+    path = path:gsub("/\\", sep)
+    local found = os.rename(path, path)
+    while not found do
+        path = path:match("(.*)[/\\]") or ""
+        if path == "" then return path end
+        found = os.rename(path, path)
+    end
+    return path..sep
 end
 
 local function System_Loop()
@@ -697,6 +743,10 @@ local function ElementsDisplay()
                 reaper.ImGui_Text(ctx, GUI_STYLE.ICONS["FAVORITE"])
                 reaper.ImGui_PopStyleColor(ctx)
                 reaper.ImGui_PopFont(ctx)
+
+                if reaper.ImGui_IsKeyPressed(ctx, reaper.ImGui_Key_Delete()) --[[or KEYS.IsPressed(KEYS.CODES.DELETE)]] then
+                    RemoveProjectsSuppr()
+                end
             end
         end
 
@@ -746,10 +796,36 @@ local function ElementsDisplay()
         else
             reaper.ImGui_Selectable(ctx, "Relink project path", false)
             if reaper.ImGui_IsItemActive(ctx) then
-                local retval, selected_path = reaper.GetUserFileNameForRead("", "Select a REAPER project file", ".rpp")
-                if retval and selected_path ~= "" then
-                    reaper.BR_Win32_WritePrivateProfileString("Recent", string.format("recent%02d", curr_right_clc_proj.ini_line), selected_path, ini_file)
-                    GetRecentProjects()
+                if not project_already_selected or proj_sel_num == 1 then
+                    local retval, selected_path = reaper.GetUserFileNameForRead(GetLastExistingFolder(curr_right_clc_proj.path), "Select a REAPER project file", ".rpp")
+                    if retval and selected_path ~= "" then
+                        reaper.BR_Win32_WritePrivateProfileString("Recent", string.format("recent%02d", curr_right_clc_proj.ini_line), selected_path, ini_file)
+                        UpdateRecentFavIni(curr_right_clc_proj.path, selected_path)
+                        GetRecentProjects()
+                    end
+                else
+                    local retval, folder_path = reaper.JS_Dialog_BrowseForFolder("Select the projects' folder", GetLastExistingFolder(curr_right_clc_proj.path))
+                    if retval and folder_path ~= "" then
+                        local found_once = false
+                        for _, j_project in ipairs(project_list) do
+                            if j_project.selected and not j_project.exists then
+                                local test_path = folder_path..sep..j_project.name
+                                local found_path = reaper.file_exists(test_path..".rpp")
+                                if not found_path then
+                                    test_path = test_path..sep..j_project.name
+                                    found_path = reaper.file_exists(test_path..".rpp")
+                                end
+                                if found_path then
+                                    found_once = true
+                                    reaper.BR_Win32_WritePrivateProfileString("Recent", string.format("recent%02d", j_project.ini_line), test_path..".rpp", ini_file)
+                                    UpdateRecentFavIni(j_project.path, test_path..".rpp")
+                                end
+                            end
+                        end
+                        if found_once then
+                            GetRecentProjects()
+                        end
+                    end
                 end
             end
         end
