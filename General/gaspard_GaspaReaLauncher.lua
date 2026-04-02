@@ -1,9 +1,8 @@
 --@description GaspaReaLauncher
 --@author gaspard
---@version 1.1.6
+--@version 1.1.7
 --@changelog
---  - Add remove project from list using Delete key
---  - Add folder relink for selected projects
+--  - New project tab uses project template
 --@about
 --  # Gaspard Reaper Launcher
 --  Reaper Launcher for projects.
@@ -436,7 +435,8 @@ end
 
 local function NewProjectOpen(search_type)
     if search_type == "new_tab" then
-        reaper.Main_OnCommand(41929, 0) -- New project tab (ignore default template)
+        reaper.Main_OnCommand(40859, 0) -- New project tab
+        --reaper.Main_OnCommand(41929, 0) -- New project tab (ignore default template)
     elseif search_type == "current_tab" then
         reaper.Main_OnCommand(40023, 0) -- New project
     end
