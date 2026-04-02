@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="f07f568b73637f57b2b4492bfc24201e7d48024a">
+<index version="1" name="Gaspard ReaScripts" commit="d6dbdd695beae5843c377dbb01941fc5591cfbe6">
   <category name="ArrangeView">
     <reapack name="gaspard_Mouse click in arrange view does not select track.lua" type="script" desc="Mouse click in arrange view does not select track">
       <metadata>
@@ -343,6 +343,10 @@
         <changelog><![CDATA[- Add remove project from list using Delete key
 - Add folder relink for selected projects]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/f07f568b73637f57b2b4492bfc24201e7d48024a/General/gaspard_GaspaReaLauncher.lua</source>
+      </version>
+      <version name="1.1.7" author="gaspard" time="2026-04-02T09:08:11Z">
+        <changelog><![CDATA[- New project tab uses project template]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d6dbdd695beae5843c377dbb01941fc5591cfbe6/General/gaspard_GaspaReaLauncher.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Master settings.lua" type="script" desc="Master settings">
