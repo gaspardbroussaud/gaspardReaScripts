@@ -1,7 +1,7 @@
 --@description Insert ReaEQ on selected items
 --@author gaspard
---@version 1.0.0
---@changelog Init
+--@version 1.0.1
+--@changelog Open UI after insert only for first iteration
 --@about Insert ReaEQ on selected items.
 
 local sel_item_count = reaper.CountSelectedMediaItems(0)
@@ -19,6 +19,10 @@ end
 
 for _, item in ipairs(sel_items) do
     reaper.TakeFX_AddByName(reaper.GetMediaItemTake(item, 0), "ReaEQ", -1)
+
+    if i < 2 then
+        reaper.TakeFX_SetOpen(take, fx_index, true)
+    end
 end
 
 reaper.PreventUIRefresh(-1)
