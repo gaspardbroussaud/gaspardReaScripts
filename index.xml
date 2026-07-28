@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="404c465f70719450616130cf708a8277f2e5c86f">
+<index version="1" name="Gaspard ReaScripts" commit="5ea9dfbee3dd945b3ddba5f299fc1eb7d70cff53">
   <category name="ArrangeView">
     <reapack name="gaspard_Mouse click in arrange view does not select track.lua" type="script" desc="Mouse click in arrange view does not select track">
       <metadata>
@@ -1167,6 +1167,51 @@
       <version name="0.1" author="gaspard" time="2024-08-08T13:47:03Z">
         <changelog><![CDATA[Script creation]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d4f8256f3aea63b9d742aee6713882d719a5f775/Item/gaspard_Crop%20right%20X%20seconds%20of%20selected%20items.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Insert Raum on selected items.lua" type="script" desc="Insert Raum on selected items">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Insert Raum on selected items.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2026-07-28T14:07:29Z">
+        <changelog><![CDATA[Init]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/5ea9dfbee3dd945b3ddba5f299fc1eb7d70cff53/Item/gaspard_Insert%20Raum%20on%20selected%20items.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Insert ReaEQ on selected items.lua" type="script" desc="Insert ReaEQ on selected items">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Insert ReaEQ on selected items.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2026-07-28T14:07:29Z">
+        <changelog><![CDATA[Init]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/5ea9dfbee3dd945b3ddba5f299fc1eb7d70cff53/Item/gaspard_Insert%20ReaEQ%20on%20selected%20items.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Insert ReaLimit on selected items.lua" type="script" desc="Insert ReaLimit on selected items">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Insert ReaLimit on selected items.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2026-07-28T14:07:29Z">
+        <changelog><![CDATA[Init]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/5ea9dfbee3dd945b3ddba5f299fc1eb7d70cff53/Item/gaspard_Insert%20ReaLimit%20on%20selected%20items.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Reverse selected items stereo.lua" type="script" desc="Reverse selected items stereo">
