@@ -1,7 +1,7 @@
 --@description Insert Raum on selected items
 --@author gaspard
---@version 1.0.0
---@changelog Init
+--@version 1.0.1
+--@changelog Open UI after insert only for first iteration
 --@about Insert Raum on selected items.
 
 local sel_item_count = reaper.CountSelectedMediaItems(0)
@@ -17,8 +17,14 @@ for i = 1, sel_item_count do
     sel_items[i] = reaper.GetSelectedMediaItem(0, i - 1)
 end
 
-for _, item in ipairs(sel_items) do
-    reaper.TakeFX_AddByName(reaper.GetMediaItemTake(item, 0), "Raum", -1)
+for i, item in ipairs(sel_items) do
+    local take = reaper.GetMediaItemTake(item, 0)
+
+    local fx_index = reaper.TakeFX_AddByName(take, "Raum", -1)
+
+    if i < 2 then
+        reaper.TakeFX_SetOpen(take, fx_index, true)
+    end
 end
 
 reaper.PreventUIRefresh(-1)
