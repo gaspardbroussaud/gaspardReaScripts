@@ -1,8 +1,8 @@
 --@description Simple renamer
 --@author gaspard
---@version 1.0.7
+--@version 1.0.8
 --@changelog
---  - Update for new ReaImGui version
+--  - GaspaReaLauncher GUI style (icon top bar, floating settings panel)
 --@about
 --  ### Simple renamer
 --  - A simple and quick renamer via text replace for tracks, regions, markers, items (may add others later).
@@ -15,13 +15,29 @@ function SetButtonState(set)
     reaper.RefreshToolbar2(sec, cmd)
 end
 
--- Get GUI style from file
-function GetGuiStylesFromFile()
-    local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
-    local style = dofile(gui_style_settings_path)
-    style_font = style.font
-    style_vars = style.vars
-    style_colors = style.colors
+-- gaspard GUI libraries: GUI style and GUI system (icon buttons)
+GUI_STYLE = dofile(reaper.GetResourcePath() .. "/Scripts/Gaspard ReaScripts/Libraries/GUI_STYLE.lua")
+GUI_SYS = dofile(reaper.GetResourcePath() .. "/Scripts/Gaspard ReaScripts/Libraries/GUI_SYS.lua")
+
+-- Get script version with ReaPack (fallback: @version of this file)
+function GetScriptVersion()
+    local script_path = select(2, reaper.get_action_context())
+    if reaper.ReaPack_GetOwner then
+        local pkg = reaper.ReaPack_GetOwner(script_path)
+        if pkg then
+            local pkg_version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
+            reaper.ReaPack_FreeEntry(pkg)
+            if pkg_version ~= "" and pkg_version ~= "nil" then return pkg_version end
+        end
+    end
+    local file = io.open(script_path, "r")
+    if file then
+        local header = file:read(1024) or ""
+        file:close()
+        local file_version = header:match("@version%s+([%w%.]+)")
+        if file_version then return file_version end
+    end
+    return "1.0.0"
 end
 
 -- Init system variables
@@ -75,20 +91,17 @@ end
 -- All initial variable for script and GUI
 function InitialVariables()
     InitSystemVariables()
-    GetGuiStylesFromFile()
-    -- Get version from ReaPack
-    local script_path = select(2, reaper.get_action_context())
-    local pkg = reaper.ReaPack_GetOwner(script_path)
-    version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
-    reaper.ReaPack_FreeEntry(pkg)
+    version = GetScriptVersion()
     -- All variables
     og_window_width = 600
     og_window_height = 500
     window_width = og_window_width
     window_height = og_window_height
-    settings_amount_height = 0.6
+    min_width, min_height = 450, 250
+    window_x, window_y = 0, 0
     topbar_height = 30
-    small_font_size = style_font.size * 0.75
+    font_size = 16
+    icon_size = 22
     window_name = "SIMPLE RENAMER"
     project_name = reaper.GetProjectName(0)
     project_path = reaper.GetProjectPath()
@@ -101,7 +114,7 @@ function InitialVariables()
     replace_regions = Settings.replace_regions.value
     selection_based = Settings.selection_based.value
     if replace_items or replace_tracks or replace_markers or replace_regions then GetUserdatas() end
-    settings_one_changed = false
+    show_settings = false
     last_changed = nil
 end
 
@@ -109,54 +122,45 @@ end
 function Gui_Init()
     InitialVariables()
     ctx = reaper.ImGui_CreateContext('random_play_context')
-    font = reaper.ImGui_CreateFont(style_font.style)
-    small_font = reaper.ImGui_CreateFont(style_font.style, reaper.ImGui_FontFlags_Italic())
+    font = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ARIAL.CLASSIC)
+    italic_font = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ARIAL.CLASSIC, 0, reaper.ImGui_FontFlags_Italic())
+    icon_font = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ICONS)
     reaper.ImGui_Attach(ctx, font)
-    reaper.ImGui_Attach(ctx, small_font)
+    reaper.ImGui_Attach(ctx, italic_font)
+    reaper.ImGui_Attach(ctx, icon_font)
 end
 
--- GUI Top Bar
+-- GUI Top Bar (GaspaReaLauncher style)
 function Gui_TopBar()
-    -- GUI Menu Bar
-    if reaper.ImGui_BeginChild(ctx, "child_top_bar", window_width, 30, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
-        reaper.ImGui_Text(ctx, window_name)
+    reaper.ImGui_BeginGroup(ctx)
+    -- Name and version
+    reaper.ImGui_Text(ctx, window_name)
+    reaper.ImGui_SameLine(ctx)
+    reaper.ImGui_PushFont(ctx, italic_font, font_size * 0.75)
+    reaper.ImGui_Text(ctx, "v" .. version)
+    reaper.ImGui_PopFont(ctx)
 
-        reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing(), 5, 0)
-
-        reaper.ImGui_SameLine(ctx)
-
-        local w, _ = reaper.ImGui_CalcTextSize(ctx, "Settings X")
-        reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 40, 0)
-
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 40, 22, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
-            reaper.ImGui_Dummy(ctx, 3, 1)
-            reaper.ImGui_SameLine(ctx)
-            if reaper.ImGui_Button(ctx, 'Settings##settings_button') then
-                if not show_settings then ResetUnappliedSettings() end
-                show_settings = not show_settings
-                if settings_one_changed then
-                    ResetUnappliedSettings()
-                    settings_one_changed = false
-                end
-            end
-            reaper.ImGui_SameLine(ctx)
-            if reaper.ImGui_Button(ctx, 'X##quit_button') then
-                open = false
-            end
-            reaper.ImGui_EndChild(ctx)
+    -- Icon buttons (right to left)
+    local menu = {}
+    table.insert(menu, {icon = 'QUIT', hint = 'Close', font = icon_font, size = icon_size, right_click = false})
+    table.insert(menu, {icon = 'GEAR', hint = 'Settings', font = icon_font, size = icon_size, right_click = false})
+    local rv, button = GUI_SYS.IconButtonRight(ctx, menu, window_width)
+    if rv then
+        if button == 'QUIT' then
+            open = false
+        elseif button == 'GEAR' then
+            show_settings = not show_settings
         end
-
-        reaper.ImGui_PopStyleVar(ctx, 1)
-        reaper.ImGui_EndChild(ctx)
     end
+    reaper.ImGui_EndGroup(ctx)
 end
 
 -- Gui Elements
 function Gui_Elements()
     -- Set child section size (can use PushItemWidth for items without this setting) and center in window_width
     local child_width = window_width - 20
-    local child_height = window_height - topbar_height - small_font_size - 30
-    reaper.ImGui_SetCursorPosX(ctx, 10)
+    local _, child_height = reaper.ImGui_GetContentRegionAvail(ctx)
+    reaper.ImGui_Indent(ctx, 2) -- 10px margin without SetCursorPos (needs no trailing item)
     if reaper.ImGui_BeginChild(ctx, "child_all_elements", child_width, child_height, reaper.ImGui_ChildFlags_Borders(), no_scrollbar_flags) then
         local inner_child_width = child_width - 15
         if reaper.ImGui_BeginChild(ctx, "child_target_settings", inner_child_width, 24, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
@@ -241,7 +245,10 @@ function Gui_Elements()
         reaper.ImGui_Separator(ctx)
         reaper.ImGui_Dummy(ctx, 1, 1)
 
-        if reaper.ImGui_BeginChild(ctx, "child_preview_replace", inner_child_width, child_height - 24 - 50 - 50 - 15) then
+        -- Preview uses remaining height, keeping room for the APPLY button row
+        local _, preview_height = reaper.ImGui_GetContentRegionAvail(ctx)
+        preview_height = math.max(preview_height - reaper.ImGui_GetFrameHeightWithSpacing(ctx), 1)
+        if reaper.ImGui_BeginChild(ctx, "child_preview_replace", inner_child_width, preview_height) then
             DisplayUserdata()
 
             reaper.ImGui_EndChild(ctx)
@@ -261,100 +268,36 @@ function Gui_Elements()
 
         reaper.ImGui_EndChild(ctx)
     end
+    reaper.ImGui_Unindent(ctx, 2)
 end
 
--- Gui settings
+-- Settings panel (GaspaReaLauncher style: under top bar, right aligned, changes saved immediately)
 function Gui_Settings()
-    -- Set Settings Window visibility and settings
     local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoResize()
-    local settings_width = og_window_width - 350
-    local settings_height = og_window_height * settings_amount_height
-    reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
-    reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
-
-    local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
-    if settings_visible then
-        if reaper.ImGui_BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, reaper.ImGui_ChildFlags_Borders()) then
-            reaper.ImGui_Text(ctx, Settings.replace_items.name..":")
-            reaper.ImGui_SameLine(ctx)
-            changed, settings_replace_items = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_replace_items", settings_replace_items)
-            reaper.ImGui_SetItemTooltip(ctx, Settings.replace_items.description)
-            if changed then settings_one_changed = true end
-
-            reaper.ImGui_Text(ctx, Settings.replace_tracks.name..":")
-            reaper.ImGui_SameLine(ctx)
-            changed, settings_replace_tracks = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_replace_tracks", settings_replace_tracks)
-            reaper.ImGui_SetItemTooltip(ctx, Settings.replace_tracks.description)
-            if changed then settings_one_changed = true end
-
-            reaper.ImGui_Text(ctx, Settings.replace_markers.name..":")
-            reaper.ImGui_SameLine(ctx)
-            changed, settings_replace_markers = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_replace_markers", settings_replace_markers)
-            reaper.ImGui_SetItemTooltip(ctx, Settings.replace_markers.description)
-            if changed then settings_one_changed = true end
-
-            reaper.ImGui_Text(ctx, Settings.replace_regions.name..":")
-            reaper.ImGui_SameLine(ctx)
-            changed, settings_replace_regions = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_replace_regions", settings_replace_regions)
-            reaper.ImGui_SetItemTooltip(ctx, Settings.replace_regions.description)
-            if changed then settings_one_changed = true end
-
-            reaper.ImGui_Text(ctx, Settings.selection_based.name..":")
-            reaper.ImGui_SameLine(ctx)
-            changed, settings_selection_based = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_selection_based", settings_selection_based)
-            reaper.ImGui_SetItemTooltip(ctx, Settings.selection_based.description)
-            if changed then settings_one_changed = true end
-
-            reaper.ImGui_Text(ctx, Settings.tree_start_open.name..":")
-            reaper.ImGui_SameLine(ctx)
-            changed, settings_tree_start_open = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_tree_start_open", settings_tree_start_open)
-            reaper.ImGui_SetItemTooltip(ctx, Settings.tree_start_open.description)
-            if changed then settings_one_changed = true end
-
-            reaper.ImGui_Text(ctx, Settings.only_show_replace.name..":")
-            reaper.ImGui_SameLine(ctx)
-            changed, settings_only_show_replace = reaper.ImGui_Checkbox(ctx, "##checkbox_settings_only_show_replace", settings_only_show_replace)
-            reaper.ImGui_SetItemTooltip(ctx, Settings.only_show_replace.description)
-            if changed then settings_one_changed = true end
-
-            reaper.ImGui_EndChild(ctx)
-        end
-
-        reaper.ImGui_SetCursorPosX(ctx, settings_width - 80)
-        reaper.ImGui_SetCursorPosY(ctx, settings_height - 35)
-        if not settings_one_changed then disable = true
-        else disable = false end
-        if disable then reaper.ImGui_BeginDisabled(ctx) end
-        if reaper.ImGui_Button(ctx, "Apply##settings_apply", 70) then
-            ApplySettings()
-            gson.SaveJSON(settings_path, Settings)
-            settings_one_changed = false
-        end
-        if disable then reaper.ImGui_EndDisabled(ctx) end
-
-        reaper.ImGui_End(ctx)
-    else
+        | reaper.ImGui_WindowFlags_TopMost() | reaper.ImGui_WindowFlags_NoDecoration() | reaper.ImGui_WindowFlags_AlwaysAutoResize()
+    reaper.ImGui_SetNextWindowPos(ctx, window_x + window_width - 8, window_y + topbar_height + 5, reaper.ImGui_Cond_Always(), 1, 0)
+    local settings_visible = reaper.ImGui_Begin(ctx, '##settings_window', true, settings_flags)
+    if not settings_visible then
         show_settings = false
+        return
     end
 
-    if not settings_open then
-        if settings_one_changed then
-            ResetUnappliedSettings()
-            settings_one_changed = false
-        end
-        show_settings = false
-    end
-end
+    reaper.ImGui_Text(ctx, "SETTINGS")
+    reaper.ImGui_Separator(ctx)
 
--- Gui Version on bottom right
-function Gui_Version()
-    local text = "gaspard v"..version
-    reaper.ImGui_PushFont(ctx, small_font, small_font_size)
-    local w, h = reaper.ImGui_CalcTextSize(ctx, text)
-    reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
-    reaper.ImGui_SetCursorPosY(ctx, window_height - h - 10)
-    reaper.ImGui_Text(ctx, text)
-    reaper.ImGui_PopFont(ctx)
+    local settings_changed = false
+    for _, key in ipairs(Settings.order) do
+        local setting = Settings[key]
+        if setting and type(setting.value) == "boolean" then
+            local changed
+            changed, setting.value = reaper.ImGui_Checkbox(ctx, setting.name .. "##setting_" .. key, setting.value)
+            if changed then settings_changed = true end
+            reaper.ImGui_SetItemTooltip(ctx, setting.description)
+        end
+    end
+    if settings_changed then gson.SaveJSON(settings_path, Settings) end
+
+    reaper.ImGui_End(ctx)
 end
 
 -- GUI function for all elements
@@ -364,7 +307,10 @@ function Gui_Loop()
     local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
     reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
     -- Font
-    reaper.ImGui_PushFont(ctx, font, style_font.size)
+    reaper.ImGui_PushFont(ctx, font, font_size)
+    -- Min size: title + version + icons must fit
+    local min_w = math.max(min_width, reaper.ImGui_CalcTextSize(ctx, window_name) + 120)
+    reaper.ImGui_SetNextWindowSizeConstraints(ctx, min_w, min_height, math.huge, math.huge)
     -- Begin
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
@@ -386,9 +332,6 @@ function Gui_Loop()
         -- All Gui Elements
         Gui_Elements()
 
-        -- Show script version on  bottom right
-        Gui_Version()
-
         reaper.ImGui_End(ctx)
     end
 
@@ -401,21 +344,18 @@ end
 
 -- Push all GUI style settings
 function Gui_PushTheme()
-    -- Style Vars
-    for i = 1, #style_vars do
-        reaper.ImGui_PushStyleVar(ctx, style_vars[i].var, style_vars[i].value)
+    for i = 1, #GUI_STYLE.VARS do
+        reaper.ImGui_PushStyleVar(ctx, GUI_STYLE.VARS[i].var, GUI_STYLE.VARS[i].value)
     end
-
-    -- Style Colors
-    for i = 1, #style_colors do
-        reaper.ImGui_PushStyleColor(ctx, style_colors[i].col, style_colors[i].value)
+    for i = 1, #GUI_STYLE.COLORS do
+        reaper.ImGui_PushStyleColor(ctx, GUI_STYLE.COLORS[i].col, GUI_STYLE.COLORS[i].value)
     end
 end
 
 -- Pop all GUI style settings
 function Gui_PopTheme()
-    reaper.ImGui_PopStyleVar(ctx, #style_vars)
-    reaper.ImGui_PopStyleColor(ctx, #style_colors)
+    reaper.ImGui_PopStyleVar(ctx, #GUI_STYLE.VARS)
+    reaper.ImGui_PopStyleColor(ctx, #GUI_STYLE.COLORS)
 end
 
 ---------------------------------------------------
@@ -429,28 +369,6 @@ function ProjectChange()
     else
         return false
     end
-end
-
--- Reset unapplied settings on settings window close
-function ResetUnappliedSettings()
-    settings_replace_items = Settings.replace_items.value
-    settings_replace_tracks = Settings.replace_tracks.value
-    settings_replace_markers = Settings.replace_markers.value
-    settings_replace_regions = Settings.replace_regions.value
-    settings_selection_based = Settings.selection_based.value
-    settings_tree_start_open = Settings.tree_start_open.value
-    settings_only_show_replace = Settings.only_show_replace.value
-end
-
--- Apply all settings in file
-function ApplySettings()
-    Settings.replace_items.value = settings_replace_items
-    Settings.replace_tracks.value = settings_replace_tracks
-    Settings.replace_markers.value = settings_replace_markers
-    Settings.replace_regions.value = settings_replace_regions
-    Settings.selection_based.value = settings_selection_based
-    Settings.tree_start_open.value = settings_tree_start_open
-    Settings.only_show_replace.value = settings_only_show_replace
 end
 
 -- Get all items from project in table

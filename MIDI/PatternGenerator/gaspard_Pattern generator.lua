@@ -1,25 +1,43 @@
 --@noindex
 --@description Pattern generator
 --@author gaspard
---@version 0.0.10b
+--@version 0.0.11b
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/Gui_Elements/*.lua
 --@changelog
---  - Update for new ReaImGui version
+--  - GaspaReaLauncher GUI style (icon top bar, floating settings panel)
 --@about
 --  ### Pattern generator
 --  - A MIDI pattern generator.
+
+-- Get script version with ReaPack (fallback: @version of this file)
+function GetScriptVersion()
+    local script_path = select(2, reaper.get_action_context())
+    if reaper.ReaPack_GetOwner then
+        local pkg = reaper.ReaPack_GetOwner(script_path)
+        if pkg then
+            local pkg_version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
+            reaper.ReaPack_FreeEntry(pkg)
+            if pkg_version ~= "" and pkg_version ~= "nil" then return pkg_version end
+        end
+    end
+    local file = io.open(script_path, "r")
+    if file then
+        local header = file:read(1024) or ""
+        file:close()
+        local file_version = header:match("@version%s+([%w%.]+)")
+        if file_version then return file_version end
+    end
+    return "1.0.0"
+end
 
 -- Toggle button state in Reaper
 function SetButtonState(set)
     local _, name, sec, cmd, _, _, _ = reaper.get_action_context()
     if set == 1 then
       action_name = string.match(name, 'gaspard_(.-)%.lua')
-      -- Get version from ReaPack
-      local pkg = reaper.ReaPack_GetOwner(name)
-      version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
-      reaper.ReaPack_FreeEntry(pkg)
+      version = GetScriptVersion()
     else
       System.ClearOnExitIfEmpty()
     end
@@ -32,6 +50,10 @@ SetButtonState(1)
 dofile(reaper.GetResourcePath() ..
        '/Scripts/ReaTeam Extensions/API/imgui.lua')
   ('0.10.0.1') -- current version at the time of writing the script
+
+-- gaspard libraries: GUI style and GUI system (icon buttons)
+GUI_STYLE = dofile(reaper.GetResourcePath() .. "/Scripts/Gaspard ReaScripts/Libraries/GUI_STYLE.lua")
+GUI_SYS = dofile(reaper.GetResourcePath() .. "/Scripts/Gaspard ReaScripts/Libraries/GUI_SYS.lua")
 
 package.path = package.path..';'..debug.getinfo(1, 'S').source:match [[^@?(.*[\/])[^\/]-$]] .. '?.lua' -- GET DIRECTORY FOR REQUIRE
 System = require('Utilities/System')

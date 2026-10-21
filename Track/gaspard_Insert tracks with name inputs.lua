@@ -1,8 +1,8 @@
 --@description Insert tracks with name inputs
 --@author gaspard
---@version 1.0.4
+--@version 1.0.5
 --@changelog
---  - Fix topbar mask
+--  - GaspaReaLauncher GUI style (icon top bar, floating settings panel)
 --@about
 --  ###Insert tracks with name inputs
 --  - How to use:
@@ -18,30 +18,45 @@ function SetButtonState(set)
     reaper.RefreshToolbar2(sec, cmd)
 end
 
--- Get GUI style from file
-function GetGuiStylesFromFile()
-    local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
-    local style = dofile(gui_style_settings_path)
-    style_font = style.font
-    style_vars = style.vars
-    style_colors = style.colors
+-- GUI style and GUI system (icon buttons) libraries
+GUI_STYLE = dofile(reaper.GetResourcePath() .. "/Scripts/Gaspard ReaScripts/Libraries/GUI_STYLE.lua")
+GUI_SYS = dofile(reaper.GetResourcePath() .. "/Scripts/Gaspard ReaScripts/Libraries/GUI_SYS.lua")
+
+-- Get script version with ReaPack (fallback: @version of this file)
+function GetScriptVersion()
+    local script_path = select(2, reaper.get_action_context())
+    if reaper.ReaPack_GetOwner then
+        local pkg = reaper.ReaPack_GetOwner(script_path)
+        if pkg then
+            local pkg_version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
+            reaper.ReaPack_FreeEntry(pkg)
+            if pkg_version ~= "" and pkg_version ~= "nil" then return pkg_version end
+        end
+    end
+    local file = io.open(script_path, "r")
+    if file then
+        local header = file:read(1024) or ""
+        file:close()
+        local file_version = header:match("@version%s+([%w%.]+)")
+        if file_version then return file_version end
+    end
+    return "1.0.0"
 end
 
 -- All initial variable for script and GUI
 function InitialVariables()
-    GetGuiStylesFromFile()
-    -- Get script version with Reapack
-    local script_path = select(2, reaper.get_action_context())
-    local pkg = reaper.ReaPack_GetOwner(script_path)
-    version = tostring(select(7, reaper.ReaPack_GetEntryInfo(pkg)))
-    reaper.ReaPack_FreeEntry(pkg)
+    version = GetScriptVersion()
     -- All script variables
     og_window_width = 275
     og_window_height = 285
+    min_width, min_height = 250, 200
     window_width = og_window_width
     window_height = og_window_height
+    window_x, window_y = 0, 0
     topbar_height = 30
-    small_font_size = style_font.size * 0.75
+    font_size = 16
+    small_font_size = font_size * 0.75
+    icon_size = 22
     window_name = "TRACK INSERTOR"
     project_name = reaper.GetProjectName(0)
     project_path = reaper.GetProjectPath()
@@ -78,44 +93,39 @@ end
 function Gui_Init()
     InitialVariables()
     ctx = reaper.ImGui_CreateContext('random_play_context')
-    font = reaper.ImGui_CreateFont(style_font.style)
-    small_font = reaper.ImGui_CreateFont(style_font.style, reaper.ImGui_FontFlags_Italic())
+    font = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ARIAL.CLASSIC)
+    italic_font = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ARIAL.CLASSIC, 0, reaper.ImGui_FontFlags_Italic())
+    icon_font = reaper.ImGui_CreateFontFromFile(GUI_STYLE.FONTS.ICONS)
     reaper.ImGui_Attach(ctx, font)
-    reaper.ImGui_Attach(ctx, small_font)
+    reaper.ImGui_Attach(ctx, italic_font)
+    reaper.ImGui_Attach(ctx, icon_font)
 end
 
--- GUI Top Bar
+-- GUI Top Bar (GaspaReaLauncher style)
 function Gui_TopBar()
-    -- GUI Menu Bar
-    if reaper.ImGui_BeginChild(ctx, "child_top_bar", window_width, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
-        reaper.ImGui_Text(ctx, window_name)
+    reaper.ImGui_BeginGroup(ctx)
+    -- Name and version
+    reaper.ImGui_Text(ctx, window_name)
+    reaper.ImGui_SameLine(ctx)
+    reaper.ImGui_PushFont(ctx, italic_font, small_font_size)
+    reaper.ImGui_Text(ctx, "v" .. version)
+    reaper.ImGui_PopFont(ctx)
 
-        reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing(), 5, 0)
-
-        reaper.ImGui_SameLine(ctx)
-
-        local w, _ = reaper.ImGui_CalcTextSize(ctx, "X")
-        reaper.ImGui_SetCursorPos(ctx, reaper.ImGui_GetWindowWidth(ctx) - w - 35, 0)
-
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", w + 35, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
-            reaper.ImGui_Dummy(ctx, 3, 1)
-            reaper.ImGui_SameLine(ctx)
-            if reaper.ImGui_Button(ctx, 'X##quit_button') then
-                open = false
-            end
-            reaper.ImGui_EndChild(ctx)
+    -- Icon buttons (right to left)
+    local menu = {}
+    table.insert(menu, {icon = 'QUIT', hint = 'Close', font = icon_font, size = icon_size, right_click = false})
+    local rv, button = GUI_SYS.IconButtonRight(ctx, menu, window_width)
+    if rv then
+        if button == 'QUIT' then
+            open = false
         end
-
-        reaper.ImGui_PopStyleVar(ctx, 1)
-        reaper.ImGui_EndChild(ctx)
     end
+    reaper.ImGui_EndGroup(ctx)
 end
 
 -- Gui Elements
 function Gui_Elements()
-    local child_main_x = window_width - 20
-    local child_main_y = window_height - topbar_height - small_font_size - 30
-    reaper.ImGui_SetCursorPosX(ctx, 10)
+    local child_main_x, child_main_y = reaper.ImGui_GetContentRegionAvail(ctx)
     if reaper.ImGui_BeginChild(ctx, "child_main_elements", child_main_x, child_main_y, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
 
         reaper.ImGui_Text(ctx, "Names (one each line):")
@@ -138,18 +148,6 @@ function Gui_Elements()
 
         reaper.ImGui_EndChild(ctx)
     end
-
-    reaper.ImGui_Dummy(ctx, 1, 1)
-end
-
--- Gui Version on bottom right
-function Gui_Version()
-    reaper.ImGui_PushFont(ctx, small_font, small_font_size)
-    local w, h = reaper.ImGui_CalcTextSize(ctx, "v"..version)
-    reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
-    reaper.ImGui_SetCursorPosY(ctx, window_height - h - 10)
-    reaper.ImGui_Text(ctx, "v"..version)
-    reaper.ImGui_PopFont(ctx)
 end
 
 -- GUI function for all elements
@@ -158,8 +156,9 @@ function Gui_Loop()
     -- Window Settings
     local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | no_scrollbar_flags
     reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
+    reaper.ImGui_SetNextWindowSizeConstraints(ctx, min_width, min_height, math.huge, math.huge)
     -- Font
-    reaper.ImGui_PushFont(ctx, font, style_font.size)
+    reaper.ImGui_PushFont(ctx, font, font_size)
     -- Begin
     visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
     window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
@@ -174,9 +173,6 @@ function Gui_Loop()
         -- All Gui Elements
         Gui_Elements()
 
-        -- Show script version on  bottom right
-        Gui_Version()
-
         reaper.ImGui_End(ctx)
     end
 
@@ -189,21 +185,18 @@ end
 
 -- Push all GUI style settings
 function Gui_PushTheme()
-    -- Style Vars
-    for i = 1, #style_vars do
-        reaper.ImGui_PushStyleVar(ctx, style_vars[i].var, style_vars[i].value)
+    for i = 1, #GUI_STYLE.VARS do
+        reaper.ImGui_PushStyleVar(ctx, GUI_STYLE.VARS[i].var, GUI_STYLE.VARS[i].value)
     end
-
-    -- Style Colors
-    for i = 1, #style_colors do
-        reaper.ImGui_PushStyleColor(ctx, style_colors[i].col, style_colors[i].value)
+    for i = 1, #GUI_STYLE.COLORS do
+        reaper.ImGui_PushStyleColor(ctx, GUI_STYLE.COLORS[i].col, GUI_STYLE.COLORS[i].value)
     end
 end
 
 -- Pop all GUI style settings
 function Gui_PopTheme()
-    reaper.ImGui_PopStyleVar(ctx, #style_vars)
-    reaper.ImGui_PopStyleColor(ctx, #style_colors)
+    reaper.ImGui_PopStyleVar(ctx, #GUI_STYLE.VARS)
+    reaper.ImGui_PopStyleColor(ctx, #GUI_STYLE.COLORS)
 end
 
 -- Main script execution
