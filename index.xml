@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="6d58384a467b03fa16a13c26b58e7d9781c0a080">
+<index version="1" name="Gaspard ReaScripts" commit="2743c0ed5ab3719e814a499b275cf4bc4d7294d1">
   <category name="ArrangeView">
     <reapack name="gaspard_Mouse click in arrange view does not select track.lua" type="script" desc="Mouse click in arrange view does not select track">
       <metadata>
@@ -73,6 +73,10 @@
       <version name="1.0.2" author="gaspard" time="2025-08-18T12:51:00Z">
         <changelog><![CDATA[- Update font size]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/689f86cbd2e53d874ea24dd8f48b595b7d6566ce/Debug/gaspard_Get%20userdata%20from%20GUID.lua</source>
+      </version>
+      <version name="1.0.3" author="gaspard" time="2026-10-21T14:22:09Z">
+        <changelog><![CDATA[- GaspaReaLauncher GUI style (icon top bar, floating settings panel)]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/2743c0ed5ab3719e814a499b275cf4bc4d7294d1/Debug/gaspard_Get%20userdata%20from%20GUID.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Show control ID of top level window under mouse.lua" type="script" desc="Show control ID of top level window under mouse">
@@ -176,6 +180,10 @@
       <version name="0.1.9b" author="gaspard" time="2025-08-18T14:47:30Z">
         <changelog><![CDATA[- Update for new ReaImGui version]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/dfe46c75070e8ecb5202cb1018c2ad1ca1467c61/General/gaspard_Complete%20selection.lua</source>
+      </version>
+      <version name="0.1.10b" author="gaspard" time="2026-10-21T14:22:09Z">
+        <changelog><![CDATA[- GaspaReaLauncher GUI style (icon top bar, floating settings panel)]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/2743c0ed5ab3719e814a499b275cf4bc4d7294d1/General/gaspard_Complete%20selection.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Detect keyboard input to VKB and set state to on.lua" type="script" desc="Detect keyboard input to VKB and set state to on">
@@ -466,6 +474,10 @@
 - Add window size constrains]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/78394bc17cf01730741da9d3dc71924b2e0a9ed0/General/gaspard_Master%20settings.lua</source>
       </version>
+      <version name="1.1.12" author="gaspard" time="2026-10-21T14:22:09Z">
+        <changelog><![CDATA[- GaspaReaLauncher GUI style (icon top bar, floating settings panel)]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/2743c0ed5ab3719e814a499b275cf4bc4d7294d1/General/gaspard_Master%20settings.lua</source>
+      </version>
     </reapack>
     <reapack name="gaspard_Prompt to quit REAPER.lua" type="script" desc="Prompt to quit REAPER">
       <metadata>
@@ -528,6 +540,10 @@
       <version name="1.0.7" author="gaspard" time="2025-08-18T14:47:30Z">
         <changelog><![CDATA[- Update for new ReaImGui version]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/dfe46c75070e8ecb5202cb1018c2ad1ca1467c61/General/gaspard_Simple%20renamer.lua</source>
+      </version>
+      <version name="1.0.8" author="gaspard" time="2026-10-21T14:22:09Z">
+        <changelog><![CDATA[- GaspaReaLauncher GUI style (icon top bar, floating settings panel)]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/2743c0ed5ab3719e814a499b275cf4bc4d7294d1/General/gaspard_Simple%20renamer.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Toggle video window saving state in project.lua" type="script" desc="Toggle video window saving state in project">
@@ -1571,6 +1587,10 @@
         <changelog><![CDATA[- Update for new ReaImGui version]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/dfe46c75070e8ecb5202cb1018c2ad1ca1467c61/Marker/gaspard_Set%20marker%20to%20first%20transient%20in%20selected%20items%20using%20name%20pattern.lua</source>
       </version>
+      <version name="1.0.5" author="gaspard" time="2026-10-21T14:22:09Z">
+        <changelog><![CDATA[- GaspaReaLauncher GUI style (icon top bar, floating settings panel)]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/2743c0ed5ab3719e814a499b275cf4bc4d7294d1/Marker/gaspard_Set%20marker%20to%20first%20transient%20in%20selected%20items%20using%20name%20pattern.lua</source>
+      </version>
     </reapack>
     <reapack name="gaspard_Set marker to first transient in selected items.lua" type="script" desc="Set marker to first transient in selected items">
       <metadata>
@@ -2060,6 +2080,10 @@
         <changelog><![CDATA[- Fix region not set if numbered]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/4abe2c9a90c9d8fc7bcc3d7ae7432772a0b33376/Region/gaspard_Set%20region%20render%20matrix%20to%20same%20named%20track.lua</source>
       </version>
+      <version name="1.0.7" author="gaspard" time="2026-10-21T14:22:09Z">
+        <changelog><![CDATA[- GaspaReaLauncher GUI style (icon top bar, floating settings panel)]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/2743c0ed5ab3719e814a499b275cf4bc4d7294d1/Region/gaspard_Set%20region%20render%20matrix%20to%20same%20named%20track.lua</source>
+      </version>
     </reapack>
   </category>
   <category name="TCP">
@@ -2369,6 +2393,10 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
         <changelog><![CDATA[- Fix topbar height]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/7c54c3942ce60409f0d31073fc3389e4adc2b856/Timeline/gaspard_Random%20play%20point%20and%20time%20selection%20size.lua</source>
       </version>
+      <version name="1.1.0" author="gaspard" time="2026-10-21T14:22:09Z">
+        <changelog><![CDATA[- GaspaReaLauncher GUI style (icon top bar, floating settings panel)]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/2743c0ed5ab3719e814a499b275cf4bc4d7294d1/Timeline/gaspard_Random%20play%20point%20and%20time%20selection%20size.lua</source>
+      </version>
     </reapack>
     <reapack name="gaspard_Remove selected even items in timeline order on multiple tracks.lua" type="script" desc="Remove selected even items in timeline order on multiple tracks">
       <metadata>
@@ -2620,6 +2648,10 @@ Prevent the use of decimal number for number of copies variable.  ]]></changelog
       <version name="1.0.4" author="gaspard" time="2025-08-19T09:50:51Z">
         <changelog><![CDATA[- Fix topbar mask]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/78394bc17cf01730741da9d3dc71924b2e0a9ed0/Track/gaspard_Insert%20tracks%20with%20name%20inputs.lua</source>
+      </version>
+      <version name="1.0.5" author="gaspard" time="2026-10-21T14:22:09Z">
+        <changelog><![CDATA[- GaspaReaLauncher GUI style (icon top bar, floating settings panel)]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/2743c0ed5ab3719e814a499b275cf4bc4d7294d1/Track/gaspard_Insert%20tracks%20with%20name%20inputs.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Invert selected tracks phase, add 'inv phase' in name and change color.lua" type="script" desc="Invert selected tracks phase, add 'inv phase' in name and change color">
