@@ -1,9 +1,11 @@
 -- @description Track Visibility Manager
 -- @author gaspard
--- @version 1.4.0
+-- @version 1.4.1
 -- @provides
 --    [nomain] Utilities/*.lua
 -- @changelog
+--  - Fix re-shown tracks staying locked and muted (show -> unlock -> restore mute order)
+--  - Mute/solo links and buttons enabled by default
 --  - New GUI style shared with GaspaReaLauncher (GUI_STYLE / GUI_SYS libraries, icon top bar, floating settings panel)
 --  - Migrate to the ReaImGui 0.10 module API (ImGui.*)
 --  - Fix hidden tracks displayed as visible (number used as boolean in checkbox)
@@ -23,7 +25,7 @@
 --  - You can change settings for links between manager and TCP to control selection, mute, solo, and hide/show tracks.
 --  - Set an action ID in settings to use with F key while in manager window's focus.
 
-local SCRIPT_VERSION = "1.4.0"
+local SCRIPT_VERSION = "1.4.1"
 local script_path = debug.getinfo(1, "S").source:match([[^@?(.*[\/])[^\/]-$]])
 
 -- Dependencies check
