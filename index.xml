@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="04c98fdc525d8b227c5e04db0d53e7dc5d429f99">
+<index version="1" name="Gaspard ReaScripts" commit="218c2a0f266726c868506d03f611fd22e868f2a4">
   <category name="ArrangeView">
     <reapack name="gaspard_Mouse click in arrange view does not select track.lua" type="script" desc="Mouse click in arrange view does not select track">
       <metadata>
@@ -843,6 +843,33 @@
         <source file="Utilities/GUI_Elements/Gui_Settings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/04c98fdc525d8b227c5e04db0d53e7dc5d429f99/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Settings.lua</source>
         <source file="Utilities/GUI_Elements/Gui_Userdata.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/04c98fdc525d8b227c5e04db0d53e7dc5d429f99/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Userdata.lua</source>
       </version>
+      <version name="1.1.1" author="gaspard" time="2026-10-21T10:31:43Z">
+        <changelog><![CDATA[- New GUI style shared with GaspaReaLauncher (GUI_STYLE / GUI_SYS libraries, icon top bar, floating panels)
+- Migrate to the ReaImGui 0.10 module API (ImGui.*)
+- Use the new REAPER region/marker API when available (legacy fallback kept)
+- Fix marker/region renaming targeting the wrong marker (enumeration index vs displayed number)
+- Fix renaming markers/regions to an empty name and keep their colors
+- Fix inverted PreventUIRefresh calls
+- Fix Ctrl+A crash when a data type is empty in the project
+- Fix "%" in replace text breaking the rename, ignore empty search text
+- Fix accents/UTF-8 characters in case rules (é -> É, élan -> Élan)
+- Fix preset list not refreshing after save/remove (EnumerateFiles cache)
+- Fix crash when the script is not installed through ReaPack or js_ReaScriptAPI is missing
+- Use active take name for items, real track name (P_NAME) for tracks
+- Big performance improvement: project is only re-read when it changes, previews are cached, lists are clipped
+- Project is no longer marked as modified just by opening the script
+- Link selection now also works for markers and regions (REAPER with region/marker API)
+- Settings are kept (merged) on update instead of being erased
+- Delete key removes selected rules, shortcuts only act when the window is focused]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/218c2a0f266726c868506d03f611fd22e868f2a4/General/Complete%20Renamer/gaspard_Complete%20renamer.lua</source>
+        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/218c2a0f266726c868506d03f611fd22e868f2a4/General/Complete%20Renamer/Utilities/System.lua</source>
+        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/218c2a0f266726c868506d03f611fd22e868f2a4/General/Complete%20Renamer/Utilities/UserInterface.lua</source>
+        <source file="Utilities/GUI_Elements/GUI_Presets.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/218c2a0f266726c868506d03f611fd22e868f2a4/General/Complete%20Renamer/Utilities/GUI_Elements/GUI_Presets.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Rules.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/218c2a0f266726c868506d03f611fd22e868f2a4/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Rules.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Rules_Popup.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/218c2a0f266726c868506d03f611fd22e868f2a4/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Rules_Popup.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Settings.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/218c2a0f266726c868506d03f611fd22e868f2a4/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Settings.lua</source>
+        <source file="Utilities/GUI_Elements/Gui_Userdata.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/218c2a0f266726c868506d03f611fd22e868f2a4/General/Complete%20Renamer/Utilities/GUI_Elements/Gui_Userdata.lua</source>
+      </version>
     </reapack>
   </category>
   <category name="General/LayerManipulator">
@@ -1113,6 +1140,25 @@
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d74fc18514caa48d6476080858c54ffead53c592/General/TrackVisibilityManager/gaspard_Track%20Visibility%20Manager.lua</source>
         <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d74fc18514caa48d6476080858c54ffead53c592/General/TrackVisibilityManager/Utilities/System.lua</source>
         <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/d74fc18514caa48d6476080858c54ffead53c592/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
+      </version>
+      <version name="1.4.0" author="gaspard" time="2026-10-21T10:31:43Z">
+        <changelog><![CDATA[- New GUI style shared with GaspaReaLauncher (GUI_STYLE / GUI_SYS libraries, icon top bar, floating settings panel)
+- Migrate to the ReaImGui 0.10 module API (ImGui.*)
+- Fix hidden tracks displayed as visible (number used as boolean in checkbox)
+- Fix selection not restored correctly after hide/show (hidden tracks stayed selected)
+- Fix empty undo points flooding the undo history when "Link TCP collapse" is enabled
+- Fix solo button setting "solo in place" when clicking an implied solo track
+- Fix F key, Ctrl+A and Escape triggering while typing in a text field or when window is not focused
+- Fix Ctrl/Shift detection when several modifiers are held
+- Fix GUI collapse state lost when the project changes (unlinked mode)
+- Hide/show folder children without SWS (SWS no longer required)
+- Mute state before hiding is stored in the project (P_EXT) instead of a track height hack (old hidden tracks still supported)
+- Command ID setting accepts numeric and named command IDs
+- Big performance improvement: track data computed in one pass, only visible rows are drawn
+- Settings are kept (merged) on update and new settings appear automatically]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/218c2a0f266726c868506d03f611fd22e868f2a4/General/TrackVisibilityManager/gaspard_Track%20Visibility%20Manager.lua</source>
+        <source file="Utilities/System.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/218c2a0f266726c868506d03f611fd22e868f2a4/General/TrackVisibilityManager/Utilities/System.lua</source>
+        <source file="Utilities/UserInterface.lua">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/218c2a0f266726c868506d03f611fd22e868f2a4/General/TrackVisibilityManager/Utilities/UserInterface.lua</source>
       </version>
     </reapack>
   </category>
