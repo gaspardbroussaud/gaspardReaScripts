@@ -7,6 +7,9 @@ local presets_window = {}
 
 local selected_preset = nil
 local preset_search = ""
+local PRESETS_WIDTH, PRESETS_HEIGHT = 360, 330
+local PANEL_FLAGS = ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_NoScrollbar | ImGui.WindowFlags_NoResize
+    | ImGui.WindowFlags_TopMost | ImGui.WindowFlags_NoDecoration
 
 local function ResetVariables()
     preset_search = ""
@@ -26,92 +29,88 @@ local function PresetExists(name)
     return false
 end
 
+-- Presets panel (GaspaReaLauncher style)
 function presets_window.Show()
-    local presets_flags = ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_NoScrollbar | ImGui.WindowFlags_NoResize
-    local presets_width = 360
-    local presets_height = 300
-    ImGui.SetNextWindowSize(ctx, presets_width, presets_height, ImGui.Cond_Once)
-    ImGui.SetNextWindowPos(ctx, window_x + (window_width - presets_width) * 0.5, window_y + 10, ImGui.Cond_Appearing)
-    local presets_visible, presets_open = ImGui.Begin(ctx, 'PRESETS', true, presets_flags)
-    if presets_visible then
-        ImGui.Text(ctx, "Name:")
-        ImGui.SameLine(ctx)
-        ImGui.SetNextItemWidth(ctx, -1)
-        _, preset_search = ImGui.InputText(ctx, "##inputtext_search", preset_search)
-        ImGui.SetItemTooltip(ctx, "Enter preset name to search or to save new.\nIf a preset exists with this name, it will be erased on SAVE.")
+    local x, y = Gui_PanelPosition()
+    ImGui.SetNextWindowSize(ctx, PRESETS_WIDTH, PRESETS_HEIGHT, ImGui.Cond_Always)
+    ImGui.SetNextWindowPos(ctx, x, y, ImGui.Cond_Always, 1, 0)
+    local presets_visible = ImGui.Begin(ctx, '##presets_window', true, PANEL_FLAGS)
+    if not presets_visible then
+        show_presets = false
+        return
+    end
 
-        if ImGui.BeginChild(ctx, "child_presets_window", presets_width - 16, presets_height - 100, ImGui.ChildFlags_Borders) then
-            if ImGui.BeginListBox(ctx, "##listbox_presets", -1, -1) then
-                local search = preset_search:lower()
-                for i, preset in ipairs(System.presets) do
-                    if search == "" or preset.name:lower():find(search, 1, true) then
-                        if ImGui.Selectable(ctx, preset.name .. "##" .. tostring(i), preset == selected_preset, ImGui.SelectableFlags_AllowDoubleClick) then
-                            selected_preset = preset
-                            -- On double click: import preset (replace rules)
-                            if ImGui.IsMouseDoubleClicked(ctx, ImGui.MouseButton_Left) then
-                                System.ImportPresetReplaceRuleset(preset)
-                                ResetVariables()
-                            end
-                        end
-                    elseif preset == selected_preset then
-                        selected_preset = nil
+    ImGui.Text(ctx, "PRESETS")
+    ImGui.Separator(ctx)
+
+    ImGui.Text(ctx, "Name:")
+    ImGui.SameLine(ctx)
+    ImGui.SetNextItemWidth(ctx, -1)
+    _, preset_search = ImGui.InputText(ctx, "##inputtext_search", preset_search)
+    ImGui.SetItemTooltip(ctx, "Enter preset name to search or to save new.\nIf a preset exists with this name, it will be erased on SAVE.")
+
+    if ImGui.BeginListBox(ctx, "##listbox_presets", -1, PRESETS_HEIGHT - 125) then
+        local search = preset_search:lower()
+        for i, preset in ipairs(System.presets) do
+            if search == "" or preset.name:lower():find(search, 1, true) then
+                if ImGui.Selectable(ctx, preset.name .. "##" .. tostring(i), preset == selected_preset, ImGui.SelectableFlags_AllowDoubleClick) then
+                    selected_preset = preset
+                    -- On double click: import preset (replace rules)
+                    if ImGui.IsMouseDoubleClicked(ctx, ImGui.MouseButton_Left) then
+                        System.ImportPresetReplaceRuleset(preset)
+                        ResetVariables()
                     end
                 end
-                ImGui.EndListBox(ctx)
+            elseif preset == selected_preset then
+                selected_preset = nil
             end
-            ImGui.EndChild(ctx)
         end
-
-        -- SAVE
-        local name_valid = preset_search:match("%S") ~= nil
-        local disable = not name_valid or #System.ruleset == 0
-        if disable then ImGui.BeginDisabled(ctx) end
-        ImGui.SetCursorPosY(ctx, presets_height - 35)
-        local save_label = (name_valid and PresetExists(preset_search)) and "OVERWRITE" or "SAVE"
-        if ImGui.Button(ctx, save_label .. "##presets_save", 80) then
-            System.SavePreset(preset_search, System.ruleset)
-            System.ScanPresetFiles()
-            ResetVariables()
-        end
-        if disable then ImGui.EndDisabled(ctx) end
-        ImGui.SameLine(ctx)
-
-        -- REMOVE / IMPORT / ADD need a selected preset
-        disable = selected_preset == nil
-        if disable then ImGui.BeginDisabled(ctx) end
-
-        ImGui.SetCursorPosY(ctx, presets_height - 35)
-        if ImGui.Button(ctx, "REMOVE##presets_remove", 80) then
-            System.RemovePreset(selected_preset)
-            selected_preset = nil
-            System.ScanPresetFiles()
-        end
-
-        ImGui.SameLine(ctx)
-        ImGui.SetCursorPosX(ctx, presets_width - 175)
-        ImGui.SetCursorPosY(ctx, presets_height - 35)
-        if ImGui.Button(ctx, "IMPORT##presets_import", 80) then
-            System.ImportPresetReplaceRuleset(selected_preset)
-            ResetVariables()
-        end
-        ImGui.SetItemTooltip(ctx, "Replace current rules with the preset.")
-
-        ImGui.SameLine(ctx)
-        ImGui.SetCursorPosY(ctx, presets_height - 35)
-        if ImGui.Button(ctx, "ADD##presets_add", 80) then
-            System.AddPresetToRuleset(selected_preset)
-            ResetVariables()
-        end
-        ImGui.SetItemTooltip(ctx, "Add preset rules after current rules.")
-
-        if disable then ImGui.EndDisabled(ctx) end
-
-        ImGui.End(ctx)
+        ImGui.EndListBox(ctx)
     end
 
-    if not presets_open then
+    local button_w = (PRESETS_WIDTH - 16 - 3 * 8) / 4
+    ImGui.SetCursorPosY(ctx, PRESETS_HEIGHT - 35)
+
+    -- SAVE
+    local name_valid = preset_search:match("%S") ~= nil
+    local disable = not name_valid or #System.ruleset == 0
+    if disable then ImGui.BeginDisabled(ctx) end
+    local save_label = (name_valid and PresetExists(preset_search)) and "OVERWRITE" or "SAVE"
+    if ImGui.Button(ctx, save_label .. "##presets_save", button_w) then
+        System.SavePreset(preset_search, System.ruleset)
+        System.ScanPresetFiles()
         ResetVariables()
     end
+    if disable then ImGui.EndDisabled(ctx) end
+
+    -- REMOVE / IMPORT / ADD need a selected preset
+    disable = selected_preset == nil
+    if disable then ImGui.BeginDisabled(ctx) end
+
+    ImGui.SameLine(ctx)
+    if ImGui.Button(ctx, "REMOVE##presets_remove", button_w) then
+        System.RemovePreset(selected_preset)
+        selected_preset = nil
+        System.ScanPresetFiles()
+    end
+
+    ImGui.SameLine(ctx)
+    if ImGui.Button(ctx, "IMPORT##presets_import", button_w) then
+        System.ImportPresetReplaceRuleset(selected_preset)
+        ResetVariables()
+    end
+    ImGui.SetItemTooltip(ctx, "Replace current rules with the preset.")
+
+    ImGui.SameLine(ctx)
+    if ImGui.Button(ctx, "ADD##presets_add", button_w) then
+        System.AddPresetToRuleset(selected_preset)
+        ResetVariables()
+    end
+    ImGui.SetItemTooltip(ctx, "Add preset rules after current rules.")
+
+    if disable then ImGui.EndDisabled(ctx) end
+
+    ImGui.End(ctx)
 end
 
 return presets_window

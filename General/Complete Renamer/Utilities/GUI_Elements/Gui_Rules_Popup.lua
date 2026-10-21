@@ -86,7 +86,7 @@ end
 -- GUI Rule popup elements
 local function VisualRulePopupElements(width, height)
     local child_width = width - 10
-    local child_height = height - 75
+    local child_height = height - 105
     if ImGui.BeginChild(ctx, "child_rule_popup", child_width, child_height, ImGui.ChildFlags_Borders) then
         if ImGui.BeginListBox(ctx, "##listbox_rule_popup_types", 100, child_height - 16) then
             for _, rule_type in ipairs(RULE_TYPES) do
@@ -121,20 +121,21 @@ end
 
 -- GUI Rule popup window
 local function VisualRulePopup()
-    ImGui.PushStyleColor(ctx, ImGui.Col_WindowBg, 0x151515FF)
-    ImGui.PushStyleColor(ctx, ImGui.Col_TitleBgActive, 0x222222FF)
-    local rule_flags = ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_NoScrollbar | ImGui.WindowFlags_NoResize | ImGui.WindowFlags_TopMost
+    local rule_flags = ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_NoScrollbar | ImGui.WindowFlags_NoResize
+        | ImGui.WindowFlags_TopMost | ImGui.WindowFlags_NoDecoration
     if focused then
         ImGui.SetNextWindowFocus(ctx)
         focused = false
     end
     local rule_popup_width = 450
-    local rule_popup_height = 300
+    local rule_popup_height = 330
     ImGui.SetNextWindowSize(ctx, rule_popup_width, rule_popup_height, ImGui.Cond_Once)
     ImGui.SetNextWindowPos(ctx, window_x + (window_width - rule_popup_width) * 0.5, window_y + (window_height - rule_popup_height) * 0.5, ImGui.Cond_Appearing)
 
-    local rule_visible, rule_open = ImGui.Begin(ctx, 'RULE', true, rule_flags)
+    local rule_visible, rule_open = ImGui.Begin(ctx, '##rule_window', true, rule_flags)
     if rule_visible then
+        ImGui.Text(ctx, editing_rule and "EDIT RULE" or "NEW RULE")
+        ImGui.Separator(ctx)
         -- Enter validates, Escape closes (only when not typing)
         if ImGui.IsWindowFocused(ctx, ImGui.FocusedFlags_RootAndChildWindows) then
             if ImGui.IsKeyPressed(ctx, ImGui.Key_Escape, false) then
@@ -149,7 +150,6 @@ local function VisualRulePopup()
     end
 
     if not rule_open then ClosePopup() end
-    ImGui.PopStyleColor(ctx, 2)
 end
 
 function rules_popup.Show(rule_popup_open, set_of_rules)

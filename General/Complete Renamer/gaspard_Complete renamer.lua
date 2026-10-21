@@ -1,10 +1,11 @@
 --@description Complete renamer
 --@author gaspard
---@version 1.1.0
+--@version 1.1.1
 --@provides
 --    [nomain] Utilities/*.lua
 --    [nomain] Utilities/GUI_Elements/*.lua
 --@changelog
+--  - New GUI style shared with GaspaReaLauncher (GUI_STYLE / GUI_SYS libraries, icon top bar, floating panels)
 --  - Migrate to the ReaImGui 0.10 module API (ImGui.*)
 --  - Use the new REAPER region/marker API when available (legacy fallback kept)
 --  - Fix marker/region renaming targeting the wrong marker (enumeration index vs displayed number)
@@ -25,7 +26,7 @@
 --  ### Complete renamer
 --  - A complete renamer with selectable and editable rule blocks for items, tracks, markers and regions (may evolve).
 
-local SCRIPT_VERSION = "1.1.0"
+local SCRIPT_VERSION = "1.1.1"
 local script_path = debug.getinfo(1, "S").source:match([[^@?(.*[\/])[^\/]-$]])
 
 -- Dependencies check
@@ -52,6 +53,21 @@ if not json_ok then
     return
 end
 gson = json_lib
+local JSON_VERSION = "1.0.6"
+if not gson.version or gson.version_less(gson.version, JSON_VERSION) then
+    reaper.MB('Please update gaspard "json_utilities_lib" to version ' .. JSON_VERSION .. ' or higher.', "Complete renamer", 0)
+    return
+end
+
+-- gaspard GUI libraries (style, fonts, icons, icon buttons)
+local libraries_path = reaper.GetResourcePath() .. "/Scripts/Gaspard ReaScripts/Libraries/"
+local style_ok, style_lib = pcall(dofile, libraries_path .. "GUI_STYLE.lua")
+local sys_ok, sys_lib = pcall(dofile, libraries_path .. "GUI_SYS.lua")
+if not style_ok or not sys_ok then
+    reaper.MB("Missing dependency: GUI_STYLE.lua / GUI_SYS.lua\nExpected in:\n" .. libraries_path .. "\n\nInstall/update them from the Gaspard ReaScripts repository.", "Complete renamer", 0)
+    return
+end
+GUI_STYLE, GUI_SYS = style_lib, sys_lib
 
 -- Get script name and version
 local _, script_file, section_id, command_id = reaper.get_action_context()

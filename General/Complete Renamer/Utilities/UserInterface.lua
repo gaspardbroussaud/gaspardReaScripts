@@ -11,26 +11,15 @@ local presets_window = require('Utilities/GUI_Elements/GUI_Presets')
 local settings_window = require('Utilities/GUI_Elements/Gui_Settings')
 
 --#region Initial Variables
-local DEFAULT_STYLE = {font = {style = "sans-serif", size = 14}, vars = {}, colors = {}}
-
--- Get GUI style from file (falls back to default style if file is missing)
-local function GetGuiStylesFromFile()
-    local gui_style_settings_path = reaper.GetResourcePath() .. "/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
-    local ok, style = pcall(dofile, gui_style_settings_path)
-    if not ok or type(style) ~= "table" then style = DEFAULT_STYLE end
-    style_font = style.font or DEFAULT_STYLE.font
-    style_vars = style.vars or {}
-    style_colors = style.colors or {}
-end
-GetGuiStylesFromFile()
-
+font_size = 16
+local icon_size = 22
 local og_window_width = 800
 local og_window_height = 650
+local min_width, min_height = 420, 400
 window_width = og_window_width
 window_height = og_window_height
 window_x, window_y = 0, 0
-local topbar_height = 30
-local small_font_size = style_font.size * 0.75
+topbar_height = 30
 local window_name = "COMPLETE RENAMER"
 local no_scrollbar_flags = ImGui.WindowFlags_NoScrollWithMouse | ImGui.WindowFlags_NoScrollbar
 local window_flags = ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_NoTitleBar | no_scrollbar_flags
@@ -39,59 +28,62 @@ local is_resizing = false
 local has_js_api = reaper.JS_Window_Find ~= nil and reaper.JS_Window_SetFocus ~= nil
 --#endregion
 
--- Init ImGui
+-- Init ImGui (fonts from gaspard GUI_STYLE library)
 local function WindowInit()
     ctx = ImGui.CreateContext('gaspard_complete_renamer')
-    font = ImGui.CreateFont(style_font.style)
-    small_font = ImGui.CreateFont(style_font.style, ImGui.FontFlags_Italic)
+    font = ImGui.CreateFontFromFile(GUI_STYLE.FONTS.ARIAL.CLASSIC)
+    small_font = ImGui.CreateFontFromFile(GUI_STYLE.FONTS.ARIAL.CLASSIC, 0, ImGui.FontFlags_Italic)
+    icon_font = ImGui.CreateFontFromFile(GUI_STYLE.FONTS.ICONS)
     ImGui.Attach(ctx, font)
     ImGui.Attach(ctx, small_font)
+    ImGui.Attach(ctx, icon_font)
 end
 
--- GUI Top Bar
+-- Position for floating panels (settings, presets): under the top bar, right aligned
+function Gui_PanelPosition()
+    return window_x + window_width - 8, window_y + topbar_height + 5
+end
+
+-- GUI Top Bar (GaspaReaLauncher style)
 local function VisualTopBar()
-    if ImGui.BeginChild(ctx, "child_top_bar", window_width, topbar_height, ImGui.ChildFlags_None, no_scrollbar_flags) then
-        ImGui.Text(ctx, window_name)
+    ImGui.BeginGroup(ctx)
+    ImGui.Text(ctx, window_name)
+    ImGui.SameLine(ctx)
+    ImGui.PushFont(ctx, small_font, font_size * 0.75)
+    ImGui.Text(ctx, "v" .. tostring(version))
+    ImGui.PopFont(ctx)
 
-        local spacing = 5
-        ImGui.PushStyleVar(ctx, ImGui.StyleVar_ItemSpacing, spacing, 0)
-        ImGui.SameLine(ctx)
-
-        local button_w = 95
-        local small_button_w = 18
-        local presets_width = window_width > 369 and button_w or small_button_w
-        local settings_width = window_width > 305 and button_w or small_button_w
-        local quit_width = small_button_w
-        local padding = ImGui.GetStyleVar(ctx, ImGui.StyleVar_WindowPadding)
-        local buttons_width = presets_width + settings_width + quit_width + 3 * padding + 2 * spacing
-        ImGui.SetCursorPos(ctx, window_width - buttons_width, 0)
-
-        if ImGui.BeginChild(ctx, "child_top_bar_buttons", buttons_width, topbar_height, ImGui.ChildFlags_None, no_scrollbar_flags) then
-            ImGui.Dummy(ctx, 3, 1)
-            ImGui.SameLine(ctx)
-            local text = presets_width == button_w and 'PRESETS' or 'P'
-            if ImGui.Button(ctx, text .. '##presets_button', presets_width) then
-                show_presets = not show_presets
-                if show_presets then System.ScanPresetFiles()
-                else System.focus_main_window = false end
+    local menu = {
+        {icon = 'QUIT', hint = 'Close', font = icon_font, size = icon_size, right_click = false},
+        {icon = 'GEAR', hint = 'Settings', font = icon_font, size = icon_size, right_click = false},
+        {icon = 'BOOKMARK', hint = 'Presets', font = icon_font, size = icon_size, right_click = false},
+        {icon = 'REFRESH_ARROW', hint = 'Refresh project data', font = icon_font, size = icon_size, right_click = false},
+    }
+    local rv, button = GUI_SYS.IconButtonRight(ctx, menu, window_width)
+    if rv then
+        if button == 'QUIT' then
+            open = false
+        elseif button == 'GEAR' then
+            show_settings = not show_settings
+            if show_settings then
+                show_presets = false
+                settings_window.GetSettings()
+            else
+                System.focus_main_window = true
             end
-            ImGui.SameLine(ctx)
-            text = settings_width == button_w and 'SETTINGS' or 'S'
-            if ImGui.Button(ctx, text .. '##settings_button', settings_width) then
-                show_settings = not show_settings
-                if show_settings then settings_window.GetSettings()
-                else System.focus_main_window = false end
+        elseif button == 'BOOKMARK' then
+            show_presets = not show_presets
+            if show_presets then
+                show_settings = false
+                System.ScanPresetFiles()
+            else
+                System.focus_main_window = true
             end
-            ImGui.SameLine(ctx)
-            if ImGui.Button(ctx, 'X##quit_button', quit_width) then
-                open = false
-            end
-            ImGui.EndChild(ctx)
+        elseif button == 'REFRESH_ARROW' then
+            System.MarkDataDirty()
         end
-
-        ImGui.PopStyleVar(ctx, 1)
-        ImGui.EndChild(ctx)
     end
+    ImGui.EndGroup(ctx)
 end
 
 -- GUI Global Elements
@@ -146,31 +138,20 @@ local function VisualElements(child_width, child_height)
     if disable then ImGui.EndDisabled(ctx) end
 end
 
--- Gui Version on bottom right
-local function VisualVersion()
-    local text = "gaspard v" .. tostring(version)
-    ImGui.PushFont(ctx, small_font, small_font_size)
-    local w, h = ImGui.CalcTextSize(ctx, text)
-    ImGui.SetCursorPosX(ctx, window_width - w - 10)
-    ImGui.SetCursorPosY(ctx, window_height - h - 10)
-    ImGui.Text(ctx, text)
-    ImGui.PopFont(ctx)
-end
-
--- Push all GUI style settings
+-- Push all GUI style settings (gaspard GUI_STYLE library)
 local function ImGuiPushTheme()
-    for i = 1, #style_vars do
-        ImGui.PushStyleVar(ctx, style_vars[i].var, style_vars[i].value, style_vars[i].value2)
+    for i = 1, #GUI_STYLE.VARS do
+        ImGui.PushStyleVar(ctx, GUI_STYLE.VARS[i].var, GUI_STYLE.VARS[i].value)
     end
-    for i = 1, #style_colors do
-        ImGui.PushStyleColor(ctx, style_colors[i].col, style_colors[i].value)
+    for i = 1, #GUI_STYLE.COLORS do
+        ImGui.PushStyleColor(ctx, GUI_STYLE.COLORS[i].col, GUI_STYLE.COLORS[i].value)
     end
 end
 
 -- Pop all GUI style settings
 local function ImGuiPopTheme()
-    if #style_vars > 0 then ImGui.PopStyleVar(ctx, #style_vars) end
-    if #style_colors > 0 then ImGui.PopStyleColor(ctx, #style_colors) end
+    if #GUI_STYLE.VARS > 0 then ImGui.PopStyleVar(ctx, #GUI_STYLE.VARS) end
+    if #GUI_STYLE.COLORS > 0 then ImGui.PopStyleColor(ctx, #GUI_STYLE.COLORS) end
 end
 
 function Gui.Init()
@@ -192,9 +173,9 @@ function Gui.Loop()
     end
 
     ImGui.SetNextWindowSize(ctx, window_width, window_height, ImGui.Cond_Once)
-    ImGui.SetNextWindowSizeConstraints(ctx, 244, 400, math.huge, math.huge)
+    ImGui.SetNextWindowSizeConstraints(ctx, min_width, min_height, math.huge, math.huge)
 
-    ImGui.PushFont(ctx, font, style_font.size)
+    ImGui.PushFont(ctx, font, font_size)
 
     local visible
     visible, open = ImGui.Begin(ctx, window_name, true, window_flags)
@@ -207,22 +188,16 @@ function Gui.Loop()
         -- Top bar elements
         VisualTopBar()
 
-        -- Presets window
+        -- Floating panels
         if show_presets then presets_window.Show() end
-
-        -- Settings window
         if show_settings then settings_window.Show() end
 
         -- Script GUI Elements
-        local child_width = window_width - 16
-        local child_height = window_height - topbar_height - 40
+        local child_width, child_height = ImGui.GetContentRegionAvail(ctx)
         if ImGui.BeginChild(ctx, "child_global", child_width, child_height, ImGui.ChildFlags_Borders) then
             VisualElements(child_width, child_height)
             ImGui.EndChild(ctx)
         end
-
-        -- Show script version on bottom right
-        VisualVersion()
 
         ImGui.End(ctx)
     end

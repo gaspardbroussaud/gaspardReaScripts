@@ -5,65 +5,35 @@
 
 local settings_window = {}
 
-local temp_values = {}
-local settings_one_changed = false
+local PANEL_FLAGS = ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_NoScrollbar | ImGui.WindowFlags_NoResize
+    | ImGui.WindowFlags_TopMost | ImGui.WindowFlags_NoDecoration | ImGui.WindowFlags_AlwaysAutoResize
 
--- Get Settings on show settings window
+-- Called when the settings panel opens
 function settings_window.GetSettings()
-    settings_one_changed = false
-    temp_values = {}
-    for _, key in ipairs(Settings.order) do
-        temp_values[key] = Settings[key].value
-    end
 end
 
-local function SetSettings()
-    for _, key in ipairs(Settings.order) do
-        Settings[key].value = temp_values[key]
-    end
-    System.SaveSettings()
-end
-
--- Gui Settings Elements
+-- Settings panel (GaspaReaLauncher style: changes are saved immediately)
 function settings_window.Show()
-    local settings_flags = ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_NoScrollbar | ImGui.WindowFlags_NoResize
-    local settings_width = 210
-    local settings_height = 200
-    ImGui.SetNextWindowSize(ctx, settings_width, settings_height, ImGui.Cond_Once)
-    ImGui.SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, ImGui.Cond_Appearing)
-
-    local settings_visible, settings_open = ImGui.Begin(ctx, 'SETTINGS', true, settings_flags)
+    local x, y = Gui_PanelPosition()
+    ImGui.SetNextWindowPos(ctx, x, y, ImGui.Cond_Always, 1, 0)
+    local settings_visible = ImGui.Begin(ctx, "##settings_window", true, PANEL_FLAGS)
     if settings_visible then
-        if ImGui.BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, ImGui.ChildFlags_Borders) then
-            for _, key in ipairs(Settings.order) do
-                local setting = Settings[key]
-                ImGui.Text(ctx, setting.name .. ":")
-                ImGui.SameLine(ctx)
-                local changed
-                changed, temp_values[key] = ImGui.Checkbox(ctx, "##settings_" .. key, temp_values[key] == true)
-                ImGui.SetItemTooltip(ctx, setting.description)
-                if changed then settings_one_changed = true end
-            end
-            ImGui.EndChild(ctx)
-        end
+        ImGui.Text(ctx, "SETTINGS")
+        ImGui.Separator(ctx)
 
-        ImGui.SetCursorPosX(ctx, settings_width - 80)
-        ImGui.SetCursorPosY(ctx, settings_height - 35)
-        local disable = not settings_one_changed
-        if disable then ImGui.BeginDisabled(ctx) end
-        if ImGui.Button(ctx, "APPLY##settings_apply", 70) then
-            SetSettings()
-            settings_one_changed = false
+        local one_changed = false
+        for _, key in ipairs(Settings.order) do
+            local setting = Settings[key]
+            local changed
+            changed, setting.value = ImGui.Checkbox(ctx, setting.name .. "##settings_" .. key, setting.value == true)
+            if changed then one_changed = true end
+            ImGui.SetItemTooltip(ctx, setting.description)
         end
-        if disable then ImGui.EndDisabled(ctx) end
+        if one_changed then System.SaveSettings() end
 
         ImGui.End(ctx)
-    end
-
-    if not settings_open then
-        settings_one_changed = false
+    else
         show_settings = false
-        System.focus_main_window = true
     end
 end
 

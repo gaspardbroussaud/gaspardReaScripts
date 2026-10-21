@@ -3,288 +3,35 @@
 -- @author gaspard
 -- @about All functions used in gaspard_Track Visibility Manager.lua script
 
--- SET GLOBAL VARIABLES
-function System_ResetVariables()
-    selected_tracks = {}
-    track_count = 0
-    selected_track_count = 0
-    tracks = {}
-end
+local System = {}
 
--- GET SELECTED TRACKS TO RE-SELECT AFTER SCRIPT END
-function System_GetSelectedTracksTable()
-    selected_tracks = {}
-    selected_track_count = reaper.CountSelectedTracks(0)
+local SCRIPT_EXT = "gaspard_TrackVisibilityManager"
+local P_EXT_WAS_MUTED = "P_EXT:" .. SCRIPT_EXT .. ":WasMuted"
+local CMD_UNSELECT_ALL_TRACKS = 40297
+local CMD_LOCK_TRACKS = 41312
+local CMD_UNLOCK_TRACKS = 41313
+local CMD_UNMUTE_ALL = 40339
+local CMD_UNSOLO_ALL = 40340
+local POLL_INTERVAL = 0.25 -- seconds between automatic refreshes
 
-    if selected_track_count ~= 0 then
-        for i = 0, selected_track_count - 1 do
-            selected_tracks[i] = reaper.GetSelectedTrack(0, i)
-        end
-    end
-end
+System.tracks = {}      -- 1-based list of track datas
+System.rows = {}        -- indexes of tracks displayed in GUI (not inside a collapsed folder)
+System.any_solo = false
 
--- SET SELECTED TRACKS BACK TO THEIR SELECTION STATE IF VISIBLE
-function System_SetSelectedTracksBack()
-    if selected_track_count ~= 0 then
-        for i = 0, #selected_tracks do
-            if reaper.GetMediaTrackInfo_Value(selected_tracks[i], "B_SHOWINTCP") ~= 10 then
-                reaper.SetTrackSelected(selected_tracks[i], true)
-            end
-        end
-    end
-end
+local gui_collapsed = {} -- GUI collapse state per track (used when collapse is not linked to TCP)
+local project = nil
+local project_path = nil
+local state_count = -1
+local last_refresh = 0
+local dirty = true
 
----comment
----@param track any
----@return any track
----@return integer depth
--- GET TOP PARENT TRACK
-function System_GetTopParentTrack(track)
-    local depth = 0
-    while true do
-        local parent = reaper.GetParentTrack(track)
-        if parent then
-            track = parent
-            depth = depth + 1
-        else
-            return track, depth
-        end
-    end
-end
+--#region Settings
+local SETTINGS_VERSION = "1.4.1"
 
----comment
----@param track any
--- RETURN TRUE IF A PARENT IS MUTE
-function System_IsParentMute(track)
-    while true do
-        if reaper.GetMediaTrackInfo_Value(track, "B_MUTE") == 1 then
-            return true
-        end
-
-        local parent = reaper.GetParentTrack(track)
-        if parent then
-            track = parent
-        else
-            return false
-        end
-    end
-end
-
----comment
----@param track any
--- RETURN TRUE IF A PARENT IS SOLO
-function System_IsParentSolo(track)
-    while true do
-        if reaper.GetMediaTrackInfo_Value(track, "I_SOLO") > 0 then
-            return track, true
-        end
-
-        local parent = reaper.GetParentTrack(track)
-        if parent then
-            track = parent
-        else
-            return track, false
-        end
-    end
-end
-
----comment
----@param index integer
--- SET ALL PARENT SOLO OF TRACK TO -1
-function System_IsOneSubParentsSolo(index)
-    for i = index + 1, #tracks do
-        if tracks[i].depth <= tracks[index].depth then return false end
-        if tracks[i].mute == 0 and tracks[i].solo == 1 then return true end
-    end
-    return false
-end
-
-function System_IsOtherChildSoloed(index)
-    if tracks[index].solo < 1 then
-        for i = index, #tracks do
-            if tracks[i].depth < tracks[index].depth then return false end
-            if tracks[i].solo == 1 then return true end
-        end
-    end
-end
-
-function System_FindTrackInTracksTab(track)
-    for i = 0, #tracks do
-        if tracks[i].id == track then return i end
-    end
-    return nil
-end
-
----comment
----@param track any
--- GET TOP PARENT TRACK
-function System_IsParentCollapsed(track)
-    while true do
-        if reaper.GetMediaTrackInfo_Value(track, "I_FOLDERCOMPACT") > 1 then
-            return true
-        end
-
-        local parent = reaper.GetParentTrack(track)
-        if parent then
-            track = parent
-        else
-            return false
-        end
-    end
-end
-
--- GET PARENT TRACK MATCH FOR TRACK VISIBILITY
-function System_GetParentTrackMatch(track, target)
-    while true do
-        local parent = reaper.GetParentTrack(track)
-        if parent then
-            if parent ~= target then
-                track = parent
-            else
-                return true
-            end
-        else
-            return false
-        end
-    end
-end
-
--- GET ALL TRACKS FROM PROJECT
-function System_GetTracksTable()
-    track_count = reaper.CountTracks(0)
-
-    -- Get all tracks and extract datas
-    tracks = {}
-    local inner_depth = 0.0
-    for i = 0, track_count - 1 do
-        -- Track reaper data 
-        local t_id = reaper.GetTrack(0, i)
-
-        -- Track number top to bottom
-        local t_number = tostring(reaper.GetMediaTrackInfo_Value(t_id, "IP_TRACKNUMBER")):sub(1, -3)
-
-        -- Track visibility in TCP state (shown or hidden)
-        local t_state = reaper.GetMediaTrackInfo_Value(t_id, "B_SHOWINTCP")
-
-        -- Track selection state in TCP
-        local t_select = false
-        if Settings.link_tcp_select.value then t_select = reaper.IsTrackSelected(t_id) end
-
-        -- Track folder depth with parent folders
-        local t_depth = reaper.GetTrackDepth(t_id)
-
-        -- Track collapsed state for folders (-1 if not a folder track)
-        local t_collapse = -1
-        if reaper.GetMediaTrackInfo_Value(t_id, "I_FOLDERDEPTH") == 1 then
-            if Settings.link_tcp_collapse.value then t_collapse = reaper.GetMediaTrackInfo_Value(t_id, "I_FOLDERCOMPACT")
-            else t_collapse = 0 end
-        end
-
-        -- Track mute state if link tcp mute setting enabled
-        local t_mute = 0
-        if Settings.link_tcp_mute.value then t_mute = reaper.GetMediaTrackInfo_Value(t_id, "B_MUTE") end
-
-        local t_solo = reaper.GetMediaTrackInfo_Value(t_id, "I_SOLO")
-
-        -- Track visibility in GUI
-        local t_visible = true
-
-        tracks[i] = { id = t_id, number = t_number, state = t_state, select = t_select, depth = t_depth, collapse = t_collapse, mute = t_mute, solo = t_solo, visible = t_visible }
-    end
-
-    if track_count ~= 0 and Settings.link_tcp_collapse.value then
-        for i = 0, #tracks do
-            if tracks[i].collapse ~= -1 then
-                System_UpdateTrackCollapse(i, tracks[i].collapse)
-            end
-        end
-    end
-end
-
--- GET TRACK MUTE
-function System_GetTrackMuteIndex(track)
-    for i = 0, #tracks do
-        if tracks[i].id == track then
-            return i
-        end
-    end
-    return nil
-end
-
--- HIDE TRACK WHEN UNSELECTING CHECKBOX
-function System_HideTrack(track)
-    reaper.SetTrackSelected(track, true)
-    if reaper.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-        reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_SELCHILDREN"), 0) -- Select all children
-        reaper.SetTrackSelected(track, true)
-    end
-
-    for m = 0, reaper.CountSelectedTracks(0) - 1 do
-        local cur_track = reaper.GetSelectedTrack(0, m)
-        if reaper.GetMediaTrackInfo_Value(cur_track, "B_MUTE") == 1 then
-            reaper.SetMediaTrackInfo_Value(cur_track, "I_HEIGHTOVERRIDE", 1)
-            reaper.SetMediaTrackInfo_Value(cur_track, "B_HEIGHTLOCK", 1)
-        else
-            reaper.SetMediaTrackInfo_Value(cur_track, "B_MUTE", 1)
-        end
-
-        reaper.SetMediaTrackInfo_Value(cur_track, "I_SOLO", 0)
-    end
-
-    reaper.Main_OnCommand(41312, 0) -- Lock selected track
-
-    for m = 0, reaper.CountSelectedTracks(0) - 1 do
-        reaper.SetMediaTrackInfo_Value(reaper.GetSelectedTrack(0, m), "B_SHOWINTCP", 0)
-        reaper.SetMediaTrackInfo_Value(reaper.GetSelectedTrack(0, m), "B_SHOWINMIXER", 0)
-    end
-
-    reaper.Main_OnCommand(40297, 0) -- Unselect all tracks
-end
-
--- SHOW TRACK WHEN SELECTING CHECKBOX
-function System_ShowTrack(track)
-    reaper.SetTrackSelected(track, true)
-    if reaper.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1 then
-        reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_SELCHILDREN"), 0) -- Select all children
-        reaper.SetTrackSelected(track, true)
-    end
-
-    for m = 0, reaper.CountSelectedTracks(0) - 1 do
-        reaper.SetMediaTrackInfo_Value(reaper.GetSelectedTrack(0, m), "B_SHOWINTCP", 1)
-        reaper.SetMediaTrackInfo_Value(reaper.GetSelectedTrack(0, m), "B_SHOWINMIXER", 1)
-    end
-
-    reaper.Main_OnCommand(41313, 0) -- Unlock selected track
-
-    for m = 0, reaper.CountSelectedTracks(0) - 1 do
-        local cur_track = reaper.GetSelectedTrack(0, m)
-        local mute = 0
-        local height = reaper.GetMediaTrackInfo_Value(cur_track, "I_HEIGHTOVERRIDE")
-        local locked_height = reaper.GetMediaTrackInfo_Value(cur_track, "B_HEIGHTLOCK")
-        if locked_height and height == 1 then
-            mute = 1
-            reaper.SetMediaTrackInfo_Value(cur_track, "I_HEIGHTOVERRIDE", 0)
-            reaper.SetMediaTrackInfo_Value(cur_track, "B_HEIGHTLOCK", 0)
-        end
-
-        reaper.SetMediaTrackInfo_Value(cur_track, "B_MUTE", mute)
-    end
-
-    reaper.Main_OnCommand(40297, 0) -- Unselect all tracks
-end
-
--- TOGGLE BUTTON STATE IN REAPER
-function System_SetButtonState(set)
-    local _, name, sec, cmd, _, _, _ = reaper.get_action_context()
-    action_name = string.match(name, "gaspard_(.-)%.lua")
-    reaper.SetToggleCommandState(sec, cmd, set or 0)
-    reaper.RefreshToolbar2(sec, cmd)
-end
-
--- INIT SYSTEM VARIABLES
-function System_InitSystemVariables()
-    Settings = {
-        order = { "link_tcp_select", "link_tcp_collapse", "link_tcp_mute", "show_mute_buttons", "link_tcp_solo", "show_solo_buttons", "F_commandID" },
+local function DefaultSettings()
+    return {
+        version = SETTINGS_VERSION,
+        order = {"link_tcp_select", "link_tcp_collapse", "link_tcp_mute", "show_mute_buttons", "link_tcp_solo", "show_solo_buttons", "F_commandID"},
         link_tcp_select = {
             value = false,
             name = "Link TCP selection",
@@ -296,177 +43,374 @@ function System_InitSystemVariables()
             description = "Links TCP tracks collapsed states with tool GUI and reverse."
         },
         link_tcp_mute = {
-            value = false,
-            influences = {
-                show_mute_buttons = {
-                    variable = "show_mute_buttons",
-                    self = false,
-                    value = false
-                },
-                link_tcp_solo = {
-                    variable = "link_tcp_solo",
-                    self = false,
-                    value = false
-                },
-                show_solo_buttons = {
-                    variable = "show_solo_buttons",
-                    self = false,
-                    value = false
-                }
-            },
+            value = true,
             name = "Link TCP Mute",
             description = "Links TCP tracks mute states with tool GUI and reverse."
         },
         show_mute_buttons = {
-            value = false,
-            dependencies = {
-                link_tcp_mute = {
-                    variable = "link_tcp_mute",
-                    self = true,
-                    value = true
-                }
-            },
+            value = true,
             name = "Show Mute buttons",
             description = 'Show mute buttons in GUI to interact.\nNeed "Link TCP mute" to work.'
         },
         link_tcp_solo = {
-            value = false,
-            dependencies = {
-                link_tcp_mute = {
-                    variable = "link_tcp_mute",
-                    self = true,
-                    value = true
-                }
-            },
-            influences = {
-                show_solo_buttons = {
-                    variable = "show_solo_buttons",
-                    self = false,
-                    value = false
-                }
-            },
+            value = true,
             name = "Link TCP Solo",
             description = 'Links TCP tracks solo states with tool GUI and reverse.\nNeed "Link TCP mute" to work.'
         },
         show_solo_buttons = {
-            value = false,
-            dependencies = {
-                link_tcp_mute = {
-                    variable = "link_tcp_mute",
-                    self = true,
-                    value = true
-                },
-                link_tcp_solo = {
-                    variable = "link_tcp_solo",
-                    self = true,
-                    value = true
-                }
-            },
+            value = true,
             name = "Show Solo buttons",
-            description = 'Show mute buttons in GUI to interact.\nNeed "Link TCP solo" to work.'
+            description = 'Show solo buttons in GUI to interact.\nNeed "Link TCP solo" to work.'
         },
         F_commandID = {
             value = "",
-            char_type = nil,
             name = "F key Command ID",
-            description = 'Set a custom command ID for "F" key shortcut while in GUI focus.'
+            description = 'Set a custom command ID for "F" key shortcut while in GUI focus.\nNumeric (40001) or named (_SWS_...) IDs.'
         }
     }
-    Settings = gson.LoadJSON(settings_path, Settings)
 end
 
--- SET TRACK TO FALSE OR TRUE WITH INDEX
-function System_SetTrackVisibility(index, visibility)
-    tracks[index].select = visibility
-    if Settings.link_tcp_select.value then
-        reaper.SetTrackSelected(tracks[index].id, visibility)
+-- Load settings from file, keeping user values and adding new settings
+function System.InitSettings()
+    local defaults = DefaultSettings()
+    local loaded = gson.LoadJSON(settings_path, defaults)
+    Settings = defaults
+    -- Settings files written by 1.4.0 had mute/solo disabled by default: use the new defaults for them
+    local reset_keys = {}
+    if type(loaded) == "table" and loaded.version == "1.4.0" then
+        reset_keys = {link_tcp_mute = true, show_mute_buttons = true, link_tcp_solo = true, show_solo_buttons = true}
+    end
+    if type(loaded) == "table" then
+        for _, key in ipairs(defaults.order) do
+            local entry = not reset_keys[key] and loaded[key] or nil
+            if type(entry) == "table" and type(entry.value) == type(defaults[key].value) then
+                Settings[key].value = entry.value
+            end
+        end
+    end
+    System.ApplySettingsDependencies()
+    if type(loaded) ~= "table" or loaded.version ~= SETTINGS_VERSION then
+        gson.SaveJSON(settings_path, Settings)
     end
 end
 
--- UPDATE TRACK COLLAPSE IF ENABLED
-function System_UpdateTrackCollapse(index, new_collapse)
-    reaper.PreventUIRefresh(1)
-    reaper.Undo_BeginBlock()
+-- Keep settings coherent (solo needs mute link, buttons need their link)
+function System.ApplySettingsDependencies(changed_key)
+    local s = Settings
+    if changed_key == "show_mute_buttons" and s.show_mute_buttons.value then s.link_tcp_mute.value = true end
+    if changed_key == "link_tcp_solo" and s.link_tcp_solo.value then s.link_tcp_mute.value = true end
+    if changed_key == "show_solo_buttons" and s.show_solo_buttons.value then
+        s.link_tcp_mute.value = true
+        s.link_tcp_solo.value = true
+    end
+    if not s.link_tcp_mute.value then
+        s.show_mute_buttons.value = false
+        s.link_tcp_solo.value = false
+    end
+    if not s.link_tcp_solo.value then s.show_solo_buttons.value = false end
+    dirty = true
+end
 
-    local parent_visible = true
-    local parent_depth = 0
+function System.SaveSettings()
+    gson.SaveJSON(settings_path, Settings)
+end
+--#endregion
 
-    -- Update collapse state for parent track
-    if not new_collapse then
-        if tracks[index].collapse > 1 then
-            tracks[index].collapse = 0
-            parent_visible = true
-        else
-            parent_visible = false
-            tracks[index].collapse = 2
+--#region Track datas
+function System.MarkDirty()
+    dirty = true
+end
+
+-- Read every track and compute derived states in one pass
+local function ReadTracks()
+    local tracks = {}
+    local count = reaper.CountTracks(project)
+    local link_collapse = Settings.link_tcp_collapse.value
+    local link_select = Settings.link_tcp_select.value
+
+    -- Keep GUI selection between refreshes when selection is not linked
+    local previous_select = {}
+    for _, t in ipairs(System.tracks) do previous_select[t.id] = t.select end
+
+    local ancestors = {} -- ancestors[depth] = index of the last track seen at this depth
+    local any_solo = false
+    for i = 1, count do
+        local track = reaper.GetTrack(project, i - 1)
+        local depth = reaper.GetTrackDepth(track)
+        local is_folder = reaper.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH") == 1
+        local _, name = reaper.GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+        local mute = reaper.GetMediaTrackInfo_Value(track, "B_MUTE") == 1
+        local solo = reaper.GetMediaTrackInfo_Value(track, "I_SOLO") > 0
+        if solo then any_solo = true end
+
+        local collapsed = false
+        if is_folder then
+            if link_collapse then collapsed = reaper.GetMediaTrackInfo_Value(track, "I_FOLDERCOMPACT") >= 2
+            else collapsed = gui_collapsed[track] == true end
         end
-    else
-        tracks[index].collapse = new_collapse
-        if new_collapse > 1 then
-            parent_visible = false
-        else
-            parent_visible = true
-            if System_IsParentCollapsed(tracks[index].id) then
-                parent_visible = false
+
+        local parent = depth > 0 and tracks[ancestors[depth - 1]] or nil
+        local t = {
+            id = track,
+            number = i,
+            name = name ~= "" and name or ("Track " .. i),
+            depth = depth,
+            is_folder = is_folder,
+            shown = reaper.GetMediaTrackInfo_Value(track, "B_SHOWINTCP") == 1,
+            mute = mute,
+            solo = solo,
+            collapsed = collapsed,
+            select = link_select and reaper.IsTrackSelected(track) or previous_select[track] == true,
+            parent_mute = parent ~= nil and (parent.mute or parent.parent_mute),
+            parent_solo = parent ~= nil and (parent.solo or parent.parent_solo),
+            child_solo = false,
+            hidden_by_collapse = parent ~= nil and (parent.collapsed or parent.hidden_by_collapse),
+            last_child = i
+        }
+        tracks[i] = t
+        ancestors[depth] = i
+
+        -- Propagate to ancestors (soloed child makes parents audible, subtree range)
+        for d = 0, depth - 1 do
+            local ancestor = tracks[ancestors[d]]
+            if ancestor then
+                ancestor.last_child = i
+                if solo then ancestor.child_solo = true end
             end
         end
     end
 
-    -- Apply collapse state of parent to children
-    for i = index + 1, #tracks do
-        if System_GetParentTrackMatch(tracks[i].id, tracks[index].id) then
-            if tracks[index].collapse > 1 then
-                tracks[i].visible = false
-            else
-                if reaper.GetMediaTrackInfo_Value(tracks[i].id, "I_FOLDERDEPTH") == 1 then
-                    if tracks[i].depth <= parent_depth then
-                        parent_visible = true
-                        parent_depth = tracks[i].depth
-                    end
-                    if parent_visible then
-                        tracks[i].visible = true
-                        if tracks[i].collapse > 1 then
-                            parent_visible = false
-                            parent_depth = tracks[i].depth
-                        end
-                    else
-                        tracks[i].visible = false
-                    end
-                else
-                    if tracks[i].depth <= parent_depth then
-                        parent_visible = true
-                        parent_depth = tracks[i].depth
-                    end
-                    tracks[i].visible = parent_visible
+    local rows = {}
+    for i, t in ipairs(tracks) do
+        t.implied_solo = not t.solo and (t.parent_solo or t.child_solo)
+        if not t.hidden_by_collapse then rows[#rows + 1] = i end
+    end
+
+    System.tracks = tracks
+    System.rows = rows
+    System.any_solo = any_solo
+end
+
+-- Called once per frame: refresh track datas when something changed
+function System.Update()
+    local proj, path = reaper.EnumProjects(-1)
+    if proj ~= project or path ~= project_path then
+        project, project_path = proj, path
+        System.tracks = {}
+        dirty = true
+    end
+    local count = reaper.GetProjectStateChangeCount(project)
+    if count ~= state_count then
+        state_count = count
+        dirty = true
+    end
+    if #System.tracks ~= reaper.CountTracks(project) then dirty = true end
+
+    local now = reaper.time_precise()
+    if dirty or now - last_refresh > POLL_INTERVAL then
+        ReadTracks()
+        dirty = false
+        last_refresh = now
+    end
+end
+
+-- Return the track and all its children (if folder), without duplicates
+local function ExpandWithChildren(indexes)
+    local result, seen = {}, {}
+    for _, index in ipairs(indexes) do
+        local t = System.tracks[index]
+        if t then
+            for i = index, t.is_folder and t.last_child or index do
+                if not seen[i] then
+                    seen[i] = true
+                    result[#result + 1] = System.tracks[i].id
                 end
             end
-        else
-            return
+        end
+    end
+    return result
+end
+
+function System.GetSelectedIndexes()
+    local indexes = {}
+    for i, t in ipairs(System.tracks) do
+        if t.select then indexes[#indexes + 1] = i end
+    end
+    return indexes
+end
+--#endregion
+
+--#region Selection
+function System.SetTrackSelected(index, value)
+    local t = System.tracks[index]
+    if not t then return end
+    t.select = value
+    if Settings.link_tcp_select.value and reaper.ValidatePtr2(project, t.id, "MediaTrack*") then
+        reaper.SetTrackSelected(t.id, value)
+    end
+end
+
+function System.ClearSelection(except_index)
+    for i in ipairs(System.tracks) do
+        if i ~= except_index then System.SetTrackSelected(i, false) end
+    end
+end
+
+function System.SelectAll()
+    for i in ipairs(System.tracks) do System.SetTrackSelected(i, true) end
+end
+
+-- Select displayed rows between two track indexes
+function System.SelectRange(index_a, index_b)
+    local first, last = math.min(index_a, index_b), math.max(index_a, index_b)
+    for _, i in ipairs(System.rows) do
+        if i >= first and i <= last then System.SetTrackSelected(i, true) end
+    end
+end
+
+-- Run an action on a given set of tracks, then restore the user selection
+local function RunActionOnTracks(command, track_ids)
+    if #track_ids == 0 then return end
+    local saved = {}
+    for i = 0, reaper.CountSelectedTracks(project) - 1 do
+        saved[#saved + 1] = reaper.GetSelectedTrack(project, i)
+    end
+    reaper.Main_OnCommand(CMD_UNSELECT_ALL_TRACKS, 0)
+    for _, track in ipairs(track_ids) do reaper.SetTrackSelected(track, true) end
+    reaper.Main_OnCommand(command, 0)
+    reaper.Main_OnCommand(CMD_UNSELECT_ALL_TRACKS, 0)
+    for _, track in ipairs(saved) do
+        -- Hidden tracks are not re-selected to avoid editing invisible tracks
+        if reaper.ValidatePtr2(project, track, "MediaTrack*") and reaper.GetMediaTrackInfo_Value(track, "B_SHOWINTCP") == 1 then
+            reaper.SetTrackSelected(track, true)
+        end
+    end
+end
+--#endregion
+
+--#region Visibility
+local function HideTrack(track)
+    if reaper.GetMediaTrackInfo_Value(track, "B_SHOWINTCP") == 0 then return end
+    local was_muted = reaper.GetMediaTrackInfo_Value(track, "B_MUTE") == 1
+    reaper.GetSetMediaTrackInfo_String(track, P_EXT_WAS_MUTED, was_muted and "1" or "", true)
+    reaper.SetMediaTrackInfo_Value(track, "B_MUTE", 1)
+    reaper.SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+end
+
+local function RestoreMute(track)
+    local _, was_muted = reaper.GetSetMediaTrackInfo_String(track, P_EXT_WAS_MUTED, "", false)
+    local mute = was_muted == "1"
+    -- Compatibility with tracks hidden by v1.3.x (muted state stored as locked 1px height)
+    if reaper.GetMediaTrackInfo_Value(track, "I_HEIGHTOVERRIDE") == 1 and reaper.GetMediaTrackInfo_Value(track, "B_HEIGHTLOCK") == 1 then
+        mute = true
+        reaper.SetMediaTrackInfo_Value(track, "B_HEIGHTLOCK", 0)
+        reaper.SetMediaTrackInfo_Value(track, "I_HEIGHTOVERRIDE", 0)
+    end
+    reaper.GetSetMediaTrackInfo_String(track, P_EXT_WAS_MUTED, "", true)
+    reaper.SetMediaTrackInfo_Value(track, "B_MUTE", mute and 1 or 0)
+end
+
+-- Hide or show tracks (and their children for folders)
+---@param indexes table Track indexes in System.tracks
+---@param shown boolean
+function System.SetTracksShown(indexes, shown)
+    local track_ids = ExpandWithChildren(indexes)
+    if #track_ids == 0 then return end
+
+    reaper.Undo_BeginBlock2(project)
+    reaper.PreventUIRefresh(1)
+
+    if shown then
+        -- Only hidden tracks are touched (visible children keep their mute/lock state)
+        local to_show = {}
+        for _, track in ipairs(track_ids) do
+            if reaper.GetMediaTrackInfo_Value(track, "B_SHOWINTCP") == 0 then to_show[#to_show + 1] = track end
+        end
+        -- Same order as hiding, reversed: show -> unlock -> restore mute (a locked track keeps its mute)
+        for _, track in ipairs(to_show) do
+            reaper.SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
+            reaper.SetMediaTrackInfo_Value(track, "B_SHOWINMIXER", 1)
+        end
+        RunActionOnTracks(CMD_UNLOCK_TRACKS, to_show)
+        for _, track in ipairs(to_show) do RestoreMute(track) end
+    else
+        local to_hide = {}
+        for _, track in ipairs(track_ids) do
+            if reaper.GetMediaTrackInfo_Value(track, "B_SHOWINTCP") == 1 then
+                HideTrack(track)
+                to_hide[#to_hide + 1] = track
+            end
+        end
+        RunActionOnTracks(CMD_LOCK_TRACKS, to_hide)
+        for _, track in ipairs(to_hide) do
+            reaper.SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+            reaper.SetMediaTrackInfo_Value(track, "B_SHOWINMIXER", 0)
         end
     end
 
-    reaper.Undo_EndBlock("Tracks collapsed or uncollapsed via Track Visibility Tool.", -1)
+    reaper.TrackList_AdjustWindows(false)
     reaper.PreventUIRefresh(-1)
     reaper.UpdateArrange()
+    reaper.Undo_EndBlock2(project, shown and "Tracks shown via Track Visibility Manager" or "Tracks hidden via Track Visibility Manager", -1)
+    dirty = true
+end
+--#endregion
+
+--#region Collapse
+function System.ToggleCollapse(index)
+    local t = System.tracks[index]
+    if not t or not t.is_folder then return end
+    local collapsed = not t.collapsed
+    gui_collapsed[t.id] = collapsed
+    if Settings.link_tcp_collapse.value then
+        reaper.Undo_BeginBlock2(project)
+        reaper.SetMediaTrackInfo_Value(t.id, "I_FOLDERCOMPACT", collapsed and 2 or 0)
+        reaper.TrackList_AdjustWindows(false)
+        reaper.Undo_EndBlock2(project, "Folder collapsed/expanded via Track Visibility Manager", 1)
+    end
+    dirty = true
+end
+--#endregion
+
+--#region Mute / Solo
+local function ApplyToIndexes(index, apply)
+    local t = System.tracks[index]
+    if not t then return end
+    local targets = t.select and System.GetSelectedIndexes() or {index}
+    reaper.Undo_BeginBlock2(project)
+    for _, i in ipairs(targets) do apply(System.tracks[i].id) end
+    reaper.Undo_EndBlock2(project, "Track mute/solo via Track Visibility Manager", 1)
+    dirty = true
 end
 
--- UPDATE THE SOLO STATE COMPARED TO SOLO AND MUTE ON TRACKS
-function System_UpdateSoloState()
-    for i = 0, #tracks do
-        if tracks[i].solo > 0 then return true end
-    end
-    return false
+function System.ToggleMute(index)
+    local value = System.tracks[index].mute and 0 or 1
+    ApplyToIndexes(index, function(track) reaper.SetMediaTrackInfo_Value(track, "B_MUTE", value) end)
 end
 
-function System_StringToBool(str)
-    if str then
-        str = string.lower(str)
-        if str == "true" then
-            return true
-        elseif str == "false" then
-            return false
-        else
-            return false
-        end
-    end
+function System.ToggleSolo(index)
+    local value = System.tracks[index].solo and 0 or 1
+    ApplyToIndexes(index, function(track) reaper.SetMediaTrackInfo_Value(track, "I_SOLO", value) end)
 end
+
+function System.UnmuteAll()
+    reaper.Main_OnCommand(CMD_UNMUTE_ALL, 0)
+    dirty = true
+end
+
+function System.UnsoloAll()
+    reaper.Main_OnCommand(CMD_UNSOLO_ALL, 0)
+    dirty = true
+end
+--#endregion
+
+--#region Custom command
+function System.RunCustomCommand()
+    local value = tostring(Settings.F_commandID.value or ""):match("^%s*(.-)%s*$")
+    if value == "" then return end
+    local command = tonumber(value) or reaper.NamedCommandLookup(value)
+    if command and command > 0 then reaper.Main_OnCommand(command, 0) end
+end
+--#endregion
+
+return System
