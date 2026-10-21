@@ -11,81 +11,86 @@ local presets_window = require('Utilities/GUI_Elements/GUI_Presets')
 local settings_window = require('Utilities/GUI_Elements/Gui_Settings')
 
 --#region Initial Variables
--- Get GUI style from file
+local DEFAULT_STYLE = {font = {style = "sans-serif", size = 14}, vars = {}, colors = {}}
+
+-- Get GUI style from file (falls back to default style if file is missing)
 local function GetGuiStylesFromFile()
-    local gui_style_settings_path = reaper.GetResourcePath().."/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
-    local style = dofile(gui_style_settings_path)
-    style_font = style.font
-    style_vars = style.vars
-    style_colors = style.colors
+    local gui_style_settings_path = reaper.GetResourcePath() .. "/Scripts/Gaspard ReaScripts/GUI/GUI_Style_Settings.lua"
+    local ok, style = pcall(dofile, gui_style_settings_path)
+    if not ok or type(style) ~= "table" then style = DEFAULT_STYLE end
+    style_font = style.font or DEFAULT_STYLE.font
+    style_vars = style.vars or {}
+    style_colors = style.colors or {}
 end
 GetGuiStylesFromFile()
+
 local og_window_width = 800
 local og_window_height = 650
 window_width = og_window_width
 window_height = og_window_height
+window_x, window_y = 0, 0
 local topbar_height = 30
 local small_font_size = style_font.size * 0.75
 local window_name = "COMPLETE RENAMER"
-local no_scrollbar_flags = reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
+local no_scrollbar_flags = ImGui.WindowFlags_NoScrollWithMouse | ImGui.WindowFlags_NoScrollbar
+local window_flags = ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_NoTitleBar | no_scrollbar_flags
 local top_height_ratio = 0.3
 local is_resizing = false
+local has_js_api = reaper.JS_Window_Find ~= nil and reaper.JS_Window_SetFocus ~= nil
 --#endregion
 
 -- Init ImGui
 local function WindowInit()
-    ctx = reaper.ImGui_CreateContext('random_play_context')
-    font = reaper.ImGui_CreateFont(style_font.style)
-    small_font = reaper.ImGui_CreateFont(style_font.style, reaper.ImGui_FontFlags_Italic())
-    reaper.ImGui_Attach(ctx, font)
-    reaper.ImGui_Attach(ctx, small_font)
+    ctx = ImGui.CreateContext('gaspard_complete_renamer')
+    font = ImGui.CreateFont(style_font.style)
+    small_font = ImGui.CreateFont(style_font.style, ImGui.FontFlags_Italic)
+    ImGui.Attach(ctx, font)
+    ImGui.Attach(ctx, small_font)
 end
 
 -- GUI Top Bar
 local function VisualTopBar()
-    -- GUI Menu Bar
-    if reaper.ImGui_BeginChild(ctx, "child_top_bar", window_width, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
-        reaper.ImGui_Text(ctx, window_name)
+    if ImGui.BeginChild(ctx, "child_top_bar", window_width, topbar_height, ImGui.ChildFlags_None, no_scrollbar_flags) then
+        ImGui.Text(ctx, window_name)
 
         local spacing = 5
-        reaper.ImGui_PushStyleVar(ctx, reaper.ImGui_StyleVar_ItemSpacing(), spacing, 0)
-
-        reaper.ImGui_SameLine(ctx)
+        ImGui.PushStyleVar(ctx, ImGui.StyleVar_ItemSpacing, spacing, 0)
+        ImGui.SameLine(ctx)
 
         local button_w = 95
         local small_button_w = 18
         local presets_width = window_width > 369 and button_w or small_button_w
         local settings_width = window_width > 305 and button_w or small_button_w
         local quit_width = small_button_w
-        local padding, _ = reaper.ImGui_GetStyleVar(ctx, reaper.ImGui_StyleVar_WindowPadding())
+        local padding = ImGui.GetStyleVar(ctx, ImGui.StyleVar_WindowPadding)
         local buttons_width = presets_width + settings_width + quit_width + 3 * padding + 2 * spacing
-        reaper.ImGui_SetCursorPos(ctx, window_width - buttons_width, 0)
+        ImGui.SetCursorPos(ctx, window_width - buttons_width, 0)
 
-        if reaper.ImGui_BeginChild(ctx, "child_top_bar_buttons", buttons_width, topbar_height, reaper.ImGui_ChildFlags_None(), no_scrollbar_flags) then
-            reaper.ImGui_Dummy(ctx, 3, 1)
-            reaper.ImGui_SameLine(ctx)
+        if ImGui.BeginChild(ctx, "child_top_bar_buttons", buttons_width, topbar_height, ImGui.ChildFlags_None, no_scrollbar_flags) then
+            ImGui.Dummy(ctx, 3, 1)
+            ImGui.SameLine(ctx)
             local text = presets_width == button_w and 'PRESETS' or 'P'
-            if reaper.ImGui_Button(ctx, text..'##presets_button', presets_width) then
+            if ImGui.Button(ctx, text .. '##presets_button', presets_width) then
                 show_presets = not show_presets
                 if show_presets then System.ScanPresetFiles()
                 else System.focus_main_window = false end
             end
-            reaper.ImGui_SameLine(ctx)
+            ImGui.SameLine(ctx)
             text = settings_width == button_w and 'SETTINGS' or 'S'
-            if reaper.ImGui_Button(ctx, text..'##settings_button', settings_width) then
+            if ImGui.Button(ctx, text .. '##settings_button', settings_width) then
                 show_settings = not show_settings
                 if show_settings then settings_window.GetSettings()
                 else System.focus_main_window = false end
             end
-            reaper.ImGui_SameLine(ctx)
-            if reaper.ImGui_Button(ctx, 'X##quit_button', quit_width) then
+            ImGui.SameLine(ctx)
+            if ImGui.Button(ctx, 'X##quit_button', quit_width) then
                 open = false
             end
-            reaper.ImGui_EndChild(ctx)
+            ImGui.EndChild(ctx)
         end
 
-        reaper.ImGui_PopStyleVar(ctx, 1)
-        reaper.ImGui_EndChild(ctx)
+        ImGui.PopStyleVar(ctx, 1)
+        ImGui.EndChild(ctx)
     end
 end
 
@@ -97,119 +102,108 @@ local function VisualElements(child_width, child_height)
     local top_height = math.floor(child_height * top_height_ratio)
     local bottom_height = child_height - top_height - splitter_size
 
-    reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) - 8)
-    reaper.ImGui_SetCursorPosY(ctx, reaper.ImGui_GetCursorPosY(ctx) - 8)
-    if reaper.ImGui_BeginChild(ctx, "child_top_ruleset", child_width, top_height, reaper.ImGui_ChildFlags_Borders()) then
+    ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) - 8)
+    ImGui.SetCursorPosY(ctx, ImGui.GetCursorPosY(ctx) - 8)
+    if ImGui.BeginChild(ctx, "child_top_ruleset", child_width, top_height, ImGui.ChildFlags_Borders) then
         rules_window.Show()
-        reaper.ImGui_EndChild(ctx)
+        ImGui.EndChild(ctx)
     end
 
-    reaper.ImGui_SetCursorPosY(ctx, top_height + (splitter_size * 0.5))
-    reaper.ImGui_Separator(ctx)
+    ImGui.SetCursorPosY(ctx, top_height + (splitter_size * 0.5))
+    ImGui.Separator(ctx)
 
-    reaper.ImGui_SetCursorPosX(ctx, 12)
-    reaper.ImGui_SetCursorPosY(ctx, top_height)
-    reaper.ImGui_InvisibleButton(ctx, "button_splitter", child_width - 8, splitter_size)
+    ImGui.SetCursorPosX(ctx, 12)
+    ImGui.SetCursorPosY(ctx, top_height)
+    ImGui.InvisibleButton(ctx, "button_splitter", child_width - 8, splitter_size)
 
-    if reaper.ImGui_IsItemHovered(ctx) or is_resizing then
-        reaper.ImGui_SetMouseCursor(ctx, reaper.ImGui_MouseCursor_ResizeNS())
+    if ImGui.IsItemHovered(ctx) or is_resizing then
+        ImGui.SetMouseCursor(ctx, ImGui.MouseCursor_ResizeNS)
     end
-    if reaper.ImGui_IsItemActive(ctx) then
+    if ImGui.IsItemActive(ctx) then
         is_resizing = true
-        local _, mouse_delta_y = reaper.ImGui_GetMouseDelta(ctx)
+        local _, mouse_delta_y = ImGui.GetMouseDelta(ctx)
         top_height_ratio = math.max(0.1, math.min(0.8, top_height_ratio + mouse_delta_y / child_height))
     elseif is_resizing then
         is_resizing = false
     end
 
-    reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) - 8)
-    reaper.ImGui_SetCursorPosY(ctx, top_height + splitter_size)
-    if reaper.ImGui_BeginChild(ctx, "child_bottom_userdata", child_width, bottom_height, reaper.ImGui_ChildFlags_Borders()) then
+    ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) - 8)
+    ImGui.SetCursorPosY(ctx, top_height + splitter_size)
+    if ImGui.BeginChild(ctx, "child_bottom_userdata", child_width, bottom_height, ImGui.ChildFlags_Borders) then
         userdata_window.ShowVisuals()
-        reaper.ImGui_EndChild(ctx)
+        ImGui.EndChild(ctx)
     end
 
-    local x, _ = reaper.ImGui_GetContentRegionAvail(ctx)
+    local x = ImGui.GetContentRegionAvail(ctx)
     local button_x = 200
     if window_width < 245 then button_x = child_width - 17 end
     local disable = not System.one_renamed
-    if disable then reaper.ImGui_BeginDisabled(ctx) end
-    reaper.ImGui_SetCursorPosX(ctx, reaper.ImGui_GetCursorPosX(ctx) + x - button_x)
-    if reaper.ImGui_Button(ctx, "RENAME##apply_button", button_x) then
+    if disable then ImGui.BeginDisabled(ctx) end
+    ImGui.SetCursorPosX(ctx, ImGui.GetCursorPosX(ctx) + x - button_x)
+    if ImGui.Button(ctx, "RENAME##apply_button", button_x) then
         System.ApplyReplacedNames()
-        System.one_renamed = false
     end
-    if disable then reaper.ImGui_EndDisabled(ctx) end
+    if disable then ImGui.EndDisabled(ctx) end
 end
 
 -- Gui Version on bottom right
 local function VisualVersion()
-    local text = "gaspard v"..version
-    reaper.ImGui_PushFont(ctx, small_font, small_font_size)
-    local w, h = reaper.ImGui_CalcTextSize(ctx, text)
-    reaper.ImGui_SetCursorPosX(ctx, window_width - w - 10)
-    reaper.ImGui_SetCursorPosY(ctx, window_height - h - 10)
-    reaper.ImGui_Text(ctx, text)
-    reaper.ImGui_PopFont(ctx)
+    local text = "gaspard v" .. tostring(version)
+    ImGui.PushFont(ctx, small_font, small_font_size)
+    local w, h = ImGui.CalcTextSize(ctx, text)
+    ImGui.SetCursorPosX(ctx, window_width - w - 10)
+    ImGui.SetCursorPosY(ctx, window_height - h - 10)
+    ImGui.Text(ctx, text)
+    ImGui.PopFont(ctx)
 end
 
 -- Push all GUI style settings
 local function ImGuiPushTheme()
-    -- Style Vars
     for i = 1, #style_vars do
-        reaper.ImGui_PushStyleVar(ctx, style_vars[i].var, style_vars[i].value)
+        ImGui.PushStyleVar(ctx, style_vars[i].var, style_vars[i].value, style_vars[i].value2)
     end
-
-    -- Style Colors
     for i = 1, #style_colors do
-        reaper.ImGui_PushStyleColor(ctx, style_colors[i].col, style_colors[i].value)
+        ImGui.PushStyleColor(ctx, style_colors[i].col, style_colors[i].value)
     end
 end
 
 -- Pop all GUI style settings
 local function ImGuiPopTheme()
-    reaper.ImGui_PopStyleVar(ctx, #style_vars)
-    reaper.ImGui_PopStyleColor(ctx, #style_colors)
-end
-
--- At every frame
-local function OnTick()
-    System.ProjectUpdates()
-    System.KeyboardHold()
+    if #style_vars > 0 then ImGui.PopStyleVar(ctx, #style_vars) end
+    if #style_colors > 0 then ImGui.PopStyleColor(ctx, #style_colors) end
 end
 
 function Gui.Init()
-    GetGuiStylesFromFile()
     WindowInit()
 end
 
 function Gui.Loop()
-    OnTick()
+    System.Update()
 
     ImGuiPushTheme()
 
-    -- Window Settings
-    local window_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoTitleBar() | reaper.ImGui_WindowFlags_NoScrollWithMouse() | reaper.ImGui_WindowFlags_NoScrollbar()
-
     if System.focus_main_window then
-        reaper.ImGui_SetNextWindowFocus(ctx)
-        local hwnd = reaper.JS_Window_Find(window_name, true)
-        if hwnd then reaper.JS_Window_SetFocus(hwnd) end
+        ImGui.SetNextWindowFocus(ctx)
+        if has_js_api then
+            local hwnd = reaper.JS_Window_Find(window_name, true)
+            if hwnd then reaper.JS_Window_SetFocus(hwnd) end
+        end
         System.focus_main_window = false
     end
 
-    reaper.ImGui_SetNextWindowSize(ctx, window_width, window_height, reaper.ImGui_Cond_Once())
-    reaper.ImGui_SetNextWindowSizeConstraints(ctx, 244, 400, math.huge, math.huge)
+    ImGui.SetNextWindowSize(ctx, window_width, window_height, ImGui.Cond_Once)
+    ImGui.SetNextWindowSizeConstraints(ctx, 244, 400, math.huge, math.huge)
 
-    -- Font
-    reaper.ImGui_PushFont(ctx, font, style_font.size)
+    ImGui.PushFont(ctx, font, style_font.size)
 
-    visible, open = reaper.ImGui_Begin(ctx, window_name, true, window_flags)
-    window_x, window_y = reaper.ImGui_GetWindowPos(ctx)
-    window_width, window_height = reaper.ImGui_GetWindowSize(ctx)
-    --current_time = reaper.ImGui_GetTime(ctx)
-
+    local visible
+    visible, open = ImGui.Begin(ctx, window_name, true, window_flags)
     if visible then
+        window_x, window_y = ImGui.GetWindowPos(ctx)
+        window_width, window_height = ImGui.GetWindowSize(ctx)
+
+        System.HandleShortcuts()
+
         -- Top bar elements
         VisualTopBar()
 
@@ -222,21 +216,22 @@ function Gui.Loop()
         -- Script GUI Elements
         local child_width = window_width - 16
         local child_height = window_height - topbar_height - 40
-        if reaper.ImGui_BeginChild(ctx, "child_global", child_width, child_height, reaper.ImGui_ChildFlags_Borders()) then
+        if ImGui.BeginChild(ctx, "child_global", child_width, child_height, ImGui.ChildFlags_Borders) then
             VisualElements(child_width, child_height)
-            reaper.ImGui_EndChild(ctx)
+            ImGui.EndChild(ctx)
         end
 
-        -- Show script version on  bottom right
+        -- Show script version on bottom right
         VisualVersion()
 
-        reaper.ImGui_End(ctx)
+        ImGui.End(ctx)
     end
 
+    ImGui.PopFont(ctx)
     ImGuiPopTheme()
-    reaper.ImGui_PopFont(ctx)
+
     if open then
-      reaper.defer(Gui.Loop)
+        reaper.defer(Gui.Loop)
     end
 end
 

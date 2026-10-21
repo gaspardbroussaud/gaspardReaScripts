@@ -5,13 +5,11 @@
 
 local presets_window = {}
 
-local presets_one_changed = false
 local selected_preset = nil
 local preset_search = ""
 
 local function ResetVariables()
     preset_search = ""
-    presets_one_changed = false
     show_presets = false
     selected_preset = nil
     for _, preset in ipairs(System.presets) do
@@ -20,99 +18,95 @@ local function ResetVariables()
     System.focus_main_window = true
 end
 
+local function PresetExists(name)
+    local lower = name:lower()
+    for _, preset in ipairs(System.presets) do
+        if preset.name:lower() == lower then return true end
+    end
+    return false
+end
+
 function presets_window.Show()
-    -- Set Presets Window visibility and settings
-    local presets_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoResize()
+    local presets_flags = ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_NoScrollbar | ImGui.WindowFlags_NoResize
     local presets_width = 360
     local presets_height = 300
-    reaper.ImGui_SetNextWindowSize(ctx, presets_width, presets_height, reaper.ImGui_Cond_Once())
-    reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - presets_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
-    local presets_visible, presets_open  = reaper.ImGui_Begin(ctx, 'PRESETS', true, presets_flags)
+    ImGui.SetNextWindowSize(ctx, presets_width, presets_height, ImGui.Cond_Once)
+    ImGui.SetNextWindowPos(ctx, window_x + (window_width - presets_width) * 0.5, window_y + 10, ImGui.Cond_Appearing)
+    local presets_visible, presets_open = ImGui.Begin(ctx, 'PRESETS', true, presets_flags)
     if presets_visible then
-        reaper.ImGui_Text(ctx, "Name:")
-        reaper.ImGui_SameLine(ctx)
-        reaper.ImGui_PushItemWidth(ctx, -1)
-        _, preset_search = reaper.ImGui_InputText(ctx, "##inputtext_search", preset_search)
-        reaper.ImGui_SetItemTooltip(ctx, "Enter preset name to search or to save new.\nIf a preset exists with this name, it will be erased on SAVE.")
-        if reaper.ImGui_BeginChild(ctx, "child_presets_window", presets_width - 16, presets_height - 100, reaper.ImGui_ChildFlags_Borders()) then
-            if reaper.ImGui_BeginListBox(ctx, "##listbox_presets", -1, -1) then
-                for i, preset in ipairs(System.presets) do
-                    if preset_search == "" or preset.name:lower():find(preset_search:lower(), 1, true) then
-                        changed, preset.selected = reaper.ImGui_Selectable(ctx, preset.name.."##"..tostring(i), preset.selected, reaper.ImGui_SelectableFlags_SpanAllColumns())
-                        if changed then
-                            presets_one_changed = false
-                            if preset.selected then selected_preset = preset end
-                        end
+        ImGui.Text(ctx, "Name:")
+        ImGui.SameLine(ctx)
+        ImGui.SetNextItemWidth(ctx, -1)
+        _, preset_search = ImGui.InputText(ctx, "##inputtext_search", preset_search)
+        ImGui.SetItemTooltip(ctx, "Enter preset name to search or to save new.\nIf a preset exists with this name, it will be erased on SAVE.")
 
-                        -- On Double clic
-                        if reaper.ImGui_IsItemHovered(ctx) and reaper.ImGui_IsMouseDoubleClicked(ctx, reaper.ImGui_MouseButton_Left()) then
-                            System.ImportPresetReplaceRuleset(preset)
-                            ResetVariables()
+        if ImGui.BeginChild(ctx, "child_presets_window", presets_width - 16, presets_height - 100, ImGui.ChildFlags_Borders) then
+            if ImGui.BeginListBox(ctx, "##listbox_presets", -1, -1) then
+                local search = preset_search:lower()
+                for i, preset in ipairs(System.presets) do
+                    if search == "" or preset.name:lower():find(search, 1, true) then
+                        if ImGui.Selectable(ctx, preset.name .. "##" .. tostring(i), preset == selected_preset, ImGui.SelectableFlags_AllowDoubleClick) then
+                            selected_preset = preset
+                            -- On double click: import preset (replace rules)
+                            if ImGui.IsMouseDoubleClicked(ctx, ImGui.MouseButton_Left) then
+                                System.ImportPresetReplaceRuleset(preset)
+                                ResetVariables()
+                            end
                         end
-                    else
-                        preset.selected = false
-                        if preset == selected_preset then selected_preset = nil end
+                    elseif preset == selected_preset then
+                        selected_preset = nil
                     end
                 end
-                reaper.ImGui_EndListBox(ctx)
+                ImGui.EndListBox(ctx)
             end
-            reaper.ImGui_EndChild(ctx)
+            ImGui.EndChild(ctx)
         end
 
-        local disable = preset_search == ""
-        if not disable and #System.ruleset == 0 then disable = true end
-        if disable then reaper.ImGui_BeginDisabled(ctx) end
-
-        reaper.ImGui_SetCursorPosY(ctx, presets_height - 35)
-        if reaper.ImGui_Button(ctx, "SAVE##presets_save", 80) then
+        -- SAVE
+        local name_valid = preset_search:match("%S") ~= nil
+        local disable = not name_valid or #System.ruleset == 0
+        if disable then ImGui.BeginDisabled(ctx) end
+        ImGui.SetCursorPosY(ctx, presets_height - 35)
+        local save_label = (name_valid and PresetExists(preset_search)) and "OVERWRITE" or "SAVE"
+        if ImGui.Button(ctx, save_label .. "##presets_save", 80) then
             System.SavePreset(preset_search, System.ruleset)
+            System.ScanPresetFiles()
             ResetVariables()
         end
+        if disable then ImGui.EndDisabled(ctx) end
+        ImGui.SameLine(ctx)
 
-        if disable then reaper.ImGui_EndDisabled(ctx) end
-        reaper.ImGui_SameLine(ctx)
+        -- REMOVE / IMPORT / ADD need a selected preset
+        disable = selected_preset == nil
+        if disable then ImGui.BeginDisabled(ctx) end
 
-        if not presets_one_changed then
-            for _, preset in ipairs(System.presets) do
-                if preset.selected then
-                    presets_one_changed = true
-                    break
-                end
-            end
+        ImGui.SetCursorPosY(ctx, presets_height - 35)
+        if ImGui.Button(ctx, "REMOVE##presets_remove", 80) then
+            System.RemovePreset(selected_preset)
+            selected_preset = nil
+            System.ScanPresetFiles()
         end
 
-        disable = not presets_one_changed
-        if not disable and not selected_preset then disable = true end
-        if disable then reaper.ImGui_BeginDisabled(ctx) end
-
-        reaper.ImGui_SetCursorPosY(ctx, presets_height - 35)
-        if reaper.ImGui_Button(ctx, "REMOVE##presets_remove", 80) then
-            if selected_preset then os.remove(selected_preset.path) end
-            ResetVariables()
-        end
-
-        reaper.ImGui_SameLine(ctx)
-
-        reaper.ImGui_SetCursorPosX(ctx, presets_width - 175)
-        reaper.ImGui_SetCursorPosY(ctx, presets_height - 35)
-        if reaper.ImGui_Button(ctx, "IMPORT##presets_import", 80) then
+        ImGui.SameLine(ctx)
+        ImGui.SetCursorPosX(ctx, presets_width - 175)
+        ImGui.SetCursorPosY(ctx, presets_height - 35)
+        if ImGui.Button(ctx, "IMPORT##presets_import", 80) then
             System.ImportPresetReplaceRuleset(selected_preset)
             ResetVariables()
         end
+        ImGui.SetItemTooltip(ctx, "Replace current rules with the preset.")
 
-        reaper.ImGui_SameLine(ctx)
-
-        reaper.ImGui_SetCursorPosY(ctx, presets_height - 35)
-        if reaper.ImGui_Button(ctx, "ADD##presets_add", 80) then
+        ImGui.SameLine(ctx)
+        ImGui.SetCursorPosY(ctx, presets_height - 35)
+        if ImGui.Button(ctx, "ADD##presets_add", 80) then
             System.AddPresetToRuleset(selected_preset)
             ResetVariables()
         end
+        ImGui.SetItemTooltip(ctx, "Add preset rules after current rules.")
 
-        if disable then reaper.ImGui_EndDisabled(ctx) end
+        if disable then ImGui.EndDisabled(ctx) end
 
-        reaper.ImGui_End(ctx)
-    else
-        show_presets = false
+        ImGui.End(ctx)
     end
 
     if not presets_open then

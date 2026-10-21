@@ -5,75 +5,59 @@
 
 local settings_window = {}
 
-local function SetSettings()
-    Settings.alphabetical_order.value = alphabetical_order
-    Settings.link_selection.value = link_selection
-    Settings.tree_start_open.value = tree_start_open
-    Settings.clean_rpp.value = clean_rpp
-end
+local temp_values = {}
+local settings_one_changed = false
 
 -- Get Settings on show settings window
 function settings_window.GetSettings()
     settings_one_changed = false
-    alphabetical_order = Settings.alphabetical_order.value
-    link_selection = Settings.link_selection.value
-    tree_start_open = Settings.tree_start_open.value
-    clean_rpp = Settings.clean_rpp.value
+    temp_values = {}
+    for _, key in ipairs(Settings.order) do
+        temp_values[key] = Settings[key].value
+    end
+end
+
+local function SetSettings()
+    for _, key in ipairs(Settings.order) do
+        Settings[key].value = temp_values[key]
+    end
+    System.SaveSettings()
 end
 
 -- Gui Settings Elements
 function settings_window.Show()
-    -- Set Settings Window visibility and settings
-    local settings_flags = reaper.ImGui_WindowFlags_NoCollapse() | reaper.ImGui_WindowFlags_NoScrollbar() | reaper.ImGui_WindowFlags_NoResize()
+    local settings_flags = ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_NoScrollbar | ImGui.WindowFlags_NoResize
     local settings_width = 210
     local settings_height = 200
-    reaper.ImGui_SetNextWindowSize(ctx, settings_width, settings_height, reaper.ImGui_Cond_Once())
-    reaper.ImGui_SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, reaper.ImGui_Cond_Appearing())
+    ImGui.SetNextWindowSize(ctx, settings_width, settings_height, ImGui.Cond_Once)
+    ImGui.SetNextWindowPos(ctx, window_x + (window_width - settings_width) * 0.5, window_y + 10, ImGui.Cond_Appearing)
 
-    local settings_visible, settings_open  = reaper.ImGui_Begin(ctx, 'SETTINGS', true, settings_flags)
+    local settings_visible, settings_open = ImGui.Begin(ctx, 'SETTINGS', true, settings_flags)
     if settings_visible then
-        if reaper.ImGui_BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, reaper.ImGui_ChildFlags_Borders()) then
-            reaper.ImGui_Text(ctx, Settings.alphabetical_order.name..":")
-            reaper.ImGui_SameLine(ctx)
-            changed, alphabetical_order = reaper.ImGui_Checkbox(ctx, "##settings_alphabetical_order", alphabetical_order)
-            reaper.ImGui_SetItemTooltip(ctx, Settings.alphabetical_order.description)
-            if changed then settings_one_changed = true end
-
-            reaper.ImGui_Text(ctx, Settings.link_selection.name..":")
-            reaper.ImGui_SameLine(ctx)
-            changed, link_selection = reaper.ImGui_Checkbox(ctx, "##settings_link_selection", link_selection)
-            reaper.ImGui_SetItemTooltip(ctx, Settings.link_selection.description)
-            if changed then settings_one_changed = true end
-
-            reaper.ImGui_Text(ctx, Settings.tree_start_open.name..":")
-            reaper.ImGui_SameLine(ctx)
-            changed, tree_start_open = reaper.ImGui_Checkbox(ctx, "##settings_tree_start_open", tree_start_open)
-            reaper.ImGui_SetItemTooltip(ctx, Settings.tree_start_open.description)
-            if changed then settings_one_changed = true end
-
-            reaper.ImGui_Text(ctx, Settings.clean_rpp.name..":")
-            reaper.ImGui_SameLine(ctx)
-            changed, clean_rpp = reaper.ImGui_Checkbox(ctx, "##settings_clean_rpp", clean_rpp)
-            reaper.ImGui_SetItemTooltip(ctx, Settings.clean_rpp.description)
-            if changed then settings_one_changed = true end
-
-            reaper.ImGui_EndChild(ctx)
+        if ImGui.BeginChild(ctx, "child_settings_window", settings_width - 16, settings_height - 74, ImGui.ChildFlags_Borders) then
+            for _, key in ipairs(Settings.order) do
+                local setting = Settings[key]
+                ImGui.Text(ctx, setting.name .. ":")
+                ImGui.SameLine(ctx)
+                local changed
+                changed, temp_values[key] = ImGui.Checkbox(ctx, "##settings_" .. key, temp_values[key] == true)
+                ImGui.SetItemTooltip(ctx, setting.description)
+                if changed then settings_one_changed = true end
+            end
+            ImGui.EndChild(ctx)
         end
 
-        reaper.ImGui_SetCursorPosX(ctx, settings_width - 80)
-        reaper.ImGui_SetCursorPosY(ctx, settings_height - 35)
+        ImGui.SetCursorPosX(ctx, settings_width - 80)
+        ImGui.SetCursorPosY(ctx, settings_height - 35)
         local disable = not settings_one_changed
-        if disable then reaper.ImGui_BeginDisabled(ctx) end
-        if reaper.ImGui_Button(ctx, "APPLY##settings_apply", 70) then
+        if disable then ImGui.BeginDisabled(ctx) end
+        if ImGui.Button(ctx, "APPLY##settings_apply", 70) then
             SetSettings()
-            gson.SaveJSON(settings_path, Settings)
             settings_one_changed = false
         end
-        if disable then reaper.ImGui_EndDisabled(ctx) end
+        if disable then ImGui.EndDisabled(ctx) end
 
-        reaper.ImGui_End(ctx)
-    else
-        show_settings = false
+        ImGui.End(ctx)
     end
 
     if not settings_open then
