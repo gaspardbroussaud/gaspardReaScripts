@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="Gaspard ReaScripts" commit="2743c0ed5ab3719e814a499b275cf4bc4d7294d1">
+<index version="1" name="Gaspard ReaScripts" commit="926cba3e76d836f33c3ca2f965e6f14a7d685e33">
   <category name="ArrangeView">
     <reapack name="gaspard_Mouse click in arrange view does not select track.lua" type="script" desc="Mouse click in arrange view does not select track">
       <metadata>
@@ -1353,6 +1353,25 @@
       <version name="1.0.0" author="gaspard" time="2026-07-28T14:07:29Z">
         <changelog><![CDATA[Init]]></changelog>
         <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/5ea9dfbee3dd945b3ddba5f299fc1eb7d70cff53/Item/gaspard_Insert%20ReaLimit%20on%20selected%20items.lua</source>
+      </version>
+    </reapack>
+    <reapack name="gaspard_Render selected items through selected track FX to new tracks.lua" type="script" desc="Render selected items through selected track FX to new tracks">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 \outlinelevel2 \b \fs28 Render selected items through selected track FX to new tracks\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab Select items (on one or several tracks) and select the track whose FX chain is used to render.\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab For each track holding selected items, a new track is created right below it with the rendered items.\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab Mono items are rendered mono, stereo items stereo, multichannel items keep their channel count.\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab Original items and the selected track FX chain are left untouched.\sa180\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0.0" author="gaspard" time="2026-11-23T10:51:57Z">
+        <changelog><![CDATA[Init]]></changelog>
+        <source main="main">https://github.com/gaspardbroussaud/gaspardReaScripts/raw/926cba3e76d836f33c3ca2f965e6f14a7d685e33/Item/gaspard_Render%20selected%20items%20through%20selected%20track%20FX%20to%20new%20tracks.lua</source>
       </version>
     </reapack>
     <reapack name="gaspard_Reverse selected items stereo.lua" type="script" desc="Reverse selected items stereo">
